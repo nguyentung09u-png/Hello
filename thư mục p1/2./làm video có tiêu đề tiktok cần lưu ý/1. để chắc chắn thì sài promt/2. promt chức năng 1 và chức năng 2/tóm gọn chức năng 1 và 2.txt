@@ -1,0 +1,12 @@
+1. chức năng 1 (tiếp)
+nó sẽ đưa những từ khóa
+để mình tìm những video xu hướng hấp dẫn để lấy về đăng nhé
+
+
+
+2. chức năng 2(tiếp2)
+vào video chụp ảnh lại
+
+rồi gửi nó
+- nó sẽ phân tích và chọn tiêu đề cho ảnh đó
+bởi vì không biết đặt gì
