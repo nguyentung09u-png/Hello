@@ -1,0 +1,70 @@
+bảo gpt chọn  
+Be Vietnam Pro
+hoặc
+Inter
+---
+
+
+Tổng quan cách làm (Luồng hoạt động):
+
+1. Truy cập Google Fonts: Mở trang fonts.google.com, tìm font muốn dùng bằng ô tìm kiếm.
+2. Chọn Weight/Style: Bấm vào font, chọn các độ đậm (weight) cần thiết (ví dụ: 400, 600, 700). Bấm nút "Get embed code" hoặc "+" để lấy mã nhúng.
+3. Copy mã nhúng: Google Fonts cung cấp một thẻ <link> (hoặc @import nếu muốn dán vào file CSS). Copy đoạn mã này.
+4. Dán vào HTML: Dán thẻ <link> vào phần <head> của file HTML.
+5. Áp dụng trong CSS: Dùng thuộc tính font-family với tên font đã chọn, kèm theo chuỗi dự phòng (fallback) như sans-serif .
+
+
+
+---
+
+Code chung chung (Ví dụ với font "Inter"):
+
+Bước 1: Lấy mã nhúng từ Google Fonts
+Truy cập Google Fonts, tìm "Inter", chọn các weight 400, 600, 700. Copy đoạn mã <link> được cung cấp.
+
+Bước 2: Dán vào HTML (<head>)
+
+```html
+<!-- Dán thẻ link vào đây -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+```
+
+Bước 3: Áp dụng trong CSS
+
+```css
+body {
+  /* Tên font phải khớp chính xác với tên Google Fonts cung cấp */
+  font-family: 'Inter', system-ui, sans-serif; 
+}
+```
+
+tổng hợp font
+/* 1. Be Vietnam Pro (Font không chân, tối ưu tiếng Việt) */
+body {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif; 
+}
+
+/* 2. Inter (Font không chân, chuẩn UI hiện đại) */
+body {
+  font-family: 'Inter', system-ui, sans-serif; 
+}
+
+/* 3. Roboto (Font không chân, phổ biến, dễ đọc) */
+body {
+  font-family: 'Roboto', system-ui, sans-serif; 
+}
+
+/* 4. Playfair Display (Font có chân, dùng cho tiêu đề sang trọng) */
+body {
+  font-family: 'Playfair Display', Georgia, serif; 
+}
+
+
+
+Lưu ý:
+
+· Tên font: Trong CSS, tên font phải khớp chính xác với tên hệ thống mà Google Fonts cung cấp (ví dụ: 'Inter', 'Roboto', 'Be Vietnam Pro') .
+· Fallback: Luôn thêm sans-serif hoặc serif vào cuối font-family để trình duyệt có phương án dự phòng nếu font Google không tải được .
+· display=swap: Tham số này (có trong link mẫu) giúp chữ hiển thị ngay bằng font hệ thống trong lúc chờ tải font chính, tránh màn hình trắng chữ .

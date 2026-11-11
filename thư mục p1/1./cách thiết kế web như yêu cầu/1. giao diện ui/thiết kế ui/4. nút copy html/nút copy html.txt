@@ -1,0 +1,50 @@
+Tổng quan cách làm (Luồng hoạt động):
+
+1. Tạo UI: Gắn sự kiện click vào nút.
+2. Check môi trường: Kiểm tra xem trình duyệt có hỗ trợ API hiện đại và đang chạy bảo mật (HTTPS) không.
+3. Chạy Logic:
+   · Nếu có: Gọi navigator.clipboard.writeText().
+   · Nếu không (hoặc bị lỗi): Tạo một thẻ <textarea> ẩn, đưa text vào, bôi đen bằng .select(), dùng document.execCommand('copy').
+4. Dọn dẹp & Thông báo: Xóa thẻ ẩn và hiện thông báo (Toast/Alert).
+
+---
+
+Code tổng quan (Khung xương):
+
+```javascript
+function handleCopy(text) {
+  // 1. Thử dùng API hiện đại
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => thongBao("Đã copy!"))
+      .catch(() => chayFallback(text)); // Thất bại thì gọi hàm dự phòng
+  } else {
+    // 2. Trình duyệt cũ / chạy file offline -> Dùng dự phòng luôn
+    chayFallback(text);
+  }
+}
+
+// 3. Hàm dự phòng (Textarea ẩn)
+function chayFallback(text) {
+  const el = document.createElement("textarea");
+  el.value = text;
+  el.style.position = "fixed"; // Ẩn khỏi màn hình
+  el.style.opacity = "0";      // Trong suốt
+  
+  document.body.appendChild(el);
+  el.select();
+  
+  try {
+    document.execCommand("copy");
+    thongBao("Đã copy (dự phòng)!");
+  } catch (e) {
+    thongBao("Lỗi, không copy được!");
+  }
+  
+  document.body.removeChild(el); // Dọn dẹp
+}
+
+function thongBao(msg) {
+  alert(msg); // Hoặc dùng Toast UI
+}
+```

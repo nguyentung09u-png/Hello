@@ -1,0 +1,24 @@
+1. Chữ to dễ nhìn thấy đầu tiên
+
+2. Khác màu , ví dụ có 4ô nhưng thể để 4 ô là màu đen được , phải để 1 ô màu trắng 3ô màu đen
+
+
+3. 4 góc bo tròn
+
+
+4. Space khoảng cách giữa các nút item cho dễ
+nhìn
+
+[Nút A]     [Nút B]     [Nút C]
+         ↑           ↑
+      space giữa các nút
+      
+      
+  
+5. font serif
+
+
+
+6. chỉ viết hoa chữ đầu dòng còn lại bình thường hết
+
+chứ viết hoa nhiều khó đọc

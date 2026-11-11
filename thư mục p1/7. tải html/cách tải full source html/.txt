@@ -1,0 +1,11 @@
+https://sun.win/
+
+cd /storage/emulated/0/cc
+
+wget -E -p -k -nH -H -P /storage/emulated/0/cc \
+-U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36" \
+--header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8" \
+--header="Accept-Language: vi-VN,vi;q=0.9,en;q=0.8" \
+--header="Referer: https://www.google.com/" \
+--wait=0.5 --random-wait \
+'https://sun.win/'

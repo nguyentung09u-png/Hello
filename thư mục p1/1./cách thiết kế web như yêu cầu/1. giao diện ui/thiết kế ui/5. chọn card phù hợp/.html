@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Professional Card Shape Studio</title>
+<style>
+  /* ====================================================
+     BIẾN TOÀN CỤC & RESET
+     ==================================================== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #06080c;
+    --surface: #0e1219;
+    --surface-hover: #161c26;
+    --border: #1f2937;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #06b6d4;
+    --accent-hover: #22d3ee;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 60px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6, 8, 12, 0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    text-align: center;
+  }
+  .header-title { font-size: 20px; font-weight: 700; }
+  .header-title span { color: var(--accent); text-shadow: 0 0 12px rgba(6, 182, 212, 0.5); }
+
+  /* LAYOUT CHÍNH */
+  .studio-container {
+    max-width: 1400px;
+    margin: 24px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 992px) {
+    .studio-container { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+
+  /* ====================================================
+     LIVE PREVIEW AREA (Đã thêm nội dung Card)
+     ==================================================== */
+  .live-preview-area {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    min-height: 400px; /* Tăng nhẹ để chứa nội dung */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    padding: 40px 20px;
+  }
+
+  .preview-label {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .preview-label span { color: var(--accent); }
+
+  #mainPreviewCard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Nội dung bên trong Card */
+  .card-content {
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    z-index: 2;
+  }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    color: #06b6d4;
+    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(6,182,212,0.3);
+    transition: all 0.3s;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.2;
+    color: #fff;
+    transition: all 0.3s;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.4;
+    transition: all 0.3s;
+  }
+
+  /* GRID THƯ VIỆN */
+  .library-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .shape-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .shape-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .shape-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+  .preview-box-small {
+    width: 60px;
+    height: 60px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .shape-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; line-height: 1.2; }
+  .shape-type { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+
+  /* SIDEBAR */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 90px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .control-group { margin-bottom: 16px; }
+  .control-group label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  input[type="color"] {
+    width: 100%; height: 34px; background: transparent; border: none; cursor: pointer;
+  }
+
+  .css-box {
+    background: #000;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #3ecf8e;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  
+  .btn-primary {
+    width: 100%; padding: 12px; background: var(--accent); color: #000;
+    border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    margin-top: 12px; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: #000; font-weight: 600; padding: 12px 24px;
+    border-radius: 30px; opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); z-index: 1000;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">Card Shape <span>Studio</span></div>
+  </header>
+
+  <main class="studio-container">
+    
+    <!-- LIVE PREVIEW -->
+    <div class="live-preview-area">
+      <div class="preview-label">Live Preview: <span id="lblCurrentShape">Loading...</span></div>
+      
+      <div id="mainPreviewCard">
+        <!-- Nội dung Card -->
+        <div class="card-content">
+          <div class="card-badge" id="previewBadge">PRO</div>
+          <h2 class="card-title">Premium Access</h2>
+          <p class="card-desc">Get unlimited access to all features.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="library-area">
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-title">Tùy chỉnh</div>
+        
+        <div class="control-group">
+          <label>Kích thước <span id="valSize">200px</span></label>
+          <input type="range" id="inputSize" min="100" max="300" value="200">
+        </div>
+        
+        <div class="control-group">
+          <label>Bo góc / Cắt <span id="valRadius">20px</span></label>
+          <input type="range" id="inputRadius" min="0" max="999" value="20">
+        </div>
+
+        <div class="control-group">
+          <label>Màu sắc (Nền / Viền)</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="color" id="inputBgColor" value="#1e293b" title="Màu nền">
+            <input type="color" id="inputBorderColor" value="#06b6d4" title="Màu viền">
+          </div>
+        </div>
+
+        <div class="css-box" id="cssCode">/* Code xuất hiện ở đây */</div>
+        <button class="btn-primary" id="btnCopy">Copy CSS</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast">Đã copy CSS!</div>
+
+<script>
+  /* ====================================================
+     DỮ LIỆU HÌNH DÁNG (FULL ALL)
+     ==================================================== */
+  const shapes = [
+    // 1. ROUNDED CORNERS
+    { id: 'r1', name: 'Small Rounded', type: 'Rounded', defSize: 200, defRadius: 8, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 8px;' },
+    { id: 'r2', name: 'Pill Card', type: 'Rounded', defSize: 200, defRadius: 999, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 999px;' },
+    { id: 'r3', name: 'Squircle', type: 'Rounded', defSize: 200, defRadius: 30, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 30%;' },
+    { id: 'r4', name: 'Asymmetric', type: 'Rounded', defSize: 200, defRadius: 40, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 40px 4px 40px 4px;' },
+    { id: 'r5', name: 'Organic', type: 'Rounded', defSize: 200, defRadius: 50, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;' },
+    { id: 'r6', name: 'Single Corner', type: 'Rounded', defSize: 200, defRadius: 30, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 0 30px 0 0;' },
+    
+    // 2. CUT CORNERS
+    { id: 'c1', name: 'Single Cut', type: 'Cut', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);' },
+    { id: 'c2', name: 'Quad Cut', type: 'Cut', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);' },
+    { id: 'c3', name: 'Cyber Cut', type: 'Cut', defSize: 200, defRadius: 30, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));' },
+    { id: 'c4', name: 'Tech Notch', type: 'Cut', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, 30% 0, 40% 10%, 60% 10%, 70% 0, 100% 0, 100% 100%, 0 100%);' },
+    { id: 'c5', name: 'Diagonal Cut', type: 'Cut', defSize: 200, defRadius: 40, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), 0 100%);' },
+    { id: 'c6', name: 'Multi-Angle', type: 'Cut', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 20%, 20% 0, 80% 0, 100% 20%, 100% 100%, 0 100%);' },
+
+    // 3. CONCAVE (LÕM)
+    { id: 'v1', name: 'Inward Curve', type: 'Concave', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 20px; mask: radial-gradient(circle at 0 0, transparent 20px, black 21px);' },
+    { id: 'v2', name: 'Double Concave', type: 'Concave', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 20px; mask: radial-gradient(circle at 0 0, transparent 20px, black 21px), radial-gradient(circle at 100% 100%, transparent 20px, black 21px); mask-composite: intersect; -webkit-mask-composite: source-in;' },
+    { id: 'v3', name: 'Circular Indent', type: 'Concave', defSize: 200, defRadius: 30, defBg: '#1e293b', defBorder: '#06b6d4', css: 'mask: radial-gradient(circle at 50% 0, transparent 30px, black 31px);' },
+
+    // 4. MIXED
+    { id: 'm1', name: 'Round + Cut', type: 'Mixed', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 20px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);' },
+    { id: 'm2', name: 'Opposite Cut', type: 'Mixed', defSize: 200, defRadius: 25, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(25px 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) 100%, 0 100%, 0 25px);' },
+
+    // 5. GEOMETRIC
+    { id: 'g1', name: 'Hexagon', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);' },
+    { id: 'g2', name: 'Octagon', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);' },
+    { id: 'g3', name: 'Diamond', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);' },
+    { id: 'g4', name: 'Trapezoid', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);' },
+    { id: 'g5', name: 'Parallelogram', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);' },
+    { id: 'g6', name: 'Pentagon', type: 'Geometric', defSize: 200, defRadius: 0, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);' },
+
+    // 6. ADVANCED
+    { id: 'a1', name: 'Folded Corner', type: 'Advanced', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 0 100%); border-top-right-radius: 4px;' },
+    { id: 'a2', name: 'Bracket Corners', type: 'Advanced', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'border-radius: 0; clip-path: polygon(0 0, 30% 0, 30% 10px, 10px 10px, 10px 30%, 0 30%, 0 0, 100% 0, 100% 100%, 0 100%);' },
+    { id: 'a3', name: 'Stepped Corner', type: 'Advanced', defSize: 200, defRadius: 15, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, 50% 0, 50% 15px, 15px 15px, 15px 50%, 0 50%, 0 100%, 100% 100%, 100% 0);' },
+    { id: 'a4', name: 'Layered Angle', type: 'Advanced', defSize: 200, defRadius: 25, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 25px, 25px 0, calc(100% - 25px) 0, 100% 25px, 100% calc(100% - 25px), calc(100% - 25px) 100%, 25px 100%, 0 calc(100% - 25px));' },
+    { id: 'a5', name: 'Cross Shape', type: 'Advanced', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(25% 0%, 75% 0%, 75% 25%, 100% 25%, 100% 75%, 75% 75%, 75% 100%, 25% 100%, 25% 75%, 0 75%, 0 25%, 25% 25%);' },
+    { id: 'a6', name: 'Arrow Right', type: 'Advanced', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 50%, calc(100% - 30px) 100%, 0 100%);' },
+    { id: 'a7', name: 'Frame Corner', type: 'Advanced', defSize: 200, defRadius: 20, defBg: '#1e293b', defBorder: '#06b6d4', css: 'clip-path: polygon(20px 0, 0 20px, 0 100%, 100% 100%, 100% 0, 20px 0); border-radius: 8px;' }
+  ];
+
+  // Trạng thái
+  let selectedShape = shapes[0];
+  let currentSize = selectedShape.defSize;
+  let currentRadius = selectedShape.defRadius;
+  let currentBgColor = selectedShape.defBg;
+  let currentBorderColor = selectedShape.defBorder;
+
+  // DOM
+  const gridEl = document.getElementById('cardGrid');
+  const mainPreview = document.getElementById('mainPreviewCard');
+  const lblCurrentShape = document.getElementById('lblCurrentShape');
+  const cssCodeEl = document.getElementById('cssCode');
+  const inputSize = document.getElementById('inputSize');
+  const valSize = document.getElementById('valSize');
+  const inputRadius = document.getElementById('inputRadius');
+  const valRadius = document.getElementById('valRadius');
+  const inputBgColor = document.getElementById('inputBgColor');
+  const inputBorderColor = document.getElementById('inputBorderColor');
+  const btnCopy = document.getElementById('btnCopy');
+  const toastEl = document.getElementById('toast');
+
+  /* ====================================================
+     HÀM XỬ LÝ
+     ==================================================== */
+  function getDynamicCSS(isPreviewSmall = false) {
+    let css = selectedShape.css;
+    let r = isPreviewSmall ? Math.min(currentRadius, 15) : currentRadius;
+    
+    // Thay thế số px bằng r (bỏ qua các số trong %)
+    css = css.replace(/(\d+)px/g, (match) => {
+      return r + 'px';
+    });
+
+    // Thêm màu nền
+    css += `\n  background: ${currentBgColor};`;
+    
+    // Thêm viền (nếu là clip-path thì dùng outline để không bị cắt mất viền)
+    if (selectedShape.css.includes('clip-path')) {
+       css += `\n  outline: 1px solid ${currentBorderColor};`;
+       css += `\n  outline-offset: -1px;`;
+    } else {
+       css += `\n  border: 1px solid ${currentBorderColor};`;
+    }
+
+    return css;
+  }
+
+  function updateCodeBox() {
+    let css = getDynamicCSS();
+    const fullCode = `.shape {\n  width: ${currentSize}px;\n  height: ${currentSize}px;\n  ${css.split('\n').join('\n  ')}\n}`;
+    cssCodeEl.textContent = fullCode;
+  }
+
+  function updateMainPreview() {
+    lblCurrentShape.textContent = selectedShape.name;
+    
+    // Áp dụng CSS cơ bản (Size, Shape, Border)
+    mainPreview.style.cssText = getDynamicCSS(false) + `; width: ${currentSize}px; height: ${currentSize}px;`;
+
+    // --- TỰ ĐỘNG ĐỔI MÀU CHỮ CHO DỄ ĐỌC ---
+    const hex = currentBgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    const titleEl = mainPreview.querySelector('.card-title');
+    const descEl = mainPreview.querySelector('.card-desc');
+    const badgeEl = mainPreview.querySelector('.card-badge');
+
+    if (brightness > 128) {
+      // Nếu nền SÁNG -> Chữ màu ĐEN
+      titleEl.style.color = '#0f172a';
+      descEl.style.color = '#334155';
+      badgeEl.style.color = '#0f172a';
+      badgeEl.style.background = 'rgba(0,0,0,0.1)';
+      badgeEl.style.borderColor = 'rgba(0,0,0,0.2)';
+    } else {
+      // Nếu nền TỐI -> Chữ màu TRẮNG/XÁM SÁNG
+      titleEl.style.color = '#ffffff';
+      descEl.style.color = '#94a3b8';
+      badgeEl.style.color = '#06b6d4';
+      badgeEl.style.background = 'rgba(255,255,255,0.1)';
+      badgeEl.style.borderColor = 'rgba(6,182,212,0.3)';
+    }
+    // ---------------------------------------
+
+    updateCodeBox();
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = "";
+    shapes.forEach(shape => {
+      const card = document.createElement('div');
+      card.className = `shape-card ${selectedShape.id === shape.id ? 'active' : ''}`;
+      
+      const previewBox = document.createElement('div');
+      previewBox.className = 'preview-box-small';
+      let smallCss = shape.css.replace(/(\d+)px/g, '8px');
+      previewBox.style.cssText = smallCss + `; width: 60px; height: 60px; background: #1e293b; border: 1px solid #334155;`;
+
+      card.innerHTML = `<div class="shape-name">${shape.name}</div><div class="shape-type">${shape.type}</div>`;
+      card.prepend(previewBox);
+
+      card.addEventListener('click', () => {
+        selectedShape = shape;
+        
+        currentSize = shape.defSize;
+        currentRadius = shape.defRadius;
+        currentBgColor = shape.defBg;
+        currentBorderColor = shape.defBorder;
+
+        inputSize.value = currentSize;
+        valSize.textContent = currentSize + 'px';
+        inputRadius.value = currentRadius;
+        valRadius.textContent = currentRadius + 'px';
+        inputBgColor.value = currentBgColor;
+        inputBorderColor.value = currentBorderColor;
+
+        renderGrid();
+        updateMainPreview();
+      });
+
+      gridEl.appendChild(card);
+    });
+  }
+
+  /* ====================================================
+     SỰ KIỆN
+     ==================================================== */
+  inputSize.addEventListener('input', (e) => {
+    currentSize = e.target.value;
+    valSize.textContent = currentSize + 'px';
+    updateMainPreview();
+  });
+
+  inputRadius.addEventListener('input', (e) => {
+    currentRadius = parseInt(e.target.value);
+    valRadius.textContent = currentRadius + 'px';
+    updateMainPreview();
+  });
+
+  inputBgColor.addEventListener('input', (e) => {
+    currentBgColor = e.target.value;
+    updateMainPreview();
+  });
+  
+  inputBorderColor.addEventListener('input', (e) => {
+    currentBorderColor = e.target.value;
+    updateMainPreview();
+  });
+
+  btnCopy.addEventListener('click', () => {
+    const code = cssCodeEl.textContent;
+    const fallbackCopy = (text) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast("Đã copy CSS (Fallback)!");
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(() => showToast("Đã copy CSS!")).catch(() => fallbackCopy(code));
+    } else {
+      fallbackCopy(code);
+    }
+  });
+
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+  }
+
+  /* ====================================================
+     KHỞI CHẠY
+     ==================================================== */
+  inputSize.value = currentSize;
+  valSize.textContent = currentSize + 'px';
+  inputRadius.value = currentRadius;
+  valRadius.textContent = currentRadius + 'px';
+  inputBgColor.value = currentBgColor;
+  inputBorderColor.value = currentBorderColor;
+
+  renderGrid();
+  updateMainPreview();
+</script>
+</body>
+</html>

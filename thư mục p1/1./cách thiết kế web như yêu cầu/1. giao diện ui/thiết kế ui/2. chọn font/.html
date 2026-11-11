@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Font Studio</title>
+<!-- Nạp các font từ Google Fonts (Be Vietnam Pro + 3 font khác) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=Inter:wght@400;600;800&family=Roboto:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  /* Reset cơ bản */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0c12; color: #e7eaf0; padding: 20px; }
+  
+  /* Layout tổng quan */
+  .layout { display: grid; grid-template-columns: 250px 1fr; gap: 20px; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+
+  /* Danh sách font */
+  .font-list { background: #12151f; padding: 15px; border-radius: 12px; border: 1px solid #1f2430; height: fit-content; }
+  .font-item { padding: 10px; margin-bottom: 10px; cursor: pointer; border-radius: 8px; border: 1px solid transparent; }
+  .font-item:hover { background: #1a1f2b; }
+  .font-item.active { border-color: #4f8cff; background: #1a243a; }
+  
+  /* Khu vực hiển thị thử nghiệm (Preview) */
+  .preview-area { background: #12151f; padding: 30px; border-radius: 12px; border: 1px solid #1f2430; }
+  
+  /* Các khối UI để test font */
+  .test-title { font-size: 32px; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
+  .test-body { font-size: 16px; line-height: 1.6; color: #8a91a0; margin-bottom: 25px; }
+  .test-btn { font-size: 16px; font-weight: 600; padding: 12px 24px; background: #4f8cff; color: #0a0c12; border: none; border-radius: 8px; cursor: pointer; }
+  
+  /* Khối code */
+  .code-box { margin-top: 20px; background: #000; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; color: #3ecf8e; overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Cột trái: Chọn Font -->
+  <div class="font-list" id="fontList">
+    <h3 style="margin-bottom: 15px; color: #8a91a0; font-size: 14px;">CHỌN FONT CHỮ:</h3>
+    <div class="font-item active" data-font="'Be Vietnam Pro', sans-serif">Be Vietnam Pro</div>
+    <div class="font-item" data-font="'Inter', sans-serif">Inter</div>
+    <div class="font-item" data-font="'Roboto', sans-serif">Roboto</div>
+    <div class="font-item" data-font="'Playfair Display', serif">Playfair Display</div>
+  </div>
+
+  <!-- Cột phải: Xem trước & Code -->
+  <div class="preview-area" id="previewArea" style="font-family: 'Be Vietnam Pro', sans-serif;">
+    <div class="test-title">Thiết kế UI hiện đại</div>
+    <div class="test-body">
+      Đây là đoạn văn bản mẫu. Bạn hãy bấm vào các font ở cột bên trái để xem sự thay đổi. Font chữ ảnh hưởng rất lớn đến cảm xúc của người dùng.
+    </div>
+    <button class="test-btn">Nút Bấm Thử</button>
+
+    <div class="code-box" id="codeBox">
+      font-family: 'Be Vietnam Pro', sans-serif;
+    </div>
+  </div>
+</div>
+
+<script>
+  // Logic chuyển đổi font
+  const items = document.querySelectorAll('.font-item');
+  const preview = document.getElementById('previewArea');
+  const codeBox = document.getElementById('codeBox');
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      // Xóa active cũ
+      items.forEach(i => i.classList.remove('active'));
+      // Thêm active mới
+      item.classList.add('active');
+
+      // Đổi font cho khu vực preview
+      const fontName = item.getAttribute('data-font');
+      preview.style.fontFamily = fontName;
+
+      // Cập nhật hiển thị code
+      codeBox.textContent = `font-family: ${fontName};`;
+    });
+  });
+</script>
+</body>
+</html>

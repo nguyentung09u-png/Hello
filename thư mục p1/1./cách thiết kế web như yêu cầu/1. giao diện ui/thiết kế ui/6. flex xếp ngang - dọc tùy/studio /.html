@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>So sánh tất cả kiểu Flex</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0a0c0f;
+    font-family:'Inter',sans-serif;
+    color:#e5e9f0;
+    padding:2rem 1.25rem;
+  }
+
+  h1 {
+    font-size:1.1rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:#00e0ff;
+    margin-bottom:2rem;
+    text-align:center;
+  }
+
+  .wrap { max-width:1000px; margin:0 auto; }
+
+  /* Mỗi khối so sánh */
+  .block {
+    margin-bottom:2.5rem;
+  }
+
+  .block h2 {
+    font-size:0.78rem;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:#8ab3c9;
+    margin-bottom:0.7rem;
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+  }
+  .block h2::before {
+    content:'';
+    width:6px; height:6px; border-radius:50%;
+    background:#00e0ff;
+    box-shadow:0 0 8px #00e0ff;
+  }
+
+  .block code {
+    font-family:monospace;
+    color:#00e0ff;
+    background:#0d1a24;
+    padding:0.15rem 0.5rem;
+    border-radius:6px;
+    font-size:0.75rem;
+    margin-left:auto;
+  }
+
+  /* Khung chứa demo */
+  .box {
+    background:#11171f;
+    border:1px solid #1e2a36;
+    border-radius:14px;
+    padding:1.25rem;
+    min-height:80px;
+  }
+
+  /* Item con — cùng nội dung, cùng style */
+  .box > div {
+    background:#00e0ff;
+    color:#0a0c0f;
+    font-weight:600;
+    font-size:0.85rem;
+    padding:0.7rem 1rem;
+    border-radius:8px;
+    text-align:center;
+    min-width:60px;
+  }
+
+  /* --- 1. flex-direction --- */
+  .dir-row       { display:flex; flex-direction:row; gap:8px; }
+  .dir-row-rev   { display:flex; flex-direction:row-reverse; gap:8px; }
+  .dir-col       { display:flex; flex-direction:column; gap:8px; }
+  .dir-col-rev   { display:flex; flex-direction:column-reverse; gap:8px; }
+
+  /* --- 2. justify-content (trục chính) --- */
+  .jc-start   { display:flex; justify-content:flex-start;   gap:8px; }
+  .jc-center  { display:flex; justify-content:center;       gap:8px; }
+  .jc-end     { display:flex; justify-content:flex-end;     gap:8px; }
+  .jc-between { display:flex; justify-content:space-between; gap:8px; }
+  .jc-around  { display:flex; justify-content:space-around;  gap:8px; }
+  .jc-evenly  { display:flex; justify-content:space-evenly;  gap:8px; }
+
+  /* --- 3. align-items (trục phụ) --- */
+  .ai-box { min-height:120px; }
+  .ai-start   { display:flex; align-items:flex-start;  gap:8px; }
+  .ai-center  { display:flex; align-items:center;      gap:8px; }
+  .ai-end     { display:flex; align-items:flex-end;    gap:8px; }
+  .ai-stretch { display:flex; align-items:stretch;     gap:8px; }
+
+  /* --- 4. flex-wrap --- */
+  .fw-nowrap { display:flex; flex-wrap:nowrap; gap:8px; }
+  .fw-wrap   { display:flex; flex-wrap:wrap;   gap:8px; }
+
+  /* --- 5. flex-grow / flex-shrink / flex-basis --- */
+  .grow-box { display:flex; gap:8px; }
+  .grow-box .g1 { flex-grow:1; }
+  .grow-box .g2 { flex-grow:2; }
+  .grow-box .g3 { flex-grow:3; }
+
+  .basis-box { display:flex; gap:8px; }
+  .basis-box .b1 { flex-basis:80px; }
+  .basis-box .b2 { flex-basis:160px; }
+  .basis-box .b3 { flex-basis:240px; }
+
+  /* Ghi chú nhỏ */
+  .note {
+    font-size:0.72rem;
+    color:#5e6c7c;
+    margin-top:0.6rem;
+    padding-left:0.2rem;
+  }
+
+  @media (max-width:600px) {
+    body { padding:1.5rem 1rem; }
+    .box > div { font-size:0.78rem; padding:0.6rem 0.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>So sánh tất cả kiểu Flexbox</h1>
+
+  <!-- ============ 1. FLEX-DIRECTION ============ -->
+  <div class="block">
+    <h2>1. flex-direction <code>row (mặc định)</code></h2>
+    <div class="box dir-row"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>1. flex-direction <code>row-reverse</code></h2>
+    <div class="box dir-row-rev"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>1. flex-direction <code>column</code></h2>
+    <div class="box dir-col"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>1. flex-direction <code>column-reverse</code></h2>
+    <div class="box dir-col-rev"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <!-- ============ 2. JUSTIFY-CONTENT ============ -->
+  <div class="block">
+    <h2>2. justify-content <code>flex-start</code></h2>
+    <div class="box jc-start"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>2. justify-content <code>center</code></h2>
+    <div class="box jc-center"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>2. justify-content <code>flex-end</code></h2>
+    <div class="box jc-end"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>2. justify-content <code>space-between</code></h2>
+    <div class="box jc-between"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>2. justify-content <code>space-around</code></h2>
+    <div class="box jc-around"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>2. justify-content <code>space-evenly</code></h2>
+    <div class="box jc-evenly"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <!-- ============ 3. ALIGN-ITEMS ============ -->
+  <div class="block">
+    <h2>3. align-items <code>flex-start</code></h2>
+    <div class="box ai-box ai-start"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>3. align-items <code>center</code></h2>
+    <div class="box ai-box ai-center"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>3. align-items <code>flex-end</code></h2>
+    <div class="box ai-box ai-end"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <div class="block">
+    <h2>3. align-items <code>stretch (mặc định)</code></h2>
+    <div class="box ai-box ai-stretch"><div>A</div><div>B</div><div>C</div></div>
+  </div>
+
+  <!-- ============ 4. FLEX-WRAP ============ -->
+  <div class="block">
+    <h2>4. flex-wrap <code>nowrap (mặc định)</code></h2>
+    <div class="box fw-nowrap">
+      <div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div>
+    </div>
+    <p class="note">6 item dồn 1 hàng → bị bóp nhỏ / tràn</p>
+  </div>
+
+  <div class="block">
+    <h2>4. flex-wrap <code>wrap</code></h2>
+    <div class="box fw-wrap">
+      <div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div>
+    </div>
+    <p class="note">Hết chỗ → tự xuống dòng, không tràn</p>
+  </div>
+
+  <!-- ============ 5. FLEX-GROW ============ -->
+  <div class="block">
+    <h2>5. flex-grow <code>1 / 2 / 3</code></h2>
+    <div class="box grow-box">
+      <div class="g1">grow 1</div>
+      <div class="g2">grow 2</div>
+      <div class="g3">grow 3</div>
+    </div>
+    <p class="note">Item chiếm tỷ lệ 1:2:3 theo không gian còn dư</p>
+  </div>
+
+  <!-- ============ 6. FLEX-BASIS ============ -->
+  <div class="block">
+    <h2>6. flex-basis <code>80px / 160px / 240px</code></h2>
+    <div class="box basis-box">
+      <div class="b1">80px</div>
+      <div class="b2">160px</div>
+      <div class="b3">240px</div>
+    </div>
+    <p class="note">Kích thước khởi điểm trước khi co giãn</p>
+  </div>
+
+</div>
+</body>
+</html>

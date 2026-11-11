@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Professional UX Interaction Studio - Sticky Preview</title>
+<style>
+  /* ====================================================
+     1. BIẾN TOÀN CỤC & RESET
+     ==================================================== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #06080c;
+    --surface: #0e1219;
+    --surface-hover: #161c26;
+    --border: #1f2937;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #06b6d4;
+    --accent-hover: #22d3ee;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 60px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6, 8, 12, 0.9);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    text-align: center;
+  }
+  .header-title { font-size: 18px; font-weight: 700; }
+  .header-title span { color: var(--accent); text-shadow: 0 0 12px rgba(6, 182, 212, 0.5); }
+
+  /* LAYOUT CHÍNH */
+  .studio-container {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 992px) {
+    .studio-container { grid-template-columns: 1fr; }
+    .sidebar { position: static !important; }
+  }
+
+  /* ====================================================
+     STICKY LIVE PREVIEW
+     ==================================================== */
+  .live-preview-area {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    /* KỸ THUẬT STICKY */
+    position: sticky;
+    top: 70px; /* Cách mép trên 70px (bằng chiều cao Header) */
+    z-index: 50; /* Nổi lên trên danh sách cuộn */
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.9); /* Đổ bóng để tách biệt */
+    
+    overflow: hidden;
+    padding: 30px 20px;
+    margin-bottom: 20px;
+    transition: top 0.3s;
+  }
+
+  .preview-label {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .preview-label span { color: var(--accent); }
+
+  .preview-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 150px;
+    position: relative;
+  }
+
+  /* ====================================================
+     GRID THƯ VIỆN (PHẦN CUỘN)
+     ==================================================== */
+  .library-area { display: flex; flex-direction: column; gap: 20px; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+
+  .effect-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .effect-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .effect-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+  .effect-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .effect-type { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+
+  /* ====================================================
+     SIDEBAR (CŨNG DÙNG STICKY)
+     ==================================================== */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 70px; /* Dính ngang hàng với Live Preview */
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+
+  .code-box {
+    background: #000;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #3ecf8e;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  
+  .btn-primary {
+    width: 100%; padding: 12px; background: var(--accent); color: #000;
+    border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    margin-top: 12px; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: #000; font-weight: 600; padding: 12px 24px;
+    border-radius: 30px; opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); z-index: 1000;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ====================================================
+     BASE CSS CHO DEMO (Giữ nguyên)
+     ==================================================== */
+  .demo-btn {
+    padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: 8px;
+    border: none; cursor: pointer; background: #1e293b; color: #fff;
+    font-family: inherit; position: relative; overflow: hidden; transition: all 0.2s ease;
+  }
+  .demo-input {
+    padding: 12px; background: #0a0c12; border: 1px solid var(--border);
+    border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: all 0.3s;
+  }
+  .demo-card {
+    width: 160px; height: 100px; background: #1e293b; border-radius: 12px;
+    border: 1px solid var(--border); display: flex; align-items: center;
+    justify-content: center; font-weight: 600; transition: all 0.3s ease; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">UX Interaction <span>Studio</span></div>
+  </header>
+
+  <main class="studio-container">
+    
+    <!-- KHU VỰC LIVE PREVIEW (STICKY) -->
+    <div class="live-preview-area">
+      <div class="preview-label">Live Preview: <span id="lblCurrentEffect">Loading...</span></div>
+      <div class="preview-stage" id="previewStage"></div>
+    </div>
+
+    <!-- KHU VỰC LƯỚI HIỆU ỨNG -->
+    <div class="library-area">
+      <div class="card-grid" id="effectGrid"></div>
+    </div>
+
+    <!-- SIDEBAR (STICKY) -->
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-title">Export Code</div>
+        <div class="code-box" id="codeBox">/* Code */</div>
+        <button class="btn-primary" id="btnCopy">Copy All Code</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast">Đã copy!</div>
+
+<script>
+  /* ====================================================
+     DANH SÁCH 50 HIỆU ỨNG
+     ==================================================== */
+  const effects = [
+    // --- CLICK (1-10) ---
+    { id: 'c1', name: 'Click Scale', type: 'Click', html: '<button class="demo-btn effect-c1">Click</button>', css: '.effect-c1:active { transform: scale(0.9); }', js: '' },
+    { id: 'c2', name: 'Press Down', type: 'Click', html: '<button class="demo-btn effect-c2">Press</button>', css: '.effect-c2:active { transform: translateY(4px); box-shadow: none; }', js: '' },
+    { id: 'c3', name: 'Glow on Click', type: 'Click', html: '<button class="demo-btn" id="glowBtn">Glow</button>', css: '.glow-active { box-shadow: 0 0 20px 5px #06b6d4 !important; border-color: #06b6d4 !important; }', js: `document.getElementById('glowBtn').addEventListener('click', function() { this.classList.add('glow-active'); setTimeout(() => this.classList.remove('glow-active'), 400); });` },
+    { id: 'c4', name: 'Shake', type: 'Click', html: '<button class="demo-btn effect-c4">Shake</button>', css: '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} } .effect-c4:active { animation: shake 0.2s; }', js: '' },
+    { id: 'c5', name: 'Bounce', type: 'Click', html: '<button class="demo-btn effect-c5">Bounce</button>', css: '@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} } .effect-c5:active { animation: bounce 0.3s; }', js: '' },
+    { id: 'c6', name: 'Pulse', type: 'Click', html: '<button class="demo-btn effect-c6">Pulse</button>', css: '@keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(6,182,212,0.7)} 70%{box-shadow:0 0 0 10px rgba(6,182,212,0)} 100%{box-shadow:0 0 0 0 rgba(6,182,212,0)} } .effect-c6:active { animation: pulse 0.5s; }', js: '' },
+    { id: 'c7', name: 'Flash', type: 'Click', html: '<button class="demo-btn effect-c7">Flash</button>', css: '@keyframes flash { 0%,100%{background:#1e293b} 50%{background:#fff; color:#000} } .effect-c7:active { animation: flash 0.3s; }', js: '' },
+    { id: 'c8', name: 'Rotate', type: 'Click', html: '<button class="demo-btn effect-c8">Rotate</button>', css: '.effect-c8:active { transform: rotate(15deg); }', js: '' },
+    { id: 'c9', name: 'Squish', type: 'Click', html: '<button class="demo-btn effect-c9">Squish</button>', css: '.effect-c9:active { transform: scale(1.1, 0.9); }', js: '' },
+    { id: 'c10', name: 'Border Draw', type: 'Click', html: '<button class="demo-btn effect-c10">Border</button>', css: '.effect-c10 { border: 2px solid transparent; } .effect-c10:active { border-color: #06b6d4; }', js: '' },
+
+    // --- HOVER (11-20) ---
+    { id: 'h1', name: 'Hover Lift', type: 'Hover', html: '<button class="demo-btn effect-h1">Lift</button>', css: '.effect-h1:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -10px #06b6d4; }', js: '' },
+    { id: 'h2', name: 'Hover Scale', type: 'Hover', html: '<button class="demo-btn effect-h2">Scale</button>', css: '.effect-h2:hover { transform: scale(1.05); }', js: '' },
+    { id: 'h3', name: 'Color Shift', type: 'Hover', html: '<button class="demo-btn effect-h3">Color</button>', css: '.effect-h3:hover { background: #06b6d4; color: #000; }', js: '' },
+    { id: 'h4', name: 'Gradient Shift', type: 'Hover', html: '<button class="demo-btn effect-h4">Gradient</button>', css: '.effect-h4 { background-size: 200% auto; background-image: linear-gradient(to right, #1e293b 0%, #06b6d4 51%, #1e293b 100%); } .effect-h4:hover { background-position: right center; }', js: '' },
+    { id: 'h5', name: 'Shine Sweep', type: 'Hover', html: '<button class="demo-btn effect-h5">Shine</button>', css: '.effect-h5::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-25deg); transition: left 0.5s; } .effect-h5:hover::after { left: 150%; }', js: '' },
+    { id: 'h6', name: 'Border Glow', type: 'Hover', html: '<button class="demo-btn effect-h6">Glow</button>', css: '.effect-h6:hover { border: 1px solid #06b6d4; box-shadow: 0 0 15px rgba(6,182,212,0.5); }', js: '' },
+    { id: 'h7', name: 'Icon Slide', type: 'Hover', html: '<button class="demo-btn effect-h7">Icon &rarr;</button>', css: '.effect-h7:hover { padding-right: 30px; } .effect-h7::after { content: "→"; position: absolute; right: 10px; opacity: 0; transition: 0.3s; } .effect-h7:hover::after { opacity: 1; right: 15px; }', js: '' },
+    { id: 'h8', name: 'Underline Reveal', type: 'Hover', html: '<a href="#" class="effect-h8">Link Text</a>', css: '.effect-h8 { position: relative; text-decoration: none; color: #fff; font-weight: 600; } .effect-h8::after { content: ""; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #06b6d4; transform: scaleX(0); transform-origin: right; transition: transform 0.3s; } .effect-h8:hover::after { transform: scaleX(1); transform-origin: left; }', js: '' },
+    { id: 'h9', name: 'Shadow Pop', type: 'Hover', html: '<button class="demo-btn effect-h9">Shadow</button>', css: '.effect-h9:hover { box-shadow: 5px 5px 0px #06b6d4; transform: translate(-2px, -2px); }', js: '' },
+    { id: 'h10', name: 'Blur Out', type: 'Hover', html: '<button class="demo-btn effect-h10">Blur</button>', css: '.effect-h10:hover { filter: blur(2px); }', js: '' },
+
+    // --- TOGGLE & SWITCH (21-30) ---
+    { id: 't1', name: 'Classic Toggle', type: 'Toggle', html: '<div class="toggle-track" id="tog1"><div class="toggle-thumb"></div></div>', css: '.toggle-track { width: 50px; height: 28px; background: #334155; border-radius: 30px; position: relative; cursor: pointer; transition: 0.3s; } .toggle-track.active { background: #06b6d4; } .toggle-thumb { width: 24px; height: 24px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); } .toggle-track.active .toggle-thumb { transform: translateX(22px); }', js: `document.getElementById('tog1').addEventListener('click', function() { this.classList.toggle('active'); });` },
+    { id: 't2', name: 'Checkbox Check', type: 'Toggle', html: '<input type="checkbox" id="chk1" style="display:none"><label for="chk1" class="chk-box"></label>', css: '.chk-box { display: block; width: 24px; height: 24px; border: 2px solid #334155; border-radius: 4px; cursor: pointer; position: relative; transition: 0.2s; } #chk1:checked + .chk-box { background: #06b6d4; border-color: #06b6d4; } #chk1:checked + .chk-box::after { content: "✓"; position: absolute; color: #000; font-weight: bold; top: -2px; left: 4px; }', js: '' },
+    { id: 't3', name: 'Animated Radio', type: 'Toggle', html: '<input type="radio" id="rad1" name="rad" style="display:none"><label for="rad1" class="rad-box"></label>', css: '.rad-box { display: block; width: 24px; height: 24px; border: 2px solid #334155; border-radius: 50%; cursor: pointer; position: relative; transition: 0.2s; } #rad1:checked + .rad-box { border-color: #06b6d4; } #rad1:checked + .rad-box::after { content: ""; position: absolute; width: 12px; height: 12px; background: #06b6d4; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }', js: '' },
+    { id: 't4', name: 'Heart Like', type: 'Toggle', html: '<button class="demo-btn" id="likeBtn" style="font-size:20px; background:transparent;">🤍</button>', css: '.liked { color: #ff4b4b; transform: scale(1.2); transition: 0.2s; }', js: `const btn = document.getElementById('likeBtn'); btn.addEventListener('click', function() { this.classList.toggle('liked'); this.textContent = this.classList.contains('liked') ? '❤️' : '🤍'; });` },
+    { id: 't5', name: 'Bookmark', type: 'Toggle', html: '<button class="demo-btn" id="bmBtn">Bookmark</button>', css: '.bm-active { background: #06b6d4; color: #000; }', js: `document.getElementById('bmBtn').addEventListener('click', function() { this.classList.toggle('bm-active'); });` },
+    { id: 't6', name: 'Dark/Light', type: 'Toggle', html: '<button class="demo-btn" id="themeBtn">🌙</button>', css: '.light-mode { background: #fff !important; color: #000 !important; }', js: `document.getElementById('themeBtn').addEventListener('click', function() { document.body.classList.toggle('light-mode'); this.textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙'; });` },
+    { id: 't7', name: 'Toggle Button', type: 'Toggle', html: '<button class="demo-btn effect-t7">Toggle</button>', css: '.effect-t7.active { background: #06b6d4; color: #000; }', js: `document.querySelector('.effect-t7').addEventListener('click', function() { this.classList.toggle('active'); });` },
+    { id: 't8', name: 'Morph Hamburger', type: 'Toggle', html: '<div id="hamb" style="width:24px; cursor:pointer;"><div style="height:2px; background:#fff; margin:5px 0; transition:0.3s;"></div><div style="height:2px; background:#fff; margin:5px 0; transition:0.3s;"></div><div style="height:2px; background:#fff; margin:5px 0; transition:0.3s;"></div></div>', css: '', js: `const h = document.getElementById('hamb'); h.addEventListener('click', function() { const lines = this.children; if(this.classList.contains('open')){ lines[0].style.transform = 'none'; lines[1].style.opacity = '1'; lines[2].style.transform = 'none'; } else { lines[0].style.transform = 'rotate(45deg) translate(5px, 5px)'; lines[1].style.opacity = '0'; lines[2].style.transform = 'rotate(-45deg) translate(5px, -5px)'; } this.classList.toggle('open'); });` },
+    { id: 't9', name: 'Star Rating', type: 'Toggle', html: '<div id="stars" style="font-size:24px; cursor:pointer; color:#555;">★★★★★</div>', css: '.star-on { color: #fbbf24 !important; }', js: `const stars = document.getElementById('stars'); stars.addEventListener('click', function() { this.classList.toggle('star-on'); });` },
+    { id: 't10', name: 'Play/Pause', type: 'Toggle', html: '<button class="demo-btn" id="ppBtn">▶</button>', css: '', js: `document.getElementById('ppBtn').addEventListener('click', function() { this.textContent = this.textContent === '▶' ? '⏸' : '▶'; });` },
+
+    // --- FORM (31-40) ---
+    { id: 'f1', name: 'Input Focus', type: 'Form', html: '<input class="demo-input effect-f1" placeholder="Focus me">', css: '.effect-f1:focus { border-color: #06b6d4; box-shadow: 0 0 10px rgba(6,182,212,0.3); }', js: '' },
+    { id: 'f2', name: 'Float Label', type: 'Form', html: '<div style="position:relative;"><input class="demo-input" id="flo" placeholder=" " style="padding-top:20px;"><label for="flo" style="position:absolute; left:12px; top:14px; color:#94a3b8; transition:0.2s; pointer-events:none; font-size:12px;">Email</label></div>', css: '#flo:focus + label, #flo:not(:placeholder-shown) + label { top: 4px !important; font-size: 10px !important; color: #06b6d4 !important; }', js: '' },
+    { id: 'f3', name: 'Search Expand', type: 'Form', html: '<div style="display:flex; align-items:center; background:#1e293b; border-radius:20px; padding:4px;"><span style="padding:8px;">🔍</span><input type="text" style="width:0; opacity:0; transition:0.3s; background:transparent; border:none; color:#fff; outline:none;" id="searchIn"></div>', css: '', js: `const si = document.getElementById('searchIn'); si.parentElement.addEventListener('click', () => { si.style.width = '150px'; si.style.opacity = '1'; si.focus(); }); si.addEventListener('blur', () => { si.style.width = '0'; si.style.opacity = '0'; });` },
+    { id: 'f4', name: 'Password Eye', type: 'Form', html: '<div style="position:relative;"><input type="password" class="demo-input" id="pwd" value="secret" style="padding-right:40px;"><span id="eye" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer;">👁</span></div>', css: '', js: `document.getElementById('eye').addEventListener('click', function() { const p = document.getElementById('pwd'); p.type = p.type === 'password' ? 'text' : 'password'; this.textContent = p.type === 'password' ? '👁' : '🙈'; });` },
+    { id: 'f5', name: 'Range Slider', type: 'Form', html: '<input type="range" min="0" max="100" value="50" id="rng" style="accent-color:#06b6d4; width:150px;">', css: '', js: '' },
+    { id: 'f6', name: 'Validation Error', type: 'Form', html: '<input class="demo-input effect-f6" style="border-color:#ff5c6c;" value="Sai định dạng">', css: '.effect-f6:focus { box-shadow: 0 0 10px rgba(255,92,108,0.3); }', js: '' },
+    { id: 'f7', name: 'Validation Success', type: 'Form', html: '<input class="demo-input effect-f7" style="border-color:#3ecf8e;" value="Hợp lệ">', css: '.effect-f7:focus { box-shadow: 0 0 10px rgba(62,207,142,0.3); }', js: '' },
+    { id: 'f8', name: 'Custom Select', type: 'Form', html: '<select class="demo-input"><option>Option 1</option><option>Option 2</option></select>', css: '', js: '' },
+    { id: 'f9', name: 'File Upload', type: 'Form', html: '<button class="demo-btn">📁 Chọn File</button>', css: '.demo-btn:hover { background: #06b6d4; color: #000; }', js: '' },
+    { id: 'f10', name: 'Step Counter', type: 'Form', html: '<div style="display:flex; gap:10px; align-items:center;"><button class="demo-btn" style="padding:4px 10px;" onclick="let v=document.getElementById(\'cnt\').innerText; document.getElementById(\'cnt\').innerText = Math.max(0, parseInt(v)-1)">-</button><span id="cnt">1</span><button class="demo-btn" style="padding:4px 10px;" onclick="let v=document.getElementById(\'cnt\').innerText; document.getElementById(\'cnt\').innerText = parseInt(v)+1">+</button></div>', css: '', js: '' },
+
+    // --- CARD (41-50) ---
+    { id: 'cd1', name: 'Card Lift', type: 'Card', html: '<div class="demo-card effect-cd1">Lift</div>', css: '.effect-cd1:hover { transform: translateY(-10px); box-shadow: 0 15px 25px -10px rgba(0,0,0,0.5); }', js: '' },
+    { id: 'cd2', name: 'Card Glow', type: 'Card', html: '<div class="demo-card effect-cd2">Glow</div>', css: '.effect-cd2:hover { border-color: #06b6d4; box-shadow: 0 0 20px rgba(6,182,212,0.3); }', js: '' },
+    { id: 'cd3', name: 'Card Tilt', type: 'Card', html: '<div class="demo-card" id="tilt">3D Tilt</div>', css: '', js: `const c = document.getElementById('tilt'); c.addEventListener('mousemove', (e) => { const r = c.getBoundingClientRect(); const x = e.clientX - r.left; const y = e.clientY - r.top; c.style.transform = \`perspective(500px) rotateX(\${((y - r.height/2)/r.height)*-20}deg) rotateY(\${((x - r.width/2)/r.width)*20}deg)\`; }); c.addEventListener('mouseleave', () => c.style.transform = 'none');` },
+    { id: 'cd4', name: 'Card Expand', type: 'Card', html: '<div class="demo-card" id="exp" style="transition:0.3s;">Expand</div>', css: '', js: `document.getElementById('exp').addEventListener('click', function() { this.style.width = this.style.width === '220px' ? '160px' : '220px'; this.style.height = this.style.height === '180px' ? '120px' : '180px'; });` },
+    { id: 'cd5', name: 'Card Border Glow', type: 'Card', html: '<div class="demo-card effect-cd5">Border</div>', css: '.effect-cd5:hover { border: 1px solid #06b6d4; animation: pulseB 1.5s infinite; } @keyframes pulseB { 0%{box-shadow:0 0 0 0 rgba(6,182,212,0.5)} 70%{box-shadow:0 0 0 10px rgba(6,182,212,0)} 100%{box-shadow:0 0 0 0 rgba(6,182,212,0)} }', js: '' },
+    { id: 'cd6', name: 'Card Press', type: 'Card', html: '<div class="demo-card effect-cd6">Press</div>', css: '.effect-cd6:active { transform: scale(0.95); }', js: '' },
+    { id: 'cd7', name: 'Card Blur Back', type: 'Card', html: '<div class="demo-card effect-cd7">Blur</div>', css: '.effect-cd7:hover { filter: blur(4px); }', js: '' },
+    { id: 'cd8', name: 'Card Slide Up', type: 'Card', html: '<div class="demo-card effect-cd8">Slide</div>', css: '.effect-cd8:hover { transform: translateY(-5px); background: #273449; }', js: '' },
+    { id: 'cd9', name: 'Card Reveal Text', type: 'Card', html: '<div class="demo-card" style="position:relative; overflow:hidden;">Hover<div style="position:absolute; bottom:-100%; left:0; width:100%; background:rgba(6,182,212,0.8); padding:5px; transition:0.3s;" class="rev">Info</div></div>', css: '.demo-card:hover .rev { bottom: 0 !important; }', js: '' },
+    { id: 'cd10', name: 'Card Image Zoom', type: 'Card', html: '<div class="demo-card" style="overflow:hidden;"><div style="width:100%; height:100%; background:url(https://picsum.photos/200) center/cover; transition:0.3s;" class="zimg"></div></div>', css: '.demo-card:hover .zimg { transform: scale(1.2); }', js: '' }
+  ];
+
+  // DOM
+  const gridEl = document.getElementById('effectGrid');
+  const stageEl = document.getElementById('previewStage');
+  const lblCurrentEffect = document.getElementById('lblCurrentEffect');
+  const codeBox = document.getElementById('codeBox');
+  const btnCopy = document.getElementById('btnCopy');
+  const toastEl = document.getElementById('toast');
+
+  let selectedEffect = effects[0];
+
+  /* ====================================================
+     RENDER
+     ==================================================== */
+  function renderGrid() {
+    gridEl.innerHTML = '';
+    effects.forEach(fx => {
+      const card = document.createElement('div');
+      card.className = `effect-card ${selectedEffect.id === fx.id ? 'active' : ''}`;
+      card.innerHTML = `<div class="effect-name">${fx.name}</div><div class="effect-type">${fx.type}</div>`;
+      
+      card.addEventListener('click', () => {
+        selectedEffect = fx;
+        renderGrid();
+        renderPreview();
+      });
+      gridEl.appendChild(card);
+    });
+  }
+
+  function renderPreview() {
+    lblCurrentEffect.textContent = selectedEffect.name;
+    stageEl.innerHTML = selectedEffect.html;
+    
+    // Cập nhật Code
+    codeBox.textContent = `/* HTML */\n${selectedEffect.html}\n\n/* CSS */\n${selectedEffect.css}\n\n/* JS */\n${selectedEffect.js || '// Không cần JS'}`;
+
+    // Inject CSS
+    const oldStyle = document.getElementById('demo-style');
+    if(oldStyle) oldStyle.remove();
+    const style = document.createElement('style');
+    style.id = 'demo-style';
+    style.textContent = selectedEffect.css;
+    document.head.appendChild(style);
+
+    // Inject JS
+    if (selectedEffect.js) {
+      const script = document.createElement('script');
+      script.textContent = selectedEffect.js;
+      const oldScript = document.getElementById('demo-script');
+      if (oldScript) oldScript.remove();
+      
+      script.id = 'demo-script';
+      document.body.appendChild(script);
+    }
+  }
+
+  // Copy
+  btnCopy.addEventListener('click', () => {
+    const text = codeBox.textContent;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => showToast('Đã copy!')).catch(() => fallbackCopy(text));
+    } else { fallbackCopy(text); }
+  });
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Đã copy (Fallback)!');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+  }
+
+  /* ====================================================
+     KHỞI CHẠY
+     ==================================================== */
+  renderGrid();
+  renderPreview();
+</script>
+</body>
+</html>

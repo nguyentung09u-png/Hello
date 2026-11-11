@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Professional Color Palette Studio</title>
+<style>
+  /* ====================================================
+     HỆ THỐNG BIẾN & RESET (DARK TECH 2D)
+     ==================================================== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #06080c;           /* Nền tối sâu */
+    --surface: #0e1219;      /* Mặt nổi */
+    --surface-hover: #161c26;
+    --border: #1f2937;       /* Viền xám xanh */
+    --border-glow: #06b6d4;  /* Viền phát sáng cyan */
+    --text: #f1f5f9;         /* Chữ chính */
+    --muted: #94a3b8;        /* Chữ phụ */
+    --accent: #06b6d4;       /* Cyan neon */
+    --accent-hover: #22d3ee;
+    --success: #10b981;
+    --radius: 12px;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--bg);
+    /* Lưới nền mờ phong cách Tech */
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+
+  /* ====================================================
+     HEADER & SEARCH / FILTERS
+     ==================================================== */
+  header {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6, 8, 12, 0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .header-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-title span {
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+  }
+
+  /* Bộ lọc */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .control-group {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .search-box {
+    flex-grow: 2;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    padding: 0 16px 0 40px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .search-box input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  }
+  .search-box svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+  }
+
+  select {
+    height: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    padding: 0 12px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    min-width: 130px;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .btn-clear {
+    height: 40px;
+    padding: 0 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-clear:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+  }
+
+  /* ====================================================
+     LAYOUT CHÍNH (STUDIO)
+     ==================================================== */
+  .studio-container {
+    max-width: 1400px;
+    margin: 24px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ====================================================
+     GRID MÀU
+     ==================================================== */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .color-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .color-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px -10px rgba(6, 182, 212, 0.3);
+  }
+  .color-card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .color-swatch {
+    height: 80px;
+    width: 100%;
+    transition: height 0.2s;
+  }
+
+  .color-info {
+    padding: 12px;
+  }
+
+  .color-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .color-hex {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ====================================================
+     SIDEBAR: DETAIL & COMPARE
+     ==================================================== */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: sticky;
+    top: 160px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* --- COLOR DETAIL --- */
+  .detail-preview {
+    height: 100px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    transition: background 0.3s;
+  }
+
+  .code-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+  }
+  .code-row:last-child { border-bottom: none; }
+  .code-row span:first-child { color: var(--muted); font-family: "Inter", sans-serif; font-weight: 500; }
+  
+  .detail-scale {
+    display: flex;
+    height: 24px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 16px;
+    border: 1px solid var(--border);
+  }
+  .detail-scale div {
+    flex: 1;
+    transition: background 0.3s;
+  }
+
+  /* --- COMPARE AREA --- */
+  .compare-empty {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .compare-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .compare-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .compare-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .compare-info { flex-grow: 1; }
+  .compare-name { font-size: 12px; font-weight: 600; }
+  .compare-hex { font-size: 11px; color: var(--muted); font-family: monospace; }
+  
+  .btn-remove {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+  }
+  .btn-remove:hover { color: #ef4444; }
+
+  /* ====================================================
+     TOAST NOTIFICATION
+     ==================================================== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    z-index: 1000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ====================================================
+     RESPONSIVE
+     ==================================================== */
+  @media (max-width: 992px) {
+    .studio-container {
+      grid-template-columns: 1fr; /* Về 1 cột */
+    }
+    .sidebar {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .sidebar { grid-template-columns: 1fr; }
+    .palette-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .controls { flex-direction: column; }
+    .control-group { width: 100%; }
+    .search-box { width: 100%; }
+    select { width: 100%; }
+    .header-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <div class="header-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+        Color <span>Studio</span>
+      </div>
+      <button class="btn-clear" id="btnClear">Xóa bộ lọc</button>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Tìm tên màu hoặc mã HEX (vd: Blue, #3b82f6)..." />
+      </div>
+      
+      <div class="control-group">
+        <select id="filterGroup">
+          <option value="all">Tất cả nhóm màu</option>
+          <!-- Được sinh ra bằng JS -->
+        </select>
+        <select id="filterType">
+          <option value="all">Tất cả phân loại</option>
+          <option value="Light">Nhạt (Light)</option>
+          <option value="Medium">Trung tính (Medium)</option>
+          <option value="Dark">Đậm (Dark)</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="studio-container">
+    
+    <!-- CỘT TRÁI: GRID MÀU -->
+    <div class="palette-grid" id="paletteGrid">
+      <!-- Render bằng JS -->
+    </div>
+
+    <!-- CỘT PHẢI: SIDEBAR -->
+    <aside class="sidebar">
+      
+      <!-- CHI TIẾT MÀU -->
+      <div class="panel" id="detailPanel">
+        <div class="panel-title">Chi tiết màu</div>
+        
+        <div class="detail-preview" id="detailPreview" style="background: var(--surface); color: var(--muted);">
+          Chọn 1 màu
+        </div>
+
+        <div class="code-row">
+          <span>HEX</span>
+          <span id="valHex" style="cursor:pointer;" title="Click để copy">-</span>
+        </div>
+        <div class="code-row">
+          <span>RGB</span>
+          <span id="valRgb">-</span>
+        </div>
+        <div class="code-row">
+          <span>HSL</span>
+          <span id="valHsl">-</span>
+        </div>
+
+        <div class="detail-scale" id="detailScale">
+          <!-- 10 ô màu từ nhạt đến đậm -->
+        </div>
+      </div>
+
+      <!-- SO SÁNH MÀU -->
+      <div class="panel">
+        <div class="panel-title">So sánh màu (Tối đa 4)</div>
+        <div id="compareContainer">
+          <div class="compare-empty">Chọn nhiều màu (Giữ Ctrl/Cmd hoặc Click icon +) để so sánh.</div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">Đã copy mã màu!</div>
+
+<script>
+  /* ====================================================
+     1. DỮ LIỆU MÀU (Tự động sinh chuẩn UI)
+     ==================================================== */
+  // Mình trích xuất 5 màu Nhạt, 5 Trung tính, 5 Đậm đẹp nhất từ bảng màu TailwindCSS (Chuẩn UI nhất hiện nay)
+  // Dùng cấu trúc mảng để dễ dàng lặp và render
+  const rawPalette = {
+    Red:     ["#fca5a5", "#f87171", "#ef4444", "#dc2626", "#b91c1c", "#fef2f2", "#fee2e2", "#fecaca", "#f87171", "#ef4444", "#dc2626", "#b91c1c", "#991b1b", "#7f1d1d", "#450a0a"],
+    Orange:  ["#fdba74", "#fb923c", "#f97316", "#ea580c", "#c2410c", "#fff7ed", "#ffedd5", "#fed7aa", "#fb923c", "#f97316", "#ea580c", "#c2410c", "#9a3412", "#7c2d12", "#431407"],
+    Amber:   ["#fcd34d", "#fbbf24", "#f59e0b", "#d97706", "#b45309", "#fffbeb", "#fef3c7", "#fde68a", "#fbbf24", "#f59e0b", "#d97706", "#b45309", "#92400e", "#78350f", "#451a03"],
+    Yellow:  ["#fde047", "#facc15", "#eab308", "#ca8a04", "#a16207", "#fefce8", "#fef9c3", "#fef08a", "#facc15", "#eab308", "#ca8a04", "#a16207", "#854d0e", "#713f12", "#422006"],
+    Lime:    ["#bef264", "#a3e635", "#84cc16", "#65a30d", "#4d7c0f", "#f7fee7", "#ecfccb", "#d9f99d", "#a3e635", "#84cc16", "#65a30d", "#4d7c0f", "#3f6212", "#365314", "#1a2e05"],
+    Green:   ["#86efac", "#4ade80", "#22c55e", "#16a34a", "#15803d", "#f0fdf4", "#dcfce7", "#bbf7d0", "#4ade80", "#22c55e", "#16a34a", "#15803d", "#166534", "#14532d", "#052e16"],
+    Emerald: ["#6ee7b7", "#34d399", "#10b981", "#059669", "#047857", "#ecfdf5", "#d1fae5", "#a7f3d0", "#34d399", "#10b981", "#059669", "#047857", "#065f46", "#064e3b", "#022c22"],
+    Teal:    ["#5eead4", "#2dd4bf", "#14b8a6", "#0d9488", "#0f766e", "#f0fdfa", "#ccfbf1", "#99f6e4", "#2dd4bf", "#14b8a6", "#0d9488", "#0f766e", "#115e59", "#134e4a", "#042f2e"],
+    Cyan:    ["#67e8f9", "#22d3ee", "#06b6d4", "#0891b2", "#0e7490", "#ecfeff", "#cffafe", "#a5f3fc", "#22d3ee", "#06b6d4", "#0891b2", "#0e7490", "#155e75", "#164e63", "#083344"],
+    Sky:     ["#7dd3fc", "#38bdf8", "#0ea5e9", "#0284c7", "#0369a1", "#f0f9ff", "#e0f2fe", "#bae6fd", "#38bdf8", "#0ea5e9", "#0284c7", "#0369a1", "#075985", "#0c4a6e", "#082f49"],
+    Blue:    ["#93c5fd", "#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8", "#eff6ff", "#dbeafe", "#bfdbfe", "#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8", "#1e40af", "#1e3a8a", "#172554"],
+    Indigo:  ["#a5b4fc", "#818cf8", "#6366f1", "#4f46e5", "#4338ca", "#eef2ff", "#e0e7ff", "#c7d2fe", "#818cf8", "#6366f1", "#4f46e5", "#4338ca", "#3730a3", "#312e81", "#1e1b4b"],
+    Violet:  ["#c4b5fd", "#a78bfa", "#8b5cf6", "#7c3aed", "#6d28d9", "#f5f3ff", "#ede9fe", "#ddd6fe", "#a78bfa", "#8b5cf6", "#7c3aed", "#6d28d9", "#5b21b6", "#4c1d95", "#2e1065"],
+    Purple:  ["#d8b4fe", "#c084fc", "#a855f7", "#9333ea", "#7e22ce", "#faf5ff", "#f3e8ff", "#e9d5ff", "#c084fc", "#a855f7", "#9333ea", "#7e22ce", "#6b21a8", "#581c87", "#3b0764"],
+    Fuchsia: ["#f0abfc", "#e879f9", "#d946ef", "#c026d3", "#a21caf", "#fdf4ff", "#fae8ff", "#f5d0fe", "#e879f9", "#d946ef", "#c026d3", "#a21caf", "#86198f", "#701a75", "#4a044e"],
+    Pink:    ["#f9a8d4", "#f472b6", "#ec4899", "#db2777", "#be185d", "#fdf2f8", "#fce7f3", "#fbcfe8", "#f472b6", "#ec4899", "#db2777", "#be185d", "#9d174d", "#831843", "#500724"],
+    Rose:    ["#fda4af", "#fb7185", "#f43f5e", "#e11d48", "#be123c", "#fff1f2", "#ffe4e6", "#fecdd3", "#fb7185", "#f43f5e", "#e11d48", "#be123c", "#9f1239", "#881337", "#4c0519"],
+    Slate:   ["#cbd5e1", "#94a3b8", "#64748b", "#475569", "#334155", "#f8fafc", "#f1f5f9", "#e2e8f0", "#94a3b8", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020617"],
+    Gray:    ["#d1d5db", "#9ca3af", "#6b7280", "#4b5563", "#374151", "#f9fafb", "#f3f4f6", "#e5e7eb", "#9ca3af", "#6b7280", "#4b5563", "#374151", "#1f2937", "#111827", "#030712"],
+    Zinc:    ["#d4d4d8", "#a1a1aa", "#71717a", "#52525b", "#3f3f46", "#fafafa", "#f4f4f5", "#e4e4e7", "#a1a1aa", "#71717a", "#52525b", "#3f3f46", "#27272a", "#18181b", "#09090b"],
+    Neutral: ["#d4d4d4", "#a3a3a3", "#737373", "#525252", "#404040", "#fafafa", "#f5f5f5", "#e5e5e5", "#a3a3a3", "#737373", "#525252", "#404040", "#262626", "#171717", "#0a0a0a"],
+    Stone:   ["#d6d3d1", "#a8a29e", "#78716c", "#57534e", "#44403c", "#fafaf9", "#f5f5f4", "#e7e5e4", "#a8a29e", "#78716c", "#57534e", "#44403c", "#292524", "#1c1917", "#0c0a09"],
+    Brown:   ["#d7ccc8", "#bcaaa4", "#a1887f", "#8d6e63", "#795548", "#efebe9", "#d7ccc8", "#bcaaa4", "#a1887f", "#8d6e63", "#795548", "#5d4037", "#4e342e", "#3e2723", "#21110d"]
+  };
+
+  // Hàm chuyển HEX sang RGB
+  function hexToRgb(hex) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b };
+  }
+
+  // Hàm chuyển RGB sang HSL
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) {
+      h = s = 0;
+    } else {
+      let d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return { 
+      h: Math.round(h * 360), 
+      s: Math.round(s * 100), 
+      l: Math.round(l * 100) 
+    };
+  }
+
+  // Tạo mảng phẳng chứa tất cả dữ liệu màu đã được xử lý
+  let allColors = [];
+  let colorIdCounter = 0;
+
+  Object.entries(rawPalette).forEach(([groupName, hexCodes]) => {
+    // Chia mảng 15 màu thành 3 nhóm: 5 Light, 5 Medium, 5 Dark
+    // (Dựa trên mã màu Tailwind: 50-300 là Light, 400-600 là Medium, 700-900 là Dark)
+    // Trong mảng trên mình đã sắp xếp thủ công: 5 đầu là Light, 5 giữa là Medium, 5 cuối là Dark.
+    
+    hexCodes.forEach((hex, index) => {
+      let type = "Medium";
+      if (index < 5) type = "Light";
+      else if (index >= 10) type = "Dark";
+
+      // Chỉ lấy đúng 15 màu unique (do mảng trên có sự trùng lặp giữa các mã)
+      // Mình sẽ lọc trùng ở bước render nếu cần, nhưng ở đây mình gắn ID luôn.
+      
+      const rgb = hexToRgb(hex);
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      
+      allColors.push({
+        id: colorIdCounter++,
+        name: `${groupName} ${index + 1}`,
+        rawName: groupName,
+        hex: hex.toUpperCase(),
+        rgb: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`,
+        type: type
+      });
+    });
+  });
+
+  // Sắp xếp lại bảng màu cho đẹp mắt (lọc trùng mã Hex)
+  const uniqueHexes = new Set();
+  allColors = allColors.filter(c => {
+    if(uniqueHexes.has(c.hex)) return false;
+    uniqueHexes.add(c.hex);
+    return true;
+  });
+
+  /* ====================================================
+     2. TRẠNG THÁI ỨNG DỤNG
+     ==================================================== */
+  let filteredColors = [...allColors];
+  let selectedColor = null;
+  let compareList = []; // Chứa các object color được chọn để so sánh
+
+  // DOM Elements
+  const gridEl = document.getElementById("paletteGrid");
+  const searchInput = document.getElementById("searchInput");
+  const filterGroup = document.getElementById("filterGroup");
+  const filterType = document.getElementById("filterType");
+  const btnClear = document.getElementById("btnClear");
+  const toastEl = document.getElementById("toast");
+  
+  // Detail Elements
+  const detailPreview = document.getElementById("detailPreview");
+  const valHex = document.getElementById("valHex");
+  const valRgb = document.getElementById("valRgb");
+  const valHsl = document.getElementById("valHsl");
+  const detailScale = document.getElementById("detailScale");
+  
+  // Compare Elements
+  const compareContainer = document.getElementById("compareContainer");
+
+  /* ====================================================
+     3. KHỞI TẠO & RENDER
+     ==================================================== */
+  
+  // Điền các option cho bộ lọc nhóm màu
+  const groups = [...new Set(allColors.map(c => c.rawName))].sort();
+  groups.forEach(g => {
+    const opt = document.createElement("option");
+    opt.value = g;
+    opt.textContent = g;
+    filterGroup.appendChild(opt);
+  });
+
+// Hàm copy vào clipboard (Đã fix lỗi mobile/offline)
+function copyToClipboard(text) {
+  // Kiểm tra xem trình duyệt có hỗ trợ API hiện đại và đang chạy HTTPS không
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Đã copy: ${text}`);
+    }).catch(() => {
+      fallbackCopy(text); // Nếu API hiện đại lỗi, chuyển sang hàm dự phòng
+    });
+  } else {
+    // Nếu chạy file offline (file://) hoặc trình duyệt cũ, dùng hàm dự phòng luôn
+    fallbackCopy(text);
+  }
+}
+
+// Hàm dự phòng dùng thẻ textarea ẩn (Hoạt động trên mọi thiết bị)
+function fallbackCopy(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  // Ẩn textarea để không làm vỡ giao diện
+  textArea.style.position = "fixed";
+  textArea.style.top = "-9999px";
+  textArea.style.left = "-9999px";
+  
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      showToast(`Đã copy: ${text}`);
+    } else {
+      showToast("Trình duyệt chặn copy!");
+    }
+  } catch (err) {
+    showToast("Lỗi copy, vui lòng thử lại!");
+  }
+
+  document.body.removeChild(textArea);
+}
+
+  // Hiện thông báo
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2000);
+  }
+
+  // Render danh sách màu ra Grid
+  function renderGrid() {
+    gridEl.innerHTML = "";
+    if (filteredColors.length === 0) {
+      gridEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">Không tìm thấy màu nào phù hợp.</div>`;
+      return;
+    }
+
+    filteredColors.forEach(c => {
+      const card = document.createElement("div");
+      card.className = `color-card ${selectedColor && selectedColor.id === c.id ? 'active' : ''}`;
+      
+      // Tính màu chữ hiển thị trên ô màu (đen hoặc trắng tuỳ độ sáng)
+      const rgb = hexToRgb(c.hex);
+      const lum = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+      const textColor = lum > 0.6 ? "#000000" : "#ffffff";
+
+      card.innerHTML = `
+        <div class="color-swatch" style="background: ${c.hex}; color: ${textColor}; display: flex; align-items: center; justify-content: center; font-weight: bold; opacity: 0; transition: opacity 0.2s;">+</div>
+        <div class="color-info">
+          <div class="color-name">
+            ${c.name}
+            <span style="font-size: 10px; color: var(--muted); font-weight: normal;">${c.type}</span>
+          </div>
+          <div class="color-hex" title="Click để copy">${c.hex}</div>
+        </div>
+      `;
+
+      // Hover hiệu ứng icon "+" để biết có thể đem đi so sánh
+      const swatch = card.querySelector('.color-swatch');
+      card.addEventListener('mouseenter', () => swatch.style.opacity = '1');
+      card.addEventListener('mouseleave', () => swatch.style.opacity = '0');
+
+      // Click vào card -> Chọn màu xem chi tiết
+      card.addEventListener("click", (e) => {
+        // Nếu click vào mã hex -> Copy
+        if (e.target.classList.contains("color-hex")) {
+          copyToClipboard(c.hex);
+          return;
+        }
+        
+        // Nếu click vào ô màu (có dấu +) -> Thêm vào so sánh
+        if (e.target.classList.contains("color-swatch")) {
+          addToCompare(c);
+          return;
+        }
+
+        // Click bình thường -> Xem chi tiết
+        selectColor(c);
+      });
+
+      gridEl.appendChild(card);
+    });
+  }
+
+  // Hàm chọn màu xem chi tiết
+  function selectColor(color) {
+    selectedColor = color;
+    
+    // Update Panel
+    detailPreview.style.background = color.hex;
+    const rgb = hexToRgb(color.hex);
+    const lum = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    detailPreview.style.color = lum > 0.6 ? "#000000" : "#ffffff";
+    detailPreview.textContent = color.name;
+
+    valHex.textContent = color.hex;
+    valRgb.textContent = color.rgb;
+    valHsl.textContent = color.hsl;
+
+    // Tạo dải màu từ nhạt -> đậm bằng cách điều chỉnh độ sáng HSL
+    detailScale.innerHTML = "";
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    for(let i = 1; i <= 10; i++) {
+      const lightness = i * 10; // 10% -> 100%
+      const div = document.createElement("div");
+      div.style.background = `hsl(${hsl.h}, ${hsl.s}%, ${lightness}%)`;
+      div.title = `Độ sáng: ${lightness}%`;
+      detailScale.appendChild(div);
+    }
+
+    // Update Grid active state
+    renderGrid();
+  }
+
+  // Hàm thêm vào danh sách so sánh
+  function addToCompare(color) {
+    if (compareList.length >= 4) {
+      showToast("Chỉ so sánh tối đa 4 màu!");
+      return;
+    }
+    if (compareList.find(c => c.id === color.id)) {
+      showToast("Màu này đã có trong danh sách so sánh!");
+      return;
+    }
+    compareList.push(color);
+    renderCompare();
+    showToast(`Đã thêm ${color.name} vào so sánh.`);
+  }
+
+  // Hàm render khu vực so sánh
+  function renderCompare() {
+    compareContainer.innerHTML = "";
+    
+    if (compareList.length === 0) {
+      compareContainer.innerHTML = `<div class="compare-empty">Chọn nhiều màu (Click vào ô màu) để so sánh.</div>`;
+      return;
+    }
+
+    const list = document.createElement("div");
+    list.className = "compare-list";
+
+    compareList.forEach(c => {
+      const item = document.createElement("div");
+      item.className = "compare-item";
+      item.innerHTML = `
+        <div class="compare-swatch" style="background: ${c.hex}"></div>
+        <div class="compare-info">
+          <div class="compare-name">${c.name}</div>
+          <div class="compare-hex">${c.hex}</div>
+        </div>
+        <button class="btn-remove" title="Xóa khỏi so sánh">×</button>
+      `;
+
+      item.querySelector(".btn-remove").addEventListener("click", (e) => {
+        e.stopPropagation();
+        compareList = compareList.filter(item => item.id !== c.id);
+        renderCompare();
+      });
+
+      list.appendChild(item);
+    });
+
+    // Thêm khối Preview So sánh trực quan (Nền tối vs Nền sáng)
+    if (compareList.length >= 2) {
+      const previewBox = document.createElement("div");
+      previewBox.style.marginTop = "16px";
+      previewBox.style.padding = "12px";
+      previewBox.style.borderRadius = "8px";
+      previewBox.style.border = "1px solid var(--border)";
+      
+      let strips = "";
+      compareList.forEach(c => {
+        strips += `<div style="flex: 1; height: 30px; background: ${c.hex}; transition: background 0.3s;"></div>`;
+      });
+      
+      previewBox.innerHTML = `
+        <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase;">Dải màu kết hợp</div>
+        <div style="display: flex; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+          ${strips}
+        </div>
+      `;
+      compareContainer.appendChild(previewBox);
+    }
+    
+    compareContainer.appendChild(list);
+  }
+
+  /* ====================================================
+     4. XỬ LÝ SỰ KIỆN FILTER / SEARCH
+     ==================================================== */
+  function applyFilters() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const groupVal = filterGroup.value;
+    const typeVal = filterType.value;
+
+    filteredColors = allColors.filter(c => {
+      // Tìm theo mã HEX hoặc Tên
+      const matchSearch = c.hex.toLowerCase().includes(searchTerm) || 
+                          c.name.toLowerCase().includes(searchTerm) || 
+                          c.rawName.toLowerCase().includes(searchTerm);
+      
+      // Lọc nhóm
+      const matchGroup = groupVal === "all" || c.rawName === groupVal;
+      
+      // Lọc phân loại
+      const matchType = typeVal === "all" || c.type === typeVal;
+
+      return matchSearch && matchGroup && matchType;
+    });
+
+    renderGrid();
+  }
+
+  searchInput.addEventListener("input", applyFilters);
+  filterGroup.addEventListener("change", applyFilters);
+  filterType.addEventListener("change", applyFilters);
+
+  btnClear.addEventListener("click", () => {
+    searchInput.value = "";
+    filterGroup.value = "all";
+    filterType.value = "all";
+    applyFilters();
+  });
+
+  // Click vào mã HEX trên panel chi tiết cũng copy được
+  valHex.addEventListener("click", () => {
+    if (selectedColor) copyToClipboard(selectedColor.hex);
+  });
+
+  /* ====================================================
+     5. KHỞI CHẠY
+     ==================================================== */
+  // Tự động chọn màu đầu tiên để show demo lúc mới vào
+  if (allColors.length > 0) {
+    selectColor(allColors[0]);
+  }
+  renderGrid();
+  renderCompare();
+
+</script>
+</body>
+</html>

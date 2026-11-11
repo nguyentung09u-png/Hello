@@ -1,0 +1,21 @@
+những lỗi thường gặp nên làm ux
+· Nút bấm không có đèn → không biết bấm trúng chưa.
+· Rút tiền xong máy im lặng → không biết thành công chưa.
+· Lỡ bấm sai số tiền → không có nút "quay lại".
+· → Người dùng hoang mang, sợ mất tiền.
+
+
+
+--- cách khắc phục---
+-khi làm card button thì nên làm click lên sẽ nổi
+- nếu thành công hiện toast thành công (nếu chưa hiện toast chưa)
+-
+
+--- lỗi ux tiếp theo ---
+- điền vào ô báo sai thông tin ( nhưng ko nói sai chỗ nào )
+- phải nhập lại từ đầu 
+
+
+- cách khắc phục
+- ô nào điện sai báo lỗi rõ ràng
+- giữ nguyên các ô đã điền đúng và nhớ hiện nút đăng kí màu xanh lá cây khi đủ thông tin là vào
