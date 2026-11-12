@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>So sánh: Flex vs Grid</title>
+
+<style>
+:root {
+  --bg: #080d16;
+  --surface: #111b2b;
+  --border: #26364c;
+  --primary: #22d3ee;
+  --text: #eaf4ff;
+  --muted: #8fa3ba;
+  --danger: #ff5c5c;
+  --success: #3ddc97;
+  --warning: #f5b942;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  padding: 40px 24px;
+}
+
+h1 { color: var(--primary); font-size: 22px; margin-bottom: 8px; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+.sub { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+
+/* Khung demo chung */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.panel .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-family: monospace;
+}
+.tag-flex { background: #1f3a5c; color: #4ea1ff; }
+.tag-grid { background: #3a2c1f; color: var(--warning); }
+
+.code {
+  background: #0f1620;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  color: #8fa3ba;
+  margin-bottom: 16px;
+  border: 1px solid #1f2a36;
+}
+.code .k { color: #4ea1ff; }   /* keyword */
+.code .v { color: #3ddc97; }   /* value */
+.code .p { color: #8fa3ba; }   /* punctuation */
+
+/* Item chung */
+.item {
+  background: #1a2940;
+  border: 1px solid #30435e;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: center;
+}
+
+/* =========================================================
+   DEMO 1: FLEX — hàng ngang
+   ========================================================= */
+.flex-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* =========================================================
+   DEMO 2: FLEX — cột dọc
+   ========================================================= */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =========================================================
+   DEMO 3: FLEX — căn giữa
+   ========================================================= */
+.flex-center {
+  display: flex;
+  justify-content: center;   /* căn giữa ngang */
+  align-items: center;       /* căn giữa dọc */
+  gap: 12px;
+  min-height: 140px;
+  background: #0f1620;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* =========================================================
+   DEMO 4: FLEX — space-between
+   ========================================================= */
+.flex-between {
+  display: flex;
+  justify-content: space-between;  /* đẩy 2 đầu */
+  align-items: center;
+  gap: 12px;
+  background: #0f1620;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* =========================================================
+   DEMO 5: FLEX — wrap (xuống dòng)
+   ========================================================= */
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;        /* cho phép xuống dòng */
+  gap: 12px;
+}
+.flex-wrap .item { flex: 1 1 180px; }
+
+/* =========================================================
+   DEMO 6: GRID — 2 cột đều
+   ========================================================= */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 2 cột bằng nhau */
+  gap: 12px;
+}
+
+/* =========================================================
+   DEMO 7: GRID — 3 cột đều
+   ========================================================= */
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* =========================================================
+   DEMO 8: GRID — cột không đều
+   ========================================================= */
+.grid-asym {
+  display: grid;
+  grid-template-columns: 200px 1fr 100px;   /* 200 | linh hoạt | 100 */
+  gap: 12px;
+}
+
+/* =========================================================
+   DEMO 9: GRID — layout kiểu dashboard
+   ========================================================= */
+.grid-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+}
+.grid-dashboard .span-2 {
+  grid-column: span 2;   /* chiếm 2 cột */
+}
+
+/* =========================================================
+   DEMO 10: SO SÁNH TRỰC TIẾP — cùng nội dung
+   ========================================================= */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .compare { grid-template-columns: 1fr; }
+}
+
+/* Bảng tóm tắt */
+.table {
+  background: #131a22;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th, .table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.table th {
+  background: #1a2940;
+  color: var(--primary);
+}
+.table td:first-child { color: var(--warning); font-family: monospace; }
+.table tr:last-child td { border-bottom: none; }
+
+/* Hint box */
+.hint {
+  background: #131a22;
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.hint b { color: var(--text); }
+.hint .ok { color: var(--success); }
+.hint .bad { color: var(--danger); }
+</style>
+</head>
+
+<body>
+
+<h1>🎯 Flex vs Grid — So sánh trực quan</h1>
+<p class="sub">Cùng item — khác cách xếp. Nhìn là thấy ngay.</p>
+
+<!-- ============================================================
+     PHẦN 1: FLEX
+     ============================================================ -->
+<div class="panel">
+  <div class="title">
+    <h2>📐 FLEX</h2>
+    <span class="tag tag-flex">display: flex</span>
+  </div>
+
+  <p style="color: var(--muted); font-size: 14px; margin-top: 0;">
+    <b>Flex</b> = xếp phần tử theo <b>1 hàng</b> hoặc <b>1 cột</b>. Phù hợp cho <b>thanh điều hướng, danh sách, căn giữa</b>.
+  </p>
+
+  <!-- Demo 1: Hàng ngang -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">1. Flex — hàng ngang</h3>
+  <div class="code">
+    <span class="k">display</span>: <span class="v">flex</span>;<br>
+    <span class="k">gap</span>: <span class="v">12px</span>;
+  </div>
+  <div class="flex-row">
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+  </div>
+
+  <!-- Demo 2: Cột dọc -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">2. Flex — cột dọc</h3>
+  <div class="code">
+    <span class="k">display</span>: <span class="v">flex</span>;<br>
+    <span class="k">flex-direction</span>: <span class="v">column</span>;<br>
+    <span class="k">gap</span>: <span class="v">12px</span>;
+  </div>
+  <div class="flex-col">
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+  </div>
+
+  <!-- Demo 3: Căn giữa -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">3. Flex — căn giữa</h3>
+  <div class="code">
+    <span class="k">display</span>: <span class="v">flex</span>;<br>
+    <span class="k">justify-content</span>: <span class="v">center</span>;  <span style="color:#6e7b8a">/* ngang */</span><br>
+    <span class="k">align-items</span>: <span class="v">center</span>;      <span style="color:#6e7b8a">/* dọc */</span>
+  </div>
+  <div class="flex-center">
+    <div class="item">Căn giữa</div>
+    <div class="item">Cả 2 chiều</div>
+  </div>
+
+  <!-- Demo 4: space-between -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">4. Flex — đẩy 2 đầu</h3>
+  <div class="code">
+    <span class="k">justify-content</span>: <span class="v">space-between</span>;  <span style="color:#6e7b8a">/* đẩy 2 đầu */</span>
+  </div>
+  <div class="flex-between">
+    <div class="item">Trái</div>
+    <div class="item">Giữa</div>
+    <div class="item">Phải</div>
+  </div>
+
+  <!-- Demo 5: wrap -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">5. Flex — tự xuống dòng</h3>
+  <div class="code">
+    <span class="k">flex-wrap</span>: <span class="v">wrap</span>;  <span style="color:#6e7b8a">/* tự xuống dòng khi hết chỗ */</span>
+  </div>
+  <div class="flex-wrap">
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+    <div class="item">Item 5</div>
+    <div class="item">Item 6</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHẦN 2: GRID
+     ============================================================ -->
+<div class="panel">
+  <div class="title">
+    <h2>📐 GRID</h2>
+    <span class="tag tag-grid">display: grid</span>
+  </div>
+
+  <p style="color: var(--muted); font-size: 14px; margin-top: 0;">
+    <b>Grid</b> = xếp phần tử thành <b>lưới 2 chiều</b> (hàng + cột). Phù hợp cho <b>layout trang, dashboard, gallery</b>.
+  </p>
+
+  <!-- Demo 6: 2 cột -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">6. Grid — 2 cột đều</h3>
+  <div class="code">
+    <span class="k">display</span>: <span class="v">grid</span>;<br>
+    <span class="k">grid-template-columns</span>: <span class="v">1fr 1fr</span>;  <span style="color:#6e7b8a">/* 2 cột bằng nhau */</span>
+  </div>
+  <div class="grid-2col">
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+  </div>
+
+  <!-- Demo 7: 3 cột -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">7. Grid — 3 cột đều</h3>
+  <div class="code">
+    <span class="k">grid-template-columns</span>: <span class="v">repeat(3, 1fr)</span>;  <span style="color:#6e7b8a">/* 3 cột đều */</span>
+  </div>
+  <div class="grid-3col">
+    <div class="item">Item 1</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+    <div class="item">Item 5</div>
+    <div class="item">Item 6</div>
+  </div>
+
+  <!-- Demo 8: cột không đều -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">8. Grid — cột không đều</h3>
+  <div class="code">
+    <span class="k">grid-template-columns</span>: <span class="v">200px 1fr 100px</span>;  <span style="color:#6e7b8a">/* 200 | linh hoạt | 100 */</span>
+  </div>
+  <div class="grid-asym">
+    <div class="item">200px</div>
+    <div class="item">1fr (linh hoạt)</div>
+    <div class="item">100px</div>
+  </div>
+
+  <!-- Demo 9: dashboard -->
+  <h3 style="font-size: 14px; color: var(--primary); margin-top: 20px;">9. Grid — dashboard (span)</h3>
+  <div class="code">
+    <span class="k">grid-template-columns</span>: <span class="v">1fr 1fr 1fr</span>;<br>
+    <span class="k">grid-column</span>: <span class="v">span 2</span>;  <span style="color:#6e7b8a">/* chiếm 2 cột */</span>
+  </div>
+  <div class="grid-dashboard">
+    <div class="item span-2">Item 1 (chiếm 2 cột)</div>
+    <div class="item">Item 2</div>
+    <div class="item">Item 3</div>
+    <div class="item">Item 4</div>
+    <div class="item">Item 5</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHẦN 3: SO SÁNH TRỰC TIẾP
+     ============================================================ -->
+<div class="panel">
+  <div class="title">
+    <h2>⚖️ So sánh trực tiếp</h2>
+  </div>
+
+  <div class="compare">
+    <!-- Flex -->
+    <div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span class="tag tag-flex">FLEX</span>
+        <span style="font-size: 13px; color: var(--muted);">1 chiều</span>
+      </div>
+      <div class="code">
+        <span class="k">display</span>: <span class="v">flex</span>;<br>
+        <span class="k">flex-wrap</span>: <span class="v">wrap</span>;<br>
+        <span class="k">gap</span>: <span class="v">12px</span>;
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <div class="item" style="flex: 1 1 100px;">1</div>
+        <div class="item" style="flex: 1 1 100px;">2</div>
+        <div class="item" style="flex: 1 1 100px;">3</div>
+        <div class="item" style="flex: 1 1 100px;">4</div>
+        <div class="item" style="flex: 1 1 100px;">5</div>
+      </div>
+      <div class="hint" style="margin-top: 12px;">
+        <b>Flex</b> — xếp theo <b>1 hàng</b>, tự xuống dòng khi hết chỗ.<br>
+        <span class="ok">✅</span> Tốt cho: thanh nav, danh sách, căn giữa.<br>
+        <span class="bad">❌</span> Không tốt cho: lưới phức tạp nhiều hàng-cột.
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span class="tag tag-grid">GRID</span>
+        <span style="font-size: 13px; color: var(--muted);">2 chiều</span>
+      </div>
+      <div class="code">
+        <span class="k">display</span>: <span class="v">grid</span>;<br>
+        <span class="k">grid-template-columns</span>: <span class="v">repeat(auto-fit, minmax(100px, 1fr))</span>;<br>
+        <span class="k">gap</span>: <span class="v">12px</span>;
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px;">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+        <div class="item">5</div>
+      </div>
+      <div class="hint" style="margin-top: 12px;">
+        <b>Grid</b> — xếp thành <b>lưới 2 chiều</b>, kiểm soát cả hàng + cột.<br>
+        <span class="ok">✅</span> Tốt cho: layout trang, dashboard, gallery.<br>
+        <span class="bad">❌</span> Overkill cho: 1 hàng đơn giản.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHẦN 4: BẢNG TÓM TẮT
+     ============================================================ -->
+<div class="panel">
+  <div class="title">
+    <h2>📋 Bảng tóm tắt</h2>
+  </div>
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>Tiêu chí</th>
+          <th>Flex</th>
+          <th>Grid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chiều</td>
+          <td>1 chiều (hàng HOẶC cột)</td>
+          <td>2 chiều (hàng VÀ cột)</td>
+        </tr>
+        <tr>
+          <td>Khai báo</td>
+          <td>display: flex;</td>
+          <td>display: grid;</td>
+        </tr>
+        <tr>
+          <td>Khoảng cách</td>
+          <td>gap: 12px;</td>
+          <td>gap: 12px;</td>
+        </tr>
+        <tr>
+          <td>Dùng khi</td>
+          <td>Nav, list, căn giữa, toolbar</td>
+          <td>Layout trang, dashboard, gallery</td>
+        </tr>
+        <tr>
+          <td>Responsive</td>
+          <td>flex-wrap: wrap;</td>
+          <td>auto-fit / auto-fill</td>
+        </tr>
+        <tr>
+          <td>Độ phức tạp</td>
+          <td>Đơn giản hơn</td>
+          <td>Mạnh hơn, phức tạp hơn</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="hint">
+    <b>💡 Quy tắc chọn nhanh:</b><br>
+    • Xếp <b>1 hàng</b> hoặc <b>1 cột</b> → dùng <b style="color:#4ea1ff;">FLEX</b>.<br>
+    • Xếp <b>lưới nhiều hàng + cột</b> → dùng <b style="color:#f5b942;">GRID</b>.<br>
+    • Không chắc → dùng <b>FLEX</b> cho đơn giản, <b>GRID</b> khi cần kiểm soát layout phức tạp.
+  </div>
+</div>
+
+</body>
+</html>
