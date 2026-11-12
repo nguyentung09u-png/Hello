@@ -1,0 +1,239 @@
+Tổng quan cách làm (ngắn)
+
+Theo cách tôi hiểu, để làm phần nội dung card đăng nhập cần 3 phần:
+
+1. HTML — đặt bên trong .content: thẻ <h1> (tiêu đề), <p> (mô tả), <input> (ô nhập tên), <button> (nút bắt đầu). Bọc input + button trong một <div class="login-form"> để dễ căn layout.
+2. CSS — style theo phong cách glassmorphism: nền rgba() trong suốt + backdrop-filter: blur() cho input, border-radius bo góc, translateZ() để đẩy nội dung nổi khỏi mặt kính, gradient cho chữ (background-clip: text) và cho nút, thêm transition để có hiệu ứng mượt khi hover/focus.
+3. JS — gắn sự kiện click cho nút và keypress (Enter) cho input, đọc giá trị, trim() để validate rỗng, lưu vào localStorage, rồi thêm class .hidden để ẩn card và hiện khung chat.
+
+Lưu ý: tôi không chắc backdrop-filter hiển thị giống nhau trên mọi trình duyệt — theo tôi biết Safari cần prefix -webkit-, và một số bản Firefox cũ có thể không hỗ trợ đầy đủ.
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{
+    margin:0; height:100vh;
+    display:grid; place-items:center;
+    background: radial-gradient(circle, #1e1b4b, #02030a 70%);
+    font-family:system-ui,sans-serif;
+  }
+
+  .stage{ perspective: 1300px; }
+
+  .card{
+    position:relative;
+    width:320px; height:460px;
+    border-radius:24px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+    transition: transform .12s linear;
+  }
+
+  /* viền gradient xoay */
+  .card::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:26px;
+    background: conic-gradient(
+      from var(--angle,0deg),
+      #7c3aed, #06b6d4, #ec4899, #f59e0b, #7c3aed);
+    filter: blur(8px);
+    z-index:-2;
+    animation: spin 8s linear infinite;
+  }
+  @property --angle{
+    syntax:'<angle>'; initial-value:0deg; inherits:false;
+  }
+  @keyframes spin{ to{ --angle:360deg; } }
+
+  /* thân kính */
+  .glass{
+    position:absolute; inset:0;
+    border-radius:24px;
+    overflow:hidden;
+    background: linear-gradient(160deg, rgba(20,22,40,.75), rgba(8,10,20,.85));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* aurora */
+  .aurora{ position:absolute; inset:-30%; filter: blur(60px); opacity:.75; }
+  .blob{ position:absolute; border-radius:50%; mix-blend-mode: screen; }
+  .b1{ width:240px;height:240px; top:5%; left:0%;
+       background:radial-gradient(circle,#7c3aed,transparent 70%);
+       animation: drift 12s ease-in-out infinite; }
+  .b2{ width:260px;height:260px; bottom:0; right:0;
+       background:radial-gradient(circle,#06b6d4,transparent 70%);
+       animation: drift 15s ease-in-out infinite reverse; }
+  .b3{ width:200px;height:200px; top:40%; left:40%;
+       background:radial-gradient(circle,#ec4899,transparent 70%);
+       animation: drift 18s ease-in-out infinite; }
+  @keyframes drift{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%    { transform:translate(40px,-40px) scale(1.2); }
+  }
+
+  /* glare */
+  .glare{
+    position:absolute; inset:0;
+    background: radial-gradient(circle at var(--gx,50%) var(--gy,50%),
+      rgba(255,255,255,.25), transparent 55%);
+    opacity:0; transition:opacity .35s ease;
+    pointer-events:none; mix-blend-mode:overlay;
+  }
+  .card:hover .glare{ opacity:1; }
+
+  /* nội dung nổi 3D */
+  .content{
+    position:relative; z-index:3;
+    height:100%; padding:32px 26px;
+    color:#fff;
+    display:flex; flex-direction:column; gap:14px;
+    transform: translateZ(40px);
+    text-align:center;
+  }
+  .content h1{
+    font-size:26px; margin:0; margin-top:16px;
+    background:linear-gradient(135deg,#fff,#67e8f9);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+  }
+  .content p{
+    font-size:13px; color:#94a3b8; line-height:1.6; margin:0 0 16px;
+  }
+
+  /* form đăng nhập */
+  .login-form{
+    display:flex; flex-direction:column; gap:14px;
+    margin-top:auto; margin-bottom:16px;
+  }
+  .login-form input{
+    padding:14px 18px; border-radius:14px;
+    border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.1);
+    color:#fff; text-align:center; outline:none;
+    font-size:14px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: all .3s ease;
+  }
+  .login-form input::placeholder{ color:rgba(255,255,255,.5); }
+  .login-form input:focus{
+    border-color:#67e8f9;
+    box-shadow:0 0 0 4px rgba(103,232,249,.15);
+    background:rgba(255,255,255,.15);
+  }
+  .login-form button{
+    padding:14px; border:none; border-radius:14px;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    color:#fff; font-weight:600; font-size:14px;
+    cursor:pointer;
+    box-shadow:0 4px 15px rgba(124,58,237,.4);
+    transition: all .3s ease;
+  }
+  .login-form button:hover{
+    transform: translateY(-2px);
+    box-shadow:0 6px 20px rgba(124,58,237,.6);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="glass">
+        <div class="aurora">
+          <div class="blob b1"></div>
+          <div class="blob b2"></div>
+          <div class="blob b3"></div>
+        </div>
+        <div class="glare" id="glare"></div>
+
+        <div class="content">
+          <h1>MiniChat</h1>
+          <p>Nhập tên của bạn để bắt đầu trò chuyện</p>
+
+          <div class="login-form">
+            <input type="text" id="username-input"
+                   placeholder="Tên của bạn..."
+                   maxlength="20" autocomplete="off">
+            <button id="join-btn">Bắt đầu Chat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const card = document.getElementById('card');
+  const glare = document.getElementById('glare');
+  const input = document.getElementById('username-input');
+  const btn = document.getElementById('join-btn');
+
+  // tilt theo chuột
+  let rx = 0, ry = 0, trx = 0, try_ = 0;
+  let lastMove = 0, idleStart = 0;
+
+  window.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left+r.width/2))  / (r.width/2)));
+    const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top+r.height/2)) / (r.height/2)));
+    try_ = nx * 15;
+    trx  = -ny * 15;
+    glare.style.setProperty('--gx', ((e.clientX-r.left)/r.width)*100 + '%');
+    glare.style.setProperty('--gy', ((e.clientY-r.top)/r.height)*100 + '%');
+    lastMove = performance.now();
+    idleStart = 0;
+  }, { passive:true });
+
+  function loop(now){
+    if (now - lastMove > 1000){
+      if (!idleStart) idleStart = now;
+      const t = (now - idleStart) / 1000;
+      try_ =  15 * Math.cos(t * 0.9);
+      trx  = -15 * Math.sin(t * 0.9);
+    }
+    ry += (try_ - ry) * 0.08;
+    rx += (trx  - rx) * 0.08;
+    card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+    card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // xử lý đăng nhập
+  function handleLogin(){
+    const name = input.value.trim();
+    if (!name){
+      input.style.borderColor = '#EF4444';
+      return;
+    }
+    localStorage.setItem('minichat_userName', name);
+    document.querySelector('.stage').classList.add('hidden');  // ẩn card
+    // TODO: hiện khung chat
+  }
+
+  btn.addEventListener('click', handleLogin);
+  input.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+  input.addEventListener('input', () => { input.style.borderColor = 'rgba(255,255,255,.2)'; });
+</script>
+</body>
+</html>
+```
+
+Lưu ý: demo trên chỉ minh họa phần card + đăng nhập. Phần "hiện khung chat" tôi để TODO — cần thêm CSS/HTML cho khung chat và JS kết nối (ví dụ Firebase) nếu muốn chat thật.
+
+---
+
+🎯 Tóm 1 câu: Đặt <h1>/<p>/<input>/<button> trong .content, style input/nút bằng rgba + backdrop-filter + gradient + translateZ, rồi JS gắn sự kiện click/Enter để validate rỗng, lưu localStorage, và ẩn card — code trên là bản demo tối thiểu.

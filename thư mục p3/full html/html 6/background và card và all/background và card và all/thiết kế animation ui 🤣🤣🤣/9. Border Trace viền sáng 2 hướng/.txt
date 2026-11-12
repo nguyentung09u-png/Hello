@@ -1,0 +1,106 @@
+Border Trace — Cách làm
+
+🧩 Nguyên lý chung
+
+Dùng 2 lớp giả (::before / ::after) làm 2 vệt sáng ở cạnh trên và cạnh dưới. Cho chúng chạy translateX ngược chiều nhau để tạo cảm giác viền sáng lần theo.
+
+---
+
+🪜 4 bước làm
+
+Bước Việc Công cụ
+1 Card làm mốc + cắt tràn position: relative + overflow: hidden
+2 Tạo 2 vệt sáng ::before / ::after + linear-gradient
+3 Neo 2 cạnh trên/dưới top: 0 / bottom: 0
+4 Chạy ngược chiều @keyframes + translateX
+
+---
+
+💻 Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Border Trace</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #05070f;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* ===== CARD ===== */
+  .trace-card {
+    position: relative;      /* mốc cho 2 lớp phủ */
+    padding: 2.5rem 3rem;
+    border-radius: 14px;
+    background: #0a0e1a;
+    color: #c084fc;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    overflow: hidden;        /* cắt vệt gọn trong card */
+  }
+
+  /* ===== 2 VỆT SÁNG ===== */
+  .trace-card::before,
+  .trace-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #22d3ee 50%,
+      transparent
+    );
+    box-shadow: 0 0 12px #22d3ee;
+  }
+
+  /* Vệt trên — chạy trái → phải */
+  .trace-card::before {
+    top: 0;
+    animation: traceTop 2.5s linear infinite;
+  }
+
+  /* Vệt dưới — chạy phải → trái */
+  .trace-card::after {
+    bottom: 0;
+    animation: traceBottom 2.5s linear infinite;
+  }
+
+  @keyframes traceTop {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes traceBottom {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="trace-card">Border Trace</div>
+
+</body>
+</html>
+```
+
+---
+
+🎯 Tóm 1 câu
+
+Dựng card position: relative + overflow: hidden, rồi dùng ::before / ::after làm 2 vệt sáng neo ở top: 0 và bottom: 0, cho chúng translateX ngược chiều nhau trong @keyframes để tạo cảm giác viền sáng lần theo.
+
+---
+
+Lưu ý: overflow: hidden cần thiết để vệt không tràn khỏi card. Cách này chỉ làm được 2 cạnh với ::before / ::after — muốn cả 4 cạnh thì cần thêm 2 phần tử con.

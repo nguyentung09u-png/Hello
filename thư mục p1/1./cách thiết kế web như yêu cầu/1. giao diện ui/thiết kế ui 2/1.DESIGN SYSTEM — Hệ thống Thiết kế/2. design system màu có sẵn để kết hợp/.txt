@@ -1,0 +1,85 @@
+🎨 MÀU KẾT HỢP CỦA TỪNG PALETTE
+
+Mỗi palette là sự kết hợp của 3 màu chủ đạo (Primary + Secondary + Accent) tạo nên cá tính riêng:
+
+---
+
+🌈 NEON
+
+```
+#00D5FF  +  #8B5CF6  +  #F472B6
+ (Cyan)      (Purple)    (Pink)
+```
+
+→ Xanh Cyan + Tím Violet + Hồng Neon — Dark Tech 2D cao cấp, năng lượng công nghệ
+
+---
+
+🌲 FOREST
+
+```
+#22C55E  +  #10B981  +  #A3E635
+ (Green)     (Emerald)   (Lime)
+```
+
+→ Xanh lá + Xanh ngọc + Xanh chanh — Tự nhiên, tươi mát, cân bằng
+
+---
+
+🌊 OCEAN
+
+```
+#0EA5E9  +  #06B6D4  +  #2DD4BF
+ (Sky Blue)  (Cyan)      (Teal)
+```
+
+→ Xanh biển + Xanh lơ + Xanh ngọc lam — Mát lạnh, tin cậy, chuyên nghiệp
+
+---
+
+🤖 CYBERPUNK
+
+```
+#FF00FF  +  #00FFFF  +  #FFFF00
+ (Magenta)   (Cyan)      (Yellow)
+```
+
+→ Hồng cánh sen + Xanh Cyan + Vàng chói — Phá cách, nổi loạn, tương lai
+
+---
+
+🌌 AURORA
+
+```
+#A78BFA  +  #F472B6  +  #34D399
+ (Lavender)  (Pink)      (Mint)
+```
+
+→ Tím oải hương + Hồng + Xanh bạc hà — Huyền ảo, cực quang, mộng mơ
+
+---
+
+🌅 SUNSET
+
+```
+#F97316  +  #EF4444  +  #FBBF24
+ (Orange)    (Red)       (Amber)
+```
+
+→ Cam hoàng hôn + Đỏ + Vàng hổ phách — Ấm áp, rực rỡ, năng lượng
+
+---
+
+📊 TÓM TẮT NHANH
+
+Palette Primary Secondary Accent Cảm giác
+Neon #00D5FF #8B5CF6 #F472B6 Cyber, công nghệ
+Forest #22C55E #10B981 #A3E635 Thiên nhiên, tươi mát
+Ocean #0EA5E9 #06B6D4 #2DD4BF Biển, tin cậy
+Cyberpunk #FF00FF #00FFFF #FFFF00 Nổi loạn, tương lai
+Aurora #A78BFA #F472B6 #34D399 Mộng mơ, huyền ảo
+Sunset #F97316 #EF4444 #FBBF24 Ấm áp, rực rỡ
+
+---
+
+💡 Mẹo phối màu: Mỗi bộ 3 trên được chọn theo quy tắc tam giác màu hoặc tương phản bổ trợ trên vòng tròn màu — đảm bảo hài hòa nhưng vẫn nổi bật. Khi dùng, áp dụng tỉ lệ 60-30-10: 60% màu nền + 30% Primary + 10% Secondary/Accent.

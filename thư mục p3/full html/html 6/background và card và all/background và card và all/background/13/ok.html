@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c0804">
+<title>Dark Tech Background — Bronze Circuit Tapestry</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0c0804;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 70% 20%, #1e1408 0%, #120c05 45%, #070402 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Circuit tapestry (SVG data-uri, painted once) ---------- */
+  .tapestry{
+    position:absolute;
+    inset:-8%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23d97706' stroke-opacity='0.22' stroke-width='1'%3E%3Cpath d='M20 20 H80 V60 H120 V20 H180'/%3E%3Cpath d='M20 100 H60 V140 H100 V100 H140 V140 H180'/%3E%3Cpath d='M20 180 H70 V150 H130 V180 H180'/%3E%3Cpath d='M100 60 V80'/%3E%3Cpath d='M60 100 V80'/%3E%3Cpath d='M140 100 V120'/%3E%3C/g%3E%3Cg fill='%23fbbf24' fill-opacity='0.55'%3E%3Ccircle cx='20' cy='20' r='2.2'/%3E%3Ccircle cx='180' cy='20' r='2.2'/%3E%3Ccircle cx='80' cy='60' r='1.8'/%3E%3Ccircle cx='120' cy='20' r='1.8'/%3E%3Ccircle cx='20' cy='100' r='2.2'/%3E%3Ccircle cx='180' cy='100' r='2.2'/%3E%3Ccircle cx='60' cy='140' r='1.8'/%3E%3Ccircle cx='140' cy='140' r='1.8'/%3E%3Ccircle cx='20' cy='180' r='2.2'/%3E%3Ccircle cx='180' cy='180' r='2.2'/%3E%3Ccircle cx='100' cy='100' r='2'/%3E%3Ccircle cx='100' cy='180' r='1.8'/%3E%3C/g%3E%3Cg stroke='%23f59e0b' stroke-opacity='0.10' stroke-width='0.8'%3E%3Cpath d='M0 40 H200'/%3E%3Cpath d='M0 160 H200'/%3E%3Cpath d='M40 0 V200'/%3E%3Cpath d='M160 0 V200'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:200px 200px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+    animation:tapestryPan 70s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes tapestryPan{
+    from{background-position:0 0;}
+    to{background-position:200px 200px;}
+  }
+
+  /* ---------- Rotating accent ring (transform-only) ---------- */
+  .ring{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:90vmin;
+    height:90vmin;
+    margin-left:-45vmin;
+    margin-top:-45vmin;
+    border-radius:50%;
+    border:1px dashed rgba(217,119,6,.25);
+    pointer-events:none;
+    animation:ringSpin 80s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .ring::before{
+    content:"";
+    position:absolute;
+    inset:6vmin;
+    border-radius:50%;
+    border:1px solid rgba(251,191,36,.14);
+  }
+  .ring::after{
+    content:"";
+    position:absolute;
+    top:-3px;
+    left:50%;
+    width:6px;
+    height:6px;
+    margin-left:-3px;
+    border-radius:50%;
+    background:rgba(251,191,36,.9);
+    box-shadow:0 0 12px rgba(251,191,36,.8), 0 0 24px rgba(217,119,6,.5);
+  }
+  @keyframes ringSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Counter-rotating second ring ---------- */
+  .ring-2{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:60vmin;
+    height:60vmin;
+    margin-left:-30vmin;
+    margin-top:-30vmin;
+    border-radius:50%;
+    border:1px solid rgba(245,158,11,.16);
+    pointer-events:none;
+    animation:ringSpin 50s linear infinite reverse;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .ring-2::after{
+    content:"";
+    position:absolute;
+    bottom:-3px;
+    left:50%;
+    width:5px;
+    height:5px;
+    margin-left:-2.5px;
+    border-radius:50%;
+    background:rgba(245,158,11,.85);
+    box-shadow:0 0 10px rgba(245,158,11,.7);
+  }
+
+  /* ---------- Warm amber glow (breathing) ---------- */
+  .amber{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:80vmin;
+    height:80vmin;
+    margin-left:-40vmin;
+    margin-top:-40vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(245,158,11,.14) 0%,
+      rgba(180,83,9,.07) 42%,
+      rgba(180,83,9,0) 72%);
+    animation:amberBreath 11s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes amberBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.75;}
+    50%{transform:translate3d(0,0,0) scale(1.12);opacity:1;}
+  }
+
+  /* ---------- Corner brass brackets ---------- */
+  .brackets{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .brackets::before,
+  .brackets::after{
+    content:"";
+    position:absolute;
+    width:14vmin;
+    height:14vmin;
+    border:1px solid rgba(217,119,6,.28);
+  }
+  .brackets::before{top:5vmin;left:5vmin;border-right:none;border-bottom:none;}
+  .brackets::after{bottom:5vmin;right:5vmin;border-left:none;border-top:none;}
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tapestry,.ring,.ring-2,.amber{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="tapestry"></div>
+  <div class="amber"></div>
+  <div class="ring"></div>
+  <div class="ring-2"></div>
+  <div class="brackets"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c0804">
+<title>Dark Tech Background — Bronze Circuit Tapestry</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0c0804;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 70% 20%, #1e1408 0%, #120c05 45%, #070402 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Circuit tapestry (SVG data-uri, painted once) ---------- */
+  .tapestry{
+    position:absolute;
+    inset:-8%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23d97706' stroke-opacity='0.22' stroke-width='1'%3E%3Cpath d='M20 20 H80 V60 H120 V20 H180'/%3E%3Cpath d='M20 100 H60 V140 H100 V100 H140 V140 H180'/%3E%3Cpath d='M20 180 H70 V150 H130 V180 H180'/%3E%3Cpath d='M100 60 V80'/%3E%3Cpath d='M60 100 V80'/%3E%3Cpath d='M140 100 V120'/%3E%3C/g%3E%3Cg fill='%23fbbf24' fill-opacity='0.55'%3E%3Ccircle cx='20' cy='20' r='2.2'/%3E%3Ccircle cx='180' cy='20' r='2.2'/%3E%3Ccircle cx='80' cy='60' r='1.8'/%3E%3Ccircle cx='120' cy='20' r='1.8'/%3E%3Ccircle cx='20' cy='100' r='2.2'/%3E%3Ccircle cx='180' cy='100' r='2.2'/%3E%3Ccircle cx='60' cy='140' r='1.8'/%3E%3Ccircle cx='140' cy='140' r='1.8'/%3E%3Ccircle cx='20' cy='180' r='2.2'/%3E%3Ccircle cx='180' cy='180' r='2.2'/%3E%3Ccircle cx='100' cy='100' r='2'/%3E%3Ccircle cx='100' cy='180' r='1.8'/%3E%3C/g%3E%3Cg stroke='%23f59e0b' stroke-opacity='0.10' stroke-width='0.8'%3E%3Cpath d='M0 40 H200'/%3E%3Cpath d='M0 160 H200'/%3E%3Cpath d='M40 0 V200'/%3E%3Cpath d='M160 0 V200'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:200px 200px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+    animation:tapestryPan 70s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes tapestryPan{
+    from{background-position:0 0;}
+    to{background-position:200px 200px;}
+  }
+
+  /* ---------- Rotating accent ring (transform-only) ---------- */
+  .ring{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:90vmin;
+    height:90vmin;
+    margin-left:-45vmin;
+    margin-top:-45vmin;
+    border-radius:50%;
+    border:1px dashed rgba(217,119,6,.25);
+    pointer-events:none;
+    animation:ringSpin 80s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .ring::before{
+    content:"";
+    position:absolute;
+    inset:6vmin;
+    border-radius:50%;
+    border:1px solid rgba(251,191,36,.14);
+  }
+  .ring::after{
+    content:"";
+    position:absolute;
+    top:-3px;
+    left:50%;
+    width:6px;
+    height:6px;
+    margin-left:-3px;
+    border-radius:50%;
+    background:rgba(251,191,36,.9);
+    box-shadow:0 0 12px rgba(251,191,36,.8), 0 0 24px rgba(217,119,6,.5);
+  }
+  @keyframes ringSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Counter-rotating second ring ---------- */
+  .ring-2{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:60vmin;
+    height:60vmin;
+    margin-left:-30vmin;
+    margin-top:-30vmin;
+    border-radius:50%;
+    border:1px solid rgba(245,158,11,.16);
+    pointer-events:none;
+    animation:ringSpin 50s linear infinite reverse;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .ring-2::after{
+    content:"";
+    position:absolute;
+    bottom:-3px;
+    left:50%;
+    width:5px;
+    height:5px;
+    margin-left:-2.5px;
+    border-radius:50%;
+    background:rgba(245,158,11,.85);
+    box-shadow:0 0 10px rgba(245,158,11,.7);
+  }
+
+  /* ---------- Warm amber glow (breathing) ---------- */
+  .amber{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:80vmin;
+    height:80vmin;
+    margin-left:-40vmin;
+    margin-top:-40vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(245,158,11,.14) 0%,
+      rgba(180,83,9,.07) 42%,
+      rgba(180,83,9,0) 72%);
+    animation:amberBreath 11s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes amberBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.75;}
+    50%{transform:translate3d(0,0,0) scale(1.12);opacity:1;}
+  }
+
+  /* ---------- Corner brass brackets ---------- */
+  .brackets{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .brackets::before,
+  .brackets::after{
+    content:"";
+    position:absolute;
+    width:14vmin;
+    height:14vmin;
+    border:1px solid rgba(217,119,6,.28);
+  }
+  .brackets::before{top:5vmin;left:5vmin;border-right:none;border-bottom:none;}
+  .brackets::after{bottom:5vmin;right:5vmin;border-left:none;border-top:none;}
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tapestry,.ring,.ring-2,.amber{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="tapestry"></div>
+  <div class="amber"></div>
+  <div class="ring"></div>
+  <div class="ring-2"></div>
+  <div class="brackets"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+</body>
+</html>

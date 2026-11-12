@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Bottom Navigation - Bo góc</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #121212;
+      color: #fff;
+    }
+
+    /* ===== Vùng nội dung ===== */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 20px calc(60px + env(safe-area-inset-bottom) + 24px);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    section {
+      display: none;
+      animation: fadeUp 0.25s ease;
+    }
+    section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    section h2 { font-size: 22px; margin-bottom: 10px; }
+    section p  { color: #a1a1aa; line-height: 1.6; margin-bottom: 8px; }
+
+    .placeholder {
+      margin-top: 20px;
+      height: 700px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #1e293b, #121212);
+      border: 1px dashed #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    /* ===== Thanh điều hướng ===== */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: calc(60px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+
+      background: #1d4ed8;
+
+      /* Bo tròn 2 góc trên */
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+
+      box-shadow: 0 -4px 20px rgba(29, 78, 216, 0.35);
+      z-index: 10;
+    }
+
+    nav a {
+      flex: 1;
+      height: 100%;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: color 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    nav a .icon {
+      font-size: 22px;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+
+    nav a.active {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    nav a.active .icon {
+      transform: translateY(-2px) scale(1.15);
+    }
+
+    nav a:active { transform: scale(0.92); }
+  </style>
+</head>
+<body>
+
+  <main>
+    <section id="s1" class="active">
+      <h2>🏠 Trang chủ</h2>
+      <p>Chào mừng bạn đến với demo Bottom Navigation Bar bo góc.</p>
+      <p>Thanh tab cố định ở đáy, có bo tròn 2 góc trên và tự chừa vùng safe-area trên iPhone.</p>
+      <div class="placeholder">Vùng nội dung dài — thử cuộn</div>
+    </section>
+
+    <section id="s2">
+      <h2>🔍 Tìm kiếm</h2>
+      <p>Đây là màn hình tìm kiếm.</p>
+      <div class="placeholder">Kết quả tìm kiếm...</div>
+    </section>
+
+    <section id="s3">
+      <h2>🔔 Thông báo</h2>
+      <p>Đây là màn hình thông báo.</p>
+      <div class="placeholder">Danh sách thông báo...</div>
+    </section>
+
+    <section id="s4">
+      <h2>👤 Tài khoản</h2>
+      <p>Đây là màn hình tài khoản.</p>
+      <div class="placeholder">Thông tin người dùng...</div>
+    </section>
+  </main>
+
+  <nav>
+    <a href="#" class="active" data-target="s1">
+      <span class="icon">🏠</span>
+      <span>Trang chủ</span>
+    </a>
+    <a href="#" data-target="s2">
+      <span class="icon">🔍</span>
+      <span>Tìm kiếm</span>
+    </a>
+    <a href="#" data-target="s3">
+      <span class="icon">🔔</span>
+      <span>Thông báo</span>
+    </a>
+    <a href="#" data-target="s4">
+      <span class="icon">👤</span>
+      <span>Tài khoản</span>
+    </a>
+  </nav>
+
+  <script>
+    const links = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('section');
+    const main = document.querySelector('main');
+
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Gỡ active khỏi tất cả
+        links.forEach(l => l.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+
+        // Gắn active cho tab & màn hình mới
+        link.classList.add('active');
+        document.getElementById(link.dataset.target).classList.add('active');
+
+        // Cuộn về đầu trang
+        main.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body>
+</html>

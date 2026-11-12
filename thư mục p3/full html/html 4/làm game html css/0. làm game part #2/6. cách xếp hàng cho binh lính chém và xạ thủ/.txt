@@ -1,0 +1,136 @@
+Đội hình vòng tròn (kiếm sĩ) + đội hình chữ V (xạ thủ).
+
+----
+
+Tổng quan cách làm
+
+```
+BƯỚC 1 — KHAI BÁO   mảng rỗng + hằng số (COUNT, RADIUS hoặc list toạ độ)
+BƯỚC 2 — SINH       vòng lặp for hoặc copy mảng literal
+BƯỚC 3 — LƯU OFFSET mỗi phần tử có { ox, oy, ... state khác }
+BƯỚC 4 — DÙNG       vị trí world = heroX + ox, heroY + oy
+```
+
+Nguyên tắc chung: ox, oy là toạ độ tương đối. Vua di chuyển → heroX, heroY thay đổi → cả đội hình di chuyển theo vì luôn cộng thêm offset.
+
+---
+
+Code chung chung
+
+1. Đội hình vòng tròn — dùng công thức
+
+```js
+const N = 10;                 // số lính
+const R = 145;                // bán kính vòng tròn
+const arr = [];
+
+for (let i = 0; i < N; i++){
+  const ang = (i / N) * TAU - Math.PI / 2;   // rải đều 360°, bắt đầu ở đỉnh
+  arr.push({
+    ox: Math.cos(ang) * R,
+    oy: Math.sin(ang) * R,
+    // state khác
+    cd: 0, seed: Math.random() * 10
+  });
+}
+```
+
+Công thức cốt lõi:
+
+```
+ang  = i / N * TAU - π/2       (i = 0..N-1)
+ox   = cos(ang) * R
+oy   = sin(ang) * R
+```
+
+· i / N → 0, 0.1, 0.2, ... 0.9 (10 phần bằng nhau).
+· * TAU → nhân 2π để mỗi bước = 36°.
+· - π/2 → xoay sao cho i = 0 ở đỉnh (12h) thay vì 3h.
+· cos * R, sin * R → toạ độ trên đường tròn bán kính R.
+
+---
+
+2. Đội hình chữ V — ghi cứng toạ độ
+
+```js
+const arr = [
+  { ox: -55, oy:  25 },   // trái gần
+  { ox:  55, oy:  25 },   // phải gần
+  { ox: -95, oy: -10 },   // trái xa
+  { ox:  95, oy: -10 },   // phải xa
+  { ox:   0, oy:  55 },   // giữa
+];
+
+// Thêm state sau (nếu cần)
+for (const a of arr){
+  a.cd = 0;
+  a.seed = Math.random() * 10;
+}
+```
+
+Không có công thức — mỗi vị trí đặt tay dựa trên hình dung.
+
+Quy ước toạ độ:
+
+· ox < 0 → bên trái, ox > 0 → bên phải.
+· oy < 0 → lên trên (canvas Y hướng xuống), oy > 0 → xuống dưới.
+
+---
+
+3. Dùng trong update — tính vị trí world
+
+```js
+for (const s of arr){
+  const ax = heroX + s.ox;    // ← toạ độ world
+  const ay = heroY + s.oy;
+
+  // Ví dụ: tìm mục tiêu gần, bắn, chém...
+  const tgt = nearestZombie(ax, ay);
+  // ...
+}
+```
+
+---
+
+4. Dùng trong render — vẽ tại vị trí world
+
+```js
+// Đưa vào danh sách entity để sort theo Y (z-order đúng)
+const entities = [];
+
+for (const s of arr){
+  entities.push({
+    y: heroY + s.oy,
+    fn: () => drawSoldier(ctx, heroX + s.ox, heroY + s.oy, s.scale, t, s.seed, s.animT)
+  });
+}
+
+// Sắp xếp để lính ở trên (y nhỏ) vẽ trước
+entities.sort((a, b) => a.y - b.y);
+for (const e of entities) e.fn();
+```
+
+---
+
+5. So sánh 2 cách
+
+ Vòng tròn Chữ V
+Cách sinh Vòng lặp for + cos/sin Mảng literal [{}, {}]
+Ưu điểm Thêm/bớt số lính dễ (đổi N) Kiểm soát từng vị trí
+Nhược điểm Khó đặt vị trí cụ thể Thêm lính phải ghi tay
+
+---
+
+Điều tôi không chắc
+
+· N = 10, R = 145 — tôi chọn theo trực giác; không có dữ liệu tối ưu.
+· - Math.PI / 2 — xoay để lính đầu ở đỉnh; nếu bỏ thì lính đầu ở 3h (bên phải).
+· 5 cặp ox, oy của chữ V — tôi chọn tay; có thể dùng con số khác tuỳ mật độ mong muốn.
+· Có nên gọi đó là "chữ V" — 5 điểm có thể nhìn thành chữ V, mũi tên, hoặc ngôi sao — tôi không chắc cách gọi nào chính xác.
+· Có cần cập nhật ox, oy theo level (mở rộng đội hình khi lên cấp) — tôi không chắc bạn muốn vậy.
+· heroX + s.ox không xét cam.zoom — vì ox là toạ độ world, không phải screen; tôi tin đúng nhưng chưa test với zoom xa.
+· Chưa test runtime — code chạy theo logic, có thể còn lỗi nhỏ.
+
+---
+
+🎯 Tóm 1 câu: Đội hình vòng tròn làm bằng vòng lặp for + công thức ox = Math.cos(i/N * TAU - π/2) * R, oy = Math.sin(...) * R, còn đội hình chữ V làm bằng mảng ghi cứng { ox, oy } cho từng lính — cả hai đều lưu offset trong { ox, oy } và khi vẽ/tính toán thì cộng vào vị trí vua heroX + s.ox, heroY + s.oy nên cả đội hình di chuyển theo vua.

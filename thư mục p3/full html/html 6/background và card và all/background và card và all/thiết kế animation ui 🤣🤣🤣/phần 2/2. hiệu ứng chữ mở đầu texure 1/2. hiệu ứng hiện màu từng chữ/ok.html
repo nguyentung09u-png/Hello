@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .text { display: flex; gap: 0.05em; font-size: 6rem; font-weight: 900; }
+
+  .text span {
+    position: relative;
+    color: transparent;
+    -webkit-text-stroke: 2px #a855f7;
+  }
+
+  /* Lớp màu gradient phủ lên, ban đầu bị che */
+  .text span::before {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #ff5c8a, #38bdf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    clip-path: inset(100% 0 0 0);       /* che từ dưới lên */
+    transition: clip-path 0.5s ease;
+  }
+
+  /* Khi có class active → mở màu ra */
+  .text span.active::before {
+    clip-path: inset(0 0 0 0);
+  }
+</style>
+</head>
+<body>
+
+  <div class="text" id="text">
+    <span data-char="H">H</span>
+    <span data-char="E">E</span>
+    <span data-char="L">L</span>
+    <span data-char="L">L</span>
+    <span data-char="O">O</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.text span');
+  let i = 0;
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[i].classList.add('active');
+    i = (i + 1) % spans.length;
+  }, 800);
+</script>
+</body>
+</html>

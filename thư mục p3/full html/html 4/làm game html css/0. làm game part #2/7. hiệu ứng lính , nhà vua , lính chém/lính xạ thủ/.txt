@@ -1,0 +1,173 @@
+Tổng quan cách làm
+
+```
+BƯỚC 1 — STATE       mỗi xạ thủ có { seed, animT } để lệch pha + điều khiển animation
+BƯỚC 2 — animT       chạy 0.5 → 0, tính drawAmt + cờ released
+BƯỚC 3 — 3 TRANG PHỤC  glow mũ, dây đeo, mũi tên — chỉ đọc seed + time
+BƯỚC 4 — 2 HÀNH ĐỘNG   dây cung co giãn theo drawAmt, flash khi released
+BƯỚC 5 — ÁP DỤNG     'lighter' cho 4/5 hiệu ứng sáng, source-over cho dây cung
+```
+
+Nguyên tắc chung: Không tạo object mới. Chỉ dùng Math.sin(time × freq + seed) và biến animT có sẵn để tính alpha. Vẽ đè lên hình cũ.
+
+---
+
+Code chung chung
+
+1. State
+
+```js
+const archers = [
+  { ox:-55, oy:25, cd:0.4, seed:0.0, animT:0, fired:false, tx:0, ty:0 },
+  { ox: 55, oy:25, cd:0.9, seed:1.7, animT:0, fired:false, tx:0, ty:0 },
+  // ...
+];
+
+const ANIM_DUR = 0.5;      // tổng thời gian animation
+const ANIM_FIRE_T = 0.35;  // mốc bắn (rút cung xong)
+```
+
+2. Hàm vẽ — tính drawAmt + released
+
+```js
+function drawArcher(g, x, y, s, t, seed, animT){
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+  g.translate(0, Math.sin(t * 3 + seed));   // bob nhấp nhô
+
+  // Tính drawAmt + released từ animT
+  let drawAmt = 0, released = false;
+  if (animT > 0){
+    const elapsed = ANIM_DUR - animT;
+    if (elapsed < ANIM_FIRE_T){
+      drawAmt = elapsed / ANIM_FIRE_T;                                   // 0 → 1
+    } else {
+      drawAmt = 1 - (elapsed - ANIM_FIRE_T) / (ANIM_DUR - ANIM_FIRE_T);  // 1 → 0
+      released = true;
+    }
+  }
+
+  // ===== VẼ THÂN THỂ BÌNH THƯỜNG =====
+  // ... (bóng, chân, áo, đầu, mũ, bao tên...) ...
+
+  // ===== VẼ 5 HIỆU ỨNG =====
+  drawArcherEffects(g, t, seed, drawAmt, released, animT);
+
+  g.restore();
+}
+```
+
+3. Hàm vẽ 5 hiệu ứng
+
+```js
+function drawArcherEffects(g, t, seed, drawAmt, released, animT){
+  const bowX = 14;
+  const pullX = bowX - drawAmt * 12;
+
+  // ===== 1. MŨ TRÙM GLOW XANH =====
+  g.save();
+  g.globalCompositeOperation = 'lighter';
+  const hoodGlow = 0.35 + Math.sin(t * 2.2 + seed) * 0.25;
+  const hg = g.createRadialGradient(0, -52, 0, 0, -52, 16);
+  hg.addColorStop(0, `rgba(150,255,200,${hoodGlow})`);
+  hg.addColorStop(1, 'rgba(60,200,120,0)');
+  g.fillStyle = hg;
+  g.beginPath(); g.arc(0, -52, 16, 0, TAU); g.fill();
+  g.restore();
+
+  // ===== 2. DÂY ĐEO NHẤP NHÁY =====
+  const strapGlint = Math.sin(t * 5 + seed) > 0.8 ? 1 : 0.5;
+  g.strokeStyle = `rgba(255,240,180,${strapGlint})`;
+  g.lineWidth = 1;
+  g.beginPath(); g.moveTo(-10, -37); g.lineTo(10, -20); g.stroke();
+
+  // ===== 3. MŨI TÊN GLOW KHI RÚT =====
+  if (drawAmt > 0.08 && !released){
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    const arrGlow = drawAmt * 0.9;
+    const ag = g.createRadialGradient(pullX + 16, -26, 0, pullX + 16, -26, 18);
+    ag.addColorStop(0, `rgba(200,240,255,${arrGlow})`);
+    ag.addColorStop(1, 'rgba(100,180,255,0)');
+    g.fillStyle = ag;
+    g.beginPath(); g.arc(pullX + 16, -26, 18, 0, TAU); g.fill();
+    g.restore();
+  }
+
+  // ===== 4. DÂY CUNG CO GIÃN =====
+  g.strokeStyle = 'rgba(240,240,220,.95)';
+  g.lineWidth = 1.1;
+  g.beginPath();
+  g.moveTo(bowX, -46);        // đầu cung trên
+  g.lineTo(pullX, -26);       // điểm kéo (chữ V)
+  g.lineTo(bowX, -6);         // đầu cung dưới
+  g.stroke();
+
+  // ===== 5. FLASH KHI BẮN =====
+  if (released && animT > ANIM_DUR - 0.15){
+    const flashA = animT / 0.15;
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    const fx = bowX + 4, fy = -26;
+    const gr = g.createRadialGradient(fx, fy, 0, fx, fy, 14);
+    gr.addColorStop(0, `rgba(255,240,180,${flashA * 0.9})`);
+    gr.addColorStop(1, 'rgba(255,200,80,0)');
+    g.fillStyle = gr;
+    g.beginPath(); g.arc(fx, fy, 14, 0, TAU); g.fill();
+
+    g.strokeStyle = `rgba(255,240,200,${flashA * 0.7})`;
+    g.lineWidth = 1.5;
+    for (let i = 0; i < 3; i++){
+      const a = -0.4 + i * 0.4;
+      g.beginPath();
+      g.moveTo(fx, fy);
+      g.lineTo(fx + Math.cos(a) * 16, fy + Math.sin(a) * 16);
+      g.stroke();
+    }
+    g.restore();
+  }
+}
+```
+
+4. Update — kích hoạt animation
+
+```js
+for (const s of archers){
+  s.cd -= dt;
+  if (s.animT > 0) s.animT = Math.max(0, s.animT - dt);
+
+  // Bắt đầu animation khi hết cd + có mục tiêu
+  if (s.cd <= 0 && s.animT <= 0){
+    const tgt = nearestZombie(heroX + s.ox, heroY + s.oy - 20);
+    if (tgt && distance(tgt) < 380){
+      s.animT = ANIM_DUR;
+      s.fired = false;
+      s.cd = rand(0.95, 1.35);
+      s.tx = tgt.x; s.ty = tgt.y - 12;
+    }
+  }
+
+  // Bắn tại mốc animT = 0.15
+  if (s.animT > 0 && !s.fired && s.animT <= ANIM_DUR - ANIM_FIRE_T){
+    s.fired = true;
+    fireArrow(heroX + s.ox + 14, heroY + s.oy - 46, s.tx, s.ty, ...);
+  }
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· Con số cụ thể (sin(t×2.2), R=16, alpha 0.9, 3 tia, góc -0.4/0/0.4) — tôi chọn theo trực giác; không có dữ liệu tối ưu.
+· Màu xanh mint rgba(150,255,200) — tôi chọn để hợp áo xanh; có thể chưa hợp tông.
+· globalCompositeOperation = 'lighter' cho 4/5 hiệu ứng — có thể tăng chi phí GPU khi có 5 xạ thủ × 5 hiệu ứng; tôi không đo fps.
+· Ngưỡng drawAmt > 0.08 cho mũi tên glow — tôi chọn; có thể 0.05 hoặc 0.15.
+· Chưa test runtime — code chạy theo lý thuyết, có thể còn lỗi nhỏ.
+· Seed khác nhau cho mỗi xạ thủ — tôi chọn để lệch pha; tôi không chắc giá trị seed cụ thể là tối ưu.
+· ANIM_DUR = 0.5s và ANIM_FIRE_T = 0.35s — tôi chọn; có thể nhanh/chậm hơn.
+
+---
+
+🎯 Tóm 1 câu: Làm 5 hiệu ứng xạ thủ = tính drawAmt từ animT (0→1 rút, 1→0 bắn) + hàm drawArcherEffects() vẽ 5 cái bằng createRadialGradient + globalCompositeOperation = 'lighter' (mũ trùm glow sin(t×2.2+seed) tại (0,-52) R=16, dây đeo nhấp nháy sin(t×5+seed)>0.8, mũi tên glow khi drawAmt>0.08 tại (pullX+16,-26), dây cung co giãn pullX = bowX - drawAmt×12, flash + 3 tia vàng flashA×0.9 trong 0.15s cuối) — không tạo state mới, mỗi xạ thủ có seed riêng để glow lệch pha.

@@ -1,0 +1,178 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. Khung panel — padding: 3px + border-radius: 16px + overflow: hidden + animation: glow 4s.
+2. Dải sáng xoay — .panel::before với conic-gradient + animation: spin 4s.
+3. Lớp che ruột — .panel::after với inset: 3px (= padding) + nền cùng màu panel.
+4. Nội dung panel — đặt z-index: 1 để nổi trên lớp che.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· padding: 3px tạo khe cho viền, inset: 3px của ::after khớp để chừa viền đều.
+· inset: -50% của ::before phóng to gradient → không hở góc khi xoay.
+· 3 lớp z-index: ::before (-1) → ::after (0) → nội dung (1).
+· @keyframes glow đổi box-shadow qua 3 mốc màu.
+· overflow: hidden cắt ::before theo bo góc.
+
+Tôi không chắc:
+
+· Bạn muốn 3 màu cụ thể nào — code dưới dùng cyan/tím/hồng theo mẫu.
+· Bạn muốn viền dày bao nhiêu — code dưới dùng 3px.
+
+---
+
+Code chung chung
+
+```html
+<div class="panel">
+  <div class="panel-header">Header</div>
+  <div class="panel-body">Nội dung…</div>
+  <div class="panel-footer">Footer</div>
+</div>
+```
+
+```css
+/* ===== Khung panel ===== */
+.panel {
+  position: relative;
+  width: 300px;
+  padding: 3px;                          /* độ dày viền */
+  border-radius: 16px;
+  background: #0f1729;                   /* màu ruột */
+  overflow: hidden;                      /* cắt ::before theo bo góc */
+  animation: glow 4s linear infinite;    /* hào quang */
+  isolation: isolate;                    /* tạo stacking context riêng */
+}
+
+/* ===== Dải sáng xoay ===== */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: -50%;                           /* phóng to để không hở góc khi xoay */
+  background: conic-gradient(from 0deg,
+      #00ffff, transparent 25%,
+      #7a6eff, transparent 60%,
+      #ff00e5, transparent 85%,
+      #00ffff);
+  animation: spin 4s linear infinite;
+  z-index: -1;
+}
+
+/* ===== Lớp che ruột — inset = padding ===== */
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 3px;                            /* = padding của .panel */
+  background: #0f1729;                   /* cùng màu ruột */
+  border-radius: 13px;                   /* = panel radius - padding */
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== Nội dung nổi trên lớp che ===== */
+.panel-header,
+.panel-body,
+.panel-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.panel-header {
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+}
+.panel-body { padding: 14px; }
+.panel-footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* ===== Keyframes ===== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(0,204,238,.7),
+      0 0 36px rgba(0,204,238,.4);
+  }
+  33% {
+    box-shadow:
+      0 0 18px rgba(122,110,255,.7),
+      0 0 36px rgba(122,110,255,.4);
+  }
+  66% {
+    box-shadow:
+      0 0 18px rgba(255,68,238,.7),
+      0 0 36px rgba(255,68,238,.4);
+  }
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+---
+
+Nguyên lý 3 lớp
+
+```
+┌─────────────────────────────────────┐
+│  ::before — conic-gradient xoay      │  z-index: -1
+│  ┌───────────────────────────────┐  │
+│  │  ::after — che ruột            │  │  z-index: 0
+│  │  ┌─────────────────────────┐  │  │
+│  │  │  Nội dung panel          │  │  │  z-index: 1
+│  │  └─────────────────────────┘  │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+          ↑
+          3px viền lộ dải sáng xoay
+```
+
+---
+
+Bảng tham số quan trọng
+
+Tham số Giá trị Vai trò
+.panel { padding } 3px Độ dày viền
+.panel::after { inset } 3px Phải = padding
+.panel { border-radius } 16px Bo góc ngoài
+.panel::after { border-radius } 13px = panel radius - padding
+.panel::before { inset } -50% Phóng to để không hở góc
+animation: spin 4s linear infinite Tốc độ xoay
+animation: glow 4s linear infinite Chu kỳ hào quang
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Viền dày hơn .panel { padding: 5px } + .panel::after { inset: 5px; border-radius: 11px }
+Xoay nhanh hơn animation: spin 2s linear infinite
+Đổi màu dải Sửa hex trong conic-gradient của .panel::before
+Tắt hào quang Xóa animation: glow 4s của .panel
+Đổi kích thước hào quang Tăng 18px/36px trong @keyframes glow
+Đổi tốc độ hào quang animation: glow 4s → 2s hoặc 6s
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: conic-gradient + animation: spin + box-shadow keyframes + ::before/::after là CSS chuẩn; prefers-reduced-motion là WCAG 2.1 requirement.
+· Tôi không chắc hiệu năng của conic-gradient xoay + box-shadow animation cùng lúc trên máy yếu — có thể tốn GPU.
+· Tôi không chắc isolation: isolate có cần thiết cho mọi trường hợp — giúp z-index: -1 của ::before không bị ảnh hưởng bởi tổ tiên bên ngoài.
+· Màu hào quang và màu viền không khớp nhau tại 1 thời điểm — viền có 3 màu cùng lúc, hào quang có 1 — đây là hạn chế của CSS thuần.
+
+🎯 Tóm 1 câu: Dải sáng xoay + hào quang = .panel { padding: 3px; border-radius: 16px; overflow: hidden; animation: glow 4s } + .panel::before { conic-gradient + animation: spin 4s; inset: -50%; z-index: -1 } + .panel::after { inset: 3px; background: #0f1729; border-radius: 13px; z-index: 0 } + nội dung z-index: 1 — 3 lớp chồng qua z-index.

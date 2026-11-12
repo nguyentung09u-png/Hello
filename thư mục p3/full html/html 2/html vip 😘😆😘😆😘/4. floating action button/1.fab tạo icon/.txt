@@ -1,0 +1,188 @@
+🎯 FAB (Floating Action Button) — Full tổng quan
+
+1. Bản chất
+
+· FAB = Floating Action Button — nút tròn nổi, neo cố định trên màn hình, luôn hiển thị trên nội dung.
+· Thường ở góc dưới-phải, kích thước 56–64px, có shadow để tách khỏi nền.
+· Nguồn gốc thiết kế: Material Design (Google) — quy định FAB có đường kính 56dp (mobile), 64dp (desktop).
+
+2. Cấu trúc HTML
+
+```html
+<button class="robot-fab" id="robotFab" aria-label="Mở trợ lý ảo">
+  <svg viewBox="0 0 24 24" ...>...</svg>
+</button>
+```
+
+· 1 thẻ <button> — không bọc wrapper.
+· Icon SVG inline — không dùng ảnh ngoài, không phụ thuộc file.
+· aria-label — cho screen reader biết nút làm gì.
+
+3. CSS — hình dáng
+
+Thuộc tính Vai trò
+width/height: 60px Kích thước chuẩn FAB
+border-radius: 50% Biến hình vuông thành tròn
+border: 0 Xoá viền mặc định của button
+display: inline-flex + align/justify: center Căn icon giữa nút
+padding: 0 Không đệm thừa
+
+4. CSS — màu & độ nổi
+
+```css
+background: linear-gradient(135deg, #10b981, #059669);
+box-shadow:
+  0 8px 24px rgba(16, 185, 129, .45),    /* shadow chính */
+  0 0 0 0 rgba(16, 185, 129, .55);       /* ring cho animation pulse */
+```
+
+· Gradient 135° từ xanh sáng → xanh đậm — tạo chiều sâu.
+· 2 lớp shadow: lớp ngoài (đổ bóng), lớp trong (ring cho pulse).
+
+5. CSS — vị trí & cố định
+
+```css
+position: fixed;
+left: 0; top: 0;             /* JS set bằng transform */
+z-index: 10000;
+will-change: transform;
+```
+
+· position: fixed — neo vào viewport, không cuộn theo trang.
+· transform: translate(x, y) — di chuyển bằng GPU, không reflow.
+· z-index cao — luôn nổi trên nội dung.
+
+6. CSS — hiệu ứng hover
+
+```css
+.robot-fab:hover {
+  box-shadow: 0 12px 28px rgba(16, 185, 129, .6), ...;
+}
+```
+
+→ Khi hover, shadow to hơn → cảm giác nút "nổi lên".
+→ Kết hợp transition: box-shadow .2s ease để mượt.
+
+7. CSS — animation pulse
+
+```css
+animation: robotPulse 2.6s ease-in-out infinite;
+
+@keyframes robotPulse {
+  0%, 100% { box-shadow: ..., 0 0 0 0   rgba(16,185,129,.55); }
+  50%      { box-shadow: ..., 0 0 0 14px rgba(16,185,129,0);  }
+}
+```
+
+· Vòng ring lan ra từ 0 → 14px, alpha giảm dần về 0.
+· Chu kỳ 2.6s — đủ chậm để không gây khó chịu.
+· ease-in-out — tăng/giảm tốc mượt.
+
+8. CSS — trạng thái kéo (dragging)
+
+```css
+.robot-fab.dragging {
+  cursor: grabbing;
+  animation: none;
+  box-shadow: ..., 0 0 0 8px rgba(16,185,129,.18);
+}
+```
+
+→ Tắt pulse (tránh rối khi kéo), đổi cursor, tăng độ nổi.
+
+9. CSS — touch & a11y
+
+```css
+touch-action: none;              /* chặn scroll khi chạm */
+user-select: none;                /* không bôi đen */
+-webkit-user-select: none;
+-webkit-tap-highlight-color: transparent;  /* xoá highlight xanh trên mobile */
+```
+
+· touch-action: none — quan trọng để kéo bằng ngón tay không bị cuộn trang.
+· -webkit-tap-highlight-color — xoá vệt xanh khi chạm trên iOS/Android.
+
+10. Icon SVG bên trong
+
+```html
+<svg viewBox="0 0 24 24" fill="none" stroke="#fff"
+     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="4" y="8" width="16" height="12" rx="3"/>       <!-- đầu robot -->
+  <circle cx="9" cy="14" r="1.3" fill="#fff"/>            <!-- mắt trái -->
+  <circle cx="15" cy="14" r="1.3" fill="#fff"/>           <!-- mắt phải -->
+  <line x1="12" y1="4" x2="12" y2="8"/>                    <!-- ăng-ten -->
+  <circle cx="12" cy="3" r="1"/>                            <!-- đầu ăng-ten -->
+</svg>
+```
+
+· Inline SVG — không cần ảnh rời, tự scale.
+· stroke="#fff" — nét trắng, không tô.
+· stroke-linecap/linejoin: round — nét mềm, không gãy góc.
+· pointer-events: none (trong CSS) — để sự kiện rơi vào <button>, không vào SVG con.
+
+11. JS — hành vi (nếu muốn kéo thả)
+
+· Pointer Events (pointerdown/move/up) — gộp chuột + cảm ứng + bút.
+· setPointerCapture — giữ sự kiện khi con trỏ ra ngoài element.
+· DRAG_THRESHOLD = 6 — phân biệt click (không kéo) vs drag.
+· Clamp — kẹp vị trí trong [0, W-w] × [0, H-h].
+· transform: translate() — di chuyển không reflow.
+· localStorage — nhớ vị trí lần sau.
+
+12. Accessibility
+
+Thuộc tính Vai trò
+<button> Screen reader đọc là "nút"
+aria-label Mô tả nút làm gì
+type="button" Tránh submit form ngoài ý muốn
+Focus ring (mặc định) Có thể thấy khi Tab tới
+
+13. Reduced motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+→ Tắt pulse + hover transition cho người nhạy cảm với chuyển động.
+
+14. Thứ tự lớp (z-index)
+
+```
+10000  .robot-fab       (nút FAB)
+ 9999  .robot-chat      (khung chat, dưới FAB 1 bậc)
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: mô tả dựa trên code đã gửi — HTML <button> + CSS thuần + SVG inline.
+· Tôi không chắc tỷ lệ 60px là tối ưu cho mọi ngữ cảnh — Material Design dùng 56dp; 60px là lựa chọn của mình.
+· Tôi không chắc màu #10b981 (emerald-500 của Tailwind) có đúng gu bạn không — có thể đổi sang bất kỳ màu nào.
+· Tôi không chắc animation pulse có gây phân tâm trên trang nhiều nội dung — có thể tắt bằng cách xóa khối @keyframes robotPulse.
+
+---
+
+Các thành phần hợp thành FAB
+
+```
+FAB = <button> + SVG icon
+    + position: fixed
+    + border-radius: 50%
+    + gradient background
+    + box-shadow (2 lớp)
+    + animation pulse
+    + hover/kéo effects
+    + touch-action: none
+    + z-index cao
+    + aria-label
+```
+
+---
+
+🎯 Tóm 1 câu: FAB = 1 thẻ <button> chứa icon SVG inline, làm tròn bằng border-radius: 50%, neo cố định bằng position: fixed, nổi bằng gradient + box-shadow 2 lớp + animation pulse, tương tác bằng hover/kéo + touch-action: none — gọn trong ~30 dòng HTML/CSS/JS thuần.

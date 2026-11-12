@@ -1,0 +1,99 @@
+Thành phần Tên gọi
+Nút ‹ › Prev/Next Buttons (Navigation Arrows)
+Chấm • • • • Pagination Dots (Page Indicators)
+Cả cụm dưới cùng Bottom Control Bar (Pagination + Nav)
+Auto chuyển 6s Auto-play / Auto-slide
+Thanh chạy trên cùng Progress Bar
+Vuốt để chuyển Touch Swipe
+Bấm phím ← → Keyboard Navigation
+
+Cách làm — tổng quan
+
+Cấu trúc 3 lớp:
+
+1. Background (nền) — position: fixed
+2. Stage (chứa card) — position: relative, 100vh
+3. Controls (nút + dots) — position: fixed, bottom
+
+Cơ chế chuyển card:
+
+· Mỗi card position: absolute; inset: 0
+· Chỉ 1 card có class .active (hiện), còn lại ẩn
+· Đổi card = đổi class → CSS transition lo phần animation
+
+---
+
+Code khung (khung tối thiểu)
+
+```html
+<div class="stage">
+  <div class="card active">Slide 1</div>
+  <div class="card">Slide 2</div>
+  <div class="card">Slide 3</div>
+</div>
+<div class="controls">
+  <button>‹</button>
+  <div class="dots"></div>
+  <button>›</button>
+</div>
+```
+
+```css
+.stage { position: relative; width: 100vw; height: 100vh; }
+
+.card {
+  position: absolute; inset: 0;
+  opacity: 0; transform: translateX(60px);
+  transition: opacity .8s, transform .8s;
+}
+.card.active { opacity: 1; transform: translateX(0); }
+.card.exit   { opacity: 0; transform: translateX(-60px); }
+
+.controls {
+  position: fixed; bottom: 40px;
+  left: 50%; transform: translateX(-50%);
+}
+```
+
+```js
+let i = 0, animating = false;
+
+function goTo(n) {
+  if (animating) return;
+  animating = true;
+  const oldC = cards[i], newC = cards[n];
+
+  oldC.classList.remove('active');
+  oldC.classList.add('exit');
+  setTimeout(() => oldC.classList.remove('exit'), 800);
+
+  newC.classList.add('active');
+  i = n;
+  setTimeout(() => animating = false, 800);
+}
+```
+
+---
+
+Ghép các thành phần
+
+Thành phần Cách thêm
+Prev/Next btn.onclick = () => goTo(i ± 1)
+Dots Tạo N chấm, mỗi chấm onclick = goTo(k)
+Auto-play setInterval(next, 6000)
+Reset auto Gọi resetAuto() sau mọi tương tác
+Touch swipe touchstart lưu X → touchend so sánh khoảng cách
+Keyboard keydown check ArrowLeft/Right
+Progress bar width = (i+1)/total * 100%
+Chống spam cờ isAnimating
+
+---
+
+Điểm cần lưu ý
+
+· Tôi không chắc con số 800ms và 6s phù hợp mọi thiết bị — cần test.
+· Tôi không chắc ngưỡng vuốt 50px tối ưu cho mọi màn hình.
+· Chỉ dùng transform + opacity để animation chạy trên GPU.
+· Nên có @media (prefers-reduced-motion) để tắt animation khi cần.
+
+Bạn muốn mình ráp code đầy đủ cho phần nào cụ thể không?

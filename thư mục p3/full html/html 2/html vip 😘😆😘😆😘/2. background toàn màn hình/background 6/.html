@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meteor Shower</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 70% 20%, #0e1428 0%, #060814 60%, #02030a 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #eaf2ff;
+    overflow: hidden;
+  }
+
+  .sky {
+    position: fixed; inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 45% 35% at 25% 30%, rgba(80,120,220,.14), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 75% 70%, rgba(140,100,220,.1), transparent 70%);
+    filter: blur(50px);
+  }
+
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; letter-spacing: -.02em; margin: 0 0 12px;
+    background: linear-gradient(135deg, #fff, #a8c8ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #9ab0d4; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+
+  <div class="content">
+    <h1>Meteor Shower</h1>
+    <p>Vệt sao băng chéo góc, có đuôi mờ.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let meteors = [];
+  let lastSpawn = 0;
+
+  const COLORS = ['#ffffff','#c8e0ff','#a8d0ff','#d8e8ff','#e0d8ff'];
+
+  // Góc chéo: bay từ trên-phải xuống dưới-trái
+  const ANGLE = Math.PI * 0.78;
+
+  function spawn() {
+    const speed = 4 + Math.random() * 5;
+    const length = 60 + Math.random() * 140;
+    const size = 1 + Math.random() * 1.6;
+    return {
+      x: Math.random() * W * 1.2,      // bắt đầu hơi lệch phải
+      y: -50 - Math.random() * 100,
+      vx: Math.cos(ANGLE) * speed,
+      vy: -Math.sin(ANGLE) * speed * -1,
+      length,
+      size,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      life: 0,
+      maxLife: 1.5 + Math.random() * 1.5,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function drawMeteor(m, alpha) {
+    const tailX = m.x - Math.cos(ANGLE) * m.length;
+    const tailY = m.y - Math.sin(ANGLE) * m.length * -1;
+
+    // đuôi dạng gradient dọc theo vệt
+    const g = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+    g.addColorStop(0, m.color);
+    g.addColorStop(0.4, m.color + '66');
+    g.addColorStop(1, m.color + '00');
+
+    ctx.strokeStyle = g;
+    ctx.lineWidth = m.size * 1.6;
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(m.x, m.y);
+    ctx.lineTo(tailX, tailY);
+    ctx.stroke();
+
+    // đầu sáng chói
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.size * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // halo đầu
+    const hg = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.size * 8);
+    hg.addColorStop(0, m.color + 'cc');
+    hg.addColorStop(1, m.color + '00');
+    ctx.fillStyle = hg;
+    ctx.globalAlpha = alpha * 0.6;
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.size * 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // spawn ngẫu nhiên — trung bình vài con / giây
+    if (t - lastSpawn > 180 + Math.random() * 240) {
+      meteors.push(spawn());
+      lastSpawn = t;
+    }
+
+    for (let i = meteors.length - 1; i >= 0; i--) {
+      const m = meteors[i];
+      m.x += m.vx;
+      m.y += m.vy;
+      m.life += 1/60;
+
+      const fade = m.life < 0.3 ? m.life / 0.3 : Math.max(0, 1 - (m.life - 0.3) / (m.maxLife - 0.3));
+
+      // xóa khi hết đời hoặc ra khỏi màn
+      if (m.life > m.maxLife || m.x < -200 || m.y > H + 200) {
+        meteors.splice(i, 1);
+        continue;
+      }
+      drawMeteor(m, fade);
+    }
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

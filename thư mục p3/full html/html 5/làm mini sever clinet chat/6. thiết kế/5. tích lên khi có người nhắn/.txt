@@ -1,0 +1,159 @@
+Tổng quan cách làm (ngắn)
+
+Theo cách tôi hiểu, để làm "thông báo tin mới" cần 5 bước:
+
+1. State — biến soundEnabled, unreadCount, lastSeenTs, isTabVisible.
+2. HTML — nút loa (2 SVG chồng) + gán id cho header và tiêu đề.
+3. CSS — @keyframes headerGlow cho header phát sáng, viền conic-gradient + mask-composite cho tin chưa đọc.
+4. JS — âm thanh — Web Audio API tạo tiếng "ting" từ 2 oscillator (không cần file mp3).
+5. JS — đếm tin — so timestamp tin mới với lastSeenTs, chỉ tăng khi tab ẩn, cập nhật document.title = "(N) MiniChat".
+
+Lưu ý: tôi không chắc mask-composite hiển thị giống nhau trên mọi trình duyệt — Firefox/Safari cũ có thể không đúng.
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>MiniChat</title>
+<style>
+  body{ margin:0; padding:40px; background:#02030a; color:#fff;
+        font-family:system-ui,sans-serif; }
+
+  header{
+    padding:14px 20px; border-radius:14px;
+    background:rgba(255,255,255,.08);
+    display:flex; justify-content:space-between; align-items:center;
+    transition:box-shadow .4s ease;
+  }
+  header.has-new{
+    animation:glow 2s ease-in-out infinite;
+  }
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 1px rgba(79,70,229,.3), 0 0 20px rgba(79,70,229,.3); }
+    50%    { box-shadow:0 0 0 1px rgba(79,70,229,.6), 0 0 32px rgba(79,70,229,.7); }
+  }
+
+  button{ background:none; border:none; color:#fff; cursor:pointer; font-size:18px; }
+
+  .msg{
+    display:inline-block; position:relative;
+    padding:8px 14px; border-radius:14px; margin-top:20px;
+    background:#F3F4F6; color:#111;
+  }
+  .msg.unread::before{
+    content:""; position:absolute; inset:-2px; border-radius:16px;
+    background:conic-gradient(from var(--a,0deg), #4F46E5, #06b6d4, #ec4899, #4F46E5);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    animation:spin 3s linear infinite;
+    pointer-events:none;
+  }
+  @property --a{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+  @keyframes spin{ to{ --a:360deg; } }
+</style>
+</head>
+<body>
+
+  <header id="header">
+    <span id="title">💬 MiniChat</span>
+    <button id="sound-btn">🔊</button>
+  </header>
+
+  <div class="msg" id="msg">Tin nhắn mẫu</div>
+
+<script>
+  // 1. State
+  let soundEnabled = true;
+  let unreadCount  = 0;
+  let isTabVisible = !document.hidden;
+  const BASE_TITLE = 'MiniChat';
+
+  const header   = document.getElementById('header');
+  const soundBtn = document.getElementById('sound-btn');
+  const msgEl    = document.getElementById('msg');
+
+  // 2. Âm thanh Web Audio API
+  let ctx = null;
+  function ting(){
+    if (!soundEnabled) return;
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    [880, 1320].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const t = now + i*0.08;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.15, t + .01);
+      g.gain.exponentialRampToValueAtTime(.001, t + .35);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + .4);
+    });
+  }
+
+  // 3. Badge tab + glow header
+  function updateBadge(){
+    if (unreadCount > 0){
+      document.title = `(${unreadCount}) ${BASE_TITLE}`;
+      header.classList.add('has-new');
+    } else {
+      document.title = BASE_TITLE;
+      header.classList.remove('has-new');
+    }
+  }
+
+  // 4. Reset khi tab hiển thị lại
+  document.addEventListener('visibilitychange', () => {
+    isTabVisible = !document.hidden;
+    if (isTabVisible){ unreadCount = 0; updateBadge(); msgEl.classList.remove('unread'); }
+  });
+  window.addEventListener('focus', () => {
+    isTabVisible = true;
+    unreadCount = 0; updateBadge(); msgEl.classList.remove('unread');
+  });
+
+  // 5. Toggle âm thanh
+  soundBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  });
+
+  // 6. Demo: giả lập có tin mới sau 3 giây
+  setTimeout(() => {
+    ting();
+    msgEl.classList.add('unread');
+    if (!isTabVisible){
+      unreadCount++;
+      updateBadge();
+    }
+  }, 3000);
+</script>
+</body>
+</html>
+```
+
+Giải thích ngắn:
+
+· State gồm soundEnabled, unreadCount, isTabVisible.
+· ting() — sinh 2 nốt sine 880Hz + 1320Hz, không cần file âm thanh.
+· updateBadge() — đổi document.title và thêm class .has-new cho header.
+· visibilitychange + focus — reset khi user quay lại tab.
+· Class .unread — CSS viền conic-gradient chạy quanh bong bóng.
+
+Lưu ý:
+
+· Demo giả lập tin mới sau 3s — không có Firebase. Muốn thật cần gắn vào onValue(messages).
+· Browser chặn autoplay — phải gọi ctx.resume() sau tương tác user (nút bấm).
+· mask-composite có thể không hỗ trợ đầy đủ trên trình duyệt cũ.
+
+---
+
+🎯 Tóm 1 câu: Dùng 5 khối — state (soundEnabled/unreadCount/isTabVisible), CSS @keyframes glow + viền conic-gradient với mask-composite, JS Web Audio API sinh tiếng "ting" từ 2 oscillator, logic đếm tin mới so timestamp (chỉ khi tab ẩn), và reset qua visibilitychange/focus — code trên là bản demo tối thiểu không có Firebase.

@@ -1,0 +1,62 @@
+---- lò xo + viền ---
+
+Khi click vào fab
+
+Spring Animation (Lò xo) :
+
+Chức năng  ScaleAnimation (Thay đổi tỉ lệ)
+
+· Vai trò: Đây là lõi của hiệu ứng. Nó thay đổi kích thước Card theo thời gian.
+· Cách hoạt động:
+  · Khi nhấn: Scale từ 100% lên 105% (to ra).
+  · Khi thả: Scale từ 105% xuống 100% (co về).
+
+
+---------
+
+setDuration(200) (Thời gian chạy)
+
+· Vai trò: Điều chỉnh thời gian diễn ra hiệu ứng.
+· Giá trị: 200 mili giây là đủ nhanh để tạo cảm giác "đàn hồi" mà không bị giật.
+
+-------
+
+
+DecelerateInterpolator (Giảm tốc)
+
+· Vai trò: Quyết định tốc độ chuyển động của Card. Thay vì co về đều đặn, nó bắt đầu nhanh và chậm dần về cuối.
+· Tác dụng: Tạo cảm giác như một lực cản (ma sát) kéo Card về vị trí cũ, rất giống lò xo thật
+
+
+
+
+
+Và thêm viền
+
+
+----
+Giữ nguyên chỉ thêm Cho phép nhấn vào Rounded Rectangle (Khung) card
+
+Nhấn vào nó sẽ hiện Hào Quang Phát Sáng Tức Thì
+
+Bừng sáng ngay lập tức với hiệu ứng Neon 
+
+
+chỉ hiện viền Neon phát sáng quanh Card, không có gradient nền, đúng theo yêu cầu của bạn.
+#3b82f6 màu xanh blue
+
+viền solid border là viền nối nét liền , không đứt đoạn
+-------
+stroke width là độ rộng nét  viền 4px
+"Solid Border" (Viền liền nét)
+
+
+-------
+// Tắt sau 1.5 giây
+handler.postDelayed gồm 2 thành phần:
+
+· Runnable → Khối lệnh cần chạy sau khi delay.
+· 1500 → Thời gian delay (1.5 giây).
+
+
+---kết thúc lò xo + viền -----

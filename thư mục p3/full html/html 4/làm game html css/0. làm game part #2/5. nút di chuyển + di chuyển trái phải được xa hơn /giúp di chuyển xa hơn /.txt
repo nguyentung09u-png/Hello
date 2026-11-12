@@ -1,0 +1,134 @@
+Tổng quan cách làm (5 bước)
+
+```
+BƯỚC 1 — Bounds    khai báo 4 hằng số WIDE_L/R/T/B + WIDE_W/H
+BƯỚC 2 — Object    khai báo biên di chuyển BOAT_* khớp với WIDE_*
+BƯỚC 3 — Fill      vẽ sky/water/sao/mây/sóng trong [WIDE_L..WIDE_R] × [WIDE_T..WIDE_B]
+BƯỚC 4 — Camera    cam.targetX = W/2 - boatX*zoom (follow)
+BƯỚC 5 — Density   tăng số sao/sóng/mây cho khớp diện tích mới
+```
+
+Nguyên tắc chung: khai báo biên → vẽ phủ kín biên → cho đối tượng di chuyển trong biên → camera bám đối tượng → nhồi đủ nền cho khỏi trống.
+
+---
+
+Code chung chung
+
+1. Bounds — hằng số biên world
+
+```js
+const W = 450, H = 800;
+
+// World rộng gấp nhiều lần màn hình
+const WIDE_L = -W * 5;
+const WIDE_R =  W * 6;
+const WIDE_T = -H * 3;
+const WIDE_B =  H * 6;
+const WIDE_W = WIDE_R - WIDE_L;
+const WIDE_H = WIDE_B - WIDE_T;
+```
+
+2. Object Bounds — biên di chuyển
+
+```js
+const BOAT_W = 180, BOAT_H = 60;
+const BOAT_X_MIN = WIDE_L + BOAT_W;   // chừa nửa thân
+const BOAT_X_MAX = WIDE_R - BOAT_W;
+const BOAT_Y_MIN = SEA_TOP + BOAT_H;
+const BOAT_Y_MAX = WIDE_B - BOAT_H;
+
+// Khi di chuyển:
+boatX = clamp(boatX + mx * SPEED * dt, BOAT_X_MIN, BOAT_X_MAX);
+boatY = clamp(boatY + my * SPEED * dt, BOAT_Y_MIN, BOAT_Y_MAX);
+```
+
+3. Fill — vẽ nền phủ kín
+
+```js
+function drawSky(t){
+  const g = ctx.createLinearGradient(0, WIDE_T, 0, SEA_TOP);
+  g.addColorStop(0, '#05061a');
+  g.addColorStop(1, '#1e3f66');
+  ctx.fillStyle = g;
+  ctx.fillRect(WIDE_L, WIDE_T, WIDE_W, SEA_TOP - WIDE_T);
+}
+
+function drawWater(t){
+  const g = ctx.createLinearGradient(0, SEA_TOP, 0, WIDE_B);
+  g.addColorStop(0, '#0d3a5a');
+  g.addColorStop(1, '#03101f');
+  ctx.fillStyle = g;
+  ctx.fillRect(WIDE_L, SEA_TOP, WIDE_W, WIDE_B - SEA_TOP);
+}
+
+// Sao, mây, sóng — rải trong [WIDE_L, WIDE_R] × [WIDE_T, WIDE_B]
+const stars = [];
+for (let i = 0; i < 900; i++){
+  stars.push({ x: rand(WIDE_L, WIDE_R), y: rand(WIDE_T, SEA_TOP), ... });
+}
+```
+
+4. Camera Follow — bám theo đối tượng
+
+```js
+function updateCamera(dt){
+  // Thuyền luôn ở (W/2, H*0.72) trên màn hình
+  cam.targetX = W/2 - boatX * cam.targetZoom;
+  cam.targetY = H * 0.72 - boatY * cam.targetZoom;
+
+  // Lerp mượt
+  const k = 1 - Math.pow(1 - cam.smooth, dt * 60);
+  cam.zoom += (cam.targetZoom - cam.zoom) * k;
+  cam.x    += (cam.targetX    - cam.x)    * k;
+  cam.y    += (cam.targetY    - cam.y)    * k;
+}
+
+// Trong render:
+ctx.save();
+ctx.translate(cam.x, cam.y);
+ctx.scale(cam.zoom, cam.zoom);
+// ... vẽ world ...
+ctx.restore();
+```
+
+5. Density — tăng mật độ nền
+
+```js
+// Tỷ lệ: diện tích world / diện tích màn hình ≈ 11 lần
+// → tăng số sao/sóng tương ứng (~5-10 lần)
+const N_STARS = 900;
+const N_WAVES = 200;
+const N_CLOUDS = 40;
+```
+
+6. View Culling — bỏ vẽ ngoài màn hình
+
+```js
+function drawStars(t){
+  const vL = -cam.x/cam.zoom - 40;
+  const vR = (W-cam.x)/cam.zoom + 40;
+  const vT = -cam.y/cam.zoom - 40;
+  const vB = (H-cam.y)/cam.zoom + 40;
+
+  for (const s of stars){
+    if (s.x < vL || s.x > vR) continue;
+    if (s.y < vT || s.y > vB) continue;
+    // ... vẽ
+  }
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· Con số W*5, W*6, H*3, H*6 — tôi chọn theo trực giác cho game thuyền; không có dữ liệu tối ưu, có thể bạn cần rộng/hẹp hơn.
+· Camera H*0.72 — đặt thuyền ở 72% chiều cao màn hình; tôi không chắc con số này là tốt nhất, có thể đổi 0.5 hoặc 0.65.
+· Số sao/sóng/mây — tôi chọn để lấp đầy nhưng chưa đo fps; có thể giảm nếu lag trên mobile yếu.
+· Bỏ clamp camera — vì world đã rộng, tôi không clamp cam.x/y; tôi tin điều này an toàn với world ≥ W/MIN_ZOOM, nhưng chưa test mọi trường hợp.
+· View culling — code thuyền tôi gửi có cull sao + sóng, nhưng không cull mây; có thể tối ưu thêm nhưng tôi không rõ có đáng không.
+· Chưa test runtime — tất cả dựa trên lý thuyết và suy luận, có thể cần chỉnh sau khi chạy thực tế.
+
+---
+
+🎯 Tóm 1 câu: Làm World Bounds Expansion = (1) khai báo WIDE_L/R/T/B rộng gấp nhiều lần màn hình, (2) đặt BOAT_X/Y_MIN/MAX khớp với WIDE_*, (3) vẽ sky/water/sao/mây/sóng phủ kín vùng đó bằng fillRect + rải random, (4) camera follow cam.targetX = W/2 - boatX*zoom để thuyền luôn ở giữa màn hình, (5) tăng mật độ nền (900 sao, 200 sóng) và cull ngoài view — nhưng các con số tôi đưa chỉ là gợi ý, cần test runtime để chắc không lộ mép đen hoặc lag.

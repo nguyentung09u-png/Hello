@@ -1,0 +1,265 @@
+Tổng quan cách làm
+
+```
+BƯỚC 1 — STATE       mỗi xạ thủ có { ox, oy, cd, animT, fired, tx, ty, seed }
+BƯỚC 2 — VẼ NHÂN VẬT 1 hàm drawArcher() vẽ 17 chi tiết từ sau ra trước
+BƯỚC 3 — ANIMATION   animT chạy 0.5 → 0, tính drawAmt từ animT
+BƯỚC 4 — KÍCH HOẠT   trong update: hết cd + có mục tiêu → animT = 0.5
+BƯỚC 5 — BẮN         khi animT ≤ 0.15 và chưa fired → fireArrow + cờ fired = true
+BƯỚC 6 — FLASH       khi released → quầng sáng + 3 tia với 'lighter'
+```
+
+Nguyên tắc chung: tách state (animT, fired) khỏi hình ảnh (drawAmt). Vẽ theo animT, không sửa state khi vẽ.
+
+---
+
+Code chung chung
+
+1. State — mảng xạ thủ
+
+```js
+const archers = [
+  { ox:-55, oy:25, scale:0.95, cd:0.4, seed:0.0, animT:0, fired:false, tx:0, ty:0 },
+  { ox: 55, oy:25, scale:0.95, cd:0.9, seed:1.7, animT:0, fired:false, tx:0, ty:0 },
+  // ... 3 xạ thủ nữa
+];
+
+const ANIM_DUR = 0.5;      // tổng thời gian animation
+const ANIM_FIRE_T = 0.35;  // mốc bắn trong animation
+```
+
+2. Hàm vẽ xạ thủ — drawArcher(g, x, y, s, t, seed, animT)
+
+```js
+function drawArcher(g, x, y, s, t, seed, animT){
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+
+  // Bob nhấp nhô
+  const bob = Math.sin(t * 3 + seed) * 1.0;
+  g.translate(0, bob);
+
+  // ---- Tính drawAmt từ animT ----
+  let drawAmt = 0;
+  let released = false;
+  if (animT > 0){
+    const elapsed = ANIM_DUR - animT;   // 0 → 0.5
+    if (elapsed < ANIM_FIRE_T){
+      drawAmt = elapsed / ANIM_FIRE_T;                               // 0 → 1
+    } else {
+      drawAmt = 1 - (elapsed - ANIM_FIRE_T) / (ANIM_DUR - ANIM_FIRE_T); // 1 → 0
+      released = true;
+    }
+  }
+
+  // ---- 1. Bóng ----
+  g.globalAlpha = 0.35; g.fillStyle = '#000';
+  g.beginPath(); g.ellipse(0, 4, 13, 4.5, 0, 0, TAU); g.fill();
+  g.globalAlpha = 1;
+
+  // ---- 2. Cung ----
+  const bowX = 14;
+  g.strokeStyle = '#6b3f1e'; g.lineWidth = 2.6; g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(bowX, -46);
+  g.quadraticCurveTo(bowX + 13, -26, bowX, -6);
+  g.stroke();
+
+  // ---- 3. Đầu cung trên/dưới ----
+  g.strokeStyle = '#a87848'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(bowX - 1, -47); g.lineTo(bowX + 2, -45); g.stroke();
+  g.beginPath(); g.moveTo(bowX - 1, -5);  g.lineTo(bowX + 2, -7);  g.stroke();
+
+  // ---- 4. Dây cung co giãn ----
+  const pullX = bowX - drawAmt * 12;
+  g.strokeStyle = 'rgba(240,240,220,.95)'; g.lineWidth = 1.1;
+  g.beginPath();
+  g.moveTo(bowX, -46);
+  g.lineTo(pullX, -26);
+  g.lineTo(bowX, -6);
+  g.stroke();
+
+  // ---- 5. Mũi tên (khi rút cung, chưa bắn) ----
+  if (drawAmt > 0.08 && !released){
+    g.fillStyle = '#8a5a2b';
+    g.fillRect(pullX, -27.3, 32, 2.6);
+    g.fillStyle = '#c8d8e8';
+    g.beginPath();
+    g.moveTo(pullX + 32, -26);
+    g.lineTo(pullX + 23, -30.5);
+    g.lineTo(pullX + 23, -21.5);
+    g.closePath(); g.fill();
+    // Lông đỏ
+    g.fillStyle = '#c0392b';
+    g.beginPath();
+    g.moveTo(pullX, -26); g.lineTo(pullX - 4, -29); g.lineTo(pullX + 3, -27);
+    g.closePath(); g.fill();
+    g.beginPath();
+    g.moveTo(pullX, -26); g.lineTo(pullX - 4, -23); g.lineTo(pullX + 3, -25);
+    g.closePath(); g.fill();
+  }
+
+  // ---- 6. Chân + giày ----
+  g.fillStyle = '#232b45';
+  g.fillRect(-8, -14, 6, 14);
+  g.fillRect( 2, -14, 6, 14);
+  g.fillStyle = '#141a2e';
+  g.fillRect(-9, -4, 8, 4);
+  g.fillRect( 1, -4, 8, 4);
+
+  // ---- 7. Thân áo (rrect + gradient 3 lớp) ----
+  const bodyG = g.createLinearGradient(-12, -42, 12, -10);
+  bodyG.addColorStop(0,    '#7fc9a0');
+  bodyG.addColorStop(0.55, '#3f8a6a');
+  bodyG.addColorStop(1,    '#1f4a38');
+  g.fillStyle = bodyG;
+  rrect(g, -10, -40, 20, 30, 5); g.fill();
+
+  // ---- 8. Đai lưng ----
+  g.fillStyle = '#b8912f';
+  g.fillRect(-10, -22, 20, 3.5);
+
+  // ---- 9. Dây đeo ----
+  g.strokeStyle = '#8a5a2b'; g.lineWidth = 2.6;
+  g.beginPath(); g.moveTo(-10, -37); g.lineTo(10, -20); g.stroke();
+
+  // ---- 10. Bao đựng tên sau lưng ----
+  g.fillStyle = '#5a3a1e';
+  rrect(g, -18, -32, 8, 18, 2); g.fill();
+  g.strokeStyle = '#aab8cc'; g.lineWidth = 1.2;
+  for (let i = 0; i < 3; i++){
+    g.beginPath();
+    g.moveTo(-15.5 + i*2.5, -32);
+    g.lineTo(-15.5 + i*2.5, -40);
+    g.stroke();
+  }
+
+  // ---- 11. Đầu ----
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(0, -48, 7.5, 0, TAU); g.fill();
+
+  // ---- 12. Mắt ----
+  g.fillStyle = '#2b2038';
+  g.beginPath(); g.arc(2.5, -49, 1.1, 0, TAU); g.fill();
+
+  // ---- 13. Mũ trùm ----
+  const hoodG = g.createLinearGradient(-9, -58, 9, -40);
+  hoodG.addColorStop(0, '#7fc9a0'); hoodG.addColorStop(1, '#1f4a38');
+  g.fillStyle = hoodG;
+  g.beginPath();
+  g.arc(0, -48, 9, Math.PI, 0);
+  g.fill();
+  g.fillRect(-9, -50, 18, 5);
+
+  // ---- 14. Chóp mũ ----
+  g.fillStyle = '#3f8a6a';
+  g.beginPath();
+  g.moveTo(-1, -63); g.lineTo(4, -52); g.lineTo(-4, -52);
+  g.closePath(); g.fill();
+
+  // ---- 15. Tay kéo cung ----
+  const handX = pullX + 1;
+  const handY = -26;
+  g.strokeStyle = '#3f8a6a'; g.lineWidth = 5; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(5, -36); g.lineTo(handX, handY); g.stroke();
+
+  // ---- 16. Bàn tay kéo ----
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(handX, handY, 3.2, 0, TAU); g.fill();
+
+  // ---- 17. Bàn tay giữ cung ----
+  g.beginPath(); g.arc(bowX, -26, 3, 0, TAU); g.fill();
+
+  // ---- FLASH khi bắn (0.15s cuối) ----
+  if (released && animT > ANIM_DUR - 0.15){
+    const flashA = animT / 0.15;
+    g.globalCompositeOperation = 'lighter';
+    const fx = bowX + 4, fy = -26;
+    const gr = g.createRadialGradient(fx, fy, 0, fx, fy, 14);
+    gr.addColorStop(0, `rgba(255,240,180,${flashA * 0.9})`);
+    gr.addColorStop(1, 'rgba(255,200,80,0)');
+    g.fillStyle = gr;
+    g.beginPath(); g.arc(fx, fy, 14, 0, TAU); g.fill();
+
+    g.strokeStyle = `rgba(255,240,200,${flashA * 0.7})`;
+    g.lineWidth = 1.5;
+    for (let i = 0; i < 3; i++){
+      const a = -0.4 + i * 0.4;
+      g.beginPath();
+      g.moveTo(fx, fy);
+      g.lineTo(fx + Math.cos(a) * 16, fy + Math.sin(a) * 16);
+      g.stroke();
+    }
+    g.globalCompositeOperation = 'source-over';
+  }
+
+  g.restore();
+}
+```
+
+3. Update — kích hoạt + bắn
+
+```js
+for (const s of archers){
+  s.cd -= dt;
+  if (s.animT > 0) s.animT = Math.max(0, s.animT - dt);
+
+  // Bắt đầu animation
+  if (s.cd <= 0 && s.animT <= 0){
+    const ax = heroX + s.ox;
+    const ay = heroY + s.oy - 20;
+    const tgt = nearestZombie(ax, ay);
+    if (tgt && Math.hypot(tgt.x - ax, tgt.y - ay) < 380){
+      s.animT = ANIM_DUR;
+      s.fired = false;
+      s.cd = rand(0.95, 1.35);
+      s.tx = tgt.x;
+      s.ty = tgt.y - 12;
+      SFX.bowDraw();
+    }
+  }
+
+  // Bắn tại mốc 0.35s
+  if (s.animT > 0 && !s.fired && s.animT <= ANIM_DUR - ANIM_FIRE_T){
+    s.fired = true;
+    const ax = heroX + s.ox + 14;
+    const ay = heroY + s.oy - 20 - 26;
+    fireArrow(ax, ay, s.tx, s.ty, 1.2, '#a8d8ff', 620, 1);
+    SFX.bowRelease();
+    boom(ax + 8, ay, '#ffe8a0', 4, 0.6, true);
+  }
+}
+```
+
+4. Âm thanh
+
+```js
+function bowDraw()    { tone(300, .25, 'sawtooth', .012, 500); }  // rít 300→500
+function bowRelease() { tone(880, .06, 'square',   .02,  320); }  // tách 880→320
+```
+
+5. Vẽ trong render
+
+```js
+for (const s of archers){
+  drawArcher(ctx, heroX + s.ox, heroY + s.oy, s.scale, time, s.seed, s.animT);
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· ANIM_DUR = 0.5s, ANIM_FIRE_T = 0.35s — tôi chọn theo trực giác, không có dữ liệu tối ưu.
+· drawAmt là đường thẳng (không ease) — có thể trông "cứng"; tôi không chắc có nên dùng easeOutQuad hay không.
+· Math.hypot(...) < 380 (tầm bắn) — tôi chọn; có thể đổi nếu bạn muốn xa/gần hơn.
+· fired là boolean cờ — cách này đơn giản nhưng nếu muốn bắn nhiều lần trong 1 animation thì phải đổi.
+· Xạ thủ luôn quay phải (không có scale(-1, 1)) — tôi không chắc bạn muốn quay theo mục tiêu.
+· Vị trí bắn heroX + s.ox + 14 — không tính chính xác đầu cung khi scale khác; có thể lệch vài px.
+· globalCompositeOperation = 'lighter' cho flash — suy luận từ tutorial trước đó; có thể dùng 'source-over' cũng chạy nhưng khác cảm giác.
+· Chưa test runtime — code chạy theo lý thuyết, có thể còn lỗi nhỏ.
+
+---
+
+🎯 Tóm 1 câu: Làm xạ thủ = state {ox, oy, cd, animT, fired, tx, ty} + hàm vẽ 17 chi tiết (cung quadraticCurveTo, dây cung chữ V co giãn theo drawAmt, mũi tên, áo rrect + gradient, mũ trùm + chóp) + animation 0.5s tính drawAmt = elapsed/0.35 khi rút (0→1) rồi 1 - (elapsed-0.35)/0.15 khi nhả (1→0) + cờ fired bắn 1 lần tại mốc animT ≤ 0.15 + flash createRadialGradient + 3 tia với 'lighter' trong 0.15s cuối + 2 âm thanh bowDraw/bowRelease.

@@ -1,0 +1,82 @@
+1. particle ( hạt) + shockwave ( là khi click vào có 1 cơn sóng nó to ra 🌊 )
+
+
+Quy trình tạo chức năng Particle + Shockwave
+
+---
+
+1. Các bước cần làm
+
+· Bước 1: Xác định mục đích và vai trò từng hiệu ứng
+· Bước 2: Tạo nút với trạng thái active
+· Bước 3: Viết CSS cho Particle (8 hạt)
+· Bước 4: Viết CSS cho Shockwave
+· Bước 5: Viết JS tạo 8 hạt khi click
+· Bước 6: Viết JS toggle class active
+· Bước 7: Dọn dẹp và chống lag
+
+---
+
+2. Giải thích từng bước
+
+Bước 1 — Xác định mục đích và vai trò từng hiệu ứng
+Particle làm gì (8 hạt bắn ra) và Shockwave làm gì (sóng lan ra). Mỗi hiệu ứng có vai trò riêng, không chồng chéo.
+
+Bước 2 — Tạo nút với trạng thái active
+Dựng nút cơ bản, thêm class .active để khi bật thì nút nổi lên (đổi màu, đổ bóng). Đây là nền tảng để Shockwave chạy theo.
+
+Bước 3 — Viết CSS cho Particle
+Tạo hình dáng hạt (chấm tròn nhỏ), màu sắc, và animation bắn ra theo hướng đã định. Hạt mờ dần rồi biến mất sau khi bay xong.
+
+Bước 4 — Viết CSS cho Shockwave
+Dùng phần tử giả ::before của nút, tạo vòng sáng bằng box-shadow lan từ 0 ra một khoảng nhỏ rồi tắt dần. Chỉ chạy khi nút có class .active.
+
+Bước 5 — Viết JS tạo 8 hạt khi click
+Khi click, JS lấy tọa độ tâm nút, tạo 8 thẻ div (mỗi thẻ là 1 hạt), chia đều 8 hướng theo hình tròn, rồi gắn vào trang. Mỗi hạt tự xóa sau khi animation xong.
+
+Bước 6 — Viết JS toggle class active
+Khi click, so sánh nút vừa click với nút đang active. Nếu trùng thì tắt, nếu khác thì tắt nút cũ và bật nút mới. Class .active này kích hoạt Shockwave chạy.
+
+Bước 7 — Dọn dẹp và chống lag
+Xóa hạt sau khi animation kết thúc (tránh rác DOM), dùng transform thay vì top/left để mượt, và tắt animation nếu người dùng bật chế độ "giảm chuyển động".
+
+---
+
+3. Thông số chung của 8 hạt
+
+Thông số Giá trị
+Số lượng 8 hạt
+Hình dạng Chấm tròn nhỏ
+Hướng bay Chia đều 8 hướng quanh tâm nút
+Điểm xuất phát Tâm nút
+Kết thúc Thu nhỏ + mờ dần rồi biến mất
+Xóa DOM Tự động xóa sau khi animation xong
+
+---
+
+4. Thông số chung của Shockwave
+
+Thông số Giá trị
+Phần tử ::before của nút
+Cách tạo sóng box-shadow
+Hướng lan Từ viền nút phình ra ngoài
+Kết thúc Mờ dần rồi biến mất
+Kích hoạt Khi nút có class .active
+Xóa DOM Không cần — dùng pseudo-element
+
+---
+
+5. Tóm gọn 1 dòng
+
+```
+8 hạt bay ra 8 hướng + Shockwave lan từ viền nút
+→ JS tạo hạt + toggle active, CSS lo chuyển động
+```
+
+
+
+
+
+--- lỗi thường gặp ---
+Sao click vào không thấy nó nổi lên
+Sao không thấy : shockwave nổi lên sóng khi click vào ô card

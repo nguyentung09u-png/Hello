@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floating Petals</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 40%, #2a1020 0%, #14060f 60%, #08020a 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #fff0f6;
+    overflow: hidden;
+  }
+
+  .bloom {
+    position: fixed; inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 45% at 25% 25%, rgba(255,140,180,.18), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 75% 70%, rgba(220,100,160,.14), transparent 70%);
+    filter: blur(60px);
+    animation: bloomDrift 24s ease-in-out infinite;
+  }
+  @keyframes bloomDrift {
+    0%,100% { transform: translate(0,0); }
+    50%     { transform: translate(-20px,15px); }
+  }
+
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; letter-spacing: -.02em; margin: 0 0 12px;
+    background: linear-gradient(135deg, #ffd8ea, #ffb0d4);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #e0a8c0; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="bloom" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+
+  <div class="content">
+    <h1>Floating Petals</h1>
+    <p>Cánh hoa hồng-trắng rơi xoay chậm.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let petals = [];
+
+  const COLORS = ['#ffd8ea','#ffb8d8','#ffe0ec','#ffc8dc','#f5b8d0','#ffffff'];
+
+  function count() { return Math.min(45, Math.max(18, Math.floor(W / 30))); }
+
+  function make(anywhere) {
+    const w = 6 + Math.random() * 12;
+    return {
+      x: Math.random() * W,
+      y: anywhere ? Math.random() * H : -30 - Math.random() * 60,
+      w,                    // bề rộng cánh
+      h: w * (0.55 + Math.random() * 0.3),  // bề cao (bầu dục)
+      vy: 0.3 + Math.random() * 0.7,        // rơi chậm
+      vx: (Math.random() - 0.5) * 0.3,      // trôi ngang
+      sway: Math.random() * Math.PI * 2,
+      swaySpeed: 0.4 + Math.random() * 0.6,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.02,     // xoay
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      alpha: 0.55 + Math.random() * 0.4,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (petals.length < need) petals.push(make(true));
+    if (petals.length > need) petals.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < petals.length; i++) {
+      const p = petals[i];
+      p.sway += 0.02 * p.swaySpeed;
+      p.x += p.vx + Math.cos(p.sway) * 0.5;
+      p.y += p.vy;
+      p.rot += p.vr;
+
+      // tái sinh khi rơi khỏi màn
+      if (p.y > H + 40) {
+        petals[i] = make(false);
+        continue;
+      }
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+
+      // cánh hoa = ellipse bầu dục
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
+
+      // gradient nhẹ để cánh có độ dày
+      const g = ctx.createLinearGradient(-p.w/2, 0, p.w/2, 0);
+      g.addColorStop(0, p.color + 'cc');
+      g.addColorStop(0.5, p.color);
+      g.addColorStop(1, p.color + 'cc');
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // viền sáng nhẹ
+      ctx.strokeStyle = 'rgba(255,255,255,.35)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // gân giữa cánh
+      ctx.beginPath();
+      ctx.moveTo(-p.w/2 + 1, 0);
+      ctx.lineTo(p.w/2 - 1, 0);
+      ctx.strokeStyle = 'rgba(255,255,255,.25)';
+      ctx.lineWidth = 0.4;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

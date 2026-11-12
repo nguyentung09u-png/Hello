@@ -1,0 +1,107 @@
+Overlay là gì
+
+Lớp phủ toàn màn hình, nằm trên trang, chặn tương tác với nội dung bên dưới. Dùng để yêu cầu người dùng bấm trước khi vào trang.
+
+Cách đưa nhạc vào
+
+Dùng thẻ <audio> với URL file nhạc:
+
+```html
+<audio id="bgMusic" loop>
+  <source src="URL_FILE_NHAC" type="audio/mpeg">
+</audio>
+```
+
+Cách phát nhạc
+
+Trình duyệt chặn autoplay nhạc nếu người dùng chưa tương tác. Phải gọi play() trong sự kiện click/touch thật.
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+  }
+  .overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .content {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .content.visible {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay">
+  <div>🎵</div>
+  <button id="startBtn">Bắt đầu</button>
+</div>
+
+<!-- Nội dung chính -->
+<div class="content" id="content">
+  Nội dung trang web
+</div>
+
+<!-- Nhạc -->
+<audio id="bgMusic" loop>
+  <source src="URL_FILE_NHAC" type="audio/mpeg">
+</audio>
+
+<script>
+const overlay = document.getElementById('overlay');
+const content = document.getElementById('content');
+const bgMusic = document.getElementById('bgMusic');
+
+function enterSite() {
+  // Phát nhạc (trong sự kiện click thật → chạy được)
+  bgMusic.volume = 0.4;
+  bgMusic.play().catch(err => console.warn('Lỗi phát nhạc:', err));
+
+  // Ẩn overlay, hiện nội dung
+  overlay.classList.add('hidden');
+  setTimeout(() => content.classList.add('visible'), 300);
+}
+
+// Bắt sự kiện click thật
+document.getElementById('startBtn').addEventListener('click', enterSite);
+overlay.addEventListener('click', enterSite);
+</script>
+
+</body>
+</html>
+```
+
+Tóm tắt luồng
+
+Bước Việc xảy ra
+1 Trang load → overlay hiện, nhạc chưa phát
+2 Người dùng click nút/overlay
+3 Gọi bgMusic.play() — chạy được vì là click thật
+4 Overlay ẩn, nội dung hiện
+
+Lưu ý
+
+· Tôi không chắc định dạng file nhạc của bạn — nếu là .mp3 dùng type="audio/mpeg", nếu .m4a dùng type="audio/mp4".
+· Nếu file nhạc ở domain khác, có thể bị chặn CORS. Cách chắc chắn nhất là để file nhạc cùng domain với trang web.
+· catch() sau play() để tránh lỗi im lặng khi trình duyệt từ chối.

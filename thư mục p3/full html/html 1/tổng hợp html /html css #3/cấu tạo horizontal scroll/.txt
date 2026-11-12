@@ -1,0 +1,40 @@
+Cách làm: Dùng display: flex + overflow-x: auto để tạo vùng cuộn ngang. Thêm scroll-snap-type để card tự căn khi dừng cuộn.
+
+---
+
+Code chung
+
+```html
+<div class="hscroll">
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+</div>
+
+<style>
+  .hscroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .card {
+    flex: 0 0 auto;
+    width: 220px;
+    height: 320px;
+    scroll-snap-align: center;
+  }
+</style>
+```
+
+---
+
+Lưu ý
+
+· flex: 0 0 auto — card không co lại, giữ kích thước cố định.
+· scroll-snap-type: x mandatory — bắt buộc card căn vào điểm snap khi dừng.
+· scroll-snap-align: center — card căn giữa vùng cuộn.
+· Tôi không chắc snap hoạt động giống nhau trên mọi trình duyệt — Safari iOS có thể khác đôi chút.
+· Muốn map cuộn chuột dọc sang ngang → thêm JS wheel event với scrollBy({ left: e.deltaY }).

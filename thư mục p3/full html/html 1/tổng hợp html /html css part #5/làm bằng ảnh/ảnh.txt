@@ -1,0 +1,65 @@
+Cách dùng ảnh bằng link
+
+Dùng thuộc tính src cho thẻ <img>, hoặc background-image cho CSS.
+
+Cách kiểm soát tỷ lệ rộng/cao
+
+Có 3 cách phổ biến:
+
+Cách Dùng khi
+aspect-ratio Khung chứa cố định tỷ lệ, ảnh tự co giãn
+object-fit: cover Ảnh phủ kín khung, giữ tỷ lệ gốc, cắt phần thừa
+padding-top (kỹ thuật cũ) Khi cần hỗ trợ trình duyệt cũ
+
+Code chung chung
+
+Cách 1: Dùng thẻ <img>
+
+```html
+<div class="card">
+  <img src="URL_ANH" alt="Mô tả">
+</div>
+```
+
+```css
+.card {
+  position: relative;
+  width: 300px;
+  aspect-ratio: 3 / 4;   /* tỷ lệ rộng : cao */
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* phủ kín, không méo */
+  object-position: center;
+}
+```
+
+
+Các tỷ lệ thường dùng
+
+Tỷ lệ CSS Dùng cho
+Vuông aspect-ratio: 1 / 1 Avatar, Instagram post
+Dọc nhẹ aspect-ratio: 3 / 4 Card, poster
+Dọc cao aspect-ratio: 9 / 16 TikTok, Shorts, Story
+Ngang aspect-ratio: 16 / 9 YouTube, banner
+
+So sánh object-fit
+
+Giá trị Kết quả
+cover Phủ kín khung, cắt phần thừa (phổ biến nhất)
+contain Vừa khung, có thể chừa khoảng trống
+fill Kéo giãn, có thể méo ảnh
+none Giữ kích thước gốc
+
+Tóm tắt
+
+· Ảnh: <img src="..."> hoặc background-image: url(...)
+· Tỷ lệ khung: aspect-ratio: rộng / cao
+· Ảnh không méo: object-fit: cover (img) hoặc background-size: cover (background)
+· Vị trí cắt: object-position / background-position
+
+Tôi không chắc bạn cần tỷ lệ cụ thể nào — nếu nói rõ (ví dụ 9:16 hay 3:4) mình viết đúng hơn.

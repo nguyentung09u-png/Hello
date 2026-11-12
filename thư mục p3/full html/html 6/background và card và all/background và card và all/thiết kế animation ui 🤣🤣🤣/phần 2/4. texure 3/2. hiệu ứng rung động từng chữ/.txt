@@ -1,0 +1,75 @@
+Tổng quan cách làm
+
+Glitch Shift gồm 4 bước:
+
+1. Tách chữ — mỗi chữ trong 1 <span>, xếp hàng ngang bằng flex.
+2. Keyframe — dùng translate() nhảy vị trí ngẫu nhiên, phần lớn thời gian đứng yên, chỉ giật trong khoảng % ngắn.
+3. steps(1) — để chữ giật cục, không chuyển động mượt.
+4. Stagger delay — mỗi chữ lệch pha để giật không đồng loạt.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Arial Black', sans-serif;
+  }
+
+  .glitch { display: flex; gap: 0.03em; font-size: 8rem; font-weight: 900; color: #e8e8f0; }
+
+  .glitch span {
+    display: inline-block;
+    animation: glitchShift 3s infinite steps(1);
+  }
+
+  /* Lệch pha mỗi chữ */
+  .glitch span:nth-child(1) { animation-delay: 0s; }
+  .glitch span:nth-child(2) { animation-delay: 0.3s; }
+  .glitch span:nth-child(3) { animation-delay: 0.6s; }
+  .glitch span:nth-child(4) { animation-delay: 0.9s; }
+  .glitch span:nth-child(5) { animation-delay: 1.2s; }
+
+  @keyframes glitchShift {
+    0%, 85%, 100% { transform: translate(0, 0); }
+    87% { transform: translate(-3px, 1px); }
+    89% { transform: translate(3px, -1px); }
+    91% { transform: translate(-2px, 2px); }
+    93% { transform: translate(2px, -2px); }
+    95% { transform: translate(-1px, -1px); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="glitch">
+    <span>G</span>
+    <span>L</span>
+    <span>I</span>
+    <span>T</span>
+    <span>C</span>
+  </div>
+
+</body>
+</html>
+```
+
+Biến thể:
+
+· Giật mạnh hơn → translate(-3px) → translate(-8px).
+· Giật nhanh hơn → 3s → 1.5s.
+· Giật mượt (không cục) → steps(1) → ease-in-out.
+· Rung liên tục → đổi mốc 85% → 0%.
+
+---
+
+🎯 Tóm 1 câu: Mỗi chữ trong <span> chạy keyframe translate() giật ngẫu nhiên + steps(1) để giật cục + animation-delay lệch pha.

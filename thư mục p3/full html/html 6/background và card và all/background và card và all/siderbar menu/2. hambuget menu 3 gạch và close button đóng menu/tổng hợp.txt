@@ -1,0 +1,91 @@
+Tổng quan cách làm:
+
+1. HTML: Tạo 2 thẻ <button>. Nút Hamburger chứa 3 thẻ <span>, nút Close chứa 2 thẻ <span>.
+2. CSS (Hamburger): Dùng display: flex cho thẻ bọc để xếp 3 gạch dọc, tạo màu cyan (#00e6b0) và hiệu ứng phát sáng (box-shadow).
+3. CSS (Close Button): Dùng position: relative cho thẻ bọc và position: absolute cho 2 gạch. Dùng transform: rotate(45deg) và rotate(-45deg) để tạo hình chữ X, tạo màu đỏ (#ff4040). Thêm flex-shrink: 0 để tránh bị bóp méo khi nằm trong flexbox.
+4. CSS (Chung): Thêm các trạng thái :hover, :active, :focus-visible cho cả hai nút.
+5. JavaScript: Gắn sự kiện click để gọi hàm đóng/mở. Cập nhật trạng thái aria-expanded (cho Hamburger) và aria-hidden (cho Sidebar).
+
+Dưới đây là code chung chung (chỉ tập trung vào 2 nút và logic cơ bản):
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamburger & Close Button</title>
+  <style>
+    /* CSS CHUNG */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #08090b; display: flex; gap: 2rem; padding: 2rem; }
+
+    .btn {
+      display: grid; place-items: center; cursor: pointer;
+      background: #0f1217; border: 1px solid #242b36;
+      transition: all 0.2s ease; user-select: none;
+    }
+    .btn:active { transform: scale(0.92); }
+
+    /* 1. HAMBURGER (☰) */
+    .hamburger { width: 52px; height: 52px; border-radius: 12px; }
+    .hamburger:hover { border-color: #2e3742; box-shadow: 0 0 15px rgba(0, 230, 176, 0.4); }
+    .hamburger:focus-visible { outline: 2px solid #00e6b0; }
+    
+    .hamburger .bars {
+      width: 24px; height: 17px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .hamburger .bars span {
+      width: 100%; height: 2px; background: #00e6b0;
+      box-shadow: 0 0 6px rgba(0, 230, 176, 0.6);
+    }
+
+    /* 2. CLOSE BUTTON (✕) */
+    .close-btn {
+      width: 44px; height: 44px; border-radius: 12px;
+      flex-shrink: 0; /* Chống bóp méo */
+    }
+    .close-btn:hover { border-color: #4a2428; box-shadow: 0 0 15px rgba(255, 64, 64, 0.4); }
+    .close-btn:focus-visible { outline: 2px solid #ff4040; }
+
+    .close-btn .x { position: relative; width: 20px; height: 20px; }
+    .close-btn .x span {
+      position: absolute; top: 50%; left: 50%;
+      width: 100%; height: 2px; background: #ff4040;
+      box-shadow: 0 0 6px rgba(255, 64, 64, 0.4);
+    }
+    .close-btn .x span:nth-child(1) { transform: translate(-50%, -50%) rotate(45deg); }
+    .close-btn .x span:nth-child(2) { transform: translate(-50%, -50%) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+  <!-- Nút Hamburger -->
+  <button class="btn hamburger" id="btnOpen" aria-label="Mở" aria-expanded="false">
+    <span class="bars"><span></span><span></span><span></span></span>
+  </button>
+
+  <!-- Nút Close -->
+  <button class="btn close-btn" id="btnClose" aria-label="Đóng">
+    <span class="x"><span></span><span></span></span>
+  </button>
+
+  <script>
+    // Logic JS chung
+    const btnOpen = document.getElementById('btnOpen');
+    const btnClose = document.getElementById('btnClose');
+
+    btnOpen.addEventListener('click', () => {
+      btnOpen.setAttribute('aria-expanded', 'true');
+      console.log('Mở Sidebar'); // Thêm logic mở sidebar tại đây
+    });
+
+    btnClose.addEventListener('click', () => {
+      btnOpen.setAttribute('aria-expanded', 'false');
+      console.log('Đóng Sidebar'); // Thêm logic đóng sidebar tại đây
+    });
+  </script>
+</body>
+</html>
+```

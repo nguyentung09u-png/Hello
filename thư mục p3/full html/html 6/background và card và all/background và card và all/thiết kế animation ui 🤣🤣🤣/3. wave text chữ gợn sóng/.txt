@@ -1,0 +1,85 @@
+Wave Text — Cách làm
+
+Tổng quan 3 bước
+
+Bước Việc làm
+1 HTML: tách mỗi ký tự thành 1 <span> bọc trong 1 khung cha
+2 CSS: cho mỗi span chạy cùng 1 @keyframes nhô lên
+3 CSS: gán animation-delay so le để tạo làn sóng
+
+---
+
+Code
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0e1a;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+  }
+
+  .wave {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #a855f7;
+    display: flex;
+    gap: 8px;
+  }
+
+  .wave span {
+    display: inline-block;              /* để transform hoạt động */
+    animation: waveUp 1.2s ease-in-out infinite;
+  }
+
+  /* Lệch nhau 0.1s để tạo sóng chạy */
+  .wave span:nth-child(1) { animation-delay: 0s; }
+  .wave span:nth-child(2) { animation-delay: 0.1s; }
+  .wave span:nth-child(3) { animation-delay: 0.2s; }
+  .wave span:nth-child(4) { animation-delay: 0.3s; }
+  .wave span:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes waveUp {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-25px); }
+  }
+</style>
+</head>
+<body>
+
+  <h1 class="wave">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </h1>
+
+</body>
+</html>
+```
+
+---
+
+Ánh xạ luồng ↔ Code
+
+Bước Trong code
+Tách ký tự Mỗi ký tự là 1 <span>
+Xếp ngang .wave { display: flex; gap: 8px; }
+Cho transform chạy .wave span { display: inline-block; }
+Nhô lên @keyframes waveUp với translateY(-25px)
+Lệch sóng animation-delay 0s → 0.4s theo nth-child
+
+---
+
+🎯 Tóm 1 câu
+
+Làm bằng cách tách mỗi ký tự vào 1 <span>, cho mỗi span chạy cùng 1 @keyframes nhô lên 25px, rồi lệch animation-delay 0.1s giữa các ký tự để tạo làn sóng chạy qua chữ.

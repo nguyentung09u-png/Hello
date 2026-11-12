@@ -1,0 +1,231 @@
+Tổng quan cách làm
+
+Cấu trúc 4 phần:
+
+1. HTML — 2 khối riêng biệt: <button class="fab"> và <div class="panel"> (không lồng nhau).
+2. CSS FAB — position: fixed + border-radius: 50% + gradient + pulse + class .is-hidden (visibility: hidden; pointer-events: none).
+3. CSS Panel — position: fixed + bo góc + shadow + mặc định ẩn (opacity: 0), thêm class .open thì hiện.
+4. JS — 2 hàm openPanel() / closePanel() thêm/xóa class; gắn vào sự kiện click FAB, click X, nhấn ESC.
+
+Nguyên lý cốt lõi (suy luận có căn cứ):
+
+· Dùng class thay vì set style trực tiếp → CSS tự lo transition.
+· visibility: hidden + pointer-events: none cho FAB khi ẩn — giữ vị trí (không dùng display: none vì sẽ reset transform, gây nhảy vị trí).
+· opacity + transform + transition cho panel — mở/đóng mượt.
+· Chỉ 2 trạng thái — ĐÓNG / MỞ, chuyển bằng toggle class.
+
+Tôi không chắc:
+
+· Bạn có cần giữ kéo thả FAB hay không — mình giữ, nhưng có thể bỏ.
+· Vị trí panel bạn muốn cố định hay đi theo FAB — mình để cố định góc dưới-phải.
+
+---
+
+Code chung chung
+
+```html
+<!-- FAB -->
+<button class="fab" id="fab" type="button" aria-label="Mở panel">
+  <svg viewBox="0 0 24 24" ...>...</svg>
+</button>
+
+<!-- Panel -->
+<div class="panel" id="panel" role="dialog" aria-label="Menu">
+  <div class="panel-header">
+    <span>Menu</span>
+    <button class="close-btn" id="closeBtn" type="button" aria-label="Đóng">✕</button>
+  </div>
+  <div class="panel-body">
+    <p>Nội dung panel…</p>
+  </div>
+</div>
+```
+
+```css
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  left: 0; top: 0;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 0;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(16,185,129,.45);
+  z-index: 10000;
+  transition: opacity .2s ease, visibility .2s ease;
+  touch-action: none;
+}
+.fab svg { width: 30px; height: 30px; pointer-events: none; }
+
+/* Trạng thái ẩn — dùng visibility + pointer-events */
+.fab.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ===== Panel ===== */
+.panel {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  background: #0f1729;
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+
+  /* Trạng thái đóng */
+  opacity: 0;
+  transform: translateY(12px) scale(.96);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 9999;
+}
+
+/* Trạng thái mở */
+.panel.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+```js
+(function () {
+  const fab      = document.getElementById('fab');
+  const panel    = document.getElementById('panel');
+  const closeBtn = document.getElementById('closeBtn');
+
+  // ---- 2 hàm chuyển trạng thái ----
+  function openPanel() {
+    panel.classList.add('open');
+    fab.classList.add('is-hidden');       // ẩn FAB
+  }
+  function closePanel() {
+    panel.classList.remove('open');
+    fab.classList.remove('is-hidden');    // hiện FAB
+  }
+
+  // ---- Gắn sự kiện ----
+  fab.addEventListener('click', openPanel);
+  closeBtn.addEventListener('click', closePanel);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanel();
+  });
+})();
+```
+
+---
+
+Luồng chạy
+
+```
+ĐÓNG (mặc định)
+  FAB: hiện  |  Panel: ẩn
+       │
+       │  click FAB
+       ▼
+MỞ
+  FAB: ẩn    |  Panel: hiện
+       │
+       │  click X hoặc ESC
+       ▼
+ĐÓNG (quay lại ban đầu)
+```
+
+---
+
+Nếu cần kéo thả FAB
+
+Thêm block Pointer Events (giống các bản trước):
+
+```js
+let dragging = false, pointerId = null, moved = false;
+let startX = 0, startY = 0, baseX = 0, baseY = 0;
+const FAB_W = 60, FAB_H = 60, THRESHOLD = 6;
+let posX = 0, posY = 0;
+
+function setPos(x, y) {
+  posX = Math.max(0, Math.min(x, innerWidth  - FAB_W));
+  posY = Math.max(0, Math.min(y, innerHeight - FAB_H));
+  fab.style.transform = `translate(${posX}px, ${posY}px)`;
+}
+
+setPos(innerWidth - FAB_W - 20, innerHeight - FAB_H - 20);
+
+fab.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0 && e.pointerType === 'mouse') return;
+  dragging = true; moved = false;
+  pointerId = e.pointerId;
+  startX = e.clientX; startY = e.clientY;
+  baseX = posX; baseY = posY;
+  try { fab.setPointerCapture(pointerId); } catch(err) {}
+  e.preventDefault();
+});
+
+fab.addEventListener('pointermove', (e) => {
+  if (!dragging || e.pointerId !== pointerId) return;
+  const dx = e.clientX - startX, dy = e.clientY - startY;
+  if (!moved && (Math.abs(dx) > THRESHOLD || Math.abs(dy) > THRESHOLD)) {
+    moved = true;
+    fab.classList.add('dragging');
+  }
+  if (moved) setPos(baseX + dx, baseY + dy);
+});
+
+function endDrag() {
+  if (!dragging) return;
+  dragging = false;
+  fab.classList.remove('dragging');
+  try { fab.releasePointerCapture(pointerId); } catch(err) {}
+  pointerId = null;
+}
+
+fab.addEventListener('pointerup', endDrag);
+fab.addEventListener('pointercancel', endDrag);
+fab.addEventListener('lostpointercapture', endDrag);
+
+// Chặn click nếu vừa kéo
+fab.addEventListener('click', (e) => {
+  if (moved) { e.preventDefault(); e.stopPropagation(); return; }
+  openPanel();
+});
+
+window.addEventListener('resize', () => setPos(posX, posY));
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Đổi màu FAB background của .fab
+Đổi vị trí panel right/bottom của .panel
+Bỏ kéo thả Xóa block Pointer Events
+Đổi tốc độ mở/đóng transition ở .panel và .fab
+FAB không chiếm chỗ khi ẩn Đổi visibility: hidden → display: none (nhưng sẽ mất vị trí)
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: visibility: hidden + pointer-events: none là cách ẩn element không làm mất vị trí; class toggle là cách chuẩn để đổi trạng thái UI qua CSS transition.
+· Tôi không chắc bạn muốn panel cố định hay đi theo FAB — code trên để cố định.
+· Tôi không chắc bạn có cần giữ kéo thả không — nếu không cần có thể bỏ toàn bộ block Pointer Events.
+
+🎯 Tóm 1 câu: Tách FAB và Panel thành 2 khối position: fixed riêng, dùng class .is-hidden (visibility + pointer-events) cho FAB và .open (opacity + transform) cho Panel, kèm 2 hàm openPanel() / closePanel() gắn vào click FAB, click X, và ESC.

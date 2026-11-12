@@ -1,0 +1,55 @@
+Cách làm Full-screen Carousel + Fade & Slide: mỗi slide phủ toàn màn hình bằng position: absolute; inset: 0. Card cũ fade ra + trượt sang trái, card mới fade vào + trượt từ phải về giữa.
+
+---
+
+Code chung
+
+CSS:
+
+```css
+.card {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card.active {
+  opacity: 1;
+  transform: translateX(0);
+  z-index: 10;
+}
+
+.card.exit {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+```
+
+JS:
+
+```js
+function show(i) {
+  const oldCard = cards[currentIndex];
+  const newCard = cards[i];
+
+  oldCard.classList.remove('active');
+  oldCard.classList.add('exit');
+  setTimeout(() => oldCard.classList.remove('exit'), 800);
+
+  newCard.classList.add('active');
+  currentIndex = i;
+}
+```
+
+---
+
+Lưu ý
+
+· cubic-bezier(0.4, 0, 0.2, 1) — easing mượt, không giật.
+· 0.8s — thời gian fade+slide. Muốn chậm hơn đổi 1s, nhanh hơn 0.5s.
+· Class exit — đánh dấu card cũ, tự xóa sau 800ms để tránh rác.
+· Tôi không chắc hiệu ứng mượt trên mọi thiết bị — cần test thực tế.
+· Chống spam: thêm cờ isAnimating để tránh bấm liên tục chồng animation.

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#03070c">
+<title>Dark Tech Background — Teal Particle Nebula</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#03070c;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 120% at 50% 40%, #07141c 0%, #040b12 45%, #020509 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Nebula blobs (transform-only, GPU) ---------- */
+  .nebula{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .nebula i{
+    position:absolute;
+    border-radius:50%;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .nebula i:nth-child(1){
+    width:70vmax;height:70vmax;left:-20vmax;top:-15vmax;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(20,184,166,.20) 0%,
+      rgba(20,184,166,.06) 40%,
+      rgba(20,184,166,0) 70%);
+    animation:nebA 30s ease-in-out infinite alternate;
+  }
+  .nebula i:nth-child(2){
+    width:80vmax;height:80vmax;right:-28vmax;bottom:-20vmax;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(14,116,144,.22) 0%,
+      rgba(14,116,144,.07) 42%,
+      rgba(14,116,144,0) 72%);
+    animation:nebB 36s ease-in-out infinite alternate;
+  }
+  .nebula i:nth-child(3){
+    width:55vmax;height:55vmax;left:30vmax;top:20vmax;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(45,212,191,.12) 0%,
+      rgba(45,212,191,.04) 45%,
+      rgba(45,212,191,0) 72%);
+    animation:nebC 24s ease-in-out infinite alternate;
+  }
+  @keyframes nebA{
+    from{transform:translate3d(0,0,0) scale(1);}
+    to{transform:translate3d(8vmax,6vmax,0) scale(1.15);}
+  }
+  @keyframes nebB{
+    from{transform:translate3d(0,0,0) scale(1.08);}
+    to{transform:translate3d(-9vmax,-7vmax,0) scale(0.92);}
+  }
+  @keyframes nebC{
+    from{transform:translate3d(0,0,0) scale(1);}
+    to{transform:translate3d(-5vmax,5vmax,0) scale(1.12);}
+  }
+
+  /* ---------- Arc rings (transform-only, GPU) ---------- */
+  .arcs{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:0;
+    height:0;
+    pointer-events:none;
+  }
+  .arcs i{
+    position:absolute;
+    left:0;
+    top:0;
+    width:70vmin;
+    height:70vmin;
+    margin-left:-35vmin;
+    margin-top:-35vmin;
+    border-radius:50%;
+    border:1px solid transparent;
+    border-top-color:rgba(45,212,191,.55);
+    border-right-color:rgba(20,184,166,.22);
+    animation:arcSpin linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .arcs i:nth-child(1){animation-duration:22s;}
+  .arcs i:nth-child(2){
+    width:50vmin;height:50vmin;margin-left:-25vmin;margin-top:-25vmin;
+    border-top-color:rgba(94,234,212,.45);
+    border-right-color:rgba(45,212,191,.18);
+    animation-duration:16s;animation-direction:reverse;
+  }
+  .arcs i:nth-child(3){
+    width:90vmin;height:90vmin;margin-left:-45vmin;margin-top:-45vmin;
+    border-top-color:rgba(20,184,166,.30);
+    border-right-color:rgba(14,116,144,.15);
+    animation-duration:30s;
+  }
+  @keyframes arcSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Fine dotted orbit (static painted) ---------- */
+  .orbit{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:120vmin;
+    height:120vmin;
+    margin-left:-60vmin;
+    margin-top:-60vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background-image:radial-gradient(rgba(94,234,212,.35) 1px, transparent 1.5px);
+    background-size:10px 10px;
+    -webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 58%, #000 59%, #000 60%, transparent 61%);
+            mask-image:radial-gradient(circle at 50% 50%, transparent 58%, #000 59%, #000 60%, transparent 61%);
+    opacity:.5;
+  }
+
+  /* ---------- Core glow ---------- */
+  .core{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:24vmin;
+    height:24vmin;
+    margin-left:-12vmin;
+    margin-top:-12vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(94,234,212,.22) 0%,
+      rgba(20,184,166,.08) 45%,
+      rgba(20,184,166,0) 72%);
+    animation:coreBreath 6s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes coreBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.8;}
+    50%{transform:translate3d(0,0,0) scale(1.18);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 40%, rgba(0,0,0,.48) 80%, rgba(0,0,0,.78) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .nebula i,.arcs i,.core{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="nebula">
+    <i></i><i></i><i></i>
+  </div>
+  <div class="orbit"></div>
+  <div class="arcs">
+    <i></i><i></i><i></i>
+  </div>
+  <div class="core"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+Tổng quan cách làm (3 lớp)
+
+```
+LỚP 1 — HTML   <button id="autoAimBtn">🎯</button> trong #hud
+LỚP 2 — CSS    position:absolute + top + right + hình tròn vàng + :active/.active
+LỚP 3 — JS     biến autoAim + gắn click + toggle class + dùng trong update
+```
+
+Nguyên tắc chung: HTML dựng nút, CSS ghim vào góc trên phải và tạo hình, JS đảo biến boolean và đổi giao diện.
+
+---
+
+Code chung chung
+
+1. HTML
+
+```html
+<div id="hud">                <!-- cha có pointer-events:none -->
+  <button id="autoAimBtn" title="Tự ngắm">🎯</button>
+</div>
+```
+
+2. CSS
+
+```css
+/* Cha — chứa tất cả UI, không nhận click */
+#hud{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Nút AUTO AIM — ghim góc trên phải */
+#autoAimBtn{
+  position: absolute;
+  top: 14px;
+  right: 98px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(20,20,10,.72);
+  border: 1px solid rgba(245,215,110,.3);
+  color: #f5d76e;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;                       /* bật lại click */
+  z-index: 7;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s, background .15s, box-shadow .15s;
+}
+
+#autoAimBtn:active{
+  transform: scale(.9);
+}
+
+#autoAimBtn.active{
+  background: linear-gradient(180deg,#fff4c2,#f5d76e 40%,#b8860b 100%);
+  color: #2a1a00;
+  border-color: #f5d76e;
+  box-shadow: 0 0 16px rgba(245,215,110,.7);
+}
+```
+
+3. JS — state + sự kiện
+
+```js
+let autoAim = false;
+
+const autoAimBtn = document.getElementById('autoAimBtn');
+
+autoAimBtn.addEventListener('click', e => {
+  e.stopPropagation();                        // không lan ra canvas
+  autoAim = !autoAim;                         // đảo trạng thái
+  autoAimBtn.classList.toggle('active', autoAim);
+});
+
+autoAimBtn.addEventListener('pointerdown', e => e.stopPropagation());
+```
+
+4. JS — dùng trong update
+
+```js
+function update(dt){
+  // ... logic khác ...
+
+  if (autoAim){
+    const target = nearestZombie(heroX, heroY);
+    if (target){
+      fireArrow(heroX, heroY - 90, target.x, target.y - 12, 3.2, '#f5d76e', 780, 1.4);
+    }
+  }
+  // hoặc:
+  // if (autoAim) { ... } else if (aim.active) { ... }
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· 34×34px — tôi chọn theo trực giác; khuyến nghị vùng chạm mobile thường ≥ 44px nên có thể hơi nhỏ.
+· right: 98px — tôi chọn để 3 nút (auto-aim, mute, menu) cách đều 42px; tôi không chắc đây là khoảng cách bạn muốn.
+· Emoji 🎯 hiển thị khác nhau giữa Windows/Android/iOS — tôi không chắc nó trông đồng nhất trên mọi thiết bị.
+· stopPropagation() ở cả click và pointerdown — tôi tin đủ để nút không kích hoạt canvas, nhưng trên một số trình duyệt mobile có thể vẫn lan; tôi không test được mọi trình duyệt.
+· .active class — tôi dùng để đổi màu khi bật; tôi không chắc bạn muốn thêm hiệu ứng khác (pulse, đổi icon...).
+· Vị trí dùng trong update — tôi đưa ví dụ if (autoAim) độc lập hoặc if/else if với aim.active; tôi không chắc bạn muốn auto-aim ưu tiên hơn hay song song với chạm tay.
+
+---
+
+🎯 Tóm 1 câu: Làm nút AUTO AIM ghim góc trên phải = HTML <button id="autoAimBtn">🎯</button> trong #hud (cha có pointer-events:none), CSS position:absolute; top:14px; right:98px + nút tròn 34×34 vàng với pointer-events:auto + :active co lại + .active sáng vàng, JS gắn click (có stopPropagation) để đảo biến autoAim và classList.toggle('active', autoAim), rồi trong update dùng if (autoAim) để tự bắn vào nearestZombie.

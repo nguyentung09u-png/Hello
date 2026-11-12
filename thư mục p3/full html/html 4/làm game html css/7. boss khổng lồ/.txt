@@ -1,0 +1,269 @@
+👹 HỆ THỐNG 2 PHASE (ZOMBIE → BOSS) — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Hệ thống 2 phase = 1 biến quyết định + 1 mảng chung + 2 điều kiện chuyển:
+
+```
+game.phase = 'zombie'  →  spawn zombie → hết → goToBossPhase()
+game.phase = 'boss'    →  spawn boss   → hết → endLevel()
+```
+
+Điểm mấu chốt: cả zombie và boss dùng chung mảng enemies[], chỉ khác ở cờ giant: true/false. Biến game.phase quyết định đang ở phase nào.
+
+---
+
+🔍 Năm bước chính
+
+Bước 1 — Khai báo biến phase
+
+```js
+const game = {
+  phase: 'zombie',    // 'zombie' | 'boss'
+  spawnLeft: 0,       // số địch còn lại chưa spawn
+  spawnTimer: 0,
+  waveActive: false
+};
+```
+
+Bước 2 — Viết hàm thuần f(level)
+
+Mỗi chỉ số boss là hàm thuần theo level:
+
+```js
+function bossCount(lv) { return Math.min(1 + Math.floor((lv-1)/8), 4); }
+function bossHP(lv)    { return zombieHP(lv) * 8; }
+function bossDMG(lv)   { return zombieDMG(lv) * 4; }
+function bossSpeed(lv) { return zombieSpeed(lv) * 0.5; }
+```
+
+Bước 3 — Hàm chuyển phase goToBossPhase()
+
+```js
+function goToBossPhase() {
+  game.phase = 'boss';
+  game.spawnLeft = bossCount(game.level);
+  game.spawnTimer = 0.5;
+  showBanner('👹 BOSS!', true);
+  // flash đỏ + shake
+}
+```
+
+Bước 4 — Hàm spawn boss
+
+```js
+function spawnBoss() {
+  const e = {
+    x, y, hp: bossHP(lv), maxHp: bossHP(lv),
+    speed: bossSpeed(lv),
+    dmg: bossDMG(lv),
+    // ...
+    giant: true      // ← cờ đánh dấu
+  };
+  enemies.push(e);   // ← cùng mảng với zombie
+}
+```
+
+Bước 5 — 2 điều kiện chuyển trong update()
+
+```js
+if (game.phase === 'zombie') {
+  // spawn zombie
+  } else if (enemies.filter(e => !e.giant).length === 0) {
+    goToBossPhase();       // ← hết zombie
+  }
+} else if (game.phase === 'boss') {
+  // spawn boss
+  } else if (enemies.length === 0) {
+    endLevel();             // ← hết boss
+  }
+}
+```
+
+Điểm quan trọng:
+
+· Hết zombie: đếm chỉ !giant → bỏ qua boss đang sống
+· Hết boss: đếm tất cả enemies.length → vì lúc này chỉ còn boss
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. STATE
+// ============================
+const game = {
+  level: 1,
+  phase: 'zombie',      // 'zombie' | 'boss'
+  spawnLeft: 0,
+  spawnTimer: 0,
+  waveActive: false,
+  restTimer: 2
+};
+
+let enemies = [];
+
+// ============================
+// 2. CÔNG THỨC THEO LEVEL
+// ============================
+function zombieCount(lv) { return Math.min(3 + lv * 2, 60); }
+function zombieHP(lv)    { return Math.min(24 + lv * 6, 400); }
+function zombieDMG(lv)   { return Math.min(5.5 + lv * 0.85, 40); }
+function zombieSpeed(lv) { return 44 + Math.min(lv * 3.2, 46); }
+function spawnInterval(lv){ return Math.max(0.28, 1.05 - lv * 0.05); }
+
+function bossCount(lv) {
+  return Math.min(1 + Math.floor((lv - 1) / 8), 4);
+}
+function bossHP(lv)    { return zombieHP(lv) * 8; }
+function bossDMG(lv)   { return zombieDMG(lv) * 4; }
+function bossSpeed(lv) { return zombieSpeed(lv) * 0.5; }
+
+// ============================
+// 3. BẮT ĐẦU MÀN
+// ============================
+function startLevel() {
+  game.waveActive = true;
+  game.phase = 'zombie';
+  game.spawnLeft = zombieCount(game.level);
+  game.spawnTimer = 0;
+  showBanner('MÀN ' + game.level, false);
+}
+
+// ============================
+// 4. SPAWN ZOMBIE THƯỜNG
+// ============================
+function spawnEnemy() {
+  const lv = game.level;
+  const e = {
+    x: rand(-40, W*0.14),
+    y: rand(G_TOP+10, G_BOT),
+    hp: zombieHP(lv), maxHp: zombieHP(lv),
+    speed: zombieSpeed(lv),
+    dmg: zombieDMG(lv),
+    atkCd: rand(0, 0.6), attackAnim: 0,
+    face: 1, phase: rand(0, 12),
+    moving: true, flash: 0,
+    giant: false                 // ← KHÔNG phải boss
+  };
+  enemies.push(e);
+}
+
+// ============================
+// 5. SPAWN BOSS
+// ============================
+function spawnBoss() {
+  const lv = game.level;
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const e = {
+    x: side < 0 ? rand(-60, -20) : rand(W + 20, W + 60),
+    y: rand(G_TOP + 60, G_BOT - 40),
+    hp: bossHP(lv), maxHp: bossHP(lv),
+    speed: bossSpeed(lv),
+    dmg: bossDMG(lv),
+    atkCd: rand(0, 0.6), attackAnim: 0,
+    face: side < 0 ? 1 : -1, phase: rand(0, 12),
+    moving: true, flash: 0,
+    giant: true                  // ← LÀ boss
+  };
+  enemies.push(e);               // ← cùng mảng
+  spawnParticles(e.x, e.y - 30, '#ff2020', 32);
+  shake = Math.min(shake + 6, 14);
+}
+
+// ============================
+// 6. CHUYỂN PHASE
+// ============================
+function goToBossPhase() {
+  game.phase = 'boss';
+  game.spawnLeft = bossCount(game.level);
+  game.spawnTimer = 0.5;
+  showBanner('👹 BOSS!', true);
+  shake = Math.min(shake + 10, 16);
+}
+
+// ============================
+// 7. UPDATE — LOGIC 2 PHASE
+// ============================
+function update(dt) {
+  if (state !== 'playing') return;
+
+  if (!game.waveActive) {
+    game.restTimer -= dt;
+    if (game.restTimer <= 0) startLevel();
+    return;
+  }
+
+  // ---- PHASE ZOMBIE ----
+  if (game.phase === 'zombie') {
+    if (game.spawnLeft > 0) {
+      game.spawnTimer -= dt;
+      if (game.spawnTimer <= 0) {
+        spawnEnemy();
+        game.spawnLeft--;
+        game.spawnTimer = spawnInterval(game.level);
+      }
+    } else if (enemies.filter(e => !e.giant).length === 0) {
+      goToBossPhase();                     // ← chuyển phase
+    }
+  }
+  // ---- PHASE BOSS ----
+  else if (game.phase === 'boss') {
+    if (game.spawnLeft > 0) {
+      game.spawnTimer -= dt;
+      if (game.spawnTimer <= 0) {
+        spawnBoss();
+        game.spawnLeft--;
+        game.spawnTimer = 0.7;
+      }
+    } else if (enemies.length === 0) {
+      endLevel();                          // ← qua màn
+    }
+  }
+}
+
+// ============================
+// 8. KẾT THÚC MÀN
+// ============================
+function endLevel() {
+  game.waveActive = false;
+  game.restTimer = 3;
+  game.level++;
+
+  if (game.level > MAX_LEVEL) { winGame(); return; }
+
+  makeArmy();                 // hồi + thêm lính
+  updateHUD();
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+bossCount công thức 1 + lv/8 cap 4 Số boss theo level
+bossHP hệ số × 8 Boss trâu hơn/ít hơn
+bossDMG hệ số × 4 Boss đánh mạnh/ít hơn
+bossSpeed hệ số × 0.5 Boss chậm/nhanh
+spawnTimer boss 0.7s Boss spawn nhanh/chậm
+cờ giant true/false Phân biệt boss với zombie
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Hệ số ×8/×4/×0.5 — tôi đề xuất theo trực giác, chưa test cân bằng. Boss level 1 có thể hơi mạnh.
+· Công thức 1 + floor((lv-1)/8) — tôi chọn, chưa có dữ liệu tối ưu. Có thể cần ít hơn (1-2) hoặc nhiều hơn (5-6).
+· enemies.filter(e => !e.giant).length === 0 chạy mỗi frame — có thể tốn CPU nếu mảng lớn. Tôi không chắc đáng kể, nhưng có thể tối ưu bằng biến đếm riêng.
+· Dùng chung mảng enemies[] cho cả 2 phase — đơn giản nhưng khó tách logic nếu sau này muốn zombie và boss có hành vi rất khác. Có thể cần 2 mảng riêng nếu mở rộng.
+· Cờ giant là tên gọi — có thể đổi thành boss cho rõ ràng hơn (tuỳ gu).
+· Không có animation khi chuyển phase (chỉ banner + flash + shake). Nếu muốn hoành tráng hơn, cần thêm code.
+· Boss spawn ở mép trái/phải — nếu muốn spawn từ giữa hoặc từ trên trời rơi xuống, đổi công thức x, y trong spawnBoss().
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: khai báo biến game.phase = 'zombie' + viết 4 hàm thuần bossCount/bossHP/bossDMG/bossSpeed (số boss 1→4, HP ×8, dmg ×4, speed ×0.5) + hàm goToBossPhase() đổi phase + hàm spawnBoss() push vào chung mảng enemies[] với cờ giant: true + trong update() 2 điều kiện: hết zombie (enemies.filter(e => !e.giant).length === 0) → goToBossPhase(), hết boss (enemies.length === 0) → endLevel().

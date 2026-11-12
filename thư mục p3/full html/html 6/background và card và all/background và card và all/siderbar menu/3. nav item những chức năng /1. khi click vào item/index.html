@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nav Item — Đầy đủ, không tap highlight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sa-panel: #070E13;
+      --sa-edge: #1A242C;
+      --sa-ink: #FFFFFF;
+      --sa-headline: #64748B;
+      --sa-row: #1E293B;
+      --sa-row-hover: rgba(30, 41, 59, 0.5);
+      --radius-sm: 8px;
+      --font-main: 'Onest', system-ui, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent; /* ← xóa tap highlight toàn cục */
+    }
+
+    body {
+      background: #020617;
+      color: var(--sa-ink);
+      font-family: var(--font-main);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .demo-frame {
+      width: 280px;
+      background: var(--sa-panel);
+      border: 1px solid var(--sa-edge);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sa-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .sa-group-head {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sa-headline);
+      font-weight: 600;
+      padding: 0 12px;
+      margin-bottom: 4px;
+    }
+
+    .sa-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--sa-headline);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s, background 0.2s;
+      -webkit-tap-highlight-color: transparent; /* ← cho link */
+      outline: none;                             /* ← xóa viền focus mặc định */
+    }
+
+    .sa-link:hover {
+      color: var(--sa-ink);
+      background: var(--sa-row-hover);
+    }
+
+    .sa-link[aria-current="page"] {
+      color: var(--sa-ink);
+      background: var(--sa-row);
+    }
+
+    .sa-link-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sa-link-icon svg { width: 100%; height: 100%; }
+    .sa-link-text { flex: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="demo-frame">
+    <div class="sa-group">
+      <div class="sa-group-head">Main</div>
+
+      <a href="#" class="sa-link" aria-current="page">
+        <div class="sa-link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="sa-link-text">Dashboard</span>
+      </a>
+
+      <a href="#" class="sa-link">
+        <div class="sa-link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 20V10M12 20V4M6 20v-6"></path>
+          </svg>
+        </div>
+        <span class="sa-link-text">Analytics</span>
+      </a>
+
+      <a href="#" class="sa-link">
+        <div class="sa-link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span class="sa-link-text">Users</span>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

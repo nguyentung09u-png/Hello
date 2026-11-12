@@ -1,0 +1,94 @@
+Full Liquid Fill — Cách làm
+
+🧩 Nguyên lý chung
+
+Tạo 1 lớp giả (::before) nằm trong nút, neo ở đáy, cao 0. Khi hover, cho nó cao 100% → khối màu trồi lên lấp đầy. Chữ đặt nổi trên khối màu nhờ z-index.
+
+```
+Bình thường:   [    nút trống    ]
+Hover:         [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓]  ← khối màu dâng
+```
+
+---
+
+🪜 4 bước làm
+
+Bước Việc Công cụ
+1 Nút làm mốc + cắt tràn position: relative + overflow: hidden
+2 Tạo khối màu neo đáy ::before + position: absolute + bottom: 0
+3 Khối cao 0, chìm dưới chữ height: 0 + z-index: -1
+4 Hover → cao 100% transition + .liquid:hover::before
+
+---
+
+💻 Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Full Liquid Fill</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #0a0e1a;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* ===== NÚT GỐC ===== */
+  .liquid {
+    position: relative;    /* mốc cho ::before */
+    padding: 1rem 2.6rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fff;
+    background: transparent;
+    border: 2px solid #a855f7;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;      /* cắt khối màu gọn trong viền */
+    z-index: 1;            /* giữ chữ nổi trên */
+  }
+
+  /* ===== KHỐI CHẤT LỎNG ===== */
+  .liquid::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;             /* neo đáy */
+    width: 100%;
+    height: 0;             /* ban đầu cao 0 */
+    background: linear-gradient(180deg, #a855f7, #ec4899);
+    transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: -1;           /* chìm dưới chữ */
+  }
+
+  /* ===== HOVER → DÂNG ĐẦY ===== */
+  .liquid:hover::before {
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+  <button class="liquid">Liquid Fill</button>
+
+</body>
+</html>
+```
+
+---
+
+🎯 Tóm 1 câu
+
+Tạo nút position: relative + overflow: hidden, dùng ::before neo đáy (bottom: 0) cao 0 và z-index: -1, khi hover đổi height: 100% qua transition — khối màu trồi lên lấp đầy nút, chữ vẫn nổi trên.
+
+---
+
+Lưu ý: overflow: hidden cần thiết để khối màu không tràn ra ngoài viền nút. Muốn thành Wave Fill thì thêm ::after hình tròn xoay hoặc border-radius động — phần này tôi chưa đưa vào code trên.

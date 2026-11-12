@@ -1,0 +1,29 @@
+Làm background Rounded Rectangle khung ngang (vertical)
+Card thơ chủ đề tình yêu
+
+
+Mỗi card mỗi bài thơ thả thính khác
+2 dòng 
+
+
+20 bài thơ 
+
+
+Làm card như yêu cầu
+
+
+
+hoặc
+
+Làm background Rounded Rectangle khung dọc (vertical)
+Card thơ chủ đề tình yêu
+
+
+Mỗi card mỗi bài thơ thả thính khác
+2 dòng 
+
+
+20 bài thơ 
+
+
+Làm card như yêu cầu

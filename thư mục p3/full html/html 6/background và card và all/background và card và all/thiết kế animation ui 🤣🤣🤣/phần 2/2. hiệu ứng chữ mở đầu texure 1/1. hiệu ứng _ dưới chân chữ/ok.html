@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .text { display: flex; gap: 0.05em; font-size: 6rem; font-weight: 900; }
+
+  .text span {
+    position: relative;              /* để ::after neo theo chữ */
+    color: #a855f7;
+  }
+
+  /* Gạch chân */
+  .text span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 0;                        /* ban đầu chưa có gì */
+    height: 4px;
+    background: linear-gradient(90deg, #ff5c8a, #38bdf8);
+    border-radius: 2px;
+    transition: width 0.4s ease;     /* chạy dài ra mượt */
+  }
+
+  /* Khi active → gạch chạy hết chiều ngang chữ */
+  .text span.active::after {
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+  <div class="text" id="text">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.text span');
+  let i = 0;
+
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[i].classList.add('active');
+    i = (i + 1) % spans.length;
+  }, 800);
+</script>
+</body>
+</html>

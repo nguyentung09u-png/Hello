@@ -1,0 +1,106 @@
+Tổng quan cách làm
+
+RGB Color Wave gồm 4 bước:
+
+1. Tách chữ — mỗi chữ trong <span>, kèm data-char, xếp hàng ngang bằng flex.
+2. Chữ gốc tối — color tối, chưa sáng.
+3. 2 lớp RGB ẩn — ::before (xanh lơ, lệch trái) + ::after (xanh đậm, lệch phải), đặt opacity: 0 + mix-blend-mode: screen.
+4. JS chạy tuần tự — setInterval bật .active cho từng chữ → neon + RGB hiện lên, quay vòng bằng %.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Arial Black', sans-serif;
+  }
+
+  .text { display: flex; gap: 0.05em; font-size: 8rem; font-weight: 900; color: #1a1a2e; }
+
+  .text span {
+    position: relative;
+    display: inline-block;
+    transition: color 0.4s ease, text-shadow 0.4s ease;
+  }
+
+  /* Lớp xanh lơ — lệch trái */
+  .text span::before {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    color: #00e5ff;
+    transform: translate(-4px, 0);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    mix-blend-mode: screen;
+  }
+
+  /* Lớp xanh đậm — lệch phải */
+  .text span::after {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    color: #0284c7;
+    transform: translate(4px, 0);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    mix-blend-mode: screen;
+  }
+
+  /* Khi active — neon + hiện 2 lớp RGB */
+  .text span.active {
+    color: #fff;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 25px #38bdf8,
+      0 0 50px #0ea5e9,
+      0 0 80px #0284c7;
+  }
+  .text span.active::before { opacity: 0.9; }
+  .text span.active::after  { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+  <div class="text" id="text">
+    <span data-char="R">R</span>
+    <span data-char="G">G</span>
+    <span data-char="B">B</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.text span');
+  let i = 0;
+
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[i].classList.add('active');
+    i = (i + 1) % spans.length;
+  }, 600);
+</script>
+</body>
+</html>
+```
+
+Biến thể:
+
+· Chạy nhanh hơn → 600 → 300.
+· Giữ nhiều chữ sáng → bỏ dòng forEach(...remove...).
+· Tách xa hơn → translate(-4px) → translate(-10px).
+· Đổi màu → thay #00e5ff / #0284c7.
+
+---
+
+🎯 Tóm 1 câu: Chữ gốc tối + ::before/::after (xanh lơ/xanh đậm) lệch 4px + mix-blend-mode: screen, JS setInterval bật .active tuần tự để neon và RGB chạy qua từng chữ.

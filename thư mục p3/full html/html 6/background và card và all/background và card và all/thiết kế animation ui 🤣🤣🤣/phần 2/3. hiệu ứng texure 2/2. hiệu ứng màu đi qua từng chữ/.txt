@@ -1,0 +1,86 @@
+Tổng quan cách làm
+
+Neon Wave gồm 4 bước:
+
+1. Tách chữ — mỗi chữ cái trong 1 <span>, kèm data-char.
+2. Chữ gốc tối — đặt color tối + viền mờ, chưa phát sáng.
+3. Lớp neon ẩn — dùng ::before chứa chữ trắng + nhiều lớp text-shadow, đặt opacity: 0.
+4. JS chạy tuần tự — setInterval bật .active cho từng chữ, quay vòng bằng %.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Arial Black', sans-serif;
+  }
+
+  .neon { display: flex; gap: 0.06em; font-size: 8rem; font-weight: 900; }
+
+  .neon span {
+    position: relative;
+    color: #1a1a2e;                          /* chữ gốc tối */
+  }
+
+  .neon span::before {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    color: #fff;
+    text-shadow:
+      0 0 8px   #fff,
+      0 0 20px  #38bdf8,
+      0 0 40px  #38bdf8,
+      0 0 80px  #0ea5e9,
+      0 0 120px #0284c7;
+    opacity: 0;                              /* ẩn ban đầu */
+    transition: opacity 0.4s ease;
+  }
+
+  .neon span.active::before {
+    opacity: 1;                              /* sáng lên */
+  }
+</style>
+</head>
+<body>
+
+  <div class="neon" id="neon">
+    <span data-char="N">N</span>
+    <span data-char="E">E</span>
+    <span data-char="O">O</span>
+    <span data-char="N">N</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.neon span');
+  let i = 0;
+
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[i].classList.add('active');
+    i = (i + 1) % spans.length;
+  }, 600);
+</script>
+</body>
+</html>
+```
+
+Biến thể:
+
+· Chạy nhanh hơn → 600 → 300.
+· Giữ nhiều chữ sáng cùng lúc → bỏ dòng forEach(...remove...).
+· Đổi màu neon → thay #38bdf8 / #0284c7.
+
+---
+
+🎯 Tóm 1 câu: Chữ gốc tối + ::before chứa neon text-shadow ẩn opacity: 0, JS setInterval bật .active tuần tự để neon chạy qua từng chữ.

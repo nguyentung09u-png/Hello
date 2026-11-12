@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay Intro</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #06060c; font-family: sans-serif; overflow: hidden; }
+
+  /* --- OVERLAY --- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 40%, #14142b, #06060c 70%);
+    color: #fff; overflow: hidden;
+    opacity: 1; visibility: visible;
+    transition: opacity .8s ease, visibility .8s;
+    transform: translateZ(0); will-change: opacity;
+  }
+  .overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  /* Hạt sáng tĩnh */
+  .overlay::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(2px 2px at 12% 22%, #b4a0ff, transparent 60%),
+      radial-gradient(2px 2px at 78% 18%, #96b4ff, transparent 60%),
+      radial-gradient(2px 2px at 32% 78%, #c8aaff, transparent 60%),
+      radial-gradient(2px 2px at 88% 82%, #a0c8ff, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* --- NỘI DUNG --- */
+  .content { position: relative; z-index: 10; text-align: center; padding: 2rem; }
+
+  .logo-wrap {
+    position: relative; display: inline-block;
+    padding: .4rem 1.2rem; overflow: hidden;
+    transform: translateZ(0);
+  }
+
+  /* Vệt sáng */
+  .light-sweep {
+    position: absolute; top: 0; left: 0;
+    width: 60%; height: 100%;
+    background: linear-gradient(100deg,
+      transparent, rgba(255,255,255,.85) 50%, transparent);
+    opacity: 0;
+    transform: translateX(-180%) skewX(-12deg);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+  .light-sweep.active {
+    animation: sweep 1s cubic-bezier(.25,.46,.45,.94) forwards;
+  }
+  @keyframes sweep {
+    0%   { transform: translateX(-180%) skewX(-12deg); opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateX(280%) skewX(-12deg); opacity: 0; }
+  }
+
+  /* Chữ gradient */
+  .greeting {
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 900; letter-spacing: -.03em;
+    background: linear-gradient(135deg, #fff, #d4caff, #90b0ff, #fff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transform: translateZ(0);
+  }
+
+  /* --- NÚT --- */
+  .start-btn {
+    position: relative; margin-top: 2.4rem;
+    padding: 1rem 3rem;
+    font-size: .95rem; font-weight: 700;
+    letter-spacing: .28em; text-transform: uppercase;
+    color: #fff;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(160,140,255,.5);
+    border-radius: 60px; cursor: pointer;
+    overflow: hidden; z-index: 30;
+    transform: translateZ(0);
+    transition: transform .3s ease, background .3s ease;
+    /* Xóa tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    appearance: none; -webkit-appearance: none;
+    outline: none; user-select: none;
+  }
+  /* Viền sáng chạy quanh nút */
+  .start-btn::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 60px; padding: 1px;
+    background: linear-gradient(120deg,
+      transparent 30%, rgba(220,200,255,1) 50%, transparent 70%);
+    background-size: 250% 100%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: borderSweep 3.5s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes borderSweep {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .start-btn:hover {
+    background: rgba(140,120,255,.15);
+    transform: translateZ(0) translateY(-3px) scale(1.03);
+  }
+  .start-btn:active {
+    transform: translateZ(0) translateY(-1px) scale(.99);
+    background: rgba(140,120,255,.15);
+  }
+
+  /* Tôn trọng giảm chuyển động */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="content">
+    <div class="logo-wrap">
+      <h1 class="greeting">Xin chào</h1>
+      <div class="light-sweep" id="sweep"></div>
+    </div>
+    <button class="start-btn" id="btn">Bắt đầu thôi</button>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const btn     = document.getElementById('btn');
+  const sweep   = document.getElementById('sweep');
+  let done = false;
+
+  btn.addEventListener('click', () => {
+    if (done) return;
+    done = true;
+    btn.disabled = true;
+    sweep.classList.add('active');           // chạy vệt sáng
+    setTimeout(() => overlay.classList.add('hidden'), 600);  // mờ overlay
+    setTimeout(() => overlay.remove(), 1500);                // dọn DOM
+  });
+</script>
+
+</body>
+</html>

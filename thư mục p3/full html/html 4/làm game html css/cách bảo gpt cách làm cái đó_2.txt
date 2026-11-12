@@ -1,0 +1,43 @@
+1. nói
+
+lăng trụ tam giác 5 mặt đó được làm từ những gì
+
+Full tổng quan
+
+xong 🎯 Tóm 1 câu
+
+
+
+
+
+---
+ê nhớ copy cái tóm đó nhé rồi xóa cái cần thay rồi | add cái tóm tắt đó vào
+
+2. xong yêu cầu
+
+
+( cái cần thay
+Background = 1 hình cầu bầu trời + 1 lưới hạt khổng lồ + 1 hệ vệt gió + 1 đám sao + 1 camera bay + 1 lớp vignette CSS + 1 pass bloom — tất cả render bằng Three.js WebGL.
+)
+
+Làm như nào
+
+Nói chung chung tổng quan và gửi code chung chung
+
+
+*"Hãy tuân thủ các nguyên tắc sau trong toàn bộ câu trả lời:
+
+1. Chỉ đưa ra thông tin chính xác, có căn cứ.
+2. Không bịa đặt, không phỏng đoán khi không có dữ liệu.
+3. Phân biệt rõ sự thật và suy luận.
+4. Nếu không chắc chắn, hãy nói thẳng 'tôi không chắc'.
+5. Không dùng từ tuyệt đối.
+6. Trả lời ngắn gọn, đúng trọng tâm."*
+
+
+
+
+
+----
+
+xong copy full cái gpt vừa gửi nhé

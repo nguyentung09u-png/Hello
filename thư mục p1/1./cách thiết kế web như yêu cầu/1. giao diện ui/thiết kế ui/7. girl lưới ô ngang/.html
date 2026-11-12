@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Grid Layout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0c0f;
+      font-family: 'Inter', sans-serif;
+      color: #e5e9f0;
+      padding: 2rem 1.25rem;
+    }
+
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      color: #00e0ff;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* =========================================
+       ĐÂY LÀ PHẦN QUAN TRỌNG NHẤT: GRID LAYOUT
+       ========================================= */
+    .grid-container {
+      display: grid;
+      
+      /* Chia thành 3 cột, mỗi cột rộng bằng nhau (1fr) */
+      grid-template-columns: repeat(3, 1fr); 
+      
+      /* Khoảng cách giữa các ô là 20px */
+      gap: 20px; 
+      
+      /* (Tùy chọn) Cho các ô tự động cao bằng nhau */
+      grid-auto-rows: 1fr; 
+    }
+
+    /* Style cho từng ô Card */
+    .card {
+      background: #11171f;
+      border: 1px solid #1e2a36;
+      border-radius: 16px;
+      padding: 2rem 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .card:hover {
+      border-color: #00e0ff;
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #00e0ff;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: #8ab3c9;
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+       RESPONSIVE: Tự động đổi số cột trên điện thoại
+       ========================================= */
+    /* Nếu màn hình nhỏ hơn 768px (Tablet dọc / Điện thoại) */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* Thu lại còn 2 cột */
+      }
+    }
+
+    /* Nếu màn hình nhỏ hơn 480px (Điện thoại) */
+    @media (max-width: 480px) {
+      .grid-container {
+        grid-template-columns: 1fr; /* Thu lại còn 1 cột dọc */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <h1>Grid Layout — Chia Lưới Vuông Vức</h1>
+
+    <div class="grid-container">
+      <div class="card">
+        <h2>Card 1</h2>
+        <p>Grid cell</p>
+      </div>
+      <div class="card">
+        <h2>Card 2</h2>
+        <p>Grid cell</p>
+      </div>
+      <div class="card">
+        <h2>Card 3</h2>
+        <p>Grid cell</p>
+      </div>
+      <div class="card">
+        <h2>Card 4</h2>
+        <p>Grid cell</p>
+      </div>
+      <div class="card">
+        <h2>Card 5</h2>
+        <p>Grid cell</p>
+      </div>
+      <div class="card">
+        <h2>Card 6</h2>
+        <p>Grid cell</p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

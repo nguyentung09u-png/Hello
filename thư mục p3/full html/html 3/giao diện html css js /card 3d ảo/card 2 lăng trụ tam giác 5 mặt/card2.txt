@@ -1,0 +1,138 @@
+Tổng quan cách làm lăng trụ tam giác 5 mặt
+
+Các bước chính
+
+1. HTML — cấu trúc
+
+· 1 khối cha (.prism)
+· 5 mặt con: 3 mặt bên + 2 mặt đáy
+
+2. CSS — không gian 3D
+
+· Thẻ bao ngoài: perspective → tạo chiều sâu
+· .prism: transform-style: preserve-3d → con giữ 3D
+· Mỗi mặt: position: absolute + transform
+
+3. CSS — định vị 5 mặt
+
+Với mặt bên rộng w, chiều cao h:
+
+Mặt Transform Ghi chú
+Bên 1 rotateY(0deg) translateZ(R) R = w/√3
+Bên 2 rotateY(120deg) translateZ(R) 
+Bên 3 rotateY(240deg) translateZ(R) 
+Đáy trên rotateX(90deg) translateZ(h/2) + clip-path tam giác
+Đáy dưới rotateX(-90deg) translateZ(h/2) + clip-path tam giác
+
+Lưu ý (suy luận): R = w/√3 là bán kính ngoại tiếp tam giác đều — khoảng cách từ tâm đến đỉnh. Tôi không chắc đây là giá trị duy nhất đúng, nhưng nó khớp với công thức hình học tam giác đều cạnh w.
+
+4. CSS — cắt tam giác
+
+· clip-path: polygon(50% 0%, 0% 100%, 100% 100%) → cắt hình chữ nhật thành tam giác
+
+5. JS — điều khiển
+
+· Bắt mousedown/mousemove/mouseup (+ touch) → tính dx
+· Cộng dx vào góc Y mục tiêu
+· requestAnimationFrame + lerp → mượt
+· Rảnh một khoảng → tự xoay
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{
+    margin:0; height:100vh;
+    display:grid; place-items:center;
+    background: radial-gradient(circle, #1a1035, #000);
+    perspective: 1200px;      /* tạo chiều sâu */
+    cursor:grab;
+  }
+
+  /* w = 200, h = 280
+     R = 200 / √3 ≈ 115.47
+     h/2 = 140 */
+  .prism{
+    position:relative;
+    width:200px; height:280px;
+    transform-style: preserve-3d;   /* giữ 3D cho con */
+    transform: rotateX(-15deg) rotateY(var(--ry,0deg));
+  }
+
+  .face{
+    position:absolute; inset:0;
+    display:grid; place-items:center;
+    color:#fff; font-family:sans-serif;
+    border:1px solid rgba(255,255,255,.25);
+    backface-visibility:hidden;
+  }
+
+  /* 3 mặt bên */
+  .s1{ background:linear-gradient(160deg,#4f46e5,#0a0c15);
+       transform: rotateY(  0deg) translateZ(115.47px); }
+  .s2{ background:linear-gradient(160deg,#0891b2,#0a0c15);
+       transform: rotateY(120deg) translateZ(115.47px); }
+  .s3{ background:linear-gradient(160deg,#db2777,#0a0c15);
+       transform: rotateY(240deg) translateZ(115.47px); }
+
+  /* 2 mặt đáy — cắt thành tam giác */
+  .base{
+    background:#7c3aed;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  .base--top   { transform: rotateX( 90deg) translateZ(140px); }
+  .base--bot   { transform: rotateX(-90deg) translateZ(140px); }
+</style>
+</head>
+<body>
+
+  <div class="prism" id="prism">
+    <div class="face s1">1</div>
+    <div class="face s2">2</div>
+    <div class="face s3">3</div>
+    <div class="face base base--top">Trên</div>
+    <div class="face base base--bot">Dưới</div>
+  </div>
+
+<script>
+  const prism = document.getElementById('prism');
+  let ry = 0, try_ = 0;
+  let dragging = false, lastX = 0, lastInteract = 0;
+
+  document.addEventListener('mousedown', e => {
+    dragging = true; lastX = e.clientX;
+    lastInteract = performance.now();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    try_ += (e.clientX - lastX) * 0.6;
+    lastX = e.clientX;
+    lastInteract = performance.now();
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false; lastInteract = performance.now();
+  });
+
+  function loop(now){
+    if (!dragging && now - lastInteract > 1200) try_ += 0.4;
+    ry += (try_ - ry) * 0.12;        // lerp
+    prism.style.setProperty('--ry', ry + 'deg');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>
+```
+
+---
+
+Tóm 1 câu
+
+Dựng 3 mặt bên bằng rotateY(0°/120°/240°) + translateZ(w/√3) và 2 mặt đáy bằng rotateX(±90°) + translateZ(h/2) + clip-path tam giác, đặt trong perspective + preserve-3d, rồi cập nhật rotateY mỗi frame bằng JS (kéo + lerp + tự xoay) — HTML/CSS/JS thuần, không thư viện.

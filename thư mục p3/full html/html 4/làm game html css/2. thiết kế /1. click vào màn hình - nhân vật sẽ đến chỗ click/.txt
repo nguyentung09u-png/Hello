@@ -1,0 +1,193 @@
+🖱️ CLICK-TO-MOVE — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Click-to-move = 4 bước tách biệt, mỗi bước 1 việc:
+
+```
+BƯỚC 1: BẮT    → lắng nghe pointerdown trên canvas
+BƯỚC 2: ĐỔI    → toạ độ viewport → toạ độ canvas
+BƯỚC 3: LỆNH   → gán đích (tx, ty) cho từng nhân vật
+BƯỚC 4: SEEK   → mỗi frame, đi từ từ về đích
+```
+
+Điểm mấu chốt: click chỉ gán đích, không dịch chuyển ngay. Việc di chuyển do vòng lặp update làm từng frame.
+
+---
+
+🔍 Bốn bước chi tiết
+
+Bước 1 — Bắt sự kiện
+
+Dùng pointerdown (gộp chuột + cảm ứng), gắn vào canvas:
+
+```js
+canvas.addEventListener('pointerdown', e => {
+  if (state !== 'playing') return;
+  const p = pointerPos(e);
+  commandMove(p.x, p.y);
+});
+```
+
+Bước 2 — Đổi toạ độ
+
+clientX/Y là toạ độ trong viewport (tính từ góc trình duyệt). Cần trừ vị trí canvas:
+
+```js
+function pointerPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - r.left,
+    y: e.clientY - r.top
+  };
+}
+```
+
+→ Nếu canvas đã setTransform(DPR, ...) thì không cần chia DPR — hệ toạ độ logic = CSS px.
+
+Bước 3 — Gán đích cho nhân vật
+
+```js
+function commandMove(x, y) {
+  // kẹp trong vùng đi được
+  const cx = clamp(x, 50, W - 50);
+  const cy = clamp(y, G_TOP + 10, G_BOT - 6);
+
+  // tách nhân vật ra thành vòng tròn
+  const n = soldiers.length;
+  soldiers.forEach((s, i) => {
+    const a = -Math.PI / 2 + i * (Math.PI * 2 / n);
+    s.tx = cx + Math.cos(a) * radius;
+    s.ty = cy + Math.sin(a) * radius * 0.55;
+  });
+}
+```
+
+→ Mỗi nhân vật nhận 1 cặp (tx, ty) riêng, không chồng lên nhau.
+
+Bước 4 — Seek mỗi frame
+
+Trong update(dt):
+
+```js
+function updateSoldier(s, dt) {
+  const mx = s.tx - s.x;
+  const my = s.ty - s.y;
+  const len = Math.hypot(mx, my);
+
+  if (len > 1) {
+    const step = Math.min(SPEED * dt, len);   // ← chống overshoot
+    s.x += mx / len * step;
+    s.y += my / len * step;
+  }
+}
+```
+
+Mấu chốt:
+
+· mx / len = vector đơn vị → hướng đi
+· Math.min(SPEED * dt, len) → không nhảy quá đích khi gần tới
+· Không dùng pathfinding — chỉ là "đi thẳng về đích"
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. BẮT SỰ KIỆN
+// ============================
+canvas.addEventListener('pointerdown', e => {
+  if (state !== 'playing') return;
+  const p = pointerPos(e);
+  commandMove(p.x, p.y);
+});
+
+// ============================
+// 2. ĐỔI TOẠ ĐỘ
+// ============================
+function pointerPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+// ============================
+// 3. RA LỆNH
+// ============================
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+function commandMove(x, y) {
+  const cx = clamp(x, 50, W - 50);
+  const cy = clamp(y, G_TOP + 10, G_BOT - 6);
+
+  const n = soldiers.length;
+  if (n === 0) return;
+
+  const radius = n === 1 ? 0 : 34 + n * 4;
+
+  soldiers.forEach((s, i) => {
+    const a = -Math.PI / 2 + i * (Math.PI * 2 / n);
+    s.tx = clamp(cx + Math.cos(a) * radius, 14, W - 14);
+    s.ty = clamp(cy + Math.sin(a) * radius * 0.55, G_TOP, G_BOT);
+  });
+}
+
+// ============================
+// 4. SEEK MỖI FRAME
+// ============================
+const SPEED = 152;   // px/giây
+
+function updateSoldier(s, dt) {
+  const mx = s.tx - s.x;
+  const my = s.ty - s.y;
+  const len = Math.hypot(mx, my);
+
+  if (len > 1) {
+    const step = Math.min(SPEED * dt, len);
+    s.x += mx / len * step;
+    s.y += my / len * step;
+  }
+}
+
+// ============================
+// 5. VÒNG LẶP
+// ============================
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  for (const s of soldiers) updateSoldier(s, dt);
+
+  ctx.clearRect(0, 0, W, H);
+  for (const s of soldiers) drawSoldier(s);
+
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+SPEED 152 px/s Nhanh/chậm
+radius 34 + n*4 Vòng xếp rộng/hẹp
+Hệ số 0.55 trục Y Ép ellipse Khớp phối cảnh 2D
+Ngưỡng len > 1 Dừng khi tới Tránh rung lắc
+clamp(x, 50, W-50) Chừa mép Không cho đi sát biên
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Các con số cụ thể (152, 34, 0.55, < 1) có phải tối ưu không — tôi không có dữ liệu so sánh.
+· Dùng pointerdown thay vì click có thực sự phản hồi nhanh hơn trên mobile không — tôi cho là có, nhưng đây là suy luận.
+· Việc không chia DPR khi đổi toạ độ có đúng trong mọi trường hợp không — đúng khi canvas đã setTransform(DPR,...), nhưng nếu không thì sẽ sai. Tôi không chắc trường hợp của bạn.
+· Có cần preventDefault() trên pointerdown để chặn cuộn/zoom trên mobile không — trong code gốc không thấy, nhưng CSS đã có touch-action: none nên có thể không cần. Tôi không chắc.
+· getBoundingClientRect() gọi mỗi lần click có tốn kém không — tôi cho là không đáng kể với tần suất click của người, nhưng đây là suy luận.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: gắn pointerdown lên canvas → pointerPos() trừ getBoundingClientRect() để đổi toạ độ → commandMove() kẹp vùng đất và xếp n nhân vật thành vòng tròn quanh điểm click bằng cos/sin, gán s.tx/s.ty → mỗi frame updateSoldier() tính vector (tx-x, ty-y), chuẩn hoá, nhân SPEED*dt, dùng Math.min(step, len) chống overshoot — 4 bước, không pathfinding.

@@ -1,0 +1,17 @@
+Tổng quan cách làm: Tạo một @keyframes để thay đổi opacity qua các mốc thời gian, sau đó gán animation cho phần tử với thời gian chạy và số lần lặp vô hạn.
+
+Code chung chung:
+
+```css
+@keyframes pulse {
+  0%   { opacity: 0.5; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.element {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+```
+
+🎯 Tóm 1 câu: Viết @keyframes thay đổi opacity từ thấp lên cao rồi về thấp, rồi gán animation: tên keyframes + thời gian + infinite cho phần tử.

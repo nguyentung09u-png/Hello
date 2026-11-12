@@ -1,0 +1,8 @@
+1. ☰ Hamburger Menu → click → mở
+2. Sidebar Menu → hiện ra
+3. ✕ Close Button → click → đóng
+
+
+--- nhớ bảo gpt ----
+1. giữ nguyên sidebar
+2. Xóa mấy nội dung ở trang chính đi và xóa lun cái alex và emali gì đó

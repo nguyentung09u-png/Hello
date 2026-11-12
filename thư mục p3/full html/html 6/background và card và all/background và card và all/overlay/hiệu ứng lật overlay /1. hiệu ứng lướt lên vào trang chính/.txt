@@ -1,0 +1,128 @@
+Curtain Reveal — Cách làm tổng quan
+
+1. Cấu trúc HTML
+
+```html
+<div class="page">...</div>          <!-- nội dung bên dưới -->
+<div class="overlay">                <!-- rèm phủ lên -->
+  <button>Bắt đầu</button>
+</div>
+```
+
+2. Các bước làm
+
+Bước Việc làm
+1 Overlay position: fixed; inset: 0 phủ toàn màn hình, z-index cao
+2 Đặt transform: translateY(0) — rèm đang che
+3 Thêm transition: transform 1s cubic-bezier(...) để có animation
+4 JS lắng nghe click nút → thêm class .hidden
+5 CSS .hidden { transform: translateY(-100%) } → rèm trượt lên
+6 Sau khi trượt xong → overlay.remove() xóa khỏi DOM
+
+3. Nguyên tắc để mượt
+
+· Chỉ animate transform (và opacity nếu cần) — không animate top, height
+· Thêm will-change: transform + translateZ(0) để tạo GPU layer
+· Tôn trọng prefers-reduced-motion
+· Xóa tap highlight trên nút
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curtain Reveal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden;
+    font-family: system-ui, sans-serif; }
+
+  /* ===== NỘI DUNG BÊN DƯỚI ===== */
+  .page {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1a2e; color: #fff;
+  }
+
+  /* ===== OVERLAY (RÈM) ===== */
+  .overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: #0e0e12; color: #fff;
+    transform: translateY(0);
+    transition: transform 1s cubic-bezier(.77, 0, .18, 1);
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  .overlay.hidden {
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+
+  /* ===== NÚT ===== */
+  .start-btn {
+    padding: 1rem 2.4rem;
+    font-size: .85rem; font-weight: 600;
+    letter-spacing: .28em; text-transform: uppercase;
+    color: #0e0e12; background: #fff;
+    border: 1px solid #fff; border-radius: 100px;
+    cursor: pointer;
+    transition: background .3s ease, color .3s ease;
+    /* Xóa tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    appearance: none; -webkit-appearance: none;
+    outline: none;
+  }
+  .start-btn:hover { background: transparent; color: #fff; }
+
+  /* ===== REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Nội dung chính</h1>
+</div>
+
+<div class="overlay" id="overlay">
+  <button class="start-btn" id="startBtn">Bắt đầu</button>
+</div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const btn     = document.getElementById('startBtn');
+  let done = false;
+
+  btn.addEventListener('click', () => {
+    if (done) return;
+    done = true;
+    btn.disabled = true;
+    overlay.classList.add('hidden');      // trượt lên
+    setTimeout(() => overlay.remove(), 1400);
+  });
+</script>
+
+</body>
+</html>
+```
+
+---
+
+Lưu ý
+
+· Tôi không chắc code này đạt 60 FPS ổn định trên mọi thiết bị — cần đo bằng DevTools Performance.
+· Tôi không chắc thời lượng 1s là phù hợp nhất — tùy cảm giác thiết kế.
+· Việc overlay.remove() là tùy chọn — có thể giữ lại nếu muốn dùng lại.
+
+🎯 Curtain reveal = overlay position: fixed + transform: translateY(0 → -100%) + JS thêm class .hidden khi click nút, chỉ animate transform để trượt lên như rèm.

@@ -1,0 +1,489 @@
+🏰 NHÀ 2 TẦNG + 3 LOẠI QUÂN — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Hệ thống này gồm 6 bước, mỗi bước 1 việc rõ ràng:
+
+```
+BƯỚC 1: NHÀ        tạo object house {x, y, w, h, floor2Y}
+BƯỚC 2: LÍNH TẦNG 1 tạo mảng guards[] quanh nhà
+BƯỚC 3: LÍNH TẦNG 2 tạo mảng archers[] cạnh vua trên nóc
+BƯỚC 4: AI        2 hàm updateGuard() và updateArcher()
+BƯỚC 5: ĐẠN       mảng arrows[] + updateArrows()
+BƯỚC 6: VẼ        drawHouse() + sort list theo y
+```
+
+Điểm mấu chốt: tách 3 loại quân (vua / cận vệ / xạ thủ) thành 3 mảng riêng, mỗi mảng có logic riêng. Vua và xạ thủ đứng ở floor2Y (nóc), cận vệ đứng quanh house.y (đất).
+
+---
+
+🔍 Sáu bước chi tiết
+
+Bước 1 — Tạo nhà
+
+```js
+const house = { x: 0, y: 0, w: 110, h: 120, floor2Y: 0 };
+
+function setupHouse() {
+  house.x = W * 0.5;
+  house.y = G_TOP + (G_BOT - G_TOP) * 0.58;
+  house.floor2Y = house.y - house.h;   // = nóc nhà = sàn tầng 2
+
+  king.x = house.x;
+  king.y = house.floor2Y;
+}
+```
+
+→ floor2Y là y của sàn tầng 2 — vua và xạ thủ đứng ở đây.
+
+Bước 2 — Cận vệ tầng 1 (quanh nhà)
+
+```js
+guards = [];
+for (let i = 0; i < guardCount(lv); i++) {
+  const ring = Math.floor(i / 10);
+  const a = (i % 10) / Math.min(10, ...) * Math.PI * 2 - Math.PI / 2 + ring * 0.35;
+  const r = 95 + ring * 28;
+
+  guards.push({
+    x: house.x + Math.cos(a) * r,
+    y: house.y + Math.sin(a) * r * 0.5,   // ← méo dọc theo phối cảnh
+    tx: 0, ty: 0,
+    hp: 110, maxHp: 110,
+    atkCd: 0, attackAnim: 0, face: 1,
+    phase: 0, moving: false, flash: 0
+  });
+}
+```
+
+→ Xếp thành nhiều vòng tròn quanh house.x/y, có tx/ty để click điều khiển.
+
+Bước 3 — Xạ thủ tầng 2 (cạnh vua)
+
+```js
+archers = [];
+for (let i = 0; i < archerCount(lv); i++) {
+  const side = i % 2 === 0 ? -1 : 1;
+  const offset = 32 + Math.floor(i / 2) * 14;
+
+  archers.push({
+    x: house.x + side * offset,       // ← 2 bên vua
+    y: house.floor2Y + 6,             // ← trên nóc
+    hp: 70, maxHp: 70,
+    atkCd: 0, attackAnim: 0, face: 1,
+    phase: 0, flash: 0
+    // KHÔNG có tx/ty vì đứng yên
+  });
+}
+```
+
+→ Xạ thủ không có tx/ty — chỉ đứng và bắn.
+
+Bước 4 — 2 hàm AI riêng
+
+Cận vệ: tìm zombie gần → đánh / đi tới
+
+```js
+function updateGuard(g, dt) {
+  // Tìm zombie gần nhất
+  let tgt = null, bd = 130;
+  for (const e of enemies) { /* ... */ }
+
+  if (tgt && bd <= 46 && g.atkCd <= 0) {
+    hitEnemy(tgt, 18, g.x, g.y);     // đánh
+  } else {
+    // đi tới (g.tx, g.ty)
+  }
+}
+```
+
+Xạ thủ: tìm zombie gần → tạo mũi tên
+
+```js
+function updateArcher(a, dt) {
+  const RANGE = 300;
+  let tgt = null, bd = RANGE;
+  for (const e of enemies) { /* ... */ }
+
+  if (tgt && a.atkCd <= 0) {
+    arrows.push({ x: a.x, y: a.y - 8, target: tgt, ... });
+  }
+  // KHÔNG có di chuyển
+}
+```
+
+→ Chung pattern (tìm mục tiêu + hồi chiêu), nhưng cận vệ đi được, xạ thủ chỉ bắn.
+
+Bước 5 — Mũi tên bay
+
+```js
+function updateArrows(dt) {
+  for (let i = arrows.length - 1; i >= 0; i--) {
+    const ar = arrows[i];
+
+    // Homing: cập nhật đích theo mục tiêu đang sống
+    if (ar.target && ar.target.hp > 0) {
+      ar.tx = ar.target.x;
+      ar.ty = ar.target.y - 18;
+    }
+
+    // Bay từng frame
+    const dx = ar.tx - ar.x, dy = ar.ty - ar.y;
+    const d = Math.hypot(dx, dy);
+
+    if (d < 14) {                       // trúng đích
+      if (ar.target && ar.target.hp > 0) hitEnemy(ar.target, ar.dmg, ar.x, ar.y);
+      arrows.splice(i, 1);
+      continue;
+    }
+
+    const step = Math.min(ar.speed * dt, d);
+    ar.x += dx / d * step;
+    ar.y += dy / d * step;
+  }
+}
+```
+
+→ Homing = bám mục tiêu cho tới khi trúng.
+
+Bước 6 — Vẽ + sort theo y
+
+```js
+function render(t) {
+  // ... áp camera ...
+
+  const list = [];
+  list.push({ y: house.y, kind: 'house' });
+  for (const g of guards)  if (g.hp > 0) list.push({ y: g.y, kind: 'guard', ref: g });
+  for (const e of enemies) if (e.hp > 0) list.push({ y: e.y, kind: 'enemy', ref: e });
+  for (const a of archers) if (a.hp > 0) list.push({ y: a.y, kind: 'archer', ref: a });
+  list.push({ y: king.y, kind: 'king' });
+
+  list.sort((a, b) => a.y - b.y);      // ← painter's algorithm
+
+  for (const it of list) {
+    if (it.kind === 'house')       drawHouse();
+    else if (it.kind === 'guard')  drawGuard(it.ref, t);
+    else if (it.kind === 'enemy')  drawEnemy(it.ref, t);
+    else if (it.kind === 'archer') drawArcher(it.ref, t);
+    else                            drawKing(king, t);
+  }
+
+  drawArrows();                        // mũi tên trên cùng
+  // ...
+}
+```
+
+→ sort((a,b) => a.y - b.y) là mấu chốt — ai y nhỏ (xa) vẽ trước.
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. STATE
+// ============================
+const house = { x: 0, y: 0, w: 110, h: 120, floor2Y: 0 };
+const king  = { x: 0, y: 0, hp: 500, maxHp: 500, flash: 0 };
+
+let guards  = [];   // tầng 1 — giáo
+let archers = [];   // tầng 2 — cung
+let arrows  = [];   // mũi tên
+let enemies = [];   // zombie
+
+// ============================
+// 2. SETUP NHÀ
+// ============================
+function setupHouse() {
+  house.x = W * 0.5;
+  house.y = G_TOP + (G_BOT - G_TOP) * 0.58;
+  house.floor2Y = house.y - house.h;
+
+  king.x = house.x;
+  king.y = house.floor2Y;
+}
+
+// ============================
+// 3. TẠO ĐỘI QUÂN THEO LEVEL
+// ============================
+function guardCount(lv)  { return Math.min(6 + Math.floor(lv / 2), 28); }
+function archerCount(lv) { return Math.min(2 + Math.floor(lv / 2), 14); }
+
+function makeArmy() {
+  const lv = game.level;
+
+  // Cận vệ — vòng tròn quanh nhà
+  guards = [];
+  const gn = guardCount(lv);
+  for (let i = 0; i < gn; i++) {
+    const ring = Math.floor(i / 10);
+    const a = (i % 10) / Math.min(10, gn - ring * 10) * Math.PI * 2 - Math.PI / 2 + ring * 0.35;
+    const r = 95 + ring * 28;
+
+    guards.push({
+      x: house.x + Math.cos(a) * r,
+      y: house.y + Math.sin(a) * r * 0.5,
+      tx: 0, ty: 0,
+      hp: 110, maxHp: 110,
+      atkCd: rand(0, 0.5), attackAnim: 0, face: 1,
+      phase: rand(0, 12), moving: false, flash: 0
+    });
+  }
+  guards.forEach(g => { g.tx = g.x; g.ty = g.y; });
+
+  // Xạ thủ — cạnh vua trên nóc
+  archers = [];
+  const an = archerCount(lv);
+  for (let i = 0; i < an; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const offset = 32 + Math.floor(i / 2) * 14;
+
+    archers.push({
+      x: house.x + side * offset,
+      y: house.floor2Y + 6,
+      hp: 70, maxHp: 70,
+      atkCd: rand(0, 0.6), attackAnim: 0, face: 1,
+      phase: rand(0, 12), flash: 0
+    });
+  }
+}
+
+// ============================
+// 4. AI CẬN VỆ
+// ============================
+function updateGuard(g, dt) {
+  g.flash = Math.max(0, g.flash - dt * 5);
+  g.attackAnim = Math.max(0, g.attackAnim - dt * 5.5);
+  g.atkCd = Math.max(0, g.atkCd - dt);
+
+  // Tìm zombie gần nhất trong 130px
+  let tgt = null, bd = 130;
+  for (const e of enemies) {
+    if (e.hp <= 0) continue;
+    const d = Math.hypot(e.x - g.x, e.y - g.y);
+    if (d < bd) { bd = d; tgt = e; }
+  }
+
+  let mx = 0, my = 0;
+  if (tgt) {
+    if (bd > 34) { mx = tgt.x - g.x; my = tgt.y - g.y; }
+    g.face = tgt.x > g.x ? 1 : -1;
+    if (bd <= 46 && g.atkCd <= 0) {
+      g.atkCd = 0.65;
+      g.attackAnim = 1;
+      const dmg = 18 * (game.buffTimer > 0 ? 1.6 : 1);
+      hitEnemy(tgt, dmg, g.x, g.y);
+    }
+  } else {
+    mx = g.tx - g.x; my = g.ty - g.y;
+    if (Math.hypot(mx, my) < 5) { mx = 0; my = 0; }
+  }
+
+  const len = Math.hypot(mx, my);
+  if (len > 0.5) {
+    const sp = 155 * dt;
+    const step = Math.min(sp, len);
+    g.x += mx / len * step; g.y += my / len * step;
+    g.moving = true;
+  } else g.moving = false;
+
+  g.x = clamp(g.x, 14, W - 14);
+  g.y = clamp(g.y, G_TOP - 4, G_BOT);
+}
+
+// ============================
+// 5. AI XẠ THỦ (chỉ bắn, không đi)
+// ============================
+function updateArcher(a, dt) {
+  a.flash = Math.max(0, a.flash - dt * 5);
+  a.attackAnim = Math.max(0, a.attackAnim - dt * 5.5);
+  a.atkCd = Math.max(0, a.atkCd - dt);
+
+  const RANGE = 300;
+  let tgt = null, bd = RANGE;
+  for (const e of enemies) {
+    if (e.hp <= 0) continue;
+    const d = Math.hypot(e.x - a.x, e.y - a.y);
+    if (d < bd) { bd = d; tgt = e; }
+  }
+
+  if (tgt) {
+    a.face = tgt.x > a.x ? 1 : -1;
+    if (a.atkCd <= 0) {
+      a.atkCd = 1.35;
+      a.attackAnim = 1;
+      const dmg = 22 * (game.buffTimer > 0 ? 1.6 : 1);
+      arrows.push({
+        x: a.x, y: a.y - 8,
+        tx: tgt.x, ty: tgt.y - 18,
+        target: tgt,
+        dmg: dmg,
+        speed: 480,
+        life: 1
+      });
+    }
+  }
+}
+
+// ============================
+// 6. MŨI TÊN BAY (homing)
+// ============================
+function updateArrows(dt) {
+  for (let i = arrows.length - 1; i >= 0; i--) {
+    const ar = arrows[i];
+
+    if (ar.target && ar.target.hp > 0) {
+      ar.tx = ar.target.x;
+      ar.ty = ar.target.y - 18;
+    }
+
+    const dx = ar.tx - ar.x, dy = ar.ty - ar.y;
+    const d = Math.hypot(dx, dy);
+
+    if (d < 14) {
+      if (ar.target && ar.target.hp > 0) {
+        hitEnemy(ar.target, ar.dmg, ar.x, ar.y);
+      }
+      arrows.splice(i, 1);
+      continue;
+    }
+
+    const step = Math.min(ar.speed * dt, d);
+    ar.x += dx / d * step;
+    ar.y += dy / d * step;
+  }
+}
+
+// ============================
+// 7. UPDATE TỔNG
+// ============================
+function update(dt) {
+  // ... level logic ...
+
+  for (const g of guards)  if (g.hp > 0) updateGuard(g, dt);
+  for (const a of archers) if (a.hp > 0) updateArcher(a, dt);
+
+  for (const e of enemies) updateEnemy(e, dt);
+
+  updateArrows(dt);
+  enemies = enemies.filter(e => e.hp > 0);
+}
+
+// ============================
+// 8. VẼ NHÀ 2 TẦNG
+// ============================
+function drawHouse() {
+  const { x, y, w, h } = house;
+  const top = y - h;
+  const midY = y - h * 0.55;
+
+  // Bóng
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.beginPath(); ctx.ellipse(x, y + 4, w * 0.62, 11, 0, 0, Math.PI*2); ctx.fill();
+
+  // Tầng 1 (đậm)
+  const g1 = ctx.createLinearGradient(x, midY, x, y);
+  g1.addColorStop(0, '#5a3a22'); g1.addColorStop(1, '#3a2414');
+  ctx.fillStyle = g1;
+  ctx.fillRect(x - w/2, midY, w, y - midY);
+
+  // Tầng 2 (nhạt)
+  const g2 = ctx.createLinearGradient(x, top, x, midY);
+  g2.addColorStop(0, '#7a5230'); g2.addColorStop(1, '#5a3a22');
+  ctx.fillStyle = g2;
+  ctx.fillRect(x - w/2, top, w, midY - top);
+
+  // Đường phân tầng
+  ctx.fillStyle = '#2a1a0e';
+  ctx.fillRect(x - w/2 - 2, midY - 2, w + 4, 4);
+
+  // Cửa sổ (4 ô)
+  const wW = 20, wH = 24;
+  ctx.fillStyle = '#1a1008';
+  ctx.fillRect(x - w/2 + 12, midY + 14, wW, wH);
+  ctx.fillRect(x + w/2 - 12 - wW, midY + 14, wW, wH);
+  ctx.fillRect(x - w/2 + 12, top + 12, wW, wH);
+  ctx.fillRect(x + w/2 - 12 - wW, top + 12, wW, wH);
+  ctx.fillStyle = 'rgba(255,180,80,0.4)';
+  ctx.fillRect(x - w/2 + 12, midY + 14, wW, wH);
+  ctx.fillRect(x + w/2 - 12 - wW, midY + 14, wW, wH);
+  ctx.fillRect(x - w/2 + 12, top + 12, wW, wH);
+  ctx.fillRect(x + w/2 - 12 - wW, top + 12, wW, wH);
+
+  // Sàn tầng 2 (thay mái)
+  ctx.fillStyle = '#5a3a22';
+  ctx.fillRect(x - w/2 - 6, top - 8, w + 12, 10);
+  ctx.fillStyle = 'rgba(255,220,150,0.35)';
+  ctx.fillRect(x - w/2 - 6, top - 8, w + 12, 3);
+  ctx.fillStyle = '#2a1a0e';
+  ctx.fillRect(x - w/2 - 6, top + 2, w + 12, 2);
+
+  // Lan can
+  ctx.fillStyle = '#4a2a18';
+  ctx.fillRect(x - w/2 - 6,  top - 20, 3, 14);
+  ctx.fillRect(x - w/2 + 20, top - 20, 3, 14);
+  ctx.fillRect(x + w/2 - 20, top - 20, 3, 14);
+  ctx.fillRect(x + w/2 + 3,  top - 20, 3, 14);
+  ctx.fillStyle = '#6a4a2a';
+  ctx.fillRect(x - w/2 - 6, top - 20, w + 12, 2.5);
+}
+
+// ============================
+// 9. RENDER + SORT THEO y
+// ============================
+function render(t) {
+  // ... áp camera ...
+
+  const list = [];
+  list.push({ y: house.y, kind: 'house' });
+  for (const g of guards)  if (g.hp > 0) list.push({ y: g.y, kind: 'guard', ref: g });
+  for (const e of enemies) if (e.hp > 0) list.push({ y: e.y, kind: 'enemy', ref: e });
+  for (const a of archers) if (a.hp > 0) list.push({ y: a.y, kind: 'archer', ref: a });
+  list.push({ y: king.y, kind: 'king' });
+
+  list.sort((a, b) => a.y - b.y);
+
+  for (const it of list) {
+    if (it.kind === 'house')       drawHouse();
+    else if (it.kind === 'guard')  drawGuard(it.ref, t);
+    else if (it.kind === 'enemy')  drawEnemy(it.ref, t);
+    else if (it.kind === 'archer') drawArcher(it.ref, t);
+    else                            drawKing(king, t);
+  }
+
+  drawArrows();
+  drawParticles();
+  drawFloaters();
+  drawMarkers();
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+house.y 58% vùng đất Nhà cao/thấp
+house.w, h 110, 120 Nhà to/nhỏ
+guardCount 6 + lv/2 Số cận vệ
+archerCount 2 + lv/2 Số xạ thủ
+RANGE xạ thủ 300 Tầm bắn
+atkCd xạ thủ 1.35s Tốc độ bắn
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Con số cụ thể (95, 130, 300, 0.65, 1.35...) — tôi chọn theo trực giác, không có benchmark tối ưu.
+· Thứ tự vẽ nhà vs vua/xạ thủ — vua và xạ thủ có y = floor2Y (rất nhỏ) nên vẽ sau nhà → đè lên sàn. Đúng về hình ảnh, nhưng nếu sàn vẽ đè lên chân nhân vật thì ngược. Tôi không chắc với mọi góc zoom.
+· Zombie không leo lên nóc — tôi để zombie đứng dưới đánh vua bằng reach = 55. Nếu muốn zombie leo lên, cần thêm logic riêng.
+· Homing cho mũi tên — tôi chọn để tránh trượt; nếu muốn khó hơn có thể bắn thẳng (bỏ phần cập nhật ar.tx/ty theo target).
+· Hiệu năng khi nhiều xạ thủ + nhiều mũi tên — tôi chưa có dữ liệu benchmark; có thể tụt FPS nếu không giới hạn số mũi tên.
+· separate() cho archers — tôi không gọi vì xạ thủ đứng yên; nếu gọi có thể đẩy họ lệch khỏi sàn.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: tạo house {x, y, w, h, floor2Y} + 2 mảng guards[] (tầng 1, vòng tròn quanh nhà, có tx/ty để click điều khiển) và archers[] (tầng 2, cạnh vua, không có tx/ty) + mảng arrows[] (homing) + 2 hàm AI riêng updateGuard() (di chuyển + đánh gần) và updateArcher() (chỉ bắn, tạo mũi tên) + hàm drawHouse() vẽ ~8 phần vector + trong render() gom tất cả vào 1 list và list.sort((a,b) => a.y - b.y) để vẽ theo painter's algorithm.

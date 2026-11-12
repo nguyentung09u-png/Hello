@@ -1,0 +1,158 @@
+Tổng quan cách làm
+
+3 bước:
+
+1. CSS khai báo — gán position: fixed cho element cần neo.
+2. Chọn góc neo — dùng 1 cặp top/bottom + left/right để xác định vị trí.
+3. Nâng độ nổi — thêm z-index cao để element không bị nội dung khác đè.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· position: fixed tách element khỏi flow — không chiếm chỗ, không cuộn theo trang.
+· top/right/bottom/left neo vào viewport (khung nhìn) — không phải vào tổ tiên.
+· z-index chỉ có tác dụng khi element có position khác static — số càng cao càng nổi.
+· Kết hợp transform: translate() nếu muốn di chuyển element đi nơi khác mà vẫn giữ fixed.
+
+Tôi không chắc:
+
+· Bạn cần element cố định 1 chỗ hay kéo được — code có cả 2.
+· Bạn muốn góc nào — mặc định mình để dưới-phải.
+
+---
+
+Code chung chung
+
+Trường hợp 1 — Cố định ở 1 góc
+
+```html
+<button class="fab">FAB</button>
+```
+
+```css
+.fab {
+  position: fixed;              /* neo vào viewport */
+  right: 20px;                  /* cách mép phải 20px */
+  bottom: 20px;                 /* cách mép dưới 20px */
+  z-index: 10000;               /* nổi trên nội dung */
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(37,99,235,.45);
+}
+```
+
+Đổi góc:
+
+Góc CSS
+Trên-trái top: 20px; left: 20px
+Trên-phải top: 20px; right: 20px
+Dưới-trái bottom: 20px; left: 20px
+Dưới-phải (mặc định) bottom: 20px; right: 20px
+
+---
+
+Trường hợp 2 — Cố định + kéo được
+
+```html
+<button class="fab" id="fab">FAB</button>
+```
+
+```css
+.fab {
+  position: fixed;
+  left: 0; top: 0;              /* gốc — JS set transform */
+  z-index: 10000;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: 0;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+}
+```
+
+```js
+(function () {
+  const fab = document.getElementById('fab');
+  const FAB_W = 60, FAB_H = 60;
+  const THRESHOLD = 6;
+  let posX = 0, posY = 0;
+
+  const clamp = (v,min,max) => v < min ? min : (v > max ? max : v);
+  function setPos(x, y) {
+    posX = clamp(x, 0, window.innerWidth  - FAB_W);
+    posY = clamp(y, 0, window.innerHeight - FAB_H);
+    fab.style.transform = `translate(${posX}px, ${posY}px)`;
+  }
+
+  // Vị trí ban đầu: góc dưới-phải, cách mép 20px
+  setPos(window.innerWidth - FAB_W - 20, window.innerHeight - FAB_H - 20);
+
+  let dragging = false, pointerId = null, moved = false;
+  let startX = 0, startY = 0, baseX = 0, baseY = 0;
+
+  fab.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    dragging = true; moved = false;
+    pointerId = e.pointerId;
+    startX = e.clientX; startY = e.clientY;
+    baseX = posX; baseY = posY;
+    try { fab.setPointerCapture(pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+
+  fab.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!moved && (Math.abs(dx) > THRESHOLD || Math.abs(dy) > THRESHOLD)) {
+      moved = true;
+    }
+    if (moved) setPos(baseX + dx, baseY + dy);
+  });
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    try { fab.releasePointerCapture(pointerId); } catch (err) {}
+    pointerId = null;
+  }
+  fab.addEventListener('pointerup', endDrag);
+  fab.addEventListener('pointercancel', endDrag);
+  fab.addEventListener('lostpointercapture', endDrag);
+
+  window.addEventListener('resize', () => setPos(posX, posY));
+})();
+```
+
+---
+
+Lưu ý quan trọng
+
+Gotcha transform trên tổ tiên
+
+· Nếu tổ tiên của element fixed có transform, fixed sẽ neo vào tổ tiên đó thay vì viewport.
+· Đây là hành vi của spec CSS — tôi không chắc nó có giống nhau 100% trên mọi trình duyệt cũ, cần test.
+
+z-index không có tác dụng nếu thiếu position
+
+· z-index chỉ hoạt động khi element có position là relative / absolute / fixed / sticky.
+
+visibility vs display khi ẩn
+
+· display: none → element biến mất khỏi layout.
+· visibility: hidden → element tàng hình nhưng vẫn chiếm chỗ, giữ vị trí.
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: position: fixed + top/right/bottom/left + z-index là CSS chuẩn; Pointer Events là W3C standard.
+· Tôi không chắc gotcha transform trên tổ tiên hoạt động giống nhau trên mọi trình duyệt hiện đại — cần test thực tế.
+
+🎯 Tóm 1 câu: Dùng position: fixed + 1 cặp top/bottom + left/right để neo element vào góc viewport + z-index cao để nổi trên nội dung; nếu muốn kéo được thì thêm Pointer Events với transform: translate() để di chuyển.

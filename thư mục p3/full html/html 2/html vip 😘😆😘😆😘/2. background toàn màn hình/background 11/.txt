@@ -1,0 +1,188 @@
+Tổng quan cách làm
+
+3 lớp chồng nhau:
+
+1. Nền — body với radial-gradient tỏa tròn, xám tím → đen.
+2. Glow — <div class="glow"> chứa 2 radial-gradient hồng/xanh + filter: blur(60px), tĩnh.
+3. Canvas hạt — <canvas> chạy requestAnimationFrame, mỗi frame: cập nhật vị trí → wrap-around → vẽ viền gradient + highlight.
+
+Nguyên lý vòng bokeh:
+
+· Mỗi vòng có x, y, vx, vy, r, thickness, color[r,g,b], alpha, pulsePhase, pulseSpeed.
+· Mỗi frame: x += vx, y += vy, wrap-around khi ra khỏi mép (đệm bằng r).
+· Pulse: rr = r * (0.8 + 0.2 * sin(t * speed + phase)) → bán kính dao động ±20%.
+
+Vẽ 1 vòng = 2 lớp:
+
+1. Viền khuyên: createRadialGradient(x, y, rr - th, x, y, rr) — bắt đầu ở mép trong vành, không phải tâm → tâm trong suốt, chỉ hiện vành.
+2. Highlight: createRadialGradient trắng ở (-0.5rr, -0.5rr), bán kính 0.3rr.
+
+Tối ưu (suy luận có căn cứ):
+
+· DPR cap 2.
+· visibilitychange → dừng khi tab ẩn.
+· prefers-reduced-motion → không chạy.
+· Số vòng cap 28 (mỗi vòng vẽ 2 radial-gradient).
+· Wrap-around có đệm r → không pop giữa màn.
+
+Tôi không chắc:
+
+· Viền khuyên rr - th → rr có đều mọi bán kính trên mọi GPU.
+· Vị trí highlight -0.5r là tự nhiên nhất.
+
+---
+
+Code chung chung
+
+```html
+<div class="glow" aria-hidden="true"></div>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="content">Nội dung</div>
+```
+
+```css
+html, body { height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 40%, #10101e 0%, #08080f 60%, #02020a 100%);
+  margin: 0; min-height: 100vh;
+  display: grid; place-items: center;
+  color: #eaf2ff; overflow: hidden;
+}
+
+.glow {
+  position: fixed; inset: 0;
+  z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 40% at 30% 30%, rgba(255,120,200,.14), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 70% 70%, rgba(120,200,255,.12), transparent 70%);
+  filter: blur(60px);
+}
+
+canvas {
+  position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  display: block;
+}
+
+.content { position: relative; z-index: 1; }
+```
+
+```js
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let circles = [];
+
+  const COLORS = [
+    [255, 200, 120],
+    [255, 150, 200],
+    [180, 200, 255],
+    [140, 230, 230],
+    [220, 170, 255],
+  ];
+
+  function count() { return Math.min(28, Math.max(10, Math.floor(W / 70))); }
+
+  function make() {
+    const r = 30 + Math.random() * 110;
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r,
+      thickness: 0.06 + Math.random() * 0.09,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      alpha: 0.35 + Math.random() * 0.4,
+      pulsePhase: Math.random() * Math.PI * 2,
+      pulseSpeed: 0.4 + Math.random() * 0.7,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width  = W * dpr;
+    c.height = H * dpr;
+    c.style.width  = W + 'px';
+    c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (circles.length < need) circles.push(make());
+    if (circles.length > need) circles.length = need;
+  }
+
+  function drawCircle(cc, t) {
+    const [r, g, b] = cc.color;
+    const pulse = 0.8 + 0.2 * Math.sin(t * 0.001 * cc.pulseSpeed + cc.pulsePhase);
+    const rr = cc.r * pulse;
+    const th = rr * cc.thickness;
+
+    // 1. viền khuyên — gradient bắt đầu ở rr - th (không phải tâm)
+    const grad = ctx.createRadialGradient(cc.x, cc.y, rr - th, cc.x, cc.y, rr);
+    grad.addColorStop(0,   'rgba(' + r + ',' + g + ',' + b + ',0)');
+    grad.addColorStop(0.5, 'rgba(' + r + ',' + g + ',' + b + ',' + (cc.alpha * 0.8) + ')');
+    grad.addColorStop(1,   'rgba(' + r + ',' + g + ',' + b + ',0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cc.x, cc.y, rr, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. highlight góc trên-trái
+    const hx = cc.x - rr * 0.5;
+    const hy = cc.y - rr * 0.5;
+    const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, rr * 0.3);
+    hg.addColorStop(0, 'rgba(255,255,255,' + (cc.alpha * 0.9) + ')');
+    hg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hg;
+    ctx.beginPath();
+    ctx.arc(hx, hy, rr * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (const cc of circles) {
+      cc.x += cc.vx;
+      cc.y += cc.vy;
+      if (cc.x < -cc.r) cc.x = W + cc.r;
+      else if (cc.x > W + cc.r) cc.x = -cc.r;
+      if (cc.y < -cc.r) cc.y = H + cc.r;
+      else if (cc.y > H + cc.r) cc.y = -cc.r;
+
+      drawCircle(cc, t);
+    }
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: dùng Canvas 2D + requestAnimationFrame tiêu chuẩn, chạy trên Chrome/Edge/Firefox/Safari hiện đại.
+· Tôi không chắc viền khuyên rr - th → rr cho ra viền đều ở mọi bán kính trên mọi GPU — cần test kỹ ở r lớn (> 100).
+· Tôi không chắc -0.5r là vị trí highlight tự nhiên nhất — có thể chỉnh tùy gu.
+
+🎯 Tóm 1 câu: Nền radial-gradient xám tím + glow tĩnh + canvas vòng khuyên rỗng (viền gradient từ rr-th → rr + highlight trắng ở -0.5r + pulse ±20%) đa màu vàng-hồng-xanh-tím, wrap-around có đệm bán kính — chạy requestAnimationFrame với DPR cap, visibility, reduced-motion.

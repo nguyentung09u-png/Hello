@@ -1,0 +1,36 @@
+Tổng quan cách làm: Đặt card lên trên một nền có hình ảnh hoặc màu sắc, sau đó áp dụng các thuộc tính CSS để tạo hiệu ứng trong suốt và làm mờ hậu cảnh.
+
+Code chung chung:
+
+```html
+<div class="glass-card">Nội dung</div>
+
+<style>
+  body {
+    /* Cần một nền phía sau để thấy rõ hiệu ứng kính mờ */
+    background: url('hinh-nen.jpg') no-repeat center/cover;
+  }
+
+  .glass-card {
+    /* 1. Nền bán trong suốt */
+    background: rgba(255, 255, 255, 0.1);
+    
+    /* 2. Làm mờ hậu cảnh phía sau */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* 3. Viền sáng mờ */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    /* 4. Bo góc */
+    border-radius: 15px;
+    
+    /* 5. Đổ bóng */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    
+    padding: 20px;
+  }
+</style>
+```
+
+🎯 Tóm 1 câu: Tạo một thẻ div, đặt nó trên nền có sẵn, rồi áp dụng đồng thời background mờ, backdrop-filter: blur(), viền mờ, bo góc và đổ bóng.

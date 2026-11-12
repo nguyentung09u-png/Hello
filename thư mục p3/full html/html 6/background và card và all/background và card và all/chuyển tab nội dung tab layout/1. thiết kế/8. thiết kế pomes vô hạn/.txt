@@ -1,0 +1,127 @@
+Cách làm Poems (Vertical List)
+
+Tổng quan các bước
+
+1. Dữ liệu — mảng poems, mỗi phần tử có {tab, name, title, href}.
+2. Nhóm theo tab — JS dùng Map gom phần tử cùng tab, giữ thứ tự xuất hiện.
+3. Sinh panel + item — mỗi nhóm tạo 1 .tab-panel, mỗi phần tử tạo 1 .item.
+4. Cấu trúc item — .item chứa tiêu đề trên + button dưới.
+5. Tách chữ — splitTitle() + splitButton() chạy sau mỗi item.
+6. CSS — container flex column (xếp dọc), item flex column (tiêu đề trên button dưới).
+
+Code chung chung
+
+```html
+<div class="tab-panel is-active">
+  <div class="item">
+    <div class="title-wrap"><p class="title" data-text="tiktok"></p></div>
+    <a class="action-btn" href="..." data-text="Nhấn vào đây"></a>
+  </div>
+  <!-- thêm bao nhiêu .item cũng được -->
+</div>
+```
+
+```css
+/* Container — xếp dọc */
+.tab-panel.is-active{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:32px;
+  min-height:180px;
+  padding:12px 0;
+}
+
+/* Mỗi item — tiêu đề trên, button dưới */
+.item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+```
+
+```js
+const BUTTON_TEXT = "Nhấn vào đây";
+
+const poems = [
+  { tab:1, name:"Tab A", title:"tiktok",   href:"https://..." },
+  { tab:1, name:"Tab A", title:"facebook", href:"https://..." },
+  { tab:2, name:"Tab B", title:"youtube",  href:"https://..." },
+  { tab:2, name:"Tab B", title:"github",   href:"https://..." },
+];
+
+/* Nhóm theo tab */
+const groups = new Map();
+poems.forEach(item => {
+  if (!groups.has(item.tab)) groups.set(item.tab, []);
+  groups.get(item.tab).push(item);
+});
+
+/* Sinh panel + item */
+groups.forEach((items, tabNumber) => {
+  const tabName = items[0].name || `Tab ${tabNumber}`;
+
+  const panel = document.createElement('div');
+  panel.className = 'tab-panel';
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.innerHTML = `
+      <div class="title-wrap">
+        <p class="title" data-text="${item.title}"></p>
+      </div>
+      <a class="action-btn"
+         href="${item.href}"
+         target="_blank" rel="noopener"
+         data-text="${BUTTON_TEXT}"></a>
+    `;
+    panel.appendChild(el);
+    splitTitle(el);
+    splitButton(el);
+  });
+
+  cardRoot.appendChild(panel);
+});
+
+/* Hàm tách chữ */
+function splitTitle(scope){
+  scope.querySelectorAll('.title').forEach(el => {
+    const text = el.dataset.text || '';
+    el.textContent = '';
+    [...text].forEach((c, i) => {
+      const span = document.createElement('span');
+      span.textContent = c === ' ' ? '\u00A0' : c;
+      span.style.animationDelay = (0.3 * i) + 's';
+      el.appendChild(span);
+    });
+  });
+}
+
+function splitButton(scope){
+  scope.querySelectorAll('.action-btn').forEach(btn => {
+    const text = btn.dataset.text || '';
+    btn.innerHTML = '';
+    [...text].forEach((c, i) => {
+      const span = document.createElement('span');
+      span.className = 'ch';
+      span.textContent = c === ' ' ? '\u00A0' : c;
+      span.style.animationDelay = (0.05 * i) + 's, 0s';
+      btn.appendChild(span);
+    });
+  });
+}
+```
+
+Lưu ý
+
+· Sự thật: Vertical List cốt lõi chỉ cần 2 rule CSS (.tab-panel.is-active + .item) — phần còn lại là hiệu ứng trang trí gắn vào tiêu đề/button.
+· Sự thật: Map giữ thứ tự chèn → tab xuất hiện trước trong mảng thì đứng trước.
+· Không chắc số item tối đa thực tế — hàng trăm item + nhiều animation có thể lag trên máy yếu; chưa test ở quy mô lớn.
+· Không chắc bạn muốn căn giữa hay căn trái item — hiện tại align-items: center.
+
+---
+
+Tóm 1 câu: Định nghĩa mảng poems với {tab,name,title,href}, JS dùng Map nhóm theo tab, mỗi nhóm sinh 1 .tab-panel chứa các .item (mỗi item flex column: tiêu đề trên + button dưới), rồi tách chữ tự động.

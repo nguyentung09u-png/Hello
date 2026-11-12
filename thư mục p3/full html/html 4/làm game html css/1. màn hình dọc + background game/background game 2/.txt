@@ -1,0 +1,142 @@
+Tổng quan cách làm
+
+Bước 1 — Nền CSS (lớp ngoài canvas):
+
+· Đặt màu nền gốc cho body.
+· Dùng body::before với position: fixed; inset: 0 và 2–3 radial-gradient chồng nhau để tạo ánh sáng mờ.
+· Thêm pointer-events: none để không chặn click.
+
+Bước 2 — Canvas (lớp trong):
+
+· Một thẻ <canvas> phủ kín khung game.
+· Xử lý độ phân giải theo devicePixelRatio để nét trên màn hình retina.
+· Mỗi khung hình, vẽ lại từ xa → gần theo thứ tự lớp.
+
+Thứ tự vẽ thường dùng:
+
+1. Trời (gradient dọc)
+2. Sao / mây / hiệu ứng rải rác
+3. Mặt trăng / mặt trời (radial-gradient)
+4. Núi / đồi xa (silhouette)
+5. Công trình (lâu đài, nhà…)
+6. Đồi gần
+7. Mặt đất
+8. Vignette (làm tối 4 góc)
+
+Kỹ thuật chính: createLinearGradient, createRadialGradient, beginPath/fill, globalAlpha, shadowBlur, và hàm sin(time) để tạo dao động.
+
+---
+
+Code chung chung (mẫu tối giản)
+
+CSS:
+
+```css
+body {
+  margin: 0;
+  background: #04050a;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(120,80,220,.18), transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(220,160,60,.10), transparent 50%);
+  pointer-events: none;
+}
+canvas { display: block; width: 100%; height: 100%; }
+```
+
+JS:
+
+```js
+const cvs = document.querySelector('canvas');
+const ctx = cvs.getContext('2d');
+const W = 450, H = 800;
+
+// Nét trên màn hình retina
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  cvs.width  = W * dpr;
+  cvs.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+
+// Tạo dữ liệu tĩnh 1 lần (sao, đồi...)
+const stars = Array.from({ length: 100 }, () => ({
+  x: Math.random() * W,
+  y: Math.random() * 500,
+  r: Math.random() * 1.4 + 0.3,
+  p: Math.random() * Math.PI * 2
+}));
+
+function draw(time) {
+  // 1. Trời
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.75);
+  sky.addColorStop(0, '#04050e');
+  sky.addColorStop(1, '#3a1740');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Sao nhấp nháy
+  for (const s of stars) {
+    const a = 0.4 + Math.sin(time * 2 + s.p) * 0.5;
+    ctx.globalAlpha = Math.max(0.1, a);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // 3. Mặt trăng
+  const halo = ctx.createRadialGradient(W*0.75, 120, 10, W*0.75, 120, 140);
+  halo.addColorStop(0, 'rgba(255,240,180,.35)');
+  halo.addColorStop(1, 'rgba(255,220,140,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(W*0.75, 120, 140, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#f6e9b8';
+  ctx.beginPath(); ctx.arc(W*0.75, 120, 40, 0, Math.PI*2); ctx.fill();
+
+  // 4. Đồi xa (silhouette)
+  ctx.fillStyle = '#150f2c';
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, H*0.62);
+  ctx.lineTo(W*0.3, H*0.55);
+  ctx.lineTo(W*0.6, H*0.6);
+  ctx.lineTo(W, H*0.58);
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // 5. Mặt đất
+  const ground = ctx.createLinearGradient(0, H*0.75, 0, H);
+  ground.addColorStop(0, '#2b2440');
+  ground.addColorStop(1, '#0a0714');
+  ctx.fillStyle = ground;
+  ctx.fillRect(0, H*0.75, W, H*0.25);
+
+  // 6. Vignette
+  const vg = ctx.createRadialGradient(W/2, H/2, 150, W/2, H/2, 500);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, W, H);
+}
+
+let last = 0;
+function loop(ts) {
+  const t = ts / 1000;
+  draw(t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+```
+
+---
+
+🎯 Tóm 1 câu: Nền = CSS body::before phủ vài radial-gradient mờ + canvas vẽ tuần tự các lớp gradient/hình khối (trời → sao → trăng → đồi → đất → vignette) bằng createLinearGradient/createRadialGradient/beginPath.

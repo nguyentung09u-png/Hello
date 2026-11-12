@@ -1,0 +1,259 @@
+Tổng quan cách vẽ Nhà Vua
+
+Vẽ bằng 1 hàm duy nhất drawKing(g, x, y, time), tuần tự từ sau ra trước theo ~12 bước. Toàn bộ là Canvas 2D path + gradient, không dùng ảnh. Phức tạp hơn lính vì có áo choàng (cape), quyền trượng, vương miện, râu, và hiệu ứng phát sáng.
+
+```
+1. save() + translate(x,y)
+2. translate(0, sin(t·1.5) · 1.5)          — nhấp nhô nhẹ
+3. Áo choàng đỏ (2 lớp: đỏ + viền lông trắng)
+4. Chân + giày
+5. Áo dài tím (gradient 3 lớp) + viền vàng + huy hiệu ngực
+6. Giáp vai vàng (2 ellipse + highlight trắng)
+7. Tay + bàn tay
+8. Quyền trượng (cán vàng + quả cầu phát sáng)
+9. Đầu + tai + mắt + lông mày
+10. Râu trắng + ria mép
+11. Vương miện (gradient vàng 4 lớp) + 5 viên ngọc + glow
+12. restore()
+```
+
+Điểm cốt lõi:
+
+· Nhiều gradient hơn lính (đỏ, tím, vàng, trắng, quả cầu radial).
+· Glow bằng shadowBlur + shadowColor — cho vương miện và quyền trượng.
+· Hiệu ứng nhấp nhô sin(t·1.5) — chậm hơn lính (1.5 vs 2.2).
+
+---
+
+Code chung chung
+
+```js
+function drawKing(g, x, y, t){
+  g.save();
+  g.translate(x, y);
+
+  // 1) Nhấp nhô chậm
+  const bob = Math.sin(t * 1.5) * 1.5;
+  g.translate(0, bob);
+
+  // ===== 2) ÁO CHOÀNG ĐỎ =====
+  const capeG = g.createLinearGradient(0, -74, 0, 2);
+  capeG.addColorStop(0, '#a02235');
+  capeG.addColorStop(1, '#4a0a14');
+  g.fillStyle = capeG;
+  g.beginPath();
+  g.moveTo(-16, -72);
+  g.quadraticCurveTo(-42, -38, -36, 4);
+  g.lineTo(36, 4);
+  g.quadraticCurveTo(42, -38, 16, -72);
+  g.closePath();
+  g.fill();
+
+  // viền lông trắng trên cổ
+  g.fillStyle = '#d8d2c4';
+  g.beginPath();
+  g.moveTo(-16, -72);
+  g.quadraticCurveTo(0, -64, 16, -72);
+  g.quadraticCurveTo(0, -60, -16, -72);
+  g.fill();
+
+  // ===== 3) CHÂN + GIÀY =====
+  g.fillStyle = '#2a2233';
+  g.fillRect(-14, -18, 12, 18);
+  g.fillRect(  2, -18, 12, 18);
+
+  g.fillStyle = '#171320';
+  g.fillRect(-15, -6, 14, 6);
+  g.fillRect(  1, -6, 14, 6);
+
+  // ===== 4) ÁO DÀI TÍM =====
+  const robeG = g.createLinearGradient(-22, -62, 22, 0);
+  robeG.addColorStop(0,   '#7a35a0');
+  robeG.addColorStop(0.5, '#4e1c72');
+  robeG.addColorStop(1,   '#2a0d42');
+  g.fillStyle = robeG;
+  g.beginPath();
+  g.moveTo(-17, -62);
+  g.lineTo( 17, -62);
+  g.lineTo( 24, -6);
+  g.lineTo(-24, -6);
+  g.closePath();
+  g.fill();
+
+  // viền vàng 3 đường
+  g.strokeStyle = '#e0be4a';
+  g.lineWidth = 2.2;
+  g.beginPath(); g.moveTo(-17, -62); g.lineTo(-24, -6); g.stroke();
+  g.beginPath(); g.moveTo( 17, -62); g.lineTo( 24, -6); g.stroke();
+  g.beginPath(); g.moveTo(  0, -60); g.lineTo(  0, -8); g.stroke();
+
+  // huy hiệu ngực — hình thoi vàng + chấm đỏ
+  g.fillStyle = '#f5d76e';
+  g.beginPath();
+  g.moveTo(0, -52); g.lineTo(6, -44); g.lineTo(0, -35); g.lineTo(-6, -44);
+  g.closePath();
+  g.fill();
+  g.fillStyle = '#c0392b';
+  g.beginPath(); g.arc(0, -44, 2.4, 0, Math.PI*2); g.fill();
+
+  // ===== 5) GIÁP VAI VÀNG =====
+  const pg = g.createLinearGradient(-26, -66, -8, -54);
+  pg.addColorStop(0, '#ffeaa0');
+  pg.addColorStop(1, '#b8860b');
+  g.fillStyle = pg;
+  g.beginPath(); g.ellipse(-18, -60, 10, 7.5, -0.25, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.ellipse( 18, -60, 10, 7.5,  0.25, 0, Math.PI*2); g.fill();
+
+  // highlight trắng
+  g.fillStyle = 'rgba(255,255,255,.35)';
+  g.beginPath(); g.ellipse(-20, -62, 4, 3, -0.25, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.ellipse( 16, -62, 4, 3,  0.25, 0, Math.PI*2); g.fill();
+
+  // ===== 6) TAY + BÀN TAY =====
+  g.fillStyle = '#5b2280';
+  g.fillRect(-24, -58, 7, 22);
+  g.fillRect( 17, -58, 7, 22);
+
+  g.fillStyle = '#f0c9a0';
+  g.beginPath(); g.arc(-20.5, -35, 4.5, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc( 20.5, -35, 4.5, 0, Math.PI*2); g.fill();
+
+  // ===== 7) QUYỀN TRƯỢNG (cán + quả cầu phát sáng) =====
+  g.strokeStyle = '#e0be4a';
+  g.lineWidth = 3.2;
+  g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(24, -34);
+  g.lineTo(24, -86);
+  g.stroke();
+
+  // quả cầu radial
+  const orbG = g.createRadialGradient(24, -92, 1, 24, -92, 8);
+  orbG.addColorStop(0,   '#fffbe0');
+  orbG.addColorStop(0.5, '#ffd166');
+  orbG.addColorStop(1,   'rgba(255,180,60,.1)');
+  g.fillStyle = orbG;
+  g.beginPath(); g.arc(24, -92, 7.5, 0, Math.PI*2); g.fill();
+
+  // glow quả cầu
+  g.shadowColor = 'rgba(255,210,110,.9)';
+  g.shadowBlur = 16;
+  g.fillStyle = 'rgba(255,240,180,.85)';
+  g.beginPath(); g.arc(24, -92, 3.5, 0, Math.PI*2); g.fill();
+  g.shadowBlur = 0;
+
+  // ===== 8) ĐẦU + TAI + MẮT + LÔNG MÀY =====
+  g.fillStyle = '#f0c9a0';
+  g.beginPath(); g.arc(0, -78, 12, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc(-11.5, -78, 2.8, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc( 11.5, -78, 2.8, 0, Math.PI*2); g.fill();
+
+  g.fillStyle = '#2b2038';
+  g.beginPath(); g.ellipse(-4.2, -80, 1.7, 2.2, 0, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.ellipse( 4.2, -80, 1.7, 2.2, 0, 0, Math.PI*2); g.fill();
+
+  g.strokeStyle = '#c9c2b4';
+  g.lineWidth = 1.8;
+  g.lineCap = 'round';
+  g.beginPath(); g.moveTo(-7, -84.5); g.lineTo(-1.8, -83.5); g.stroke();
+  g.beginPath(); g.moveTo( 7, -84.5); g.lineTo( 1.8, -83.5); g.stroke();
+
+  // ===== 9) RÂU + RIA MÉP =====
+  const beardG = g.createLinearGradient(0, -74, 0, -50);
+  beardG.addColorStop(0, '#ffffff');
+  beardG.addColorStop(1, '#c8c2b6');
+  g.fillStyle = beardG;
+  g.beginPath();
+  g.moveTo(-10.5, -74);
+  g.quadraticCurveTo(0, -48, 10.5, -74);
+  g.quadraticCurveTo(0, -66, -10.5, -74);
+  g.closePath();
+  g.fill();
+  g.beginPath();
+  g.moveTo(-8, -73); g.quadraticCurveTo(0, -68, 8, -73);
+  g.quadraticCurveTo(0, -70, -8, -73);
+  g.fill();
+
+  // ===== 10) VƯƠNG MIỆN =====
+  const cg = g.createLinearGradient(-14, -104, 14, -84);
+  cg.addColorStop(0,    '#fff4c2');
+  cg.addColorStop(0.4,  '#f5d76e');
+  cg.addColorStop(0.75, '#d4a017');
+  cg.addColorStop(1,    '#8a6508');
+  g.fillStyle = cg;
+  g.beginPath();
+  g.moveTo(-14, -86);
+  g.lineTo(-14, -98);
+  g.lineTo(-7,  -91);
+  g.lineTo(0,   -104);
+  g.lineTo(7,   -91);
+  g.lineTo(14,  -98);
+  g.lineTo(14,  -86);
+  g.closePath();
+  g.fill();
+
+  // dải ngang
+  g.fillStyle = '#b8860b';
+  g.fillRect(-14, -88, 28, 4);
+
+  // 5 viên ngọc
+  g.fillStyle = '#e74c3c';
+  g.beginPath(); g.arc(0, -93, 2.6, 0, Math.PI*2); g.fill();
+  g.fillStyle = '#3498db';
+  g.beginPath(); g.arc(-9, -92, 2, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc( 9, -92, 2, 0, Math.PI*2); g.fill();
+  g.fillStyle = '#2ecc71';
+  g.beginPath(); g.arc(-13.5, -88.5, 1.6, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc( 13.5, -88.5, 1.6, 0, Math.PI*2); g.fill();
+
+  // glow vương miện (pulsing)
+  const glow = 0.5 + Math.sin(t * 2) * 0.3;
+  g.shadowColor = `rgba(255,220,120,${glow})`;
+  g.shadowBlur = 18;
+  g.fillStyle = `rgba(255,240,180,${glow * 0.5})`;
+  g.beginPath(); g.arc(0, -95, 4, 0, Math.PI*2); g.fill();
+  g.shadowBlur = 0;
+
+  g.restore();
+}
+
+// ===== GỌI =====
+drawKing(ctx, 225, 660, time);
+```
+
+---
+
+Bảng màu vua dùng
+
+Bộ phận Màu
+Áo choàng #a02235 → #4a0a14
+Viền lông #d8d2c4
+Chân #2a2233, #171320
+Áo dài #7a35a0 → #4e1c72 → #2a0d42
+Viền vàng áo #e0be4a
+Huy hiệu #f5d76e, #c0392b
+Giáp vai #ffeaa0 → #b8860b
+Tay áo #5b2280
+Da #f0c9a0
+Mắt #2b2038
+Lông mày #c9c2b4
+Râu #ffffff → #c8c2b6
+Vương miện #fff4c2 → #f5d76e → #d4a017 → #8a6508
+Ngọc #e74c3c, #3498db, #2ecc71
+Quyền trượng #e0be4a, #fffbe0, #ffd166
+
+→ Khoảng 18–20 mã màu cho 1 vua.
+
+---
+
+Điều tôi không chắc
+
+· Tại sao chọn tốc độ nhấp nhô 1.5 (chậm hơn lính 2.2) — tôi đoán là để vua trông trang nghiêm hơn lính. Đây là suy luận, không có tài liệu xác nhận.
+· Chu kỳ pulse vương miện sin(t·2) — tôi không rõ tác giả chọn theo tiêu chí nào; có thể là thử cho đến khi thấy vừa mắt.
+· shadowBlur = 18 cho vương miện và 16 cho quyền trượng — hai giá trị khác nhau; tôi không chắc đây là cố ý hay ngẫu nhiên.
+· Thứ tự vẽ — tôi liệt kê theo thứ tự code, nhưng có thể có chi tiết tôi bỏ sót khi đọc lướt (ví dụ: có thể có highlight khác trên áo).
+· Mã màu chính xác — tôi đọc lại từ code và ghi theo, nhưng không dám khẳng định không có sai sót khi copy tay.
+
+---
+
+🎯 Tóm 1 câu: Vẽ vua bằng 1 hàm Canvas 2D theo ~12 bước — save/translate → translate(0, sin(t·1.5)·1.5) nhấp nhô → áo choàng đỏ quadraticCurveTo + viền lông trắng → chân/giày → áo dài tím (gradient 3 lớp #7a35a0→#4e1c72→#2a0d42) + viền vàng + huy hiệu thoi → giáp vai vàng (gradient #ffeaa0→#b8860b) → tay + bàn tay → quyền trượng (cán #e0be4a + quả cầu createRadialGradient + shadowBlur 16) → đầu/tai/mắt/lông mày → râu trắng (gradient #fff→#c8c2b6 + quadraticCurveTo) → vương miện (gradient 4 lớp #fff4c2→#f5d76e→#d4a017→#8a6508) + 5 viên ngọc + glow pulse sin(t·2), không dùng ảnh.

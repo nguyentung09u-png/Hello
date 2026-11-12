@@ -1,0 +1,239 @@
+Nút Joystick ảo (Virtual Joystick) — vòng tròn nổi hiện ra khi chạm vào màn hình, kéo để di chuyển theo mọi hướng
+
+
+---
+
+Tổng quan cách làm Virtual Joystick
+
+Ý tưởng chung: Không tạo HTML element cho joystick. Thay vào đó:
+
+· Dùng 1 canvas phủ toàn màn hình
+· Bắt sự kiện chạm bằng Pointer Events
+· Vẽ joystick bằng JS lên canvas mỗi frame
+· Đọc vector từ joystick để di chuyển nhân vật
+
+4 bước cơ bản:
+
+1. HTML — 1 thẻ <canvas>
+2. CSS — touch-action:none để chặn scroll/zoom
+3. JS — state + 3 sự kiện pointer + công thức vector
+4. JS — hàm vẽ bằng ctx.arc + gradient
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Virtual Joystick Demo</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:#0a0f14; }
+
+  canvas {
+    display: block;
+    touch-action: none;   /* chặn scroll/zoom khi kéo */
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<script>
+(() => {
+  "use strict";
+
+  const cv  = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+
+  let VW = 0, VH = 0, DPR = 1;
+
+  /* ---------- Resize canvas ---------- */
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    VW = window.innerWidth;
+    VH = window.innerHeight;
+    cv.width  = VW * DPR;
+    cv.height = VH * DPR;
+    cv.style.width  = VW + 'px';
+    cv.style.height = VH + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ---------- State joystick ---------- */
+  const STICK_R = 62;   // bán kính vòng ngoài
+  const stick = {
+    active: false,
+    id: null,
+    bx: 0, by: 0,       // tâm gốc
+    cx: 0, cy: 0,       // núm hiện tại
+    vx: 0, vy: 0,       // vector hướng (-1 → 1)
+    mag: 0              // độ lớn (0 → 1)
+  };
+
+  /* ---------- Nhân vật demo ---------- */
+  const player = {
+    x: 0, y: 0,
+    r: 18,
+    speed: 260
+  };
+
+  /* ---------- 3 sự kiện Pointer ---------- */
+  cv.addEventListener('pointerdown', e => {
+    if (stick.active) return;
+    stick.active = true;
+    stick.id = e.pointerId;
+    stick.bx = stick.cx = e.clientX;
+    stick.by = stick.cy = e.clientY;
+    stick.vx = stick.vy = stick.mag = 0;
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
+  }, { passive: false });
+
+  cv.addEventListener('pointermove', e => {
+    if (!stick.active || e.pointerId !== stick.id) return;
+
+    let dx = e.clientX - stick.bx;
+    let dy = e.clientY - stick.by;
+    const len = Math.hypot(dx, dy);
+
+    // Giới hạn trong bán kính
+    if (len > STICK_R) {
+      dx = dx / len * STICK_R;
+      dy = dy / len * STICK_R;
+    }
+    stick.cx = stick.bx + dx;
+    stick.cy = stick.by + dy;
+    stick.vx = dx / STICK_R;
+    stick.vy = dy / STICK_R;
+    stick.mag = Math.min(1, len / STICK_R);
+    e.preventDefault();
+  }, { passive: false });
+
+  function endStick(e) {
+    if (!stick.active || (e && e.pointerId !== stick.id)) return;
+    stick.active = false;
+    stick.id = null;
+    stick.vx = stick.vy = stick.mag = 0;
+  }
+  cv.addEventListener('pointerup', endStick);
+  cv.addEventListener('pointercancel', endStick);
+
+  /* ---------- Vẽ joystick ---------- */
+  function drawJoystick() {
+    if (!stick.active) return;
+
+    // Vòng ngoài
+    ctx.strokeStyle = 'rgba(130,255,215,.55)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(stick.bx, stick.by, STICK_R, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Vòng trang trí
+    ctx.strokeStyle = 'rgba(130,255,215,.18)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(stick.bx, stick.by, STICK_R * 0.6, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Núm trong (có gradient + glow)
+    const g = ctx.createRadialGradient(
+      stick.cx - 8, stick.cy - 8, 3,
+      stick.cx, stick.cy, 30
+    );
+    g.addColorStop(0,   'rgba(220,255,245,.95)');
+    g.addColorStop(0.5, 'rgba(90,230,190,.85)');
+    g.addColorStop(1,   'rgba(20,120,95,.85)');
+
+    ctx.shadowColor = 'rgba(110,255,210,.9)';
+    ctx.shadowBlur  = 22;
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(stick.cx, stick.cy, 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = 'rgba(255,255,255,.75)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(stick.cx, stick.cy, 30, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  /* ---------- Vẽ nhân vật ---------- */
+  function drawPlayer() {
+    ctx.fillStyle = '#ffd23f';
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#8a6200';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  }
+
+  /* ---------- Update ---------- */
+  function update(dt) {
+    if (stick.active && stick.mag > 0) {
+      player.x += stick.vx * player.speed * dt;
+      player.y += stick.vy * player.speed * dt;
+    }
+    // Giữ trong màn hình
+    player.x = Math.max(player.r, Math.min(VW - player.r, player.x));
+    player.y = Math.max(player.r, Math.min(VH - player.r, player.y));
+  }
+
+  /* ---------- Vòng lặp ---------- */
+  let lastT = performance.now();
+
+  function loop(now) {
+    requestAnimationFrame(loop);
+
+    let dt = (now - lastT) / 1000;
+    lastT = now;
+    if (dt > 0.05) dt = 0.05;
+
+    update(dt);
+
+    // Xóa + vẽ
+    ctx.fillStyle = '#0a1310';
+    ctx.fillRect(0, 0, VW, VH);
+
+    drawPlayer();
+    drawJoystick();
+  }
+
+  // Khởi tạo vị trí player giữa màn hình
+  player.x = VW / 2;
+  player.y = VH / 2;
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
+```
+
+---
+
+Giải thích ngắn từng phần
+
+Phần Vai trò
+<canvas> Vẽ cả joystick lẫn nhân vật
+touch-action:none Chặn trình duyệt scroll/zoom khi kéo
+stick object Lưu trạng thái: tâm, núm, vector
+pointerdown Tạo tâm joystick tại chỗ chạm
+pointermove Tính vector, giới hạn bán kính STICK_R
+pointerup Reset joystick, ẩn đi
+drawJoystick() Vẽ vòng ngoài + núm bằng arc + gradient
+update() Dùng stick.vx, vy để dịch chuyển nhân vật
+
+Lưu ý (tôi không chắc 100% trong mọi trường hợp): Pointer Events được hỗ trợ rộng rãi trên các trình duyệt hiện đại, nhưng một số trình duyệt mobile cũ có thể cần fallback sang touchstart/touchmove/touchend. Bản này dùng Pointer Events vì đơn giản và chạy chung cho cả chuột lẫn cảm ứng.

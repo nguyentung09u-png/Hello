@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04070a">
+<title>Dark Tech Background — Navy Sonar Array</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#04070a;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 20% 20%, #0a1826 0%, #05101a 45%, #02060a 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Hex-dot matrix (static painted) ---------- */
+  .matrix{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(rgba(56,189,248,.28) 1px, transparent 1.4px);
+    background-size:26px 26px;
+    background-position:13px 13px;
+    -webkit-mask-image:radial-gradient(120% 100% at 30% 30%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 30% 30%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 88%);
+    opacity:.55;
+  }
+
+  /* ---------- Sonar arcs (SVG data-uri, painted once, off-center) ---------- */
+  .arcs{
+    position:absolute;
+    left:30%;
+    top:30%;
+    width:200vmin;
+    height:200vmin;
+    margin-left:-100vmin;
+    margin-top:-100vmin;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-500 -500 1000 1000'%3E%3Cg fill='none' stroke='%2338bdf8' stroke-opacity='0.22' stroke-width='1'%3E%3Cpath d='M -480 0 A 480 480 0 0 1 0 -480'/%3E%3Cpath d='M -380 0 A 380 380 0 0 1 0 -380'/%3E%3Cpath d='M -280 0 A 280 280 0 0 1 0 -280'/%3E%3Cpath d='M -180 0 A 180 180 0 0 1 0 -180'/%3E%3Cpath d='M -80 0 A 80 80 0 0 1 0 -80'/%3E%3C/g%3E%3Cg fill='none' stroke='%237dd3fc' stroke-opacity='0.10' stroke-width='1'%3E%3Cpath d='M -480 0 A 480 480 0 0 0 0 480'/%3E%3Cpath d='M 0 -480 A 480 480 0 0 0 480 0'/%3E%3C/g%3E%3Cg fill='none' stroke='%23e0f2fe' stroke-opacity='0.16' stroke-width='0.8'%3E%3Cline x1='0' y1='-500' x2='0' y2='-40'/%3E%3Cline x1='-500' y1='0' x2='-40' y2='0'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+    pointer-events:none;
+    animation:arcPulse 9s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes arcPulse{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.75;}
+    50%{transform:translate3d(0,0,0) scale(1.05);opacity:1;}
+  }
+
+  /* ---------- Rotating sonar sweep beam ---------- */
+  .beam{
+    position:absolute;
+    left:30%;
+    top:30%;
+    width:200vmin;
+    height:200vmin;
+    margin-left:-100vmin;
+    margin-top:-100vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:conic-gradient(
+      from 0deg,
+      rgba(56,189,248,0) 0deg,
+      rgba(56,189,248,0) 305deg,
+      rgba(125,211,252,.06) 340deg,
+      rgba(56,189,248,.14) 358deg,
+      rgba(224,242,254,.20) 360deg
+    );
+    animation:beamSpin 14s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes beamSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Contact pings (transform/opacity only) ---------- */
+  .pings{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .pings i{
+    position:absolute;
+    width:7px;
+    height:7px;
+    margin:-3.5px 0 0 -3.5px;
+    border-radius:50%;
+    border:1px solid rgba(125,211,252,.9);
+    background:rgba(224,242,254,.15);
+    box-shadow:0 0 10px rgba(56,189,248,.85), 0 0 22px rgba(14,116,144,.5);
+    animation:pingExpand 4.5s ease-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes pingExpand{
+    0%{transform:translate3d(0,0,0) scale(.3);opacity:0;}
+    22%{opacity:1;}
+    100%{transform:translate3d(0,0,0) scale(2.8);opacity:0;}
+  }
+
+  /* ---------- Corner grid brackets ---------- */
+  .brackets{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .brackets::before,
+  .brackets::after{
+    content:"";
+    position:absolute;
+    width:20vmin;
+    height:20vmin;
+    border:1px solid rgba(56,189,248,.22);
+  }
+  .brackets::before{top:6vmin;right:6vmin;border-left:none;border-bottom:none;}
+  .brackets::after{bottom:6vmin;left:6vmin;border-right:none;border-top:none;}
+
+  /* ---------- Navy core glow ---------- */
+  .core{
+    position:absolute;
+    left:30%;
+    top:30%;
+    width:60vmin;
+    height:60vmin;
+    margin-left:-30vmin;
+    margin-top:-30vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(56,189,248,.16) 0%,
+      rgba(14,116,144,.06) 44%,
+      rgba(14,116,144,0) 74%);
+    animation:coreBreath 8s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes coreBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.78;}
+    50%{transform:translate3d(0,0,0) scale(1.14);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .arcs,.beam,.pings i,.core{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="matrix"></div>
+  <div class="beam"></div>
+  <div class="arcs"></div>
+  <div class="core"></div>
+  <div class="pings" id="pings"></div>
+  <div class="brackets"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const pings = document.getElementById('pings');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 11;
+
+  for (let i = 0; i < COUNT; i++) {
+    const el = document.createElement('i');
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 15 + Math.random() * 55;
+    const cx = 30 + Math.cos(angle) * radius;
+    const cy = 30 + Math.sin(angle) * radius;
+    el.style.left = cx + 'vmin';
+    el.style.top = cy + 'vmin';
+    el.style.animationDelay = (Math.random() * 4.5) + 's';
+    el.style.animationDuration = (3.5 + Math.random() * 3) + 's';
+    frag.appendChild(el);
+  }
+
+  pings.appendChild(frag);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+Tổng quan cách làm Aurora Glass Card
+
+Các bước chính
+
+1. HTML — cấu trúc
+
+· 1 .card (khối cha, nhận tilt)
+· Bên trong: .glass (thân kính) chứa .aurora (3 blob) + .particles (hạt) + .glare + .content
+
+2. CSS — không gian 3D
+
+· Thẻ bao ngoài: perspective → tạo chiều sâu
+· .card: transform-style: preserve-3d + rotateX/Y
+· Nội dung: translateZ(...) để nổi lên
+
+3. CSS — các lớp hiệu ứng
+
+Lớp Kỹ thuật (có căn cứ)
+Viền xoay conic-gradient + @property --angle + @keyframes spin
+Glass backdrop-filter: blur() + nền rgba
+Aurora radial-gradient + mix-blend-mode: screen + filter: blur()
+Hạt sáng <span> + @keyframes bay lên
+Glare radial-gradient tại --gx/--gy
+
+4. JS — điều khiển
+
+· pointermove → tính góc nghiêng mục tiêu
+· Lerp: hiện_tại += (mục_tiêu − hiện_tại) * hệ_số
+· requestAnimationFrame render liên tục
+· Rảnh ≥ 1s → chạy quỹ đạo tròn: ry = A·cos(t·speed), rx = −A·sin(t·speed)
+
+Lưu ý (tôi không chắc): @property cần trình duyệt hỗ trợ Houdini — Firefox/Safari cũ có thể không chạy.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{
+    margin:0; height:100vh;
+    display:grid; place-items:center;
+    background: radial-gradient(circle, #1e1b4b, #02030a 70%);
+    font-family:system-ui,sans-serif;
+  }
+
+  .stage{
+    perspective: 1300px;   /* tạo chiều sâu */
+  }
+
+  .card{
+    position:relative;
+    width:320px; height:440px;
+    border-radius:24px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+    transition: transform .12s linear;
+  }
+
+  /* ===== viền gradient xoay ===== */
+  .card::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:26px;
+    background: conic-gradient(
+      from var(--angle,0deg),
+      #7c3aed, #06b6d4, #ec4899, #f59e0b, #7c3aed);
+    filter: blur(8px);
+    z-index:-2;
+    animation: spin 8s linear infinite;
+  }
+  @property --angle{
+    syntax:'<angle>'; initial-value:0deg; inherits:false;
+  }
+  @keyframes spin{ to{ --angle:360deg; } }
+
+  /* ===== thân kính ===== */
+  .glass{
+    position:absolute; inset:0;
+    border-radius:24px;
+    overflow:hidden;
+    background: linear-gradient(160deg, rgba(20,22,40,.75), rgba(8,10,20,.85));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ===== aurora ===== */
+  .aurora{
+    position:absolute; inset:-30%;
+    filter: blur(60px);
+    opacity:.75;
+  }
+  .blob{
+    position:absolute; border-radius:50%;
+    mix-blend-mode: screen;
+  }
+  .b1{ width:240px;height:240px; top:5%; left:0%;
+       background:radial-gradient(circle,#7c3aed,transparent 70%);
+       animation: drift 12s ease-in-out infinite; }
+  .b2{ width:260px;height:260px; bottom:0; right:0;
+       background:radial-gradient(circle,#06b6d4,transparent 70%);
+       animation: drift 15s ease-in-out infinite reverse; }
+  .b3{ width:200px;height:200px; top:40%; left:40%;
+       background:radial-gradient(circle,#ec4899,transparent 70%);
+       animation: drift 18s ease-in-out infinite; }
+  @keyframes drift{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%    { transform:translate(40px,-40px) scale(1.2); }
+  }
+
+  /* ===== hạt sáng ===== */
+  .particles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .particles span{
+    position:absolute; bottom:-10px;
+    width:3px; height:3px; border-radius:50%;
+    background:#fff; box-shadow:0 0 8px #fff;
+    opacity:0;
+    animation: rise linear infinite;
+  }
+  @keyframes rise{
+    0%  { transform:translateY(20px); opacity:0; }
+    20% { opacity:.9; }
+    100%{ transform:translateY(-460px); opacity:0; }
+  }
+
+  /* ===== glare theo chuột ===== */
+  .glare{
+    position:absolute; inset:0;
+    background: radial-gradient(circle at var(--gx,50%) var(--gy,50%),
+      rgba(255,255,255,.25), transparent 55%);
+    opacity:0; transition:opacity .35s ease;
+    pointer-events:none; mix-blend-mode:overlay;
+  }
+  .card:hover .glare{ opacity:1; }
+
+  /* ===== nội dung nổi 3D ===== */
+  .content{
+    position:relative; z-index:3;
+    height:100%; padding:32px 26px;
+    color:#fff;
+    display:flex; flex-direction:column; gap:14px;
+    transform: translateZ(40px);
+  }
+  .content h1{ font-size:26px; margin:0;
+    background:linear-gradient(135deg,#fff,#67e8f9);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+  }
+  .content p{ font-size:13px; color:#94a3b8; line-height:1.6; margin:0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="glass">
+        <div class="aurora">
+          <div class="blob b1"></div>
+          <div class="blob b2"></div>
+          <div class="blob b3"></div>
+        </div>
+        <div class="particles" id="particles"></div>
+        <div class="glare" id="glare"></div>
+        <div class="content">
+          <h1>Aurora Glass</h1>
+          <p>Card kính với cực quang chuyển màu và hạt sáng bay.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const card = document.getElementById('card');
+  const glare = document.getElementById('glare');
+  const box = document.getElementById('particles');
+
+  // tạo 20 hạt ngẫu nhiên
+  for (let i = 0; i < 20; i++){
+    const s = document.createElement('span');
+    s.style.left = Math.random()*100 + '%';
+    s.style.animationDuration = (5 + Math.random()*5) + 's';
+    s.style.animationDelay = (Math.random()*6) + 's';
+    box.appendChild(s);
+  }
+
+  let rx = 0, ry = 0;        // hiện tại
+  let trx = 0, try_ = 0;     // mục tiêu
+  let lastMove = 0;
+  let idleStart = 0;
+
+  // ===== chuột di chuyển → cập nhật mục tiêu =====
+  window.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left+r.width/2))  / (r.width/2)));
+    const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top+r.height/2)) / (r.height/2)));
+
+    try_ =  nx * 15;
+    trx  = -ny * 15;
+
+    // glare
+    glare.style.setProperty('--gx', ((e.clientX-r.left)/r.width)*100 + '%');
+    glare.style.setProperty('--gy', ((e.clientY-r.top)/r.height)*100 + '%');
+
+    lastMove = performance.now();
+    idleStart = 0;
+  }, { passive:true });
+
+  // ===== vòng lặp =====
+  function loop(now){
+    // rảnh ≥ 1s → tự xoay quỹ đạo tròn
+    if (now - lastMove > 1000){
+      if (!idleStart) idleStart = now;
+      const t = (now - idleStart) / 1000;
+      const A = 15, speed = 0.9;
+      try_ =  A * Math.cos(t * speed);
+      trx  = -A * Math.sin(t * speed);
+    }
+
+    // lerp
+    ry += (try_ - ry) * 0.08;
+    rx += (trx  - rx) * 0.08;
+
+    card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+    card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>
+```
+
+---
+
+Tóm 1 câu
+
+Dựng .card chứa .glass (blur), bên trong là 3 blob aurora (radial-gradient + mix-blend-mode: screen), hạt sáng (<span> + keyframes), viền conic-gradient xoay bằng @property --angle, và .glare theo chuột — đặt trong perspective + preserve-3d, điều khiển bằng JS (pointermove tilt + lerp + requestAnimationFrame, rảnh 1s thì tự xoay quỹ đạo tròn) — HTML/CSS/JS thuần.

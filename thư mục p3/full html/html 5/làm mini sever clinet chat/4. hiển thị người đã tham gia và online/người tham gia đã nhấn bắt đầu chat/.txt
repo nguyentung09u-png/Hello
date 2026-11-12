@@ -1,0 +1,123 @@
+Tổng quan cách làm (ngắn)
+
+Theo cách tôi hiểu, để làm tin hệ thống "[Tên] đã tham gia" cần 3 bước:
+
+1. Bắt sự kiện connected — dùng .info/connected của Firebase, khi true thì push tin lên node messages với cờ isSystem: true.
+2. CSS — thêm class .message.system (căn giữa, không nền, chữ nghiêng xám).
+3. JS render — khi nhận tin, nếu msg.isSystem === true thì gán class system, ngược lại xử lý như tin thường.
+
+Lưu ý: tôi không chắc Firebase onDisconnect/.info/connected phản hồi giống nhau trong mọi điều kiện mạng — có thể trễ vài giây.
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{ margin:0; padding:40px; background:#02030a; color:#fff;
+        font-family:system-ui,sans-serif; }
+
+  #chat-box{ max-width:420px; display:flex; flex-direction:column; gap:10px; }
+
+  .message{ padding:10px 14px; border-radius:14px; max-width:80%; }
+  .message.mine{ align-self:flex-end; background:#4F46E5; color:#fff; }
+  .message.theirs{ align-self:flex-start; background:#F3F4F6; color:#111; }
+
+  /* tin hệ thống */
+  .message.system{
+    align-self:center;
+    background:transparent;
+    color:#6B7280;
+    font-size:.8rem;
+    font-style:italic;
+    text-align:center;
+    max-width:90%;
+    padding:4px 0;
+  }
+</style>
+</head>
+<body>
+
+  <div id="chat-box"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getDatabase, ref, push, onValue, set, onDisconnect,
+      serverTimestamp, query, limitToLast
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+    // ⚠️ thay config của bạn
+    const firebaseConfig = {
+      databaseURL: "https://chat-d878c-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    // demo: id + tên tạm
+    const userId   = 'user_' + Math.random().toString(36).substring(2, 9);
+    const userName = 'Khách ' + Math.floor(Math.random() * 100);
+
+    const chatBox = document.getElementById('chat-box');
+
+    // 1. Bắt connected → push tin hệ thống
+    onValue(ref(db, '.info/connected'), snap => {
+      if (snap.val() === true){
+        // đánh dấu presence
+        const myRef = ref(db, `presence/${userId}`);
+        set(myRef, { name: userName });
+        onDisconnect(myRef).remove();
+
+        // push tin hệ thống
+        push(ref(db, 'messages'), {
+          userId: 'system',
+          text: `${userName} đã tham gia phòng chat.`,
+          isSystem: true,
+          timestamp: serverTimestamp()
+        });
+      }
+    });
+
+    // 2. Render tin nhắn (phân biệt system vs thường)
+    onValue(query(ref(db, 'messages'), limitToLast(50)), snapshot => {
+      chatBox.innerHTML = '';
+      snapshot.forEach(child => {
+        const msg = child.val();
+        const div = document.createElement('div');
+
+        if (msg.isSystem){
+          div.classList.add('message', 'system');
+          div.textContent = msg.text;
+        } else {
+          const isMine = msg.userId === userId;
+          div.classList.add('message', isMine ? 'mine' : 'theirs');
+          div.textContent = msg.text;
+        }
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  </script>
+</body>
+</html>
+```
+
+Giải thích ngắn:
+
+· onValue('.info/connected') → khi true thì push tin có cờ isSystem: true.
+· .message.system — style căn giữa, chữ nghiêng, không nền.
+· Trong vòng lặp render, chỉ cần if (msg.isSystem) là phân biệt được.
+
+Lưu ý:
+
+· Code trên cần chạy qua Live Server hoặc hosting (vì dùng ES Modules).
+· Tin hệ thống sẽ được push mỗi lần client connected — F5 trang sẽ có thêm 1 tin mới. Tôi không chắc bạn có muốn chặn điều này.
+· userId: 'system' chỉ là quy ước; nếu không có Firebase Rules bảo vệ, client khác có thể giả mạo isSystem: true. Tôi không chắc bạn có cần xử lý bảo mật ở bước này.
+
+---
+
+🎯 Tóm 1 câu: Bắt .info/connected → push() tin có cờ isSystem: true lên messages, style .message.system (căn giữa, nghiêng, xám), rồi trong vòng onValue render chỉ cần if (msg.isSystem) là phân biệt được — code trên là bản demo tối thiểu.

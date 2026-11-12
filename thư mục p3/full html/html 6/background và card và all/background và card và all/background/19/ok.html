@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#030a08">
+<title>Dark Tech Background — Jade Sonar Field</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#030a08;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 110% at 70% 30%, #0a2018 0%, #061410 45%, #020806 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Sonar rings (static painted, off-center) ---------- */
+  .sonar{
+    position:absolute;
+    left:72%;
+    top:38%;
+    width:0;
+    height:0;
+    pointer-events:none;
+  }
+  .sonar i{
+    position:absolute;
+    left:0;
+    top:0;
+    border-radius:50%;
+    border:1px solid rgba(52,211,153,.18);
+    transform:translate(-50%,-50%);
+  }
+  .sonar i:nth-child(1){width:14vmin;height:14vmin;border-color:rgba(52,211,153,.35);}
+  .sonar i:nth-child(2){width:28vmin;height:28vmin;border-color:rgba(52,211,153,.25);}
+  .sonar i:nth-child(3){width:44vmin;height:44vmin;border-color:rgba(52,211,153,.18);}
+  .sonar i:nth-child(4){width:62vmin;height:62vmin;border-color:rgba(52,211,153,.12);}
+  .sonar i:nth-child(5){width:82vmin;height:82vmin;border-color:rgba(52,211,153,.08);}
+  .sonar i:nth-child(6){width:104vmin;height:104vmin;border-color:rgba(52,211,153,.05);}
+
+  /* ---------- Expanding pulse (transform/opacity only) ---------- */
+  .pulse{
+    position:absolute;
+    left:72%;
+    top:38%;
+    width:20vmin;
+    height:20vmin;
+    margin-left:-10vmin;
+    margin-top:-10vmin;
+    border-radius:50%;
+    border:1px solid rgba(110,231,183,.55);
+    pointer-events:none;
+    animation:sonarPulse 5s ease-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .pulse:nth-child(2){animation-delay:1.66s;border-color:rgba(52,211,153,.45);}
+  .pulse:nth-child(3){animation-delay:3.32s;border-color:rgba(16,185,129,.35);}
+
+  @keyframes sonarPulse{
+    0%{transform:translate3d(0,0,0) scale(.4);opacity:0;}
+    20%{opacity:1;}
+    100%{transform:translate3d(0,0,0) scale(3.2);opacity:0;}
+  }
+
+  /* ---------- Jade sweep cone (transform-only rotation) ---------- */
+  .sweep{
+    position:absolute;
+    left:72%;
+    top:38%;
+    width:200vmin;
+    height:200vmin;
+    margin-left:-100vmin;
+    margin-top:-100vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:conic-gradient(
+      from 0deg,
+      rgba(52,211,153,0) 0deg,
+      rgba(52,211,153,0) 320deg,
+      rgba(110,231,183,.10) 348deg,
+      rgba(16,185,129,.18) 360deg
+    );
+    animation:sweepSpin 11s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes sweepSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Coordinate ticks (static painted) ---------- */
+  .ticks{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:repeating-linear-gradient(
+      to right,
+      rgba(52,211,153,.06) 0 1px,
+      transparent 1px 60px
+    );
+    -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 40%, #000 60%, rgba(0,0,0,0) 100%);
+            mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 40%, #000 60%, rgba(0,0,0,0) 100%);
+  }
+
+  /* ---------- Echo dots (transform/opacity) ---------- */
+  .echoes{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .echoes i{
+    position:absolute;
+    width:4px;
+    height:4px;
+    margin:-2px 0 0 -2px;
+    border-radius:50%;
+    background:rgba(167,243,208,.95);
+    box-shadow:0 0 8px rgba(110,231,183,.85), 0 0 18px rgba(16,185,129,.4);
+    animation:echoBlip 6s ease-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes echoBlip{
+    0%{transform:translate3d(0,0,0) scale(.3);opacity:0;}
+    20%{opacity:1;}
+    100%{transform:translate3d(0,0,0) scale(2.2);opacity:0;}
+  }
+
+  /* ---------- Jade bloom ---------- */
+  .bloom{
+    position:absolute;
+    left:72%;
+    top:38%;
+    width:110vmin;
+    height:110vmin;
+    margin-left:-55vmin;
+    margin-top:-55vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(52,211,153,.10) 0%,
+      rgba(16,185,129,.04) 42%,
+      rgba(16,185,129,0) 72%);
+    animation:bloomBreath 14s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes bloomBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.7;}
+    50%{transform:translate3d(0,0,0) scale(1.08);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .pulse,.sweep,.echoes i,.bloom{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="sonar">
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+  <div class="sweep"></div>
+  <div class="pulse"></div>
+  <div class="pulse"></div>
+  <div class="pulse"></div>
+  <div class="ticks"></div>
+  <div class="bloom"></div>
+  <div class="echoes" id="echoes"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const echoes = document.getElementById('echoes');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 10;
+
+  for (let i = 0; i < COUNT; i++) {
+    const el = document.createElement('i');
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 12 + Math.random() * 40;
+    const x = 72 + Math.cos(angle) * radius;
+    const y = 38 + Math.sin(angle) * radius;
+    el.style.left = x + 'vmin';
+    el.style.top = y + 'vmin';
+    el.style.animationDelay = (Math.random() * 6) + 's';
+    el.style.animationDuration = (4 + Math.random() * 4) + 's';
+    frag.appendChild(el);
+  }
+
+  echoes.appendChild(frag);
+})();
+</script>
+</body>
+</html>

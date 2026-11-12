@@ -1,0 +1,127 @@
+Tổng quan cách làm
+
+3 bước:
+
+1. HTML — 1 <div class="header"> chứa 3 con: avatar (icon) + text tiêu đề + nút đóng.
+2. CSS khung — display: flex; align-items: center; gap: 10px; padding + nền gradient + chữ trắng.
+3. CSS con — avatar tròn, nút đóng tròn + margin-left: auto để đẩy sang phải.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· display: flex + align-items: center — xếp con theo hàng ngang, căn giữa theo trục dọc.
+· gap: 10px — khoảng cách đều giữa các con.
+· margin-left: auto trên nút đóng — đẩy nút sang phải mà không cần justify-content: space-between.
+· flex-shrink: 0 trên avatar — không bị co khi text dài.
+· background: linear-gradient — nền xanh chuyển màu.
+· Không cần JS cho phần style.
+
+Tôi không chắc:
+
+· Bạn muốn có avatar hay không — code có avatar, có thể xóa.
+· Bạn muốn có nút đóng hay không — code có nút đóng, có thể xóa.
+
+---
+
+Code chung chung
+
+```html
+<div class="header">
+  <span class="avatar" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="8" width="16" height="12" rx="3"/>
+      <circle cx="9" cy="14" r="1.2" fill="#fff"/>
+      <circle cx="15" cy="14" r="1.2" fill="#fff"/>
+      <line x1="12" y1="4" x2="12" y2="8"/>
+      <circle cx="12" cy="3" r="1"/>
+    </svg>
+  </span>
+
+  <span class="title">Trợ lý ảo</span>
+
+  <button class="close-btn" type="button" aria-label="Đóng">✕</button>
+</div>
+```
+
+```css
+/* ===== Khung header ===== */
+.header {
+  display: flex;                       /* xếp con theo hàng ngang */
+  align-items: center;                 /* căn giữa theo trục dọc */
+  gap: 10px;                           /* khoảng cách giữa các con */
+  padding: 12px 14px;                  /* đệm trong */
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);  /* nền xanh */
+  color: #fff;                         /* chữ trắng */
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ===== Avatar / icon (bên trái) ===== */
+.header .avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);   /* nền mờ */
+  display: grid; place-items: center;  /* căn giữa icon */
+  flex-shrink: 0;                       /* không co khi text dài */
+}
+.header .avatar svg { width: 16px; height: 16px; }
+
+/* ===== Tiêu đề ===== */
+.header .title {
+  /* tự nhiên chiếm khoảng giữa */
+}
+
+/* ===== Nút đóng (bên phải) ===== */
+.header .close-btn {
+  margin-left: auto;                    /* đẩy sang phải */
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: grid; place-items: center;
+  font-family: inherit;
+  transition: background .18s ease;
+}
+.header .close-btn:hover { background: rgba(255,255,255,.28); }
+```
+
+---
+
+Cấu trúc hình học
+
+```
+┌─────────────────────────────┐
+│ [icon]  Trợ lý ảo      [X] │  ← header
+└─────────────────────────────┘
+   ↑                       ↑
+   avatar                  nút đóng
+   (flex-shrink: 0)        (margin-left: auto)
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Đổi màu nền background của .header
+Đổi gradient hướng linear-gradient(135deg, ...) → to right, 180deg, …
+Không có avatar Xóa <span class="avatar">...</span>
+Không có nút đóng Xóa <button class="close-btn">...</button>
+Đổi kích thước avatar width/height của .avatar
+Thêm subtitle (dòng phụ) Bọc text trong <div> chứa 2 dòng <span>
+Căn giữa text thay vì trái Thêm justify-content: center (nhưng nút đóng sẽ không còn đẩy phải nữa)
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: display: flex + align-items: center + margin-left: auto là kỹ thuật CSS chuẩn để căn icon trái và nút phải trong 1 hàng.
+· Tôi không chắc bạn muốn header có avatar và nút đóng hay chỉ 1 trong 2 — code trên có cả 2, có thể xóa từng phần.
+· Tôi không chắc bạn muốn justify-content nào — code trên dùng margin-left: auto để đẩy nút phải, không cần justify-content.
+
+🎯 Tóm 1 câu: Header = 1 <div> với display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: linear-gradient(blue); color: #fff, chứa avatar (tròn + flex-shrink: 0) + text tiêu đề + nút đóng (margin-left: auto) — thuần HTML/CSS, không cần JS.

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Marquee — Click dừng 2s</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #05070f;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #fff;
+    padding-top: 44px;
+  }
+
+  /* ===== THANH MARQUEE DÍNH MÉP TRÊN ===== */
+  .top-marquee {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 44px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #a855f7, #ec4899, #22d3ee, #a855f7);
+    background-size: 300% 100%;
+    animation: bgFlow 6s linear infinite;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  @keyframes bgFlow {
+    to { background-position: 300% 0; }
+  }
+
+  /* ===== TRACK ===== */
+  .top-track {
+    display: flex;
+    gap: 2.5rem;
+    width: max-content;
+    animation: marqueeGo 18s linear infinite;
+    will-change: transform;
+  }
+
+  /* Trạng thái dừng */
+  .top-track.paused {
+    animation-play-state: paused;
+  }
+
+  @keyframes marqueeGo {
+    to { transform: translateX(-50%); }
+  }
+
+  /* ===== MỤC ===== */
+  .top-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #05070f;
+    white-space: nowrap;
+  }
+
+  .top-item .star {
+    font-size: 1rem;
+  }
+
+  /* ===== NỘI DUNG DEMO ===== */
+  .content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .content h1 {
+    font-size: clamp(2rem, 8vw, 4rem);
+    font-weight: 900;
+    background: linear-gradient(90deg, #22d3ee, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .content p { color: #94a3b8; line-height: 1.7; }
+
+  .status {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #64748b;
+    min-height: 1em;
+  }
+
+  .status.paused { color: #ec4899; }
+  .status.running { color: #22d3ee; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .top-marquee, .top-track {
+      animation-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-marquee" id="marquee">
+    <div class="top-track" id="track">
+      <span class="top-item"><span class="star">★</span>HELLO WORLD</span>
+      <span class="top-item"><span class="star">★</span>WELCOME TO MY SITE</span>
+      <span class="top-item"><span class="star">★</span>DESIGN & ANIMATION</span>
+      <span class="top-item"><span class="star">★</span>CYBERPUNK THEME</span>
+
+      <span class="top-item"><span class="star">★</span>HELLO WORLD</span>
+      <span class="top-item"><span class="star">★</span>WELCOME TO MY SITE</span>
+      <span class="top-item"><span class="star">★</span>DESIGN & ANIMATION</span>
+      <span class="top-item"><span class="star">★</span>CYBERPUNK THEME</span>
+    </div>
+  </div>
+
+  <main class="content">
+    <h1>TOP MARQUEE</h1>
+    <p>Click vào thanh trên → marquee dừng 2 giây. Click tiếp → reset đếm lại. Không click nữa → tự chạy tiếp.</p>
+    <p class="status running" id="status">● ĐANG CHẠY TỰ ĐỘNG</p>
+  </main>
+
+<script>
+  const marquee = document.getElementById('marquee');
+  const track   = document.getElementById('track');
+  const status  = document.getElementById('status');
+
+  let resumeTimer = null;  // bộ đếm 2 giây
+
+  /* ===== CLICK → DỪNG + ĐẾM 2s ===== */
+  marquee.addEventListener('click', () => {
+    // 1. Dừng marquee
+    track.classList.add('paused');
+    status.textContent = '⏸ ĐANG DỪNG — chờ 2 giây';
+    status.className = 'status paused';
+
+    // 2. Xóa timer cũ (nếu click tiếp → reset đếm)
+    clearTimeout(resumeTimer);
+
+    // 3. Đếm 2 giây → nếu không click nữa thì chạy tiếp
+    resumeTimer = setTimeout(() => {
+      track.classList.remove('paused');
+      status.textContent = '● ĐANG CHẠY TỰ ĐỘNG';
+      status.className = 'status running';
+    }, 2000);
+  });
+</script>
+
+</body>
+</html>

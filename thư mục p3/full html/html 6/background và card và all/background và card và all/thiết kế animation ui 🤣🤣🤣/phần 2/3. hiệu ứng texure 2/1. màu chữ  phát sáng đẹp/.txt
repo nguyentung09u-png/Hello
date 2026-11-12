@@ -1,0 +1,66 @@
+Tổng quan cách làm
+
+Neon Text Effect gồm 3 bước:
+
+1. Lõi chữ trắng — đặt color: #fff để làm tâm sáng.
+2. Nhiều lớp text-shadow — mỗi lớp có bán kính blur lớn dần (8px → 120px), màu xanh từ sáng đến đậm.
+3. Nhấp nháy — dùng @keyframes bật/tắt shadow ở vài mốc thời gian.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Arial Black', sans-serif;
+  }
+
+  .neon {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #fff;                 /* lõi trắng */
+    text-shadow:
+      0 0 8px   #fff,
+      0 0 20px  #38bdf8,
+      0 0 40px  #38bdf8,
+      0 0 80px  #0ea5e9,
+      0 0 120px #0284c7;
+    animation: flicker 2s infinite alternate;
+  }
+
+  @keyframes flicker {
+    0%, 18%, 22%, 100% {
+      text-shadow:
+        0 0 8px   #fff,
+        0 0 20px  #38bdf8,
+        0 0 40px  #38bdf8,
+        0 0 80px  #0ea5e9,
+        0 0 120px #0284c7;
+    }
+    20% {
+      text-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="neon">NEON</div>
+</body>
+</html>
+```
+
+Muốn đổi màu → thay #38bdf8 và #0284c7 bằng màu khác.
+Muốn tắt nhấp nháy → xóa dòng animation: flicker ....
+
+---
+
+🎯 Tóm 1 câu: Chữ trắng + nhiều lớp text-shadow xanh loe dần, thêm @keyframes bật/tắt shadow để nhấp nháy.

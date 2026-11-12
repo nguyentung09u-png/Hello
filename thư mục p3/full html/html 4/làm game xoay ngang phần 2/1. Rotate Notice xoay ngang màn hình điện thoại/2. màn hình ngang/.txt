@@ -1,0 +1,111 @@
+Tổng quan cách xử lý Landscape trong web
+
+Ý tưởng chung: Landscape không tự tạo ra được — nó là trạng thái do thiết bị. Code chỉ đọc để đổi giao diện, hoặc yêu cầu khóa (nếu trình duyệt cho phép).
+
+3 cách xử lý:
+
+1. CSS Media Query — đổi giao diện theo hướng (phổ biến nhất, chạy mọi nơi)
+2. JS matchMedia — đọc hướng trong code logic
+3. Fullscreen + Orientation Lock — ép xoay (hỗ trợ hạn chế)
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Landscape Demo</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    height:100vh;
+    font-family:system-ui, sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    background:#111; color:#eee;
+    transition: background .3s;
+  }
+
+  /* Mặc định: portrait */
+  #status::before { content: "📱 PORTRAIT — máy đang dọc"; }
+
+  /* Khi máy ngang */
+  @media (orientation: landscape) {
+    body { background:#0a2a1a; }
+    #status::before { content: "🖥️ LANDSCAPE — máy đang ngang"; }
+  }
+</style>
+</head>
+<body>
+
+  <h1 id="status"></h1>
+
+<script>
+  /* ---------- 1. Đọc hướng bằng matchMedia ---------- */
+  const mq = window.matchMedia("(orientation: landscape)");
+
+  function onOrientationChange(e) {
+    if (e.matches) {
+      console.log("→ Đang LANDSCAPE");
+    } else {
+      console.log("→ Đang PORTRAIT");
+    }
+  }
+  mq.addEventListener("change", onOrientationChange);
+  onOrientationChange(mq);  // chạy lần đầu
+
+  /* ---------- 2. Đọc bằng screen.orientation (nếu có) ---------- */
+  if (screen.orientation) {
+    console.log("Loại hiện tại:", screen.orientation.type);
+    // ví dụ: "landscape-primary" hoặc "portrait-primary"
+
+    screen.orientation.addEventListener("change", () => {
+      console.log("Đổi hướng →", screen.orientation.type);
+    });
+  }
+
+  /* ---------- 3. Ép khóa landscape (hỗ trợ hạn chế) ---------- */
+  async function lockLandscape() {
+    try {
+      // Phải vào fullscreen trước
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      }
+      // Rồi mới khóa được
+      await screen.orientation.lock('landscape');
+      console.log("Đã khóa landscape");
+    } catch (err) {
+      // iOS Safari không hỗ trợ — dùng fallback (Rotate Notice)
+      console.warn("Không khóa được hướng:", err.message);
+    }
+  }
+
+  // Gọi khi cần (ví dụ bấm nút, hoặc khi bắt đầu game)
+  // lockLandscape();
+</script>
+</body>
+</html>
+```
+
+---
+
+Giải thích ngắn từng phần
+
+Phần Vai trò Hỗ trợ
+@media (orientation: landscape) Đổi CSS theo hướng Rộng rãi
+matchMedia(...).matches Đọc hướng trong JS Rộng rãi
+screen.orientation.type Đọc loại hướng chi tiết Khá rộng
+screen.orientation.lock() Ép khóa hướng Hạn chế
+
+Lưu ý (tôi không chắc 100% trong mọi trường hợp):
+
+· screen.orientation.lock() thường yêu cầu đang ở fullscreen.
+· iOS Safari (theo hiểu biết của tôi) không hỗ trợ lock() → cần fallback bằng Rotate Notice (thông báo nhắc user tự xoay).
+· Android Chrome hỗ trợ tốt hơn.
+
+---
+
+🎯 Tóm 1 câu: Xử lý landscape = CSS @media (orientation:landscape) để đổi giao diện + JS matchMedia / screen.orientation để đọc hướng + (tùy chọn) Fullscreen API + screen.orientation.lock('landscape') để ép khóa — nhưng lock chỉ chạy trên một số trình duyệt, iOS thường phải dùng Rotate Notice làm fallback.

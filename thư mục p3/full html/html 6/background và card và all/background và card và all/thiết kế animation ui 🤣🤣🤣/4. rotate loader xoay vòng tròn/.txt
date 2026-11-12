@@ -1,0 +1,68 @@
+
+Rotate Loader — Cách làm
+
+Tổng quan 3 bước
+
+Bước Việc làm
+1 HTML: 1 thẻ <div> làm vòng tròn
+2 CSS: tạo hình tròn + đổi màu 1 cạnh viền
+3 CSS: cho cả khối xoay 360° liên tục bằng @keyframes
+
+---
+
+Code (bản cơ bản)
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0e1a;
+    margin: 0;
+  }
+
+  .loader {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #1e293b;      /* viền xám */
+    border-top-color: #a855f7;      /* 1 cạnh đổi màu */
+    border-radius: 50%;             /* hình tròn */
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="loader"></div>
+
+</body>
+</html>
+```
+
+---
+
+Ánh xạ luồng ↔ Code
+
+Thành phần Trong code
+Hình tròn border-radius: 50%
+Viền dày border: 6px solid
+Điểm sáng border-top-color đổi màu
+Xoay @keyframes spin với rotate(360deg)
+Lặp vô hạn animation: ... infinite
+Xoay đều linear
+
+---
+
+🎯 Tóm 1 câu
+
+Làm bằng 1 thẻ <div> có border-radius: 50% + đổi màu 1 cạnh viền border-top-color + cho cả khối rotate(360deg) bằng @keyframes với animation: infinite.

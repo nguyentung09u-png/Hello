@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Neon Pulse</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #05060a;
+    font-family: system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding: 40px 20px;
+  }
+
+  /* ============ NEON PULSE ============ */
+  .neon {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    padding: 16px 40px;
+    border-radius: 14px;
+    border: 2px solid currentColor;
+    color: #22d3ee;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow:
+        0 0 5px  currentColor,
+        0 0 15px currentColor,
+        inset 0 0 5px currentColor;
+      text-shadow: 0 0 5px currentColor;
+    }
+    50% {
+      box-shadow:
+        0 0 20px currentColor,
+        0 0 45px currentColor,
+        0 0 70px currentColor,
+        inset 0 0 20px currentColor;
+      text-shadow:
+        0 0 15px currentColor,
+        0 0 30px currentColor;
+    }
+  }
+
+  /* Đổi màu chỉ cần đổi color */
+  .cyan   { color: #22d3ee; }
+  .purple { color: #a855f7; }
+  .pink   { color: #ec4899; }
+</style>
+</head>
+<body>
+
+  <div class="neon cyan">CYAN</div>
+  <div class="neon purple">PURPLE</div>
+  <div class="neon pink">PINK</div>
+
+</body>
+</html>

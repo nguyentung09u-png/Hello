@@ -1,0 +1,171 @@
+🖼️ BACKGROUND TOÀN MÀN HÌNH — LÀM TỪ NHỮNG GÌ
+
+📋 Tổng quan: 6 thành phần chính
+
+Background trong code này không phải một ảnh — nó là 6 lớp vector vẽ bằng code, xếp chồng theo thứ tự từ xa → gần.
+
+```
+┌──────────────────────────────────────┐
+│  ⭐ SAO (80 ngôi)      ← lớp 1       │
+│  🌌 BẦU TRỜI gradient  ← lớp 2       │
+│  ☁️ MÂY (7 đám)        ← lớp 3       │
+│  🌅 MẶT TRỜI + quầng   ← lớp 4       │
+│  🏔️ NÚI XA (1 dãy)     ← lớp 5       │
+│  🏔️ NÚI GẦN (1 dãy)    ← lớp 6       │
+├──────────────────────────────────────┤  ← HORIZON 44%
+│  🌿 MẶT ĐẤT gradient   ← lớp 7       │
+│  🌲 CÂY (26 cái)       ← lớp 8       │
+│  🪨 ĐÁ (34 hòn)        ← lớp 9       │
+└──────────────────────────────────────┘  ← H 100%
+```
+
+🔍 Chi tiết từng thành phần
+
+1️⃣ BẦU TRỜI — Gradient 6 điểm dừng
+
+```js
+skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON);
+skyGrad.addColorStop(0.00, '#0b0e2a');  // đêm xanh thẫm
+skyGrad.addColorStop(0.30, '#241a4a');  // tím đêm
+skyGrad.addColorStop(0.55, '#5a2f5e');  // tím hồng
+skyGrad.addColorStop(0.76, '#a8484f');  // đỏ gạch
+skyGrad.addColorStop(0.90, '#dd7a45');  // cam cháy
+skyGrad.addColorStop(1.00, '#f4b063');  // vàng hoàng hôn
+```
+
+→ Mô phỏng bầu trời chuyển màu từ đêm → hoàng hôn trong 44% màn hình trên.
+
+2️⃣ SAO — 80 ngôi nhấp nháy
+
+```js
+stars.push({
+  x: rng() * W,
+  y: rng() * HORIZON * 0.72,   // chỉ ở 72% trên của bầu trời
+  r: rng() * 1.3 + 0.25,       // bán kính nhỏ
+  a: rng() * 0.55 + 0.15,      // alpha mờ
+  tw: rng() * Math.PI * 2      // pha nhấp nháy
+});
+```
+
+→ Vẽ bằng arc(), độ sáng thay đổi theo sin(t) → tạo hiệu ứng lấp lánh.
+
+3️⃣ MẶT TRỜI — Tâm sáng + 4 lớp quầng
+
+```js
+const sx = W * 0.72;              // lệch phải
+const sy = HORIZON - H * 0.018;   // ngay trên chân trời
+const R  = Math.max(W, H) * 0.30; // quầng cực lớn
+
+// quầng 4 lớp
+g.addColorStop(0.00, 'rgba(255,236,190,0.95)'); // lõi sáng
+g.addColorStop(0.10, 'rgba(255,206,130,0.60)');
+g.addColorStop(0.30, 'rgba(255,150,80,0.24)');
+g.addColorStop(1.00, 'rgba(255,110,60,0)');     // tan biến
+
+// đĩa mặt trời
+ctx.arc(sx, sy, H * 0.048, ...)  // ~4.8% chiều cao
+```
+
+→ Vẽ bằng radialGradient → tạo cảm giác mặt trời đang lặn, toả sáng.
+
+4️⃣ MÂY — 7 đám trôi ngang
+
+```js
+clouds.push({
+  x: rng() * W,
+  y: HORIZON * 0.14 + rng() * HORIZON * 0.55,  // rải rác trên trời
+  w: 70 + rng() * 200,                          // rộng 70–270px
+  h: 10 + rng() * 22,                           // cao 10–32px
+  a: 0.05 + rng() * 0.11,                       // rất mờ
+  sp: 3 + rng() * 9                             // tốc độ trôi
+});
+```
+
+→ Mỗi đám = 2 hình ellipse chồng, trôi theo (c.x + t*speed) % (W+400) → trôi vô tận.
+
+5️⃣ NÚI — 2 dãy Ridge vẽ bằng path
+
+```js
+function makeRidge(rng, baseY, height, count, w){
+  const pts = [{ x: -80, y: baseY }];
+  const step = (w + 160) / count;
+  for (let i = 0; i < count; i++){
+    const px = -80 + step * (i + 0.5) + (rng()-0.5)*step*0.5;
+    const ph = height * (0.35 + rng() * 0.65);   // cao ngẫu nhiên
+    pts.push({ x: px - step*0.52, y: baseY - ph*0.20 }); // chân trái
+    pts.push({ x: px,             y: baseY - ph      }); // đỉnh
+    pts.push({ x: px + step*0.52, y: baseY - ph*0.20 }); // chân phải
+  }
+  return pts;
+}
+```
+
+Dãy Vị trí Cao Số đỉnh Màu
+Xa HORIZON + 8 21.5% H 8 #2b2350 (tím đậm)
+Gần HORIZON + 22 13.5% H 12 #1d1738 (tím tối hơn)
+
+→ Vẽ bằng đa giác path (moveTo + lineTo + fill), có alpha khác nhau → tạo chiều sâu khí quyển.
+
+6️⃣ MẶT ĐẤT — Gradient 4 điểm + đường viền
+
+```js
+groundGrad.addColorStop(0.00, '#4a5b3c');  // xanh ô-liu sáng (xa)
+groundGrad.addColorStop(0.18, '#3a4a32');
+groundGrad.addColorStop(0.55, '#26331f');
+groundGrad.addColorStop(1.00, '#111a10');  // gần như đen (gần)
+```
+
+→ Cộng thêm dải sáng hoàng hôn ở mép trên + 7 đường viền mờ để gợi địa hình.
+
+7️⃣ CÂY — 26 cái, 2 loại
+
+· Pine (thông, 72%): 3 tầng tam giác chồng nhau + thân nhỏ.
+· Bush (bụi, 28%): 3 ellipse chồng.
+
+```js
+s: 0.35 + t * 1.5 + rng() * 0.25   // scale theo độ xa
+```
+
+→ Cây càng gần G_BOT càng to → củng cố phối cảnh giả 3D.
+
+8️⃣ ĐÁ — 34 hòn nhỏ
+
+```js
+{ x, y, r: 1.8 + rng()*4.2, sq: 0.45 + rng()*0.4 }
+```
+
+→ Vẽ 2 lớp: bóng đen mờ dưới + ellipse xám trên → gợi khối 3D đơn giản.
+
+🎲 Điểm mấu chốt: SEED cố định
+
+```js
+const rng = mulberry32(20240711);   // ← số seed
+```
+
+Mọi thứ ngẫu nhiên (vị trí sao, mây, núi, cây, đá) đều sinh từ một seed duy nhất.
+
+Hệ quả Giải thích
+✅ Giống hệt nhau mỗi lần load Cùng seed → cùng dãy số ngẫu nhiên
+✅ Resize không đổi bố cục buildBackground() chạy lại với cùng seed
+✅ Không cần lưu ảnh Nền tái tạo được từ 1 con số
+
+⚡ Kỹ thuật vẽ
+
+Yếu tố Cách làm
+Không dùng ảnh 100% arc, ellipse, fillRect, bezierCurveTo
+Không dùng WebGL Chỉ Canvas 2D context
+Nét trên Retina cv.width = W * DPR, setTransform(DPR,...)
+Vẽ lại mỗi frame Nền tĩnh bị vẽ lại 60 lần/giây (tốn CPU)
+Sort theo y Cây/cỏ trang trí sort để cây gần che cây xa
+
+⚠️ Điều tôi không chắc
+
+· Việc vẽ lại nền mỗi frame có phải lựa chọn tối ưu không — tôi cho là không, nhưng tôi không có số đo FPS thực tế để khẳng định mức độ ảnh hưởng.
+· Con số seed 20240711 — tôi đoán là ngày tác giả viết code, nhưng không có căn cứ xác nhận.
+· Gradient có bị tạo lại mỗi frame không — đọc code thì có, nhưng tôi không chắc browser có cache lại không (thường là không).
+
+---
+
+🎯 TÓM 1 CÂU
+
+Background toàn màn hình = 6 lớp vector vẽ bằng Canvas 2D (sao, trời gradient 6 màu, mây trôi, mặt trời toả quầng, 2 dãy núi, cây + đá), tất cả sinh từ một seed cố định mulberry32(20240711) nên giống hệt nhau mỗi lần load và không dùng bất kỳ file ảnh nào.

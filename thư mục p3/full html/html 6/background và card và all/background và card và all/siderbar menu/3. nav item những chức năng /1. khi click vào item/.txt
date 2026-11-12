@@ -1,0 +1,156 @@
+LIỆT KÊ ĐẦY ĐỦ: Hover/Active State Background (Nền trạng thái Hover/Active)
+
+---
+
+I. TỔNG QUAN
+
+Hover/Active State Background là lớp nền thay đổi màu xuất hiện trên một phần tử (nav item, button, link) khi người dùng tương tác với nó — rê chuột (hover), chạm (touch), nhấn giữ (active), hoặc khi phần tử ở trạng thái được chọn cố định (active/current). Nó là phản hồi thị giác (visual feedback) do CSS tạo ra, không phải một phần tử HTML riêng biệt — nó là thuộc tính background thay đổi theo pseudo-class / attribute selector.
+
+Trong code cụ thể của bạn, nó được tạo bởi 2 selector phối hợp: .sa-link:hover và .sa-link[aria-current="page"].
+
+---
+
+II. CẤU TRÚC TỔNG THỂ (từ lớn đến nhỏ)
+
+1. Phần tử chủ thể (Host Element) — .sa-link
+
+Đây là "cái khung" mà nền hover/active được vẽ lên.
+
+· Thẻ HTML: <a> (anchor)
+· Class: .sa-link
+· Vai trò: phần tử điều hướng — nơi nền hover/active xuất hiện
+· Thuộc tính đi kèm:
+  · href="#" — đích đến (placeholder)
+  · aria-current="page" — chỉ item đang active cố định (chỉ Dashboard có)
+· Cấu trúc bên trong (2 con):
+  · .sa-link-icon — icon SVG 20×20px
+  · .sa-link-text — nhãn chữ
+
+2. Cái nền (Background) — Thuộc tính thay đổi
+
+Đây là đối tượng chính được hỏi — nó chính là giá trị của thuộc tính background (viết tắt của background-color).
+
+2a. Nền mặc định (khi không tương tác)
+
+· Giá trị: transparent (trong suốt — vì .sa-link không khai báo background, mặc định là transparent)
+· Vai trò: để lộ nền panel (#070E13) phía sau
+
+2b. Nền Hover (khi rê chuột / chạm trên mobile)
+
+· Selector: .sa-link:hover
+· Giá trị: var(--sa-row-hover) = rgba(30, 41, 59, 0.5)
+· Bản chất: màu xám xanh (#1E293B) với độ mờ 50% (alpha 0.5)
+· Vai trò: báo hiệu "con trỏ đang ở trên item này"
+
+2c. Nền Active/Current (khi item là trang hiện tại)
+
+· Selector: .sa-link[aria-current="page"]
+· Giá trị: var(--sa-row) = #1E293B (xám xanh, đục hoàn toàn)
+· Bản chất: cùng màu gốc với hover nhưng alpha = 1 (đậm hơn)
+· Vai trò: báo hiệu "bạn đang ở trang này"
+
+2d. Nền Active (khi đang nhấn giữ — mobile)
+
+· Selector: .sa-link:active (KHÔNG có trong code hiện tại — cần nói rõ là thiếu)
+· Giá trị hiện tại: trình duyệt dùng mặc định hoặc không có
+· Vai trò lẽ ra: phản hồi tức thì khi ngón tay đang đè
+
+3. Bo góc (Border Radius) — Giới hạn hình dạng nền
+
+· Thuộc tính: border-radius: var(--radius-sm) = 8px
+· Vai trò: bo 4 góc của khối nền → tạo hình chữ nhật bo mềm, không phải góc vuông
+· Nếu thiếu: nền sẽ là hình chữ nhật sắc cạnh, thô hơn
+
+4. Vùng bao phủ (Coverage) — Kích thước nền
+
+Nền phủ đúng bằng hộp padding của .sa-link:
+
+· Chiều rộng: flex:1 → giãn hết chiều ngang container (trừ padding container)
+· Chiều cao: padding 10px trên + 10px dưới + nội dung (icon/text ~20px) ≈ 40px
+· Padding ngang: 12px mỗi bên
+· Khoảng cách giữa các item: gap: 4px (từ .sa-group) → nền các item không dính nhau
+
+5. Chữ đổi màu (Text Color) — Thành phần đi kèm
+
+Nền không đổi một mình — chữ cũng đổi đồng thời để tương phản:
+
+Trạng thái Màu chữ Giá trị
+Mặc định var(--sa-headline) #64748B (xám nhạt)
+Hover var(--sa-ink) #FFFFFF (trắng)
+Active var(--sa-ink) #FFFFFF (trắng)
+
+· Vai trò: đảm bảo độ tương phản (contrast) — nền tối + chữ sáng = dễ đọc
+· Icon cũng hưởng lợi: SVG dùng stroke:currentColor nên tự đổi màu theo chữ
+
+6. Chuyển động (Transition) — Công nghệ làm mượt
+
+· Thuộc tính: transition: color 0.2s, background 0.2s
+· Vai trò: khi hover vào/ra, nền và chữ chuyển màu mượt trong 200ms, không giật tức thì
+· Easing: mặc định ease (không khai báo riêng)
+
+---
+
+III. CÔNG NGHỆ / CƠ CHẾ HOẠT ĐỘNG
+
+1. CSS Pseudo-class :hover — kích hoạt khi con trỏ chuột nằm trên phần tử (desktop); trên mobile, trình duyệt mô phỏng hover khi chạm.
+2. CSS Attribute Selector [aria-current="page"] — kích hoạt dựa trên thuộc tính HTML (không phụ thuộc tương tác, trạng thái cố định).
+3. CSS Custom Properties (Variables) — var(--sa-row), var(--sa-row-hover) cho phép đổi màu toàn cục từ :root.
+4. RGBA Color — rgba(30, 41, 59, 0.5) tạo hiệu ứng bán trong suốt cho hover (nền panel vẫn xuyên nhẹ qua).
+5. CSS Transition — animation màu mượt 200ms.
+6. Specificity (độ ưu tiên) — [aria-current="page"] có specificity cao hơn :hover? Thực tế cả hai đều là (0,2,0) và (0,1,1)... Cần nói rõ: trong code này [aria-current="page"] đứng sau :hover trong file → khi hover vào item active, cả hai áp dụng, thuộc tính background bị ghi đè bởi rule sau (aria-current), nên item active không đổi màu khi hover (vẫn giữ #1E293B đục).
+
+---
+
+IV. VẬT LIỆU (Design Tokens liên quan)
+
+Token Giá trị Dùng cho
+--sa-row #1E293B nền active/current
+--sa-row-hover rgba(30, 41, 59, 0.5) nền hover
+--sa-headline #64748B chữ mặc định
+--sa-ink #FFFFFF chữ khi hover/active
+--radius-sm 8px bo góc nền
+--sa-panel #070E13 nền panel phía sau (lộ qua khi hover bán trong suốt)
+
+---
+
+V. CHỨC NĂNG & CÁCH PHỐI HỢP
+
+Luồng tương tác (từng bước):
+
+1. Trạng thái nghỉ: nền trong suốt → chỉ thấy nền panel tối #070E13; chữ xám #64748B.
+2. Rê chuột vào (hover): :hover kích hoạt → nền chuyển sang rgba(30,41,59,0.5) (xám mờ) trong 200ms; chữ chuyển trắng.
+3. Rê chuột ra: :hover mất → nền về transparent, chữ về xám, mượt 200ms.
+4. Item active cố định: [aria-current="page"] luôn áp dụng → nền #1E293B đục, chữ trắng vĩnh viễn (không phụ thuộc chuột).
+5. Mobile chạm: trình duyệt mô phỏng :hover tạm thời → nền sáng lên (đúng như ảnh bạn chụp, cả Dashboard và Analytics cùng sáng).
+
+Phối hợp với các thành phần khác:
+
+· Với .sa-group: gap: 4px tạo khoảng hở giữa các nền → các item không dính thành 1 khối.
+· Với .sa-sidebar: nền bán trong suốt của hover cho phép màu panel tối (#070E13) xuyên qua → tạo hiệu ứng "nền tối hơn một chút", không phải màu phẳng.
+· Với .sa-link-icon: SVG dùng currentColor → icon tự đổi màu theo color của link (xám → trắng).
+· Với aria-current: đảm bảo accessibility — screen reader đọc "current page" cho item active.
+
+---
+
+VI. CÁC YẾU TỐ LIÊN QUAN (ngoài phạm vi nhưng cùng hệ)
+
+· :active (đang nhấn giữ) — KHÔNG có trong code, cần nói rõ là thiếu.
+· :focus-visible (focus bàn phím) — KHÔNG có (vì outline: none đã tắt) → thiếu chỉ báo a11y.
+· :visited (đã thăm) — không áp dụng cho sidebar nav thường.
+· -webkit-tap-highlight-color: transparent — đã thêm để tắt vệt xanh mặc định của mobile (khác với hover background — đây là lớp phủ native của trình duyệt).
+
+---
+
+VII. ĐIỂM THIẾU / CẦN LÀM RÕ
+
+· Không có :active state cho phản hồi nhấn giữ trên mobile (chỉ có hover mô phỏng).
+· Không có :focus-visible → người dùng bàn phím không thấy mình đang ở item nào.
+· Specificity giữa :hover và [aria-current] không được khai báo rõ ràng → hiện tại item active "nuốt" hover (không sáng thêm khi hover) — có thể là chủ ý hoặc thiếu sót, code không ghi chú.
+· Không có transition cho border/box-shadow (nếu sau này muốn thêm viền khi active).
+· --sa-row-hover dùng alpha 0.5 — giá trị này không được giải thích trong code là chủ ý thiết kế hay ngẫu nhiên.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Hover/Active State Background được tạo nên từ thuộc tính background thay đổi theo 2 selector CSS (:hover → rgba(30,41,59,0.5) bán trong suốt; [aria-current="page"] → #1E293B đục), áp lên hộp padding 10×12px bo 8px của thẻ <a class="sa-link">, đồng thời đổi màu chữ/icon sang trắng (#FFFFFF), chuyển mượt 200ms bằng CSS Transition, phối hợp với gap 4px của group và nền panel #070E13 phía sau để tạo phản hồi thị giác rõ ràng — nhưng thiếu :active và :focus-visible.

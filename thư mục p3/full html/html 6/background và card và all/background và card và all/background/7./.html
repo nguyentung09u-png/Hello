@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070510">
+<title>Dark Tech Background — Violet Radar Sweep</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#070510;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 120% at 50% 50%, #120a24 0%, #0a0616 45%, #050309 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Concentric radar rings (static, painted once) ---------- */
+  .rings{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:150vmin;
+    height:150vmin;
+    margin-left:-75vmin;
+    margin-top:-75vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 50%,
+        rgba(168,85,247,0) 0%,
+        rgba(168,85,247,0) 12%,
+        rgba(168,85,247,.06) 12.2%,
+        rgba(168,85,247,0) 12.4%,
+        rgba(168,85,247,0) 26%,
+        rgba(168,85,247,.06) 26.2%,
+        rgba(168,85,247,0) 26.4%,
+        rgba(168,85,247,0) 42%,
+        rgba(168,85,247,.06) 42.2%,
+        rgba(168,85,247,0) 42.4%,
+        rgba(168,85,247,0) 60%,
+        rgba(168,85,247,.06) 60.2%,
+        rgba(168,85,247,0) 60.4%,
+        rgba(168,85,247,0) 80%,
+        rgba(168,85,247,.05) 80.2%,
+        rgba(168,85,247,0) 80.4%,
+        rgba(168,85,247,0) 100%);
+  }
+  .rings::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:
+      linear-gradient(to right, transparent calc(50% - .5px), rgba(168,85,247,.10) 50%, transparent calc(50% + .5px)),
+      linear-gradient(to bottom, transparent calc(50% - .5px), rgba(168,85,247,.10) 50%, transparent calc(50% + .5px)),
+      linear-gradient(45deg, transparent calc(50% - .5px), rgba(168,85,247,.07) 50%, transparent calc(50% + .5px)),
+      linear-gradient(-45deg, transparent calc(50% - .5px), rgba(168,85,247,.07) 50%, transparent calc(50% + .5px));
+  }
+
+  /* ---------- Radar sweep cone (transform-only rotation) ---------- */
+  .sweep{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:150vmin;
+    height:150vmin;
+    margin-left:-75vmin;
+    margin-top:-75vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:conic-gradient(
+      from 0deg,
+      rgba(168,85,247,0) 0deg,
+      rgba(168,85,247,0) 340deg,
+      rgba(139,92,246,.12) 355deg,
+      rgba(217,70,239,.22) 360deg
+    );
+    animation:sweepRotate 8s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes sweepRotate{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Blips (dots pulsing, transform/opacity only) ---------- */
+  .blips{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    contain:strict;
+  }
+  .blips i{
+    position:absolute;
+    width:6px;
+    height:6px;
+    margin:-3px 0 0 -3px;
+    border-radius:50%;
+    background:rgba(232,121,249,.95);
+    box-shadow:0 0 10px rgba(217,70,239,.9), 0 0 20px rgba(168,85,247,.5);
+    animation:blip 3.2s ease-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes blip{
+    0%{transform:translate3d(0,0,0) scale(.4);opacity:0;}
+    20%{opacity:1;}
+    100%{transform:translate3d(0,0,0) scale(2.2);opacity:0;}
+  }
+
+  /* ---------- Center pulse ---------- */
+  .core{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:22vmin;
+    height:22vmin;
+    margin-left:-11vmin;
+    margin-top:-11vmin;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(217,70,239,.22) 0%,
+      rgba(168,85,247,.08) 40%,
+      rgba(168,85,247,0) 70%);
+    animation:corePulse 4s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes corePulse{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.75;}
+    50%{transform:translate3d(0,0,0) scale(1.2);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 78%, rgba(0,0,0,.80) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .sweep,.core,.blips i{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="rings"></div>
+  <div class="sweep"></div>
+  <div class="core"></div>
+  <div class="blips" id="blips"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const blips = document.getElementById('blips');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 9;
+  const R = 42; // vmin radius from center
+
+  for (let i = 0; i < COUNT; i++) {
+    const el = document.createElement('i');
+    const angle = Math.random() * Math.PI * 2;
+    const radius = R * (0.35 + Math.random() * 0.6);
+    const x = 50 + Math.cos(angle) * radius;
+    const y = 50 + Math.sin(angle) * radius;
+    el.style.left = x + 'vmin';
+    el.style.top = y + 'vmin';
+    el.style.animationDelay = (Math.random() * 3.2) + 's';
+    el.style.animationDuration = (2.6 + Math.random() * 2.4) + 's';
+    frag.appendChild(el);
+  }
+
+  blips.appendChild(frag);
+})();
+</script>
+</body>
+</html>

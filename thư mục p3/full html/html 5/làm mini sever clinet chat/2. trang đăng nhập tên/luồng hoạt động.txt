@@ -1,0 +1,30 @@
+[1] Trang load
+      ↓
+[2] Kiểm tra localStorage: có userId chưa?
+      ↓ Chưa có
+[3] Sinh userId ngẫu nhiên (vd: "user_a3f9k2")
+      ↓
+[4] Lưu userId vào localStorage
+      ↓
+[5] Kiểm tra: có userName chưa?
+      ↓ Chưa có
+[6] Hiện form đăng nhập (Aurora Card)
+      ↓
+[7] Người dùng nhập tên → nhấn "Bắt đầu"
+      ↓
+[8] Lưu userName vào localStorage
+      ↓
+[9] Ẩn card → hiện khung chat
+      ↓
+[10] Kết nối Firebase, gửi tin "X đã tham gia"
+
+Và
+
+[1] Trang load
+      ↓
+[2] Đọc localStorage: có userId? → có
+[3] Đọc localStorage: có userName? → có
+      ↓
+[4] Bỏ qua form, vào thẳng chat
+
+ 

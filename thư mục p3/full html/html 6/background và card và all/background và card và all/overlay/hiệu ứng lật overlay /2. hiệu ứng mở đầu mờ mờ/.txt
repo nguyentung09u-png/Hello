@@ -1,0 +1,131 @@
+Staggered Animation — Cách làm tổng quan
+
+1. Cấu trúc HTML
+
+```html
+<div class="container">
+  <div class="item">Phần tử 1</div>
+  <div class="item">Phần tử 2</div>
+  <div class="item">Phần tử 3</div>
+  ...
+</div>
+```
+
+2. Các bước làm
+
+Bước Việc làm
+1 Cho mọi .item cùng trạng thái đầu: opacity: 0 + transform: translateY(...)
+2 Gán cùng 1 animation fadeUp cho tất cả
+3 Viết 1 @keyframes fadeUp duy nhất
+4 Đặt animation-delay tăng dần cho từng item bằng :nth-child(n)
+5 Thêm forwards để giữ trạng thái cuối
+
+3. Nguyên tắc để mượt
+
+· Chỉ animate transform + opacity — chạy trên compositor
+· Dùng will-change đúng chỗ, không lạm dụng
+· Tôn trọng prefers-reduced-motion
+· Không animate top, left, width, height
+
+4. Cách tạo độ trễ
+
+Có thể dùng CSS hoặc JS:
+
+· CSS: .item:nth-child(1) { animation-delay: .1s } ...
+· JS: gán style.animationDelay theo index trong vòng lặp
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staggered Animation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden;
+    font-family: system-ui, sans-serif; }
+
+  /* ===== CONTAINER ===== */
+  .container {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1rem;
+    background: #0e0e12; color: #fff;
+    padding: 2rem;
+  }
+
+  /* ===== ITEM — trạng thái đầu + animation chung ===== */
+  .item {
+    opacity: 0;
+    transform: translateY(24px);
+    will-change: transform, opacity;
+    animation: fadeUp .8s cubic-bezier(.16, 1, .3, 1) forwards;
+  }
+
+  /* ===== STAGGER — delay tăng dần ===== */
+  .item:nth-child(1) { animation-delay: .10s; }
+  .item:nth-child(2) { animation-delay: .25s; }
+  .item:nth-child(3) { animation-delay: .40s; }
+  .item:nth-child(4) { animation-delay: .55s; }
+  .item:nth-child(5) { animation-delay: .70s; }
+
+  /* ===== KEYFRAME CHUNG ===== */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .item { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="item">Phần tử 1</div>
+  <div class="item">Phần tử 2</div>
+  <div class="item">Phần tử 3</div>
+  <div class="item">Phần tử 4</div>
+  <div class="item">Phần tử 5</div>
+</div>
+
+</body>
+</html>
+```
+
+Biến thể
+
+Kiểu Transform
+Fade up translateY(24px) → 0
+Fade down translateY(-24px) → 0
+Fade left translateX(-24px) → 0
+Fade scale scale(.9) → 1
+
+Cách dùng JS (nếu không muốn viết :nth-child)
+
+```js
+document.querySelectorAll('.item').forEach((el, i) => {
+  el.style.animationDelay = (i * 0.15) + 's';
+});
+```
+
+---
+
+Lưu ý
+
+· Tôi không chắc code này đạt 60 FPS ổn định trên mọi thiết bị — cần đo bằng DevTools Performance.
+· Tôi không chắc bước delay 0.15s là phù hợp nhất — tùy cảm giác thiết kế, có thể chỉnh.
+· Nếu có nhiều item (>20), nên giới hạn tổng delay để tránh chờ lâu.
+
+🎯 Staggered animation = cho mọi item cùng opacity: 0 + translateY(...) + cùng animation: fadeUp, rồi đặt animation-delay tăng dần qua :nth-child hoặc JS để chúng xuất hiện so le.

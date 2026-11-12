@@ -1,0 +1,99 @@
+Tổng quan cách làm Rotate Notice
+
+Ý tưởng chung: Tạo 1 lớp phủ (overlay) che toàn màn hình, mặc định ẩn, chỉ hiện khi máy đang ở hướng dọc — dùng Media Query để phát hiện hướng, CSS animation để icon xoay, HTML để chứa nội dung. Không bắt buộc JavaScript.
+
+3 bước cơ bản:
+
+1. HTML — tạo thẻ chứa icon + chữ nhắc
+2. CSS — position:fixed, inset:0, display:none, z-index cao
+3. Media Query — @media (orientation:portrait) → đổi thành display:flex
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rotate Notice Demo</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  /* Nội dung game / app (bị che khi máy dọc) */
+  body {
+    background:#0a0f14;
+    color:#e0e0e0;
+    font-family:system-ui, sans-serif;
+    height:100vh;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ===== ROTATE NOTICE ===== */
+  #rotate {
+    position: fixed;
+    inset: 0;                    /* phủ toàn màn hình */
+    z-index: 9999;               /* nằm trên mọi thứ */
+    display: none;               /* mặc định ẩn */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #04080a;
+    text-align: center;
+    padding: 24px;
+  }
+
+  #rotate .icon {
+    font-size: 56px;
+    animation: rotateAnim 1.8s ease-in-out infinite;
+  }
+
+  #rotate p {
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #9fc7bd;
+  }
+
+  /* Icon tự xoay 0° → 90° */
+  @keyframes rotateAnim {
+    0%, 40%   { transform: rotate(0deg); }
+    60%, 100% { transform: rotate(90deg); }
+  }
+
+  /* Chỉ hiện khi: máy DỌC + màn hình nhỏ */
+  @media (orientation: portrait) and (max-width: 820px) {
+    #rotate { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nội dung game / app -->
+  <h1>🎮 Game Landscape</h1>
+
+  <!-- Lớp phủ yêu cầu xoay -->
+  <div id="rotate">
+    <div class="icon">📱</div>
+    <p>HÃY XOAY NGANG THIẾT BỊ</p>
+  </div>
+
+</body>
+</html>
+```
+
+---
+
+Giải thích ngắn từng phần
+
+Phần Vai trò
+<div id="rotate"> Khung chứa thông báo
+position:fixed; inset:0 Phủ kín màn hình
+z-index:9999 Đảm bảo nằm trên game
+display:none → flex Ẩn mặc định, hiện theo điều kiện
+@keyframes rotateAnim Icon xoay 0° → 90° lặp lại
+@media (orientation:portrait) Bật hiển thị khi máy dọc
+
+Lưu ý (tôi không chắc 100% trong mọi trường hợp): Media Query orientation dựa trên tỉ lệ khung nhìn, nên có thể hoạt động khác nhau trên một số trình duyệt mobile cũ. JavaScript (screen.orientation) có thể cần thêm nếu muốn xử lý chính xác hơn — nhưng bản CSS thuần này thường đủ dùng.

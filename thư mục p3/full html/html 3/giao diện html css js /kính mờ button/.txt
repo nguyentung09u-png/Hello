@@ -1,0 +1,79 @@
+Glassmorphism button — khái niệm
+
+Trên Web, một button glassmorphism thường gồm 4 thành phần:
+
+· Nền bán trong suốt (background: rgba(255,255,255,0.1~0.2))
+· Làm mờ nền phía sau (backdrop-filter: blur(...))
+· Viền mảnh sáng (border: 1px solid rgba(255,255,255,0.2~0.4))
+· Bo góc + bóng nhẹ (border-radius, box-shadow)
+
+Trên Android Java thuần — làm được gì
+
+Làm được (có căn cứ):
+
+· Nền bán trong suốt → GradientDrawable.setColor(alphaColor)
+· Bo góc → setCornerRadius()
+· Viền mảnh → setStroke()
+· Gradient sáng/tối → GradientDrawable.Orientation
+· Đổi trạng thái khi nhấn → StateListDrawable
+
+Không làm được như Web (điểm quan trọng):
+
+· backdrop-filter: blur() — làm mờ nội dung View khác phía sau. Android Java thuần không có API tương đương để blur View phía sau một cách tổng quát. RenderEffect (API 31+) blur chính nội dung của View đó, không phải blur những gì nằm dưới nó theo nghĩa CSS backdrop. (Tôi không chắc có thư viện bên thứ ba nào mô phỏng đủ tốt trong mọi trường hợp.)
+· Vì vậy, trên Android, button chỉ trong suốt chứ không nhòe — blob/nền phía sau vẫn nhìn sắc nét qua nút.
+
+Code chung chung — GradientDrawable
+
+```java
+private Drawable buildGlassButton(Context ctx, int cornerPx, int strokePx) {
+    // Nền gradient trắng mờ: sáng trên → mờ dưới (mô phỏng kính nghiêng)
+    GradientDrawable g = new GradientDrawable(
+        GradientDrawable.Orientation.TOP_BOTTOM,
+        new int[]{ 0x33FFFFFF, 0x11FFFFFF }  // alpha thấp, không đặc
+    );
+    g.setShape(GradientDrawable.RECTANGLE);
+    g.setCornerRadius(cornerPx);
+    g.setStroke(strokePx, 0x55FFFFFF);       // viền trắng mờ
+    return g;
+}
+```
+
+Code chung chung — có trạng thái nhấn (StateListDrawable)
+
+```java
+private Drawable buildGlassButtonStates(Context ctx, int cornerPx, int strokePx) {
+    StateListDrawable sld = new StateListDrawable();
+
+    // Khi nhấn: sáng hơn
+    GradientDrawable pressed = new GradientDrawable();
+    pressed.setShape(GradientDrawable.RECTANGLE);
+    pressed.setCornerRadius(cornerPx);
+    pressed.setColor(0x55FFFFFF);
+    pressed.setStroke(strokePx, 0x88FFFFFF);
+
+    // Bình thường: mờ hơn
+    GradientDrawable normal = new GradientDrawable(
+        GradientDrawable.Orientation.TOP_BOTTOM,
+        new int[]{ 0x33FFFFFF, 0x11FFFFFF }
+    );
+    normal.setShape(GradientDrawable.RECTANGLE);
+    normal.setCornerRadius(cornerPx);
+    normal.setStroke(strokePx, 0x55FFFFFF);
+
+    sld.addState(new int[]{ android.R.attr.state_pressed }, pressed);
+    sld.addState(new int[]{}, normal);
+    return sld;
+}
+```
+
+Áp dụng:
+
+```java
+btn.setBackground(buildGlassButtonStates(this, dp(12), dp(1)));
+```
+
+Ghi chú
+
+· Alpha càng thấp → càng "kính", nhưng chữ có thể khó đọc nếu nền phía sau phức tạp.
+· Muốn "kính" hơn nữa trên Android, cách phổ biến là tự vẽ bitmap nền đã blur rồi dùng làm background — việc này tốn công và không hoàn toàn giống CSS. (Tôi không chắc cách này phù hợp với mọi layout.)
+· RenderEffect chỉ nên cân nhắc nếu bạn chấp nhận giới hạn API 31+ và hiểu rõ nó blur nội dung của chính View, không phải nền phía sau.

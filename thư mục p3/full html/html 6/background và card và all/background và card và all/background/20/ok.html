@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#06060e">
+<title>Dark Tech Background — Indigo Star Compass</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#06060e;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 50% 40%, #0e0e24 0%, #080818 45%, #030308 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Starfield (static painted) ---------- */
+  .stars{
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.65), transparent 50%),
+      radial-gradient(1px 1px at 28% 62%, rgba(199,210,254,.55), transparent 50%),
+      radial-gradient(1.5px 1.5px at 44% 28%, rgba(255,255,255,.75), transparent 50%),
+      radial-gradient(1px 1px at 61% 78%, rgba(199,210,254,.45), transparent 50%),
+      radial-gradient(1px 1px at 76% 34%, rgba(255,255,255,.65), transparent 50%),
+      radial-gradient(1.5px 1.5px at 88% 66%, rgba(224,231,255,.75), transparent 50%),
+      radial-gradient(1px 1px at 8% 82%, rgba(199,210,254,.55), transparent 50%),
+      radial-gradient(1px 1px at 34% 6%, rgba(255,255,255,.55), transparent 50%),
+      radial-gradient(1px 1px at 68% 8%, rgba(199,210,254,.55), transparent 50%),
+      radial-gradient(1.5px 1.5px at 92% 14%, rgba(255,255,255,.75), transparent 50%),
+      radial-gradient(1px 1px at 52% 92%, rgba(199,210,254,.50), transparent 50%),
+      radial-gradient(1px 1px at 18% 44%, rgba(224,231,255,.55), transparent 50%);
+    background-size:100% 100%;
+    background-repeat:no-repeat;
+    opacity:.85;
+  }
+
+  /* ---------- Compass rose (SVG data-uri, painted once) ---------- */
+  .compass{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:76vmin;
+    height:76vmin;
+    margin-left:-38vmin;
+    margin-top:-38vmin;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-200 -200 400 400'%3E%3Cg fill='none' stroke='%23818cf8' stroke-opacity='0.28' stroke-width='0.8'%3E%3Ccircle cx='0' cy='0' r='180'/%3E%3Ccircle cx='0' cy='0' r='140'/%3E%3Ccircle cx='0' cy='0' r='100'/%3E%3Ccircle cx='0' cy='0' r='60'/%3E%3C/g%3E%3Cg stroke='%23818cf8' stroke-opacity='0.20' stroke-width='0.6'%3E%3Cline x1='-180' y1='0' x2='180' y2='0'/%3E%3Cline x1='0' y1='-180' x2='0' y2='180'/%3E%3Cline x1='-127' y1='-127' x2='127' y2='127'/%3E%3Cline x1='127' y1='-127' x2='-127' y2='127'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c7d2fe' stroke-opacity='0.35' stroke-width='0.8'%3E%3Cpolygon points='0,-180 8,-60 0,-20 -8,-60'/%3E%3Cpolygon points='180,0 60,8 20,0 60,-8'/%3E%3Cpolygon points='0,180 -8,60 0,20 8,60'/%3E%3Cpolygon points='-180,0 -60,-8 -20,0 -60,8'/%3E%3C/g%3E%3Cg fill='%23e0e7ff' fill-opacity='0.55'%3E%3Ccircle cx='0' cy='-180' r='2.4'/%3E%3Ccircle cx='180' cy='0' r='2.4'/%3E%3Ccircle cx='0' cy='180' r='2.4'/%3E%3Ccircle cx='-180' cy='0' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+    pointer-events:none;
+    animation:compassSpin 90s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes compassSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Counter-rotating inner compass ---------- */
+  .compass-inner{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:44vmin;
+    height:44vmin;
+    margin-left:-22vmin;
+    margin-top:-22vmin;
+    border-radius:50%;
+    border:1px dashed rgba(129,140,248,.18);
+    pointer-events:none;
+    animation:compassSpin 55s linear infinite reverse;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .compass-inner::after{
+    content:"";
+    position:absolute;
+    top:-3px;
+    left:50%;
+    width:5px;
+    height:5px;
+    margin-left:-2.5px;
+    border-radius:50%;
+    background:rgba(165,180,252,.9);
+    box-shadow:0 0 10px rgba(129,140,248,.8), 0 0 20px rgba(99,102,241,.5);
+  }
+
+  /* ---------- Center core glow ---------- */
+  .core{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:18vmin;
+    height:18vmin;
+    margin-left:-9vmin;
+    margin-top:-9vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(199,210,254,.24) 0%,
+      rgba(129,140,248,.08) 42%,
+      rgba(129,140,248,0) 72%);
+    animation:corePulse 5s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes corePulse{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.8;}
+    50%{transform:translate3d(0,0,0) scale(1.25);opacity:1;}
+  }
+
+  /* ---------- Orbiting satellites ---------- */
+  .satellites{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:0;
+    height:0;
+    pointer-events:none;
+  }
+  .satellites i{
+    position:absolute;
+    left:0;
+    top:0;
+    width:60vmin;
+    height:60vmin;
+    margin-left:-30vmin;
+    margin-top:-30vmin;
+    border-radius:50%;
+    animation:orbitSpin linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .satellites i::before{
+    content:"";
+    position:absolute;
+    top:-3px;
+    left:50%;
+    width:6px;
+    height:6px;
+    margin-left:-3px;
+    border-radius:50%;
+    background:rgba(224,231,255,.95);
+    box-shadow:0 0 10px rgba(199,210,254,.9), 0 0 20px rgba(129,140,248,.6);
+  }
+  .satellites i:nth-child(1){animation-duration:18s;}
+  .satellites i:nth-child(2){width:80vmin;height:80vmin;margin-left:-40vmin;margin-top:-40vmin;animation-duration:26s;animation-direction:reverse;}
+  .satellites i:nth-child(3){width:44vmin;height:44vmin;margin-left:-22vmin;margin-top:-22vmin;animation-duration:13s;}
+
+  @keyframes orbitSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Ambient indigo wash ---------- */
+  .wash{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(50% 45% at 20% 25%, rgba(99,102,241,.10), transparent 70%),
+      radial-gradient(50% 45% at 80% 75%, rgba(139,92,246,.08), transparent 70%);
+    animation:washDrift 20s ease-in-out infinite alternate;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes washDrift{
+    from{transform:translate3d(-2%,-1%,0);}
+    to{transform:translate3d(2%,1%,0);}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .compass,.compass-inner,.core,.satellites i,.wash{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stars"></div>
+  <div class="wash"></div>
+  <div class="compass"></div>
+  <div class="compass-inner"></div>
+  <div class="satellites">
+    <i></i><i></i><i></i>
+  </div>
+  <div class="core"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+</body>
+</html>

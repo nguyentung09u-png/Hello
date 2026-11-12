@@ -1,0 +1,103 @@
+1. Shine Sweep(là ánh sáng trắng lướt qua card) + 360° Spin / Full Rotation ( xoay 360độ cái thẻ card)
+
+```
+```
+CLICK
+  │
+  ├─► GÁC CỬA + KHÓA
+  │     → Nếu đang xoay → thoát luôn
+  │     → Nếu chưa → đánh dấu "đang xoay"
+  │
+  ├─► BẬT HIỆU ỨNG PHỤ (nền + ánh sáng)
+  │     → Xóa class cũ → ép browser làm mới → thêm class mới
+  │     → Bật vệt sáng (shine) + hào quang (aura)
+  │
+  ├─► CHẠY 2 ANIMATION SONG SONG
+  │     → Vệt sáng: CSS keyframe, quét từ trái → phải
+  │     → Xoay: JS animate, 0° → 360° quanh trục ngang,
+  │        kèm nhún (translateZ) + scale
+  │
+  ├─► KHI XOAY XONG
+  │     → Đưa về trạng thái gốc (0°, scale 1, translateZ 0)
+  │     → Xóa dấu vết animation
+  │     → Tắt vệt sáng + hào quang
+  │
+  └─► MỞ KHÓA (delay ngắn)
+        → Đánh dấu "rảnh" → sẵn sàng click lần sau
+```
+
+---
+
+💻 CODE CHUNG CHUNG (khung sườn)
+
+```js
+let busy = false;
+
+element.onclick = () => {
+  // 1. GÁC CỬA
+  if (busy) return;
+  busy = true;
+
+  // 2. BẬT HIỆU ỨNG PHỤ
+  el.classList.remove("shine");
+  void el.offsetWidth;          // force reflow
+  el.classList.add("shine");
+  stage.classList.add("spinning");
+
+  // 3. CHẠY ANIMATION CHÍNH
+  const anim = el.animate(keyframes, options);
+
+  // 4. KHI XONG — DỌN DẸP
+  anim.onfinish = () => {
+    el.style.transform = "none";   // về gốc
+    anim.cancel();
+    stage.classList.remove("spinning");
+    el.classList.remove("shine");
+
+    // 5. MỞ KHÓA
+    setTimeout(() => { busy = false; }, 120);
+  };
+};
+```
+
+Trong đó keyframes là mảng 0° → 360° quanh trục ngang:
+
+```js
+const keyframes = [
+  { transform: "rotateY(0deg)   scale(1)    translateZ(0px)"  },
+  { transform: "rotateY(90deg)  scale(1.08) translateZ(40px)" },
+  { transform: "rotateY(180deg) scale(1.10) translateZ(55px)" },
+  { transform: "rotateY(270deg) scale(1.08) translateZ(40px)" },
+  { transform: "rotateY(360deg) scale(1)    translateZ(0px)"  }
+];
+
+const options = {
+  duration: 1500,                // 1 vòng trong 1.5s
+  easing: "ease-in-out",         // chậm → nhanh → chậm, mượt mà
+  fill: "forwards"
+};
+```
+
+---
+
+🎨 CSS cần cho stage & element
+
+```css
+.stage {
+  perspective: 1400px;          /* tạo chiều sâu khi xoay ngang */
+}
+
+element {
+  transform-style: preserve-3d;
+  backface-visibility: visible; /* thấy card suốt quá trình xoay */
+  will-change: transform;
+}
+```
+
+---
+
+🎯 TÓM 1 CÂU
+
+Click → gác cửa → bật hiệu ứng phụ → chạy animation chính (xoay ngang 0°→360° kèm nhún + scale) → xong thì dọn dẹp → mở khóa.
+
+5 giai đoạn. Đủ cho mọi hiệu ứng "shine & spin" tương tự.

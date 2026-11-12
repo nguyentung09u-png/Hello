@@ -1,0 +1,124 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 1 thẻ <button> rỗng, có aria-label cho screen reader (vì không có <img alt>).
+2. CSS hình dáng — width/height bằng nhau + aspect-ratio: 1/1 + border-radius: 50%.
+3. CSS nền ảnh — background-image: url("...") + background-size: cover + background-position: center + background-repeat: no-repeat + background-color dự phòng.
+4. CSS vị trí — position: fixed + z-index cao (+ JS kéo thả nếu cần).
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· aspect-ratio: 1/1 khẳng định tỷ lệ vuông → kết hợp border-radius: 50% thành hình tròn.
+· background-size: cover phủ kín nút, cắt phần thừa, giữ tỷ lệ gốc → ảnh không méo.
+· background-position: center căn giữa ảnh trong nút.
+· background-color làm màu dự phòng khi ảnh chưa/không load được.
+· position: fixed neo vào viewport, không cuộn theo trang.
+
+Tôi không chắc:
+
+· URL ảnh cụ thể bạn dùng có hotlink được không — cần test trên trình duyệt thực tế.
+· Bạn muốn FAB cố định hay kéo thả — code dưới để cố định, có gợi ý kéo thả.
+
+---
+
+Code chung chung
+
+```html
+<button class="fab" id="fab" type="button" aria-label="Mở trợ lý ảo"></button>
+```
+
+```css
+/* ===== FAB icon ảnh bằng link ===== */
+.fab {
+  position: fixed;
+  right: 20px;                          /* góc neo */
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  aspect-ratio: 1 / 1;                  /* vuông */
+  border-radius: 50%;                   /* bo tròn */
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+
+  /* Ảnh làm nền */
+  background-image: url("https://example.com/icon.png");
+  background-size: cover;               /* phủ kín, không méo */
+  background-position: center;          /* căn giữa */
+  background-repeat: no-repeat;         /* không lặp */
+  background-color: #1d4ed8;            /* màu dự phòng */
+
+  box-shadow: 0 8px 24px rgba(37,99,235,.45);
+  z-index: 10000;
+  transition: box-shadow .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab:hover {
+  box-shadow: 0 12px 28px rgba(37,99,235,.6);
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .fab { transition: none !important; }
+}
+```
+
+---
+
+Đổi ảnh icon
+
+Tìm dòng:
+
+```css
+background-image: url("https://example.com/icon.png");
+```
+
+Thay URL bằng link ảnh của bạn:
+
+```css
+background-image: url("https://your-domain.com/your-icon.png");
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Đổi kích thước FAB width: 60px; height: 60px → 72px, 80px…
+Ảnh vừa khung (không cắt) background-size: contain
+Ảnh zoom background-size: 120%
+Ảnh căn trên background-position: top
+Đổi màu dự phòng background-color: #1d4ed8
+Góc khác top/left/bottom/right
+
+---
+
+Nếu muốn FAB kéo thả được
+
+Thêm vào CSS:
+
+```css
+.fab {
+  left: 0; top: 0;                      /* gốc toạ độ */
+  right: auto; bottom: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+```
+
+Và thêm JS Pointer Events (pointerdown/move/up + setPointerCapture + clamp viewport + transform: translate()) — tương tự các bản Draggable FAB trước.
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: background-image + background-size: cover + border-radius: 50% là CSS chuẩn để làm ảnh tròn không méo.
+· Cách 2 không có onerror — nếu ảnh lỗi/không load, chỉ thấy background-color dự phòng, không có cách nào phát hiện trong CSS.
+· Cách 2 không có alt — screen reader chỉ đọc aria-label của <button>.
+· Tôi không chắc URL ảnh cụ thể của bạn load được hay không — cần test thực tế.
+
+🎯 Tóm 1 câu: FAB icon ảnh bằng link (Cách 2) = <button> rỗng + CSS width/height: 60px; aspect-ratio: 1/1; border-radius: 50%; background-image: url("..."); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: #1d4ed8 + position: fixed + z-index: 10000 — ảnh nạp trực tiếp làm nền, không cần thẻ <img>.

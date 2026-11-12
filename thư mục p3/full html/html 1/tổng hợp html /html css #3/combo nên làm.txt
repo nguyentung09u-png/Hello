@@ -1,0 +1,13 @@
+1. dạng carousel full screen
+
+
+2. card Làm background Rounded Rectangle khung dọc (vertical)
+
+
+3. chuyển card
+
+
+4. thanh điều hướng ☰
+
+
+xong kaka

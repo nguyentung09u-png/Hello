@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050d0b">
+<title>Vua Bypass v2</title>
+<style>
+:root{
+  --bg:#050d0b; --ink:#f8f3e4; --muted:#93a79f; --line:rgba(255,226,150,.14);
+  --gold:#f6c85f; --gold2:#e8a317; --gold3:#ffe39a; --amber:#ff9f1c;
+  --ok:#3fe39a; --warn:#ffb86b; --err:#ff8b8b; --r:clamp(22px,6vw,30px);
+}
+*{box-sizing:border-box;margin:0}
+body{
+  min-height:100vh;min-height:100dvh;color:var(--ink);overflow-x:hidden;
+  font:400 15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(85% 42% at 90% -6%,rgba(246,200,95,.30),transparent 70%),
+    radial-gradient(70% 38% at -8% 48%,rgba(40,200,160,.13),transparent 70%),
+    radial-gradient(90% 40% at 100% 105%,rgba(232,163,23,.16),transparent 70%),
+    var(--bg) fixed;
+  padding:max(18px,env(safe-area-inset-top)) clamp(14px,4vw,24px) max(30px,env(safe-area-inset-bottom));
+}
+main{width:min(100%,540px);margin:0 auto;display:grid;gap:14px}
+main>*{animation:rise .5s ease both}
+main>*:nth-child(2){animation-delay:.06s} main>*:nth-child(3){animation-delay:.12s}
+main>*:nth-child(4){animation-delay:.18s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.crown{flex:none;width:50px;height:50px;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(255,227,154,.45),rgba(232,163,23,.10));
+  border:1px solid rgba(246,200,95,.6);
+  box-shadow:0 10px 26px -8px rgba(246,200,95,.65),inset 0 1px 0 rgba(255,255,255,.45)}
+.brand h1{font-size:clamp(1.25rem,5.4vw,1.5rem);font-weight:800;line-height:1.1;letter-spacing:.005em}
+.brand h1 span{background:linear-gradient(90deg,var(--gold3),var(--gold) 50%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand p{color:var(--muted);font-size:.78rem}
+.ver{flex:none;padding:6px 13px;border-radius:99px;font-size:.78rem;font-weight:800;color:#2a1c00;
+  background:linear-gradient(135deg,var(--gold3),var(--gold2));box-shadow:0 6px 16px -6px rgba(246,200,95,.7)}
+.card{
+  position:relative;border-radius:var(--r);padding:clamp(16px,5vw,24px);overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,240,200,.11),rgba(255,240,200,.03) 60%,rgba(246,200,95,.05));
+  border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(26px) saturate(150%);backdrop-filter:blur(26px) saturate(150%);
+  box-shadow:0 26px 56px -24px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.card::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,227,154,.75),transparent)}
+.lbl{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:650;color:var(--muted);margin-bottom:10px}
+.lbl em{font-style:normal;font-weight:500;color:#6b7f77}
+.field{position:relative}
+input{
+  width:100%;height:60px;padding:0 76px 0 18px;border-radius:19px;color:var(--ink);font:inherit;font-size:16px;
+  background:rgba(0,0,0,.4);border:1px solid var(--line);text-overflow:ellipsis;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.35);transition:border-color .2s,box-shadow .2s;
+}
+input::placeholder{color:#5a6d65}
+input:focus{outline:none;border-color:rgba(246,200,95,.8);box-shadow:inset 0 2px 8px rgba(0,0,0,.35),0 0 0 4px rgba(246,200,95,.16)}
+input.bad{border-color:var(--err);box-shadow:0 0 0 4px rgba(255,139,139,.13)}
+.side{position:absolute;right:9px;top:10px;height:40px;min-width:42px;padding:0 13px;border-radius:13px;border:0;cursor:pointer;
+  background:rgba(246,200,95,.18);color:var(--gold3);font:700 .82rem system-ui,sans-serif}
+.side:active{transform:scale(.94)}
+.hint{min-height:1.3em;margin-top:8px;font-size:.82rem;color:var(--err)}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:2px 0 18px;animation:rise .35s ease both}
+.info div{padding:10px 12px;border-radius:15px;background:rgba(0,0,0,.3);border:1px solid var(--line);min-width:0}
+.info dt{font-size:.7rem;color:var(--muted)}
+.info dd{font-size:.87rem;font-weight:650;overflow-wrap:anywhere;word-break:break-all}
+.info .wide{grid-column:1/-1}
+.good{color:var(--ok)} .warn-t{color:var(--warn)}
+.plats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:340px){.plats{grid-template-columns:repeat(2,1fr)}}
+.pill{height:46px;padding:0 6px;border-radius:15px;cursor:pointer;color:#d6ddd8;font:inherit;font-size:.85rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid var(--line);
+  transition:transform .12s,background .2s,box-shadow .2s,color .2s}
+.pill:active{transform:scale(.95)}
+.pill[aria-pressed="true"]{color:#2a1c00;font-weight:750;border-color:transparent;
+  background:linear-gradient(135deg,var(--gold3),var(--gold) 50%,var(--gold2));
+  box-shadow:0 10px 22px -8px rgba(246,200,95,.75),inset 0 1px 0 rgba(255,255,255,.55)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.go{
+  position:relative;overflow:hidden;width:100%;height:62px;margin-top:22px;border:0;border-radius:21px;cursor:pointer;color:#2a1c00;
+  font:800 1.06rem/1 system-ui,sans-serif;letter-spacing:.04em;
+  background:linear-gradient(135deg,var(--gold3),var(--gold) 45%,var(--gold2));
+  box-shadow:0 18px 36px -10px rgba(240,170,30,.7),inset 0 1px 0 rgba(255,255,255,.7),inset 0 -3px 0 rgba(160,95,0,.25);
+  transition:transform .12s,opacity .2s,filter .2s;
+}
+.go::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-60%}100%{left:130%}}
+.go:active{transform:scale(.98)}
+.go:disabled{opacity:.7;cursor:progress;filter:saturate(.75)}
+.go:disabled::after{display:none}
+.dev{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:14px;font-weight:700;font-size:.95rem;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);margin-bottom:16px}
+.dev::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.bar{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:0;border-radius:inherit;transition:width .2s linear;
+  background:linear-gradient(90deg,var(--gold3),var(--gold),var(--amber));box-shadow:0 0 14px rgba(246,200,95,.6)}
+.pct{text-align:right;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:12px}
+.log{list-style:none;padding:0;display:grid;gap:10px}
+.log li{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:20px;color:#8a9e96;
+  background:rgba(255,255,255,.035);border-left:3px solid rgba(246,200,95,.28);
+  transition:background .35s,color .35s,border-color .35s,transform .35s}
+.log li::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;background:#7c6a3a;transition:background .3s}
+.log li.run{color:var(--ink);border-left-color:var(--gold);background:rgba(246,200,95,.07);transform:translateX(3px)}
+.log li.run::before{background:var(--gold);animation:pulse 1.2s infinite}
+.log li.ok{color:#d4ffe8;background:rgba(63,227,154,.09);border-left-color:var(--ok)}
+.log li.ok::before{background:var(--ok);box-shadow:0 0 10px rgba(63,227,154,.7)}
+.log li.warn{color:#ffe6c7;background:rgba(255,184,107,.09);border-left-color:var(--warn)}
+.log li.warn::before{background:var(--warn)}
+.log li.err{color:#ffd6d6;background:rgba(255,139,139,.09);border-left-color:var(--err)}
+.log li.err::before{background:var(--err)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(246,200,95,.65)}70%,100%{box-shadow:0 0 0 9px rgba(246,200,95,0)}}
+.result h2{font-size:1.08rem;margin-bottom:4px}
+.result .msg{color:var(--muted);font-size:.86rem;margin-bottom:12px}
+.dest{padding:13px 15px;border-radius:15px;background:rgba(0,0,0,.4);border:1px solid rgba(246,200,95,.28);
+  font-size:.86rem;overflow-wrap:anywhere;word-break:break-all;margin-bottom:10px;color:#fff3cf}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.meta div{padding:9px 11px;border-radius:13px;background:rgba(255,255,255,.05);border:1px solid var(--line);min-width:0}
+.meta dt{font-size:.68rem;color:var(--muted)} .meta dd{font-size:.85rem;font-weight:650;overflow-wrap:anywhere}
+.actions{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.btn{height:50px;display:flex;align-items:center;justify-content:center;border-radius:15px;cursor:pointer;color:var(--ink);
+  font:inherit;font-weight:700;font-size:.93rem;text-decoration:none;border:1px solid var(--line);background:rgba(255,255,255,.07)}
+.btn.main{color:#2a1c00;border-color:transparent;background:linear-gradient(135deg,var(--gold3),var(--gold2));
+  box-shadow:0 10px 22px -10px rgba(246,200,95,.7)}
+.btn:active{transform:scale(.97)}
+[hidden]{display:none!important}
+.note{text-align:center;font-size:.75rem;color:#62756d;padding:0 8px}
+@media (prefers-reduced-motion:reduce){*,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="brand">
+      <div class="crown" aria-hidden="true">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="#ffe39a"><path d="M3 18h18l1.2-10.5-5.2 4.5L12 5 7 12 1.8 7.5zM4 20h16v2H4z"/></svg>
+      </div>
+      <div><h1>Vua <span>Bypass</span></h1><p>Công cụ xử lý liên kết rút gọn</p></div>
+    </div>
+    <span class="ver">v2</span>
+  </div>
+
+  <section class="card">
+    <div class="lbl"><label for="url">Liên kết cần xử lý</label><em id="len"></em></div>
+    <div class="field">
+      <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://..." aria-describedby="hint">
+      <button class="side" id="side" type="button">Dán</button>
+    </div>
+    <p class="hint" id="hint" role="alert"></p>
+    <dl class="info" id="info" hidden></dl>
+
+    <div class="lbl"><span>Nền tảng</span><em id="picked">Chưa chọn</em></div>
+    <div class="plats" id="platforms"></div>
+
+    <button class="go" id="go" type="button">VƯỢT LINK ↗</button>
+  </section>
+
+  <section class="card" aria-live="polite">
+    <div class="dev" id="dev">Thiết bị</div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><i id="fill"></i></div>
+    <div class="pct" id="pct">0%</div>
+    <ul class="log" id="log"></ul>
+  </section>
+
+  <section class="card result" id="result" hidden>
+    <h2 id="r-title"></h2>
+    <p class="msg" id="r-msg"></p>
+    <div class="dest" id="r-dest" hidden></div>
+    <dl class="meta" id="r-meta" hidden></dl>
+    <div class="actions" id="r-actions" hidden>
+      <a class="btn main" id="r-open" target="_blank" rel="noopener noreferrer">Mở liên kết</a>
+      <button class="btn" id="r-copy" type="button">Sao chép</button>
+    </div>
+  </section>
+
+  <p class="note">Vua Bypass v2</p>
+</main>
+
+<script>
+"use strict";
+/* Thêm liên kết mới bằng cách thêm một dòng vào ROUTES. */
+const ROUTES = [
+  { input: "https://link4m.org/go/9Rdjtt", output: "https://fnote.net/notes/F1Hb2v" },
+  { input: "https://layma.net/dj28g1j", output: "https://www.mediafire.com/file/djid28jr8fln/MapAOVchapto1.2m_1.1.4.apk/file" },
+  { input: "https://link4m.org/go/ijivMgH", output: "https://zufile.com/download/D4PZdBIPlu" }
+];
+const PLATFORMS = [
+  {name:"Link4m",hint:"link4m"},{name:"Layma",hint:"layma"},{name:"Gtraffic",hint:"gtraffic"},
+  {name:"Traffic4k",hint:"traffic4k"},{name:"Site2s",hint:"site2s"},{name:"Bbmkt",hint:"bbmkt"},
+  {name:"TrafficHub",hint:"traffichub"},{name:"TrafficViet",hint:"trafficviet"},{name:"Phiên chờ số",hint:"phienchoso"},
+  {name:"Link1s",hint:"link1s"},{name:"Yeumoney",hint:"yeumoney"},{name:"Ouo.io",hint:"ouo.io"}
+];
+const $ = id => document.getElementById(id);
+const els = { url:$("url"), side:$("side"), hint:$("hint"), go:$("go"), pct:$("pct"), fill:$("fill"), bar:$("bar"),
+  log:$("log"), result:$("result"), title:$("r-title"), msg:$("r-msg"), dest:$("r-dest"), meta:$("r-meta"),
+  actions:$("r-actions"), open:$("r-open"), copy:$("r-copy"), info:$("info"), len:$("len"), picked:$("picked") };
+let running = false, currentDest = "", selected = null;
+
+/* Nhãn thiết bị lấy từ trình duyệt thật của người dùng */
+(function(){
+  const ua = navigator.userAgent;
+  const os = /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "Thiết bị";
+  const br = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /SamsungBrowser/.test(ua) ? "Samsung Internet" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Trình duyệt";
+  $("dev").textContent = os + " • " + br;
+})();
+
+const box = $("platforms");
+PLATFORMS.forEach(p => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "pill"; b.textContent = p.name; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click", () => {
+    selected = p; els.picked.textContent = p.name;
+    box.querySelectorAll(".pill").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+    renderInfo();
+  });
+  box.appendChild(b);
+});
+
+function parseUrl(raw){
+  try{ const u = new URL(raw.trim()); return (/^https?:$/.test(u.protocol) && u.hostname.includes(".")) ? u : null; }
+  catch(e){ return null; }
+}
+const keyOf = u => u.hostname.toLowerCase().replace(/^www\./,"") + u.pathname.toLowerCase().replace(/\/+$/,"");
+const TABLE = ROUTES.map(r => ({ key: keyOf(new URL(r.input)), output: r.output }));
+const detect = u => PLATFORMS.find(p => u.hostname.toLowerCase().includes(p.hint)) || null;
+
+function row(label, value, cls, wide){
+  const d = document.createElement("div"); if(wide) d.className = "wide";
+  const t = document.createElement("dt"); t.textContent = label;
+  const v = document.createElement("dd"); v.textContent = value; if(cls) v.className = cls;
+  d.append(t, v); return d;
+}
+function renderInfo(){
+  const raw = els.url.value.trim(); els.len.textContent = raw ? raw.length + " ký tự" : "";
+  const u = raw && parseUrl(raw);
+  if(!u){ els.info.hidden = true; els.info.replaceChildren(); return; }
+  const det = detect(u);
+  const rows = [
+    row("Tên miền", u.hostname.replace(/^www\./,"")),
+    row("Giao thức", u.protocol === "https:" ? "HTTPS · an toàn" : "HTTP · không mã hóa", u.protocol === "https:" ? "good" : "warn-t"),
+    row("Đường dẫn", u.pathname === "/" ? "(gốc)" : u.pathname, "", true),
+    row("Đoạn / tham số", u.pathname.split("/").filter(Boolean).length + " đoạn · " + [...u.searchParams.keys()].length + " tham số"),
+    row("Nhận diện", det ? det.name : "Chưa nhận diện", det ? "good" : "warn-t")
+  ];
+  if(selected && det && selected !== det) rows.push(row("Lưu ý", "Nền tảng đã chọn khác với liên kết (" + det.name + ")", "warn-t", true));
+  els.info.hidden = false; els.info.replaceChildren(...rows);
+}
+
+/* Nhật ký trạng thái */
+const LINES = [];
+function buildLog(){
+  els.log.replaceChildren();
+  ["Trạng thái: Sẵn sàng","Kiểm tra liên kết","Nhận diện nền tảng","Tra cứu hệ thống","Hoàn tất xử lý"].forEach(t => {
+    const li = document.createElement("li"); li.textContent = t; els.log.appendChild(li); LINES.push(li);
+  });
+  LINES[0].className = "run";
+}
+function line(i, cls, text){ LINES[i].className = cls; if(text) LINES[i].textContent = text; }
+function resetLog(){
+  const t = ["Trạng thái: Sẵn sàng","Kiểm tra liên kết","Nhận diện nền tảng","Tra cứu hệ thống","Hoàn tất xử lý"];
+  LINES.forEach((li,i) => { li.className = ""; li.textContent = t[i]; });
+}
+function setProgress(p){ const v = Math.round(p); els.fill.style.width = v+"%"; els.pct.textContent = v+"%"; els.bar.setAttribute("aria-valuenow", v); }
+buildLog();
+
+function showHint(t){ els.hint.textContent = t; els.url.classList.toggle("bad", !!t); }
+function showResult(title, msg, dest, metaRows){
+  els.result.hidden = false; els.title.textContent = title; els.msg.textContent = msg; currentDest = dest || "";
+  els.dest.hidden = els.actions.hidden = els.meta.hidden = !dest;
+  if(dest){ els.dest.textContent = dest; els.open.href = dest; els.meta.replaceChildren(...metaRows); }
+  els.result.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth", block:"nearest"});
+}
+
+function syncSide(){ els.side.textContent = els.url.value ? "✕" : "Dán"; els.side.setAttribute("aria-label", els.url.value ? "Xóa nội dung" : "Dán từ bộ nhớ tạm"); }
+els.url.addEventListener("input", () => { syncSide(); showHint(""); renderInfo(); });
+els.side.addEventListener("click", async () => {
+  if(els.url.value){ els.url.value = ""; syncSide(); showHint(""); renderInfo(); els.url.focus(); return; }
+  try{ const t = await navigator.clipboard.readText(); if(t){ els.url.value = t.trim(); syncSide(); showHint(""); renderInfo(); } }
+  catch(e){ showHint("Không đọc được bộ nhớ tạm, hãy nhấn giữ ô nhập để dán."); els.url.focus(); }
+});
+els.copy.addEventListener("click", async () => {
+  try{ await navigator.clipboard.writeText(currentDest); }
+  catch(e){ const t = document.createElement("textarea"); t.value = currentDest; document.body.appendChild(t); t.select(); try{document.execCommand("copy")}catch(_){} t.remove(); }
+  els.copy.textContent = "Đã chép ✓"; setTimeout(() => els.copy.textContent = "Sao chép", 1800);
+});
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+els.go.addEventListener("click", async () => {
+  if(running) return;
+  els.result.hidden = true; resetLog(); setProgress(0); line(0,"run");
+  const raw = els.url.value.trim();
+  const u = raw && parseUrl(raw);
+  if(!u){
+    line(0,"err", raw ? "URL không hợp lệ" : "Chưa nhập liên kết");
+    showHint(raw ? "Liên kết cần bắt đầu bằng http:// hoặc https:// và có tên miền đúng." : "Hãy dán liên kết cần xử lý vào ô nhập.");
+    els.url.focus(); return;
+  }
+  showHint("");
+  running = true; els.go.disabled = true; els.go.textContent = "ĐANG XỬ LÝ…";
+  const total = 5000 + Math.random()*3000, t0 = performance.now();
+  const det = detect(u); let found, stage = -1;
+  const enter = [0, 1, 30, 55, 85];            /* mốc % bắt đầu từng dòng */
+  for(;;){
+    const p = Math.min(100, (performance.now()-t0)/total*100);
+    setProgress(p);
+    while(stage < 4 && p >= enter[stage+1]){
+      stage++;
+      if(stage === 1) { line(0,"ok"); line(1,"run","Đang kiểm tra liên kết..."); }
+      if(stage === 2) { line(1,"ok","Liên kết hợp lệ!"); line(2,"run","Đang nhận diện nền tảng..."); }
+      if(stage === 3) { line(2,"ok", det ? "Nền tảng: " + det.name : "Chưa nhận diện nền tảng"); line(3,"run","Đang tra cứu hệ thống..."); found = TABLE.find(r => r.key === keyOf(u)) || null; }
+      if(stage === 4) { line(3,"ok","Tra cứu hoàn tất!"); line(4,"run","Đang chuẩn bị kết quả..."); }
+    }
+    if(p >= 100) break;
+    await sleep(100);
+  }
+  const secs = ((performance.now()-t0)/1000).toFixed(1) + " giây";
+  if(found){
+    line(4,"ok","Đã có kết quả!");
+    const d = new URL(found.output), file = d.pathname.match(/\.([a-z0-9]{2,5})(?:\/|$)/i);
+    showResult("Đã có kết quả","Liên kết đích của bạn đã sẵn sàng.", found.output, [
+      row("Đích đến", d.hostname.replace(/^www\./,"")),
+      row("Loại", file ? "Tệp ." + file[1].toLowerCase() : "Trang / ghi chú"),
+      row("Thời gian", secs)
+    ]);
+  }else{
+    line(4,"warn","Liên kết chưa được hỗ trợ");
+    showResult("Chưa hỗ trợ liên kết này","Liên kết này chưa có trong hệ thống. Ô nhập được giữ nguyên để bạn kiểm tra hoặc sửa lại.","");
+  }
+  running = false; els.go.disabled = false; els.go.textContent = "VƯỢT LINK ↗";
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#060a08">
+<title>Dark Tech Background — Emerald Hex Pulse</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#060a08;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 110% at 50% 110%, #0a1a14 0%, #07100c 40%, #040706 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Hexagonal field (SVG data-uri, painted once) ---------- */
+  .hex{
+    position:absolute;
+    inset:-8%;
+    opacity:.5;
+    background-color:transparent;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='96' viewBox='0 0 56 96'%3E%3Cg fill='none' stroke='%2334d399' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z'/%3E%3Cpath d='M28 64 L56 80 L56 112 L28 128 L0 112 L0 80 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:56px 96px;
+    -webkit-mask-image:radial-gradient(125% 105% at 50% 45%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 85%);
+            mask-image:radial-gradient(125% 105% at 50% 45%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 85%);
+    animation:hexDrift 48s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes hexDrift{
+    from{background-position:0 0;}
+    to{background-position:112px 192px;}
+  }
+
+  /* ---------- Rotating conic sweep (GPU, transform only) ---------- */
+  .sweep{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:180vmax;
+    height:180vmax;
+    margin-left:-90vmax;
+    margin-top:-90vmax;
+    pointer-events:none;
+    background:conic-gradient(
+      from 0deg,
+      rgba(52,211,153,0) 0deg,
+      rgba(52,211,153,0) 300deg,
+      rgba(52,211,153,.10) 335deg,
+      rgba(16,185,129,.18) 350deg,
+      rgba(52,211,153,.10) 360deg
+    );
+    animation:sweepSpin 26s linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes sweepSpin{
+    from{transform:translate3d(0,0,0) rotate(0deg);}
+    to{transform:translate3d(0,0,0) rotate(360deg);}
+  }
+
+  /* ---------- Pulse glow at center (opacity/scale only) ---------- */
+  .core{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:60vmin;
+    height:60vmin;
+    margin-left:-30vmin;
+    margin-top:-30vmin;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(52,211,153,.14) 0%,
+      rgba(16,185,129,.06) 35%,
+      rgba(16,185,129,0) 65%);
+    animation:corePulse 7s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes corePulse{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.85;}
+    50%{transform:translate3d(0,0,0) scale(1.18);opacity:1;}
+  }
+
+  /* ---------- Edge emerald blooms ---------- */
+  .bloom{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(50% 40% at 0% 100%, rgba(52,211,153,.10), transparent 70%),
+      radial-gradient(50% 40% at 100% 0%, rgba(16,185,129,.09), transparent 70%);
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 55%,
+      rgba(0,0,0,0) 42%, rgba(0,0,0,.42) 80%, rgba(0,0,0,.70) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hex,.sweep,.core{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="hex"></div>
+  <div class="sweep"></div>
+  <div class="core"></div>
+  <div class="bloom"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+</body>
+</html>

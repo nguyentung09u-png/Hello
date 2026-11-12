@@ -1,0 +1,72 @@
+Overflow Scroll Ngang — Tổng quan & Code mẫu
+
+Tổng quan cơ chế
+
+overflow-x: auto cho phép một khung chứa cuộn ngang khi nội dung con vượt quá chiều rộng khung. Cần 4 yếu tố phối hợp:
+
+Yếu tố Vai trò
+overflow-x: auto Bật cuộn ngang, tự hiện scrollbar khi tràn
+flex + flex: 0 0 auto Giữ item không co lại, buộc tràn ra
+scrollbar-width: none / ::-webkit-scrollbar Ẩn scrollbar (tuỳ chọn)
+white-space: nowrap (nếu inline) Ngăn item xuống dòng
+
+Không có flex-shrink: 0 hoặc min-width thì item sẽ bị bóp lại thay vì tràn → không cuộn được.
+
+Code mẫu tối giản
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overflow Scroll Ngang</title>
+<style>
+  .scroll-x{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;          /* Firefox */
+    -ms-overflow-style:none;       /* Edge cũ */
+    -webkit-overflow-scrolling:touch;
+  }
+  .scroll-x::-webkit-scrollbar{    /* Chrome, Safari, Edge mới */
+    display:none;
+  }
+
+  .item{
+    flex:0 0 auto;                 /* không co lại */
+    padding:10px 16px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-x">
+  <div class="item">Mục 1</div>
+  <div class="item">Mục 2</div>
+  <div class="item">Mục 3</div>
+  <div class="item">Mục 4</div>
+  <div class="item">Mục 5</div>
+  <div class="item">Mục 6</div>
+  <div class="item">Mục 7</div>
+  <div class="item">Mục 8</div>
+</div>
+
+</body>
+</html>
+```
+
+Lưu ý
+
+· overflow-x: auto chỉ cuộn khi thật sự tràn. Nếu nội dung ngắn hơn khung → không có scrollbar, không cuộn.
+· Ẩn scrollbar chỉ ẩn hình ảnh, không tắt khả năng cuộn (vẫn kéo được bằng chuột/touch/bàn phím).
+· Muốn scroll mượt theo từng mục → thêm scroll-snap-type + scroll-snap-align.
+
+---
+
+Tóm 1 câu: Cho khung overflow-x:auto, item con flex:0 0 auto, thêm scrollbar-* để ẩn thanh cuộn — hết.

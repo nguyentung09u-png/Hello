@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astra Sidebar · Đã xóa nút X xanh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --sa-panel: #070E13;
+      --sa-edge: #1A242C;
+      --sa-ink: #FFFFFF;
+      --sa-headline: #64748B;
+      --sa-row: #1E293B;
+      --sa-row-hover: rgba(30, 41, 59, 0.5);
+      --sa-field: #0F172A;
+      --sa-field-ink: #E2E8F0;
+      --sa-field-icon: #475569;
+      --sa-mark: #38BDF8;
+      --radius-panel: 24px;
+      --radius-sm: 8px;
+      --font-main: 'Onest', system-ui, sans-serif;
+      --panel-width: 280px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #020617;
+      color: var(--sa-ink);
+      font-family: var(--font-main);
+      min-height: 100dvh;
+      display: flex;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .desk {
+      display: flex;
+      width: 100%;
+      height: 100dvh;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    /* ================= HAMBURGER BUTTON ================= */
+    .hamburger {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--sa-panel);
+      border: 1px solid var(--sa-edge);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 50;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger:hover {
+      background: var(--sa-row);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    .hamburger .bars {
+      width: 20px;
+      height: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hamburger .bars span {
+      width: 100%;
+      height: 2px;
+      background: var(--sa-mark);
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Ẩn hoàn toàn Hamburger khi Sidebar mở */
+    .hamburger.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.8);
+    }
+
+    /* ================= SIDEBAR PANEL ================= */
+    .sa-sidebar {
+      background: var(--sa-panel);
+      border: 1px solid var(--sa-edge);
+      border-radius: var(--radius-panel);
+      display: flex;
+      flex-direction: column;
+      width: var(--panel-width);
+      flex-shrink: 0;
+      position: absolute;
+      top: 1.5rem;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      z-index: 40;
+      box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.9);
+      
+      transform: translateX(-150%);
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
+    }
+
+    .sa-sidebar.is-open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    /* ================= HEADER & BRAND ================= */
+    .sa-header {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+    }
+
+    .sa-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sa-brand-mark {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sa-ink);
+    }
+
+    .sa-brand-mark svg { width: 100%; height: 100%; fill: currentColor; }
+
+    .sa-brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+
+    /* ================= NÚT X ĐỎ (DUY NHẤT) ================= */
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: #F43F5E;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .close-btn:hover {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.3);
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+    }
+
+    .close-btn svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s;
+    }
+
+    .close-btn:active svg { transform: scale(0.85); }
+
+    /* ================= SEARCH ================= */
+    .sa-search-wrap {
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .sa-search {
+      display: flex;
+      align-items: center;
+      background: var(--sa-field);
+      border: 1px solid var(--sa-edge);
+      border-radius: 12px;
+      padding: 10px 12px;
+      gap: 8px;
+    }
+
+    .sa-search:focus-within { border-color: var(--sa-mark); }
+
+    .sa-search-icon {
+      color: var(--sa-field-icon);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .sa-search input {
+      background: transparent;
+      border: none;
+      color: var(--sa-field-ink);
+      font-family: inherit;
+      font-size: 0.85rem;
+      width: 100%;
+      outline: none;
+    }
+
+    .sa-kbd {
+      font-size: 0.65rem;
+      color: var(--sa-field-icon);
+      background: var(--sa-edge);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* ================= NAVIGATION ================= */
+    .sa-nav-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sa-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .sa-group-head {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sa-headline);
+      font-weight: 600;
+      padding: 0 12px;
+      margin-bottom: 4px;
+    }
+
+    .sa-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--sa-headline);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .sa-link:hover {
+      color: var(--sa-ink);
+      background: var(--sa-row-hover);
+    }
+
+    .sa-link[aria-current="page"] {
+      color: var(--sa-ink);
+      background: var(--sa-row);
+    }
+
+    .sa-link-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sa-link-icon svg { width: 100%; height: 100%; }
+    .sa-link-text { flex: 1; }
+
+    /* ================= FOOTER ================= */
+    .sa-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--sa-edge);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 80px;
+    }
+
+    .sa-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1E293B;
+      display: grid;
+      place-items: center;
+      color: var(--sa-ink);
+      flex-shrink: 0;
+    }
+
+    .sa-avatar svg { width: 18px; height: 18px; }
+
+    .sa-profile-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .sa-profile-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--sa-ink);
+    }
+
+    .sa-profile-email {
+      font-size: 0.7rem;
+      color: var(--sa-headline);
+    }
+
+    /* ================= MAIN CONTENT ================= */
+    .main-content {
+      flex: 1;
+      padding: 6rem 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .main-content h1 { font-size: 2rem; margin-bottom: 1rem; }
+    .main-content p { color: var(--sa-headline); max-width: 400px; line-height: 1.6; }
+
+    /* ================= OVERLAY ================= */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.6);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s;
+      z-index: 30;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="desk">
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Nút Hamburger -->
+    <button class="hamburger" id="hamburger" aria-label="Mở menu">
+      <span class="bars">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sa-sidebar" id="sidebar">
+      <!-- Header: Logo và Nút X Đỏ -->
+      <div class="sa-header">
+        <div class="sa-brand">
+          <div class="sa-brand-mark">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6 13.5H6l6-13.5z"/></svg>
+          </div>
+          <span class="sa-brand-name">Astra</span>
+        </div>
+        
+        <!-- Nút X Đỏ -->
+        <button class="close-btn" id="closeBtn" aria-label="Đóng sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sa-search-wrap">
+        <div class="sa-search">
+          <svg class="sa-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search...">
+          <span class="sa-kbd">⌘K</span>
+        </div>
+      </div>
+
+      <div class="sa-nav-container">
+        <div class="sa-group">
+          <div class="sa-group-head">Main</div>
+          <a href="#" class="sa-link" aria-current="page">
+            <div class="sa-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <span class="sa-link-text">Dashboard</span>
+          </a>
+          <a href="#" class="sa-link">
+            <div class="sa-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+            </div>
+            <span class="sa-link-text">Analytics</span>
+          </a>
+          <a href="#" class="sa-link">
+            <div class="sa-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+            <span class="sa-link-text">Users</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sa-footer">
+        <div class="sa-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        <div class="sa-profile-info">
+          <span class="sa-profile-name">Alex Johnson</span>
+          <span class="sa-profile-email">alex@astra.io</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <h1>Astra Console</h1>
+      <p>Đã xóa hoàn toàn nút X màu xanh. Chỉ còn nút X màu đỏ ở góc phải.</p>
+    </main>
+  </div>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
+
+    function openSidebar() {
+      sidebar.classList.add('is-open');
+      overlay.classList.add('active');
+      hamburger.classList.add('hidden'); // Ẩn nút Hamburger 3 gạch
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('is-open');
+      overlay.classList.remove('active');
+      hamburger.classList.remove('hidden'); // Hiện lại nút Hamburger 3 gạch
+    }
+
+    hamburger.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+        closeSidebar();
+      }
+    });
+  </script>
+</body>
+</html>

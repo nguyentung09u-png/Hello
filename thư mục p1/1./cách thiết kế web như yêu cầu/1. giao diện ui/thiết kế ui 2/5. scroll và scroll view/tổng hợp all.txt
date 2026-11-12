@@ -1,0 +1,6 @@
+.box {
+  height: 400px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  contain: strict;
+}

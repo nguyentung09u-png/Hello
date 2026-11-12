@@ -1,0 +1,150 @@
+Tổng quan cách làm
+
+```
+BƯỚC 1 — HTML    1 div cha + 9 ô lưới (4 nút + 4 trống + 1 giữa)
+BƯỚC 2 — CSS     grid 3×3, bo góc, blur, màu, :active/.held
+BƯỚC 3 — JS      state move{}, gắn pointerdown/up/cancel/leave
+BƯỚC 4 — UPDATE  cộng trừ theo hướng, chuẩn hoá chéo, clamp biên
+```
+
+Nguyên tắc chung: mỗi nút bật/tắt 1 cờ trong object move, hàm update đọc 4 cờ để tính vector di chuyển, chuẩn hoá để đi chéo không nhanh hơn, clamp để không vượt biên.
+
+---
+
+Code chung chung
+
+1. HTML
+
+```html
+<div id="dpad">
+  <div></div>
+  <button data-dir="up">▲</button>
+  <div></div>
+  <button data-dir="left">◀</button>
+  <div class="center"></div>
+  <button data-dir="right">▶</button>
+  <div></div>
+  <button data-dir="down">▼</button>
+  <div></div>
+</div>
+```
+
+2. CSS
+
+```css
+#dpad{
+  position:absolute;
+  left:14px; bottom:16px;
+  display:grid;
+  grid-template-columns:repeat(3,42px);
+  grid-template-rows:repeat(3,42px);
+  gap:4px;
+  pointer-events:auto;
+  z-index:6;
+}
+#dpad button{
+  width:42px; height:42px;
+  border-radius:12px;
+  border:1px solid rgba(150,220,255,.4);
+  background:rgba(10,20,30,.75);
+  color:#7ddeff;
+  font-family:inherit;
+  font-size:14px; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(0,0,0,.6);
+  transition:transform .08s, background .12s, color .12s;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+#dpad button:active,
+#dpad button.held{
+  transform:scale(.9);
+  background:linear-gradient(180deg,#cceaff,#7ddeff 60%,#1f6ea8 100%);
+  color:#001a2e;
+}
+#dpad .center{
+  border-radius:10px;
+  background:rgba(10,20,30,.4);
+  border:1px solid rgba(150,220,255,.15);
+}
+```
+
+3. JS — State + gắn sự kiện
+
+```js
+const move = { up:false, down:false, left:false, right:false };
+
+document.querySelectorAll('#dpad button').forEach(btn => {
+  const dir = btn.dataset.dir;
+
+  const onDown = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    btn.classList.add('held');
+    move[dir] = true;
+  };
+  const onUp = () => {
+    btn.classList.remove('held');
+    move[dir] = false;
+  };
+
+  btn.addEventListener('pointerdown', onDown, { passive:false });
+  btn.addEventListener('pointerup', onUp);
+  btn.addEventListener('pointercancel', onUp);
+  btn.addEventListener('pointerleave', onUp);
+});
+```
+
+4. JS — Update di chuyển
+
+```js
+const SPEED = 300;
+const X_MIN = 0,   X_MAX = 1000;
+const Y_MIN = 200, Y_MAX = 800;
+let px = 100, py = 500;
+
+const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
+
+function updateMove(dt){
+  let mx = 0, my = 0;
+  if (move.left)  mx -= 1;
+  if (move.right) mx += 1;
+  if (move.up)    my -= 1;
+  if (move.down)  my += 1;
+  if (mx === 0 && my === 0) return { mx:0, my:0 };
+
+  // Chuẩn hoá để đi chéo không nhanh hơn
+  const len = Math.hypot(mx, my);
+  mx /= len; my /= len;
+
+  px = clamp(px + mx * SPEED * dt, X_MIN, X_MAX);
+  py = clamp(py + my * SPEED * dt, Y_MIN, Y_MAX);
+  return { mx, my };
+}
+
+// Trong vòng lặp chính:
+function loop(ts){
+  const dt = Math.min((ts - last)/1000, 0.05);
+  last = ts;
+  updateMove(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· 42px và border-radius:12px — tôi chọn theo trực giác; khuyến nghị chung cho vùng chạm là ≥ 44px, nhưng tôi không chắc con số nào tối ưu.
+· .held có cần thiết không — :active thường đã đủ trên desktop, nhưng trên mobile có lúc :active giữ không ổn định; tôi tin .held giúp ổn định nhưng không có tài liệu xác nhận từ nguồn cụ thể.
+· pointerleave có đủ không — với vài trình duyệt mobile cũ, tôi không chắc touchcancel có cần bổ sung.
+· Math.hypot(mx,my) — cách chuẩn hoá phổ biến, nhưng tôi không dám khẳng định đây là cách duy nhất đúng.
+· e.preventDefault() trong pointerdown — có thể gây một số tác dụng phụ; tôi tin ổn cho D-pad nhưng không dám chắc cho mọi trường hợp.
+
+---
+
+🎯 Tóm 1 câu: Làm D-pad = HTML 1 div + 9 ô lưới (4 nút data-dir + 5 ô trang trí), CSS display:grid 3×3 + border-radius:12px + backdrop-filter:blur + :active/.held co nút và đổi gradient, JS gắn pointerdown/up/cancel/leave để bật/tắt move[dir] + class .held, rồi trong update(dt) cộng trừ theo cờ, chuẩn hoá bằng Math.hypot(mx,my) để đi chéo không nhanh hơn, và clamp để không vượt biên.

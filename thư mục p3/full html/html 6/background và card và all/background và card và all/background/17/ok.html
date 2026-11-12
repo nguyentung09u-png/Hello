@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a04">
+<title>Dark Tech Background — Honeycomb Signal Mesh</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0a04;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 60% 40%, #1a1a08 0%, #100f05 45%, #060502 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Honeycomb (SVG data-uri, painted once) ---------- */
+  .comb{
+    position:absolute;
+    inset:-8%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill='none' stroke='%23facc15' stroke-opacity='0.20' stroke-width='1'%3E%3Cpath d='M30 0 L60 17.5 L60 52.5 L30 70 L0 52.5 L0 17.5 Z'/%3E%3Cpath d='M30 70 L60 87.5 L60 122.5 L30 140 L0 122.5 L0 87.5 Z'/%3E%3C/g%3E%3Cg fill='%23fde047' fill-opacity='0.55'%3E%3Ccircle cx='30' cy='17.5' r='1.8'/%3E%3Ccircle cx='30' cy='87.5' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:60px 104px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+    animation:combDrift 80s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes combDrift{
+    from{background-position:0 0;}
+    to{background-position:120px 208px;}
+  }
+
+  /* ---------- Signal nodes (transform/opacity only) ---------- */
+  .nodes{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    contain:strict;
+  }
+  .nodes i{
+    position:absolute;
+    width:6px;
+    height:6px;
+    margin:-3px 0 0 -3px;
+    border-radius:50%;
+    background:rgba(253,224,71,.95);
+    box-shadow:0 0 10px rgba(250,204,21,.85), 0 0 22px rgba(202,138,4,.45);
+    animation:nodePing 4s ease-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes nodePing{
+    0%{transform:translate3d(0,0,0) scale(.4);opacity:0;}
+    22%{opacity:1;}
+    100%{transform:translate3d(0,0,0) scale(2.6);opacity:0;}
+  }
+
+  /* ---------- Horizontal honey beams (transform-only) ---------- */
+  .beams{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .beams span{
+    position:absolute;
+    left:-20vw;
+    width:20vw;
+    height:1px;
+    background:linear-gradient(90deg,
+      rgba(250,204,21,0) 0%,
+      rgba(253,224,71,.7) 45%,
+      rgba(250,204,21,.9) 55%,
+      rgba(250,204,21,0) 100%);
+    animation:beamSweep linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes beamSweep{
+    0%{transform:translate3d(0,0,0);opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{transform:translate3d(120vw,0,0);opacity:0;}
+  }
+
+  /* ---------- Warm amber glow ---------- */
+  .amber{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:80vmin;
+    height:80vmin;
+    margin-left:-40vmin;
+    margin-top:-40vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(250,204,21,.12) 0%,
+      rgba(161,98,7,.05) 42%,
+      rgba(161,98,7,0) 72%);
+    animation:amberBreath 14s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes amberBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.7;}
+    50%{transform:translate3d(0,0,0) scale(1.1);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .comb,.nodes i,.beams span,.amber{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="comb"></div>
+  <div class="amber"></div>
+  <div class="beams" id="beams"></div>
+  <div class="nodes" id="nodes"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const nodes = document.getElementById('nodes');
+  const beams = document.getElementById('beams');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const nodeFrag = document.createDocumentFragment();
+  const NODE_COUNT = 12;
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const el = document.createElement('i');
+    el.style.left = (Math.random() * 100) + 'vw';
+    el.style.top = (Math.random() * 100) + 'vh';
+    el.style.animationDelay = (Math.random() * 4) + 's';
+    el.style.animationDuration = (3 + Math.random() * 3) + 's';
+    nodeFrag.appendChild(el);
+  }
+  nodes.appendChild(nodeFrag);
+
+  const beamFrag = document.createDocumentFragment();
+  const BEAM_COUNT = 6;
+  for (let i = 0; i < BEAM_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.top = (8 + Math.random() * 84) + 'vh';
+    const dur = 6 + Math.random() * 8;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+    beamFrag.appendChild(s);
+  }
+  beams.appendChild(beamFrag);
+})();
+</script>
+</body>
+</html>

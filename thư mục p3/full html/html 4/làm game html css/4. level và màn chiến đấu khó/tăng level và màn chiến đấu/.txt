@@ -1,0 +1,270 @@
+🎯 HỆ THỐNG LEVEL 1→999 — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Chỉ cần 1 biến số game.level — mọi thứ khác suy ra từ nó bằng hàm thuần:
+
+```
+game.level = 1  →  f(1)  →  lính 5, zombie 5, hp 30, dmg 6.35
+game.level = 10 →  f(10) →  lính 8, zombie 23, hp 84, dmg 14
+game.level = 50 →  f(50) →  lính 21, zombie 80, hp 324, dmg 48
+```
+
+Điểm mấu chốt: không lưu riêng "số lính", "số zombie", "máu zombie" — chỉ lưu level rồi tính lại mỗi khi cần. Gọi là "single source of truth" (1 nguồn sự thật).
+
+---
+
+🔍 Các bước chính
+
+Bước 1 — Khai báo 1 biến level
+
+```js
+const game = {
+  level: 1,        // màn hiện tại
+  maxLevel: 999,   // giới hạn
+  // ...
+};
+```
+
+Bước 2 — Viết các hàm f(level)
+
+Mỗi chỉ số là 1 hàm thuần (không side-effect), nhận level → trả số:
+
+```js
+function soldierCount(lv) { return Math.min(5 + Math.floor(lv/3), 30); }
+function zombieCount(lv)  { return Math.min(3 + lv*2, 80); }
+function zombieHP(lv)     { return Math.min(24 + lv*6, 500); }
+function zombieDMG(lv)    { return Math.min(5.5 + lv*0.85, 50); }
+function zombieSpeed(lv)  { return 44 + Math.min(lv*3.2, 46); }
+```
+
+→ Math.min(..., cap) chặn tăng vô hạn.
+
+Bước 3 — Gọi hàm khi cần (không cache)
+
+Khi tạo lính:
+
+```js
+function makeSquad() {
+  const n = soldierCount(game.level);   // ← gọi hàm
+  // ... tạo n lính ...
+}
+```
+
+Khi spawn zombie:
+
+```js
+function spawnEnemy() {
+  const lv = game.level;
+  const hp  = zombieHP(lv);
+  const dmg = zombieDMG(lv);
+  // ...
+}
+```
+
+Bước 4 — Luồng thắng: endLevel()
+
+```js
+function endLevel() {
+  game.level++;                      // ← tăng level
+  if (game.level > MAX_LEVEL) { winGame(); return; }
+  reviveAndExpand();                 // ← lính mới theo level mới
+}
+```
+
+Bước 5 — Luồng thua: gameOver()
+
+```js
+function startGame() {
+  game.level = 1;                    // ← reset
+  // ...
+}
+```
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. STATE — 1 BIẾN DUY NHẤT
+// ============================
+const MAX_LEVEL = 999;
+const game = {
+  level: 1,
+  score: 0,
+  waveActive: false,
+  spawnLeft: 0,
+  spawnTimer: 0
+};
+
+// ============================
+// 2. HÀM THUẦN f(level)
+// ============================
+function soldierCount(lv) {
+  return Math.min(5 + Math.floor(lv / 3), 30);
+}
+function zombieCount(lv) {
+  return Math.min(3 + lv * 2, 80);
+}
+function zombieHP(lv) {
+  return Math.min(24 + lv * 6, 500);
+}
+function zombieDMG(lv) {
+  return Math.min(5.5 + lv * 0.85, 50);
+}
+function zombieSpeed(lv) {
+  return 44 + Math.min(lv * 3.2, 46);
+}
+function spawnInterval(lv) {
+  return Math.max(0.28, 1.05 - lv * 0.05);
+}
+
+// ============================
+// 3. TẠO LÍNH THEO LEVEL
+// ============================
+function makeSquad() {
+  const n = soldierCount(game.level);
+  soldiers = [];
+
+  for (let i = 0; i < n; i++) {
+    const ring = Math.floor(i / 8);
+    const a = (i % 8) / Math.min(8, n - ring*8) * Math.PI * 2 - Math.PI/2;
+    const r = 70 + ring * 26;
+
+    soldiers.push({
+      x: king.x + Math.cos(a) * r,
+      y: king.y + Math.sin(a) * r * 0.52 + 12,
+      tx: 0, ty: 0,
+      hp: 95, maxHp: 95,
+      // ...
+    });
+  }
+}
+
+// ============================
+// 4. SPAWN ZOMBIE THEO LEVEL
+// ============================
+function spawnEnemy() {
+  const lv = game.level;
+  const hp    = zombieHP(lv);
+  const dmg   = zombieDMG(lv);
+  const speed = zombieSpeed(lv);
+
+  const e = {
+    x: /* vị trí ngẫu nhiên */,
+    y: /* vị trí ngẫu nhiên */,
+    hp, maxHp: hp,
+    dmg, speed,
+    // ...
+  };
+  enemies.push(e);
+}
+
+// ============================
+// 5. BẮT ĐẦU MÀN
+// ============================
+function startLevel() {
+  game.waveActive = true;
+  game.spawnLeft = zombieCount(game.level);   // ← gọi hàm
+  game.spawnTimer = 0;
+  showBanner('MÀN ' + game.level);
+}
+
+// ============================
+// 6. KẾT THÚC MÀN (thắng)
+// ============================
+function endLevel() {
+  game.waveActive = false;
+  game.score += 50 + game.level * 15;
+
+  game.level++;                               // ← tăng level
+  if (game.level > MAX_LEVEL) { winGame(); return; }
+
+  makeSquad();                                // ← lính mới theo level mới
+  updateHUD();
+}
+
+// ============================
+// 7. UPDATE — kiểm tra thắng màn
+// ============================
+function update(dt) {
+  if (state !== 'playing') return;
+
+  if (!game.waveActive) {
+    game.restTimer -= dt;
+    if (game.restTimer <= 0) startLevel();
+  } else {
+    if (game.spawnLeft > 0) {
+      game.spawnTimer -= dt;
+      if (game.spawnTimer <= 0) {
+        spawnEnemy();
+        game.spawnLeft--;
+        game.spawnTimer = spawnInterval(game.level);
+      }
+    } else if (enemies.length === 0) {
+      endLevel();                             // ← hết zombie → thắng màn
+    }
+  }
+}
+
+// ============================
+// 8. THUA — reset về level 1
+// ============================
+function gameOver() {
+  state = 'gameover';
+  card.innerHTML = `<button id="startBtn">CHƠI LẠI</button>`;
+  overlay.classList.remove('hide');
+  document.getElementById('startBtn')
+    .addEventListener('click', startGame);
+}
+
+function startGame() {
+  game.level = 1;                             // ← reset
+  game.score = 0;
+  king.hp = king.maxHp;
+  enemies = [];
+  makeSquad();
+  overlay.classList.add('hide');
+  state = 'playing';
+}
+
+// ============================
+// 9. THẮNG TOÀN BỘ
+// ============================
+function winGame() {
+  state = 'gameover';
+  card.innerHTML = `<button id="startBtn">CHIẾN THẮNG 🏆</button>`;
+  overlay.classList.remove('hide');
+  document.getElementById('startBtn')
+    .addEventListener('click', startGame);
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Hàm Đổi để làm gì
+soldierCount Lính tăng nhanh/chậm
+zombieCount Zombie tăng nhanh/chậm
+zombieHP/DMG/Speed Độ khó zombie
+MAX_LEVEL Giới hạn màn (đổi 999 → 10 để test nhanh)
+Math.min(..., cap) Bỏ cap nếu muốn tăng vô hạn (không khuyến khích)
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Các con số cụ thể (5 + lv/3, 3 + lv*2, cap 30/80) — tôi đề xuất dựa trên trải nghiệm chung, không phải số tối ưu.
+· Tuyến tính vs phi tuyến — tôi dùng tuyến tính đơn giản; có thể dùng Math.sqrt(lv) hoặc Math.log(lv) cho độ khó tăng chậm dần, nhưng tôi không chắc cách nào tốt hơn.
+· Cap ở mức nào — tôi chọn cap 30/80/500/50 theo trực giác, không có dữ liệu benchmark.
+· Có nên lưu level vào localStorage để chơi tiếp không — bạn không nói, tôi không chắc.
+· Có nên dùng object config chứa tất cả công thức thay vì rải rác không — tôi nghĩ là nên cho dễ bảo trì, nhưng đây là đề xuất phong cách, không phải sự thật.
+· Cân bằng giữa lính tăng và zombie tăng — tôi không chắc tỉ lệ này có làm game dễ hay khó quá, cần test thực tế.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: lưu duy nhất 1 biến game.level (1→999), viết 5 hàm thuần f(lv) (soldierCount, zombieCount, zombieHP, zombieDMG, zombieSpeed) đều có Math.min(..., cap) chặn tăng vô hạn, gọi hàm mỗi khi cần (không cache), tăng level++ khi hết zombie (thắng), reset level = 1 khi Vua chết (thua) — mọi chỉ số độ khó và số lượng đều suy ra từ 1 con số game.level.

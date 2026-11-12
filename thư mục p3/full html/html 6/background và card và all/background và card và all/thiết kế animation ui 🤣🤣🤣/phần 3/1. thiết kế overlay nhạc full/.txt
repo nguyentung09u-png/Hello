@@ -1,0 +1,172 @@
+Tổng quan cách làm
+ * Giao diện kính mờ (Glassmorphism Overlay): Dùng thẻ div với vị trí cố định phủ kín màn hình (position: fixed, inset: 0), kết hợp thuộc tính làm mờ nền (backdrop-filter) và độ ưu tiên hiển thị cao (z-index) để tạo lớp chắn trực quan.
+ * Hiệu ứng chữ mở đầu (Staggered Text Reveal): Chia dòng thông điệp thành các ký tự <span> riêng biệt, áp dụng hiệu ứng dịch chuyển kết hợp độ trễ hoạt ảnh (animation-delay) tăng dần để chữ xuất hiện nối tiếp nhau.
+ * Hiệu ứng chữ phát sáng (Neon Text): Thiết kế lõi chữ sáng trắng kết hợp nhiều lớp text-shadow lan tỏa với bán kính blur khác nhau kèm hoạt ảnh nhấp nháy (@keyframes flicker).
+ * Logic âm thanh (JavaScript): Đặt thẻ <audio>, sử dụng sự kiện tương tác bấm chuột thực tế của người dùng để gọi hàm play(), vượt qua rào cản chặn phát tự động của trình duyệt và ẩn lớp phủ bằng cách thêm lớp ẩn (.hidden).
+Code mẫu chung
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: sans-serif;
+    color: #fff;
+  }
+
+  /* Lớp phủ kính mờ toàn màn hình */
+  .music-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 6, 16, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  .music-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .icon {
+    font-size: 64px;
+    animation: bounce 1.5s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* Staggered Text Reveal */
+  .reveal-text {
+    display: flex;
+    gap: 0.05em;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 4px;
+  }
+
+  .reveal-text span {
+    opacity: 0;
+    animation: reveal 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.4) forwards;
+  }
+
+  .reveal-text span:nth-child(1) { animation-delay: 0.1s; }
+  .reveal-text span:nth-child(2) { animation-delay: 0.2s; }
+  .reveal-text span:nth-child(3) { animation-delay: 0.3s; }
+  .reveal-text span:nth-child(4) { animation-delay: 0.4s; }
+  .reveal-text span:nth-child(5) { animation-delay: 0.5s; }
+  .reveal-text span:nth-child(6) { animation-delay: 0.6s; }
+  .reveal-text span:nth-child(7) { animation-delay: 0.7s; }
+
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hiệu ứng chữ Neon */
+  .neon-title {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow:
+      0 0 10px  #fff,
+      0 0 25px  #38bdf8,
+      0 0 50px  #38bdf8,
+      0 0 100px #0ea5e9,
+      0 0 150px #0284c7;
+    animation: flicker 2s infinite alternate;
+    margin: 0;
+    letter-spacing: 3px;
+  }
+
+  @keyframes flicker {
+    0%, 18%, 22%, 100% {
+      text-shadow:
+        0 0 10px  #fff,
+        0 0 25px  #38bdf8,
+        0 0 50px  #38bdf8,
+        0 0 100px #0ea5e9,
+        0 0 150px #0284c7;
+    }
+    20% {
+      text-shadow: none;
+    }
+  }
+
+  .music-overlay button {
+    padding: 16px 40px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(168,85,247,0.4);
+    transition: filter .2s, transform .2s;
+  }
+
+  .music-overlay button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+</style>
+</head>
+<body>
+
+<!-- Lớp phủ âm nhạc -->
+<div class="music-overlay" id="musicOverlay">
+  <div class="icon">🎵</div>
+  
+  <div class="reveal-text">
+    <span>W</span><span>E</span><span>L</span><span>C</span><span>O</span><span>M</span><span>E</span>
+  </div>
+
+  <h1 class="neon-title">MUSIC</h1>
+  <button id="startBtn">Bắt đầu</button>
+</div>
+
+<!-- Nội dung trang chính -->
+<div style="text-align: center;">
+  <h1>Nội dung trang web chính</h1>
+</div>
+
+<!-- Thẻ âm thanh -->
+<audio id="bgMusic" loop>
+  <source src="URL_FILE_NHAC" type="audio/mpeg">
+</audio>
+
+<script>
+  const musicOverlay = document.getElementById('musicOverlay');
+  const bgMusic = document.getElementById('bgMusic');
+  const startBtn = document.getElementById('startBtn');
+
+  function enterSite() {
+    bgMusic.volume = 0.4;
+    bgMusic.play().catch(err => console.warn('Lỗi phát nhạc:', err));
+    musicOverlay.classList.add('hidden');
+  }
+
+  startBtn.addEventListener('click', enterSite);
+  musicOverlay.addEventListener('click', enterSite);
+</script>
+
+</body>
+</html>
+

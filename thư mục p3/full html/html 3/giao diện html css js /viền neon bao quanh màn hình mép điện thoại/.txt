@@ -1,0 +1,114 @@
+Viền dải sáng xoay quanh View — Tổng quan và code chung
+
+Tổng quan (5 bước)
+
+1. Tạo shader — SweepGradient(cx, cy, colors, positions) neo tại tâm View, tương đương conic-gradient trong CSS. Gán vào Paint.
+2. Dựng vành viền — Path chứa 2 hình bo góc: outer rect (cả View) và inner rect (cách mép borderWidth). Đặt FillType.EVEN_ODD để vùng giữa 2 rect được tô = vành viền.
+3. Clip — canvas.clipPath(borderRingPath) giới hạn vẽ vào vành viền.
+4. Xoay và vẽ — canvas.rotate(angle, cx, cy) với góc tính từ (now − startTime) % period, rồi canvas.drawRect(rect lớn, paint) để SweepGradient phủ hết vùng cần.
+5. Vòng lặp — gọi lại postInvalidateOnAnimation() ở cuối onDraw để hệ thống vẽ frame kế tiếp, đồng bộ vsync.
+
+Điểm cần lưu ý
+
+· SweepGradient nên có màu đầu = màu cuối để tránh vết nối ở góc 0°/360° (suy luận từ cách hoạt động của gradient tuần hoàn).
+· Tôi không chắc canvas.rotate luôn làm SweepGradient xoay đúng theo tâm gradient trên mọi phiên bản Android — cần test.
+· Tôi không chắc clipPath với EVEN_ODD cho antialias hoàn hảo tại biên trong/ngoài của vành trên mọi thiết bị.
+
+Code chung (Android Canvas)
+
+```java
+public class NeonFrameView extends View {
+
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path  ring  = new Path();
+    private final RectF outer = new RectF();
+    private final RectF inner = new RectF();
+
+    private static final int[]  COLORS = {
+        0xFF00FFFF, 0x0000FFFF, 0xFF7A6EFF, 0x007A6EFF, 0xFF00FFFF
+    };
+    private static final float[] POS = { 0f, 0.25f, 0.5f, 0.75f, 1f };
+    private static final long PERIOD_MS = 4000L;
+
+    private float borderWidth;
+    private float cornerRadius;
+    private long  startTime;
+    private boolean shaderReady = false;
+
+    public NeonFrameView(Context c) {
+        super(c);
+        borderWidth  = 4f * getResources().getDisplayMetrics().density;
+        cornerRadius = 28f * getResources().getDisplayMetrics().density;
+        startTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int ow, int oh) {
+        super.onSizeChanged(w, h, ow, oh);
+        if (w > 0 && h > 0) {
+            SweepGradient sg = new SweepGradient(w / 2f, h / 2f, COLORS, POS);
+            paint.setShader(sg);
+            shaderReady = true;
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas c) {
+        super.onDraw(c);
+        int w = getWidth(), h = getHeight();
+        if (w == 0 || h == 0 || !shaderReady) return;
+
+        // 1) góc xoay hiện tại
+        long elapsed = System.currentTimeMillis() - startTime;
+        float angle  = (elapsed % PERIOD_MS) * 360f / PERIOD_MS;
+
+        // 2) rect ngoài / trong
+        outer.set(0, 0, w, h);
+        inner.set(borderWidth, borderWidth,
+                  w - borderWidth, h - borderWidth);
+
+        // 3) vành viền = outer − inner
+        ring.reset();
+        ring.setFillType(Path.FillType.EVEN_ODD);
+        ring.addRoundRect(outer, cornerRadius, cornerRadius,
+                          Path.Direction.CW);
+        ring.addRoundRect(inner,
+                          Math.max(0, cornerRadius - borderWidth),
+                          Math.max(0, cornerRadius - borderWidth),
+                          Path.Direction.CW);
+
+        // 4) clip vào vành
+        c.save();
+        c.clipPath(ring);
+
+        // 5) xoay hệ toạ độ quanh tâm
+        c.rotate(angle, w / 2f, h / 2f);
+
+        // 6) vẽ rect khổng lồ để gradient phủ hết
+        float diag = (float) Math.sqrt(w * w + h * h);
+        c.drawRect(w / 2f - diag, h / 2f - diag,
+                   w / 2f + diag, h / 2f + diag, paint);
+
+        c.restore();
+
+        postInvalidateOnAnimation();
+    }
+}
+```
+
+Đối chiếu Web ↔ Android
+
+CSS Android
+conic-gradient(from 0deg, ...) SweepGradient(cx, cy, colors, positions)
+::before { inset: -50%; animation: spin } rect khổng lồ + canvas.rotate
+::after { inset: 3px; background: #111 } ring với FillType.EVEN_ODD
+overflow: hidden canvas.clipPath(ring)
+@keyframes spin { to { rotate(360deg) } } angle = elapsed % period × 360 / period
+padding: 3px borderWidth
+border-radius: 20px cornerRadius
+
+---
+
+🎯 Tóm 1 câu
+
+Cách làm = tạo SweepGradient neo tâm View, dựng Path với 2 rect bo góc + FillType.EVEN_ODD để tạo vành viền, clipPath vào vành rồi canvas.rotate(góc, cx, cy) với góc tính từ (now − startTime) % period × 360 / period, vẽ rect lớn để shader phủ hết vùng, cuối onDraw gọi postInvalidateOnAnimation() để chạy theo vsync — tôi không chắc hành vi xoay gradient và antialias clip giống hệt trên mọi Android version.

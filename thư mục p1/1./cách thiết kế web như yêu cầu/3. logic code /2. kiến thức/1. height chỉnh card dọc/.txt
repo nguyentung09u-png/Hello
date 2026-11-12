@@ -1,0 +1,11 @@
+1. chiều rộng dọc
+
+ height: 400px;
+
+
+-- px càng lớn thì chiều dọc của card đó càng dài ra
+
+
+nếu càng nhỏ px thì càng nhỏ lại
+
+

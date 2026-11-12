@@ -1,0 +1,140 @@
+Cách làm Vertical List
+
+Tổng quan các bước
+
+1. Dữ liệu — mảng poems, mỗi phần tử có tab, title, href.
+2. Nhóm theo tab — JS dùng Map gom phần tử cùng tab, giữ thứ tự xuất hiện.
+3. Sinh tab — mỗi nhóm tạo 1 tab-btn + 1 tab-panel.
+4. Sinh item — mỗi phần tử trong nhóm tạo 1 .item chứa tiêu đề + button.
+5. Tách chữ — splitTitle() + splitButton() chạy sau mỗi item.
+6. Tab Nav — indicator trượt, cuộn ngang, điều hướng bàn phím.
+
+Code chung chung
+
+```html
+<div class="card">
+  <div class="tab-wrap">
+    <div class="tab-list" role="tablist" id="tabList">
+      <span class="indicator" id="indicator"></span>
+    </div>
+  </div>
+  <!-- JS sinh panel vào đây -->
+</div>
+```
+
+```css
+/* Container — Vertical List */
+.tab-panel{display:none;margin-top:18px}
+.tab-panel.is-active{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:32px;
+  min-height:180px;
+  padding:12px 0;
+}
+
+/* Mỗi item */
+.item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+```
+
+```js
+const BUTTON_TEXT = "Nhấn vào đây";
+
+const poems = [
+  { tab:"Tab 1", title:"tiktok",   href:"https://..." },
+  { tab:"Tab 1", title:"github",   href:"https://..." },
+  { tab:"Tab 2", title:"youtube",  href:"https://..." },
+  { tab:"Tab 2", title:"facebook", href:"https://..." },
+];
+
+const cardRoot  = document.getElementById('cardRoot');
+const tabList   = document.getElementById('tabList');
+
+/* Nhóm theo tab */
+const groups = new Map();
+poems.forEach(item => {
+  if (!groups.has(item.tab)) groups.set(item.tab, []);
+  groups.get(item.tab).push(item);
+});
+
+/* Sinh tab + panel + item */
+let first = true;
+groups.forEach((items, tabName) => {
+  /* Tab button */
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn' + (first ? ' is-active' : '');
+  btn.textContent = tabName;
+  tabList.appendChild(btn);
+
+  /* Panel */
+  const panel = document.createElement('div');
+  panel.className = 'tab-panel' + (first ? ' is-active' : '');
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.innerHTML = `
+      <div class="title-wrap">
+        <p class="title" data-text="${item.title}"></p>
+      </div>
+      <a class="action-btn"
+         href="${item.href}"
+         target="_blank" rel="noopener"
+         data-text="${BUTTON_TEXT}"></a>
+    `;
+    panel.appendChild(el);
+    splitTitle(el);
+    splitButton(el);
+  });
+
+  cardRoot.appendChild(panel);
+  first = false;
+});
+
+/* Hàm tách chữ */
+function splitTitle(scope){
+  scope.querySelectorAll('.title').forEach(el => {
+    const text = el.dataset.text || '';
+    el.textContent = '';
+    [...text].forEach((c, i) => {
+      const span = document.createElement('span');
+      span.textContent = c === ' ' ? '\u00A0' : c;
+      span.style.animationDelay = (0.3 * i) + 's';
+      el.appendChild(span);
+    });
+  });
+}
+
+function splitButton(scope){
+  scope.querySelectorAll('.action-btn').forEach(btn => {
+    const text = btn.dataset.text || '';
+    btn.innerHTML = '';
+    [...text].forEach((c, i) => {
+      const span = document.createElement('span');
+      span.className = 'ch';
+      span.textContent = c === ' ' ? '\u00A0' : c;
+      span.style.animationDelay = (0.05 * i) + 's, 0s';
+      btn.appendChild(span);
+    });
+  });
+}
+```
+
+Lưu ý
+
+· Sự thật: Vertical List chỉ cần 2 rule CSS (.tab-panel.is-active + .item) — phần còn lại là hiệu ứng trang trí gắn vào tiêu đề/button.
+· Sự thật: JS dùng Map để giữ thứ tự tab theo lần xuất hiện đầu tiên trong mảng.
+· Không chắc bạn muốn gap bao nhiêu giữa các item — 32px là giá trị hợp lý, có thể tăng/giảm.
+· Không chắc số lượng item/tab tối đa — nếu quá nhiều, panel cần scroll dọc riêng.
+· Không chắc bạn muốn giữ hết hiệu ứng glitch/shine/neon hay làm list đơn giản — có thể bỏ nếu cần.
+
+---
+
+Tóm 1 câu: Định nghĩa mảng poems với {tab,title,href}, JS dùng Map nhóm theo tab, mỗi nhóm sinh 1 tab-btn + 1 tab-panel chứa các .item xếp dọc (tiêu đề trên, button dưới), rồi tách chữ và gắn Tab Nav.

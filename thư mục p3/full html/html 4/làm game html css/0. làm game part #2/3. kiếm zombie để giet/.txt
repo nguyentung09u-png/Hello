@@ -1,0 +1,159 @@
+🎯 Chase Behavior — Tổng quan + Code khung
+
+1️⃣ Tổng quan (5 bước)
+
+Bước Việc Ở đâu
+1 Duyệt enemies[] tìm mục tiêu gần nhất updateSoldier()
+2 So khoảng cách với 2 ngưỡng (chase, attack) trong hàm
+3 Quay mặt facing = ±1 trong hàm
+4 Nếu xa → x += dx/d × speed × dt trong hàm
+5 Nếu gần → hitEnemy() với cooldown trong hàm
+
+Mấu chốt: chase = tìm mục tiêu + 2 ngưỡng + Frame-based Movement + melee attack.
+
+---
+
+2️⃣ Code khung (chung chung)
+
+```javascript
+// ===== 1. STATE =====
+const soldier = {
+  x: 0, y: 0,
+  homeX: 0, homeY: 0,
+  speed: 150,
+  facing: 1,
+  moving: false,
+  walkPhase: 0,
+  cool: 0,
+  anim: 0,
+  hp: 90, maxHp: 90
+};
+
+let enemies = [];   // mỗi enemy có {x, y, hp}
+
+// ===== 2. HÀM CHASE =====
+function updateSoldier(s, dt){
+  s.cool = Math.max(0, s.cool - dt);
+  s.anim = Math.max(0, s.anim - dt);
+
+  // --- Bước 1: TÌM zombie gần nhất ---
+  let nearest = null;
+  let bd = Infinity;
+  for (const e of enemies){
+    if (e.hp <= 0) continue;
+    const dx = e.x - s.x;
+    const dy = e.y - s.y;
+    const d2 = dx*dx + dy*dy;        // bình phương
+    if (d2 < bd){ bd = d2; nearest = e; }
+  }
+
+  const ATTACK_RANGE  = 40;         // ≤ 40px → chém
+  const CHASE_RANGE2  = 280 * 280;  // ≤ 280px → đuổi
+
+  // --- Bước 2: QUYẾT theo khoảng cách ---
+  if (nearest && bd < CHASE_RANGE2){
+    const dx = nearest.x - s.x;
+    const dy = nearest.y - s.y;
+    const d  = Math.sqrt(bd) || 0.001;
+
+    // --- Bước 3: QUAY mặt ---
+    s.facing = dx >= 0 ? 1 : -1;
+
+    // --- Bước 4: CHẠY hoặc ĐÁNH ---
+    if (d > ATTACK_RANGE){
+      // CHẠY tới
+      s.moving = true;
+      s.x += (dx / d) * s.speed * dt;
+      s.y += (dy / d) * s.speed * dt;
+      s.walkPhase += dt * 11;
+    } else {
+      // ĐÁNH
+      s.moving = false;
+      s.walkPhase = 0;
+      if (s.cool <= 0){
+        s.cool = 0.7;
+        s.anim = 0.28;
+        hitEnemy(nearest, 16);       // hàm tự viết
+      }
+    }
+  } else {
+    // --- Không có địch → quay về home ---
+    const dx = s.homeX - s.x;
+    const dy = s.homeY - s.y;
+    const d  = Math.hypot(dx, dy);
+    s.facing = dx >= 0 ? 1 : -1;
+
+    if (d > 3){
+      s.moving = true;
+      s.x += (dx / d) * s.speed * dt;
+      s.y += (dy / d) * s.speed * dt;
+      s.walkPhase += dt * 11;
+    } else {
+      s.x = s.homeX;
+      s.y = s.homeY;
+      s.moving = false;
+      s.walkPhase = 0;
+    }
+  }
+}
+
+// ===== 3. HÀM DAMAGE =====
+function hitEnemy(e, dmg){
+  e.hp -= dmg;
+  // hiệu ứng, âm thanh, particle… (tùy game)
+}
+
+// ===== 4. GỌI TRONG UPDATE =====
+function update(dt){
+  for (const s of soldiers){
+    if (s.hp > 0) updateSoldier(s, dt);
+  }
+}
+
+// ===== 5. VÒNG LẶP =====
+let last = performance.now();
+function loop(now){
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+loop(performance.now());
+```
+
+---
+
+3️⃣ Tại sao code này hoạt động
+
+· dx² + dy² so sánh khoảng cách mà không cần Math.sqrt → nhanh hơn.
+· 2 ngưỡng (ATTACK_RANGE, CHASE_RANGE2) chia 3 nhánh: chém / chạy / bỏ qua.
+· facing = ±1 đơn giản, đủ cho 2D side-view; muốn quay mọi góc cần atan2.
+· x += dx/d × speed × dt = Frame-based Movement.
+· cool tránh chém liên tục mỗi frame.
+· Fallback else cho lính quay về vị trí home khi hết địch.
+
+---
+
+4️⃣ Tham số có thể chỉnh
+
+Tham số Mặc định Tác dụng
+ATTACK_RANGE 40 Tầm chém
+CHASE_RANGE2 280² Tầm phát hiện địch
+speed 150 Tốc độ chạy
+cool reset 0.7s Tần suất chém
+Ngưỡng về home 3px Tránh rung quanh home
+
+---
+
+🎯 Tóm 1 câu
+
+Mỗi frame: duyệt enemies[] tìm mục tiêu bằng dx² + dy² nhỏ nhất → so với ATTACK_RANGE và CHASE_RANGE → facing = dx >= 0 ? 1 : -1 → nếu xa thì x += dx/d × speed × dt, nếu gần thì hitEnemy() với cooldown, nếu không có địch thì quay về home.
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Con số cụ thể (40, 280, 150, 0.7, 0.28, 3) — tôi chọn theo thông lệ, không có dữ liệu tối ưu.
+· Math.sqrt(bd) mỗi frame — có thể tránh bằng cách so sánh với bình phương ngưỡng; tôi không chắc sự tối ưu này đáng kể với số lính nhỏ.
+· facing = ±1 đủ cho side-view; nếu bạn muốn top-down quay mọi góc, cần dùng atan2 — tôi không chắc bạn cần kiểu nào.

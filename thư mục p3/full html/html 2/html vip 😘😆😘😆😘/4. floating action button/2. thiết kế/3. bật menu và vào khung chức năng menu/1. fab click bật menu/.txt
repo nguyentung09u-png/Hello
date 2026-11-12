@@ -1,0 +1,254 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 2 khối riêng biệt: <button class="fab"> (nút kích hoạt) và <div class="panel"> (khung hiện ra), không lồng nhau.
+2. CSS FAB — position: fixed + border-radius: 50% + gradient + z-index cao.
+3. CSS Panel — position: fixed + bo góc + shadow + mặc định ẩn bằng opacity: 0 + pointer-events: none; thêm class .open thì hiện.
+4. JS — 2 hàm openPanel() / closePanel() toggle class; gắn vào sự kiện click FAB, click X, ESC, click ngoài.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· Toggle class thay vì set style trực tiếp → CSS tự lo transition.
+· opacity + transform + transition cho panel → mở/đóng mượt.
+· pointer-events: none/auto — chặn click khi panel ẩn, cho click khi hiện.
+· z-index cao cho FAB/panel → luôn nổi trên nội dung.
+
+Tôi không chắc:
+
+· Bạn muốn FAB ẩn khi panel mở (kiểu "FAB hidden on open") hay vẫn hiện — code dưới đây để FAB vẫn hiện theo mô tả "click FAB mở panel".
+· Bạn muốn panel ở góc nào — mình để góc dưới-phải, gần FAB.
+
+---
+
+Code chung chung
+
+```html
+<!-- Nút kích hoạt -->
+<button class="fab" id="fab" type="button" aria-label="Mở panel">
+  <svg viewBox="0 0 24 24" ...>...</svg>
+</button>
+
+<!-- Panel -->
+<div class="panel" id="panel" role="dialog" aria-label="Menu">
+  <div class="panel-header">
+    <span>Tiêu đề panel</span>
+    <button class="close-btn" id="closeBtn" type="button" aria-label="Đóng">✕</button>
+  </div>
+
+  <div class="panel-body">
+    <!-- Card bên trong -->
+    <div class="card">
+      <h3>Title</h3>
+      <p>Description — mô tả ngắn gọn nội dung của card.</p>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="close-footer" type="button">Đóng</button>
+  </div>
+</div>
+```
+
+```css
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 0;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(16,185,129,.45);
+  z-index: 10000;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.fab:hover { box-shadow: 0 12px 28px rgba(16,185,129,.6); transform: translateY(-2px); }
+.fab svg { width: 30px; height: 30px; pointer-events: none; }
+
+/* ===== Panel ===== */
+.panel {
+  position: fixed;
+  right: 20px;
+  bottom: 96px;                     /* trên FAB ~ FAB(60) + gap(16) */
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  background: #0f1729;
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 40px rgba(16,185,129,.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  /* Trạng thái đóng */
+  opacity: 0;
+  transform: translateY(12px) scale(.96);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 9999;
+}
+
+/* Trạng thái mở */
+.panel.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Header */
+.panel-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+.panel-header .close-btn {
+  margin-left: auto;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+.panel-header .close-btn:hover { background: rgba(255,255,255,.28); }
+
+/* Body */
+.panel-body {
+  padding: 14px;
+  color: #e8e0ff;
+  font-size: 13.5px;
+}
+
+/* Card bên trong */
+.card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.card p {
+  margin: 0;
+  font-size: 13px;
+  color: #b8c0d8;
+  line-height: 1.5;
+}
+
+/* Footer */
+.panel-footer {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.panel-footer button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #c8c1de;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .18s, transform .18s;
+}
+.panel-footer button:hover {
+  background: rgba(255,255,255,.1);
+  transform: translateY(-1px);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+```js
+(function () {
+  const fab      = document.getElementById('fab');
+  const panel    = document.getElementById('panel');
+  const closeBtn = document.getElementById('closeBtn');
+  const closeFooter = panel.querySelector('.close-footer');
+
+  // ---- 2 hàm chuyển trạng thái ----
+  function openPanel()  { panel.classList.add('open'); }
+  function closePanel() { panel.classList.remove('open'); }
+
+  // ---- Gắn sự kiện ----
+  fab.addEventListener('click', openPanel);
+  closeBtn.addEventListener('click', closePanel);
+  closeFooter.addEventListener('click', closePanel);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanel();
+  });
+
+  // Click ngoài panel + FAB → đóng
+  document.addEventListener('click', (e) => {
+    if (!panel.contains(e.target) && !fab.contains(e.target)) {
+      closePanel();
+    }
+  });
+})();
+```
+
+---
+
+Luồng chạy
+
+```
+ĐÓNG (mặc định)
+  FAB: hiện  |  Panel: ẩn (opacity 0, pointer-events none)
+       │
+       │  click FAB
+       ▼
+MỞ
+  FAB: hiện  |  Panel: hiện (opacity 1, pointer-events auto)
+       │
+       │  click X / Đóng / ESC / click ngoài
+       ▼
+ĐÓNG (quay lại ban đầu)
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Đổi vị trí panel right/bottom của .panel
+Đổi màu panel background của .panel
+Panel rộng hơn width: 300px → 400px
+Bỏ click-ngoài-để-đóng Xóa block document.addEventListener('click', ...)
+Ẩn FAB khi mở panel Trong openPanel() thêm fab.classList.add('is-hidden') + CSS .is-hidden { visibility: hidden; pointer-events: none; }
+Đổi tốc độ mở/đóng transition ở .panel
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: toggle class là cách chuẩn để đổi trạng thái UI; opacity + transform + transition tạo animation mượt; pointer-events: none/auto chặn/cho click.
+· Tôi không chắc bạn muốn panel cố định hay đi theo FAB khi kéo — code trên để cố định.
+· Tôi không chắc bạn muốn FAB ẩn khi panel mở hay vẫn hiện — code trên để vẫn hiện theo mô tả ban đầu.
+
+🎯 Tóm 1 câu: FAB-triggered panel = <button class="fab"> + <div class="panel"> với CSS position: fixed + bo góc + shadow + class .open (opacity + transform + transition), bên trong panel chứa card (Title + Description) + nút đóng footer, kèm JS openPanel()/closePanel() gắn vào click FAB / X / ESC / click ngoài.

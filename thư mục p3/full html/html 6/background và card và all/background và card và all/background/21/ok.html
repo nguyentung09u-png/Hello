@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0407">
+<title>Dark Tech Background — Copper Ferrofluid</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0407;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 70% 30%, #1c0a08 0%, #120605 45%, #060202 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Ferrofluid blobs (transform-only, GPU) ---------- */
+  .fluid{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    filter:blur(0px);
+  }
+  .fluid i{
+    position:absolute;
+    border-radius:50% 42% 58% 46% / 48% 52% 44% 56%;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+    animation:fluidMorph 20s ease-in-out infinite;
+  }
+  .fluid i:nth-child(1){
+    width:60vmax;height:60vmax;left:-18vmax;top:-22vmax;
+    background:radial-gradient(circle at 40% 40%,
+      rgba(251,146,60,.20) 0%,
+      rgba(194,65,12,.10) 40%,
+      rgba(120,53,15,0) 72%);
+    animation-duration:24s;
+  }
+  .fluid i:nth-child(2){
+    width:70vmax;height:70vmax;right:-24vmax;bottom:-26vmax;
+    background:radial-gradient(circle at 60% 60%,
+      rgba(244,63,94,.16) 0%,
+      rgba(190,24,93,.07) 42%,
+      rgba(120,20,60,0) 72%);
+    animation-duration:28s;
+    animation-delay:-6s;
+  }
+  .fluid i:nth-child(3){
+    width:45vmax;height:45vmax;left:35vmax;top:10vmax;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(251,191,36,.12) 0%,
+      rgba(180,83,9,.05) 46%,
+      rgba(120,53,15,0) 74%);
+    animation-duration:20s;
+    animation-delay:-3s;
+  }
+
+  @keyframes fluidMorph{
+    0%,100%{
+      transform:translate3d(0,0,0) scale(1) rotate(0deg);
+      border-radius:50% 42% 58% 46% / 48% 52% 44% 56%;
+    }
+    33%{
+      transform:translate3d(4vmax,3vmax,0) scale(1.08) rotate(120deg);
+      border-radius:60% 40% 50% 50% / 55% 45% 55% 45%;
+    }
+    66%{
+      transform:translate3d(-3vmax,4vmax,0) scale(0.95) rotate(240deg);
+      border-radius:40% 60% 45% 55% / 50% 55% 45% 50%;
+    }
+  }
+
+  /* ---------- Molten metallic wave lines (SVG data-uri, static curves) ---------- */
+  .waves{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-repeat:repeat-x;
+    background-position:0 50%;
+    background-size:1400px 100%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 500' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23fb923c' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M0 250 C 200 180, 400 320, 600 250 S 1000 180, 1200 250 S 1380 320, 1400 250'/%3E%3Cpath d='M0 280 C 200 210, 400 350, 600 280 S 1000 210, 1200 280 S 1380 350, 1400 280'/%3E%3Cpath d='M0 310 C 200 240, 400 380, 600 310 S 1000 240, 1200 310 S 1380 380, 1400 310'/%3E%3C/g%3E%3Cg fill='none' stroke='%23f43f5e' stroke-opacity='0.12' stroke-width='1'%3E%3Cpath d='M0 220 C 200 150, 400 290, 600 220 S 1000 150, 1200 220 S 1380 290, 1400 220'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+    animation:waveFlow 35s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes waveFlow{
+    from{background-position:0 50%;}
+    to{background-position:-1400px 50%;}
+  }
+
+  /* ---------- Copper hot core ---------- */
+  .core{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:40vmin;
+    height:40vmin;
+    margin-left:-20vmin;
+    margin-top:-20vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(251,146,60,.16) 0%,
+      rgba(194,65,12,.06) 44%,
+      rgba(120,53,15,0) 74%);
+    animation:coreBreath 9s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes coreBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.75;}
+    50%{transform:translate3d(0,0,0) scale(1.15);opacity:1;}
+  }
+
+  /* ---------- Rising embers (transform/opacity only) ---------- */
+  .embers{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .embers span{
+    position:absolute;
+    width:2px;
+    height:2px;
+    border-radius:50%;
+    background:rgba(253,186,116,.9);
+    box-shadow:0 0 6px rgba(251,146,60,.9), 0 0 12px rgba(244,63,94,.5);
+    animation:emberRise linear infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes emberRise{
+    0%{transform:translate3d(0,10vh,0);opacity:0;}
+    15%{opacity:1;}
+    85%{opacity:.8;}
+    100%{transform:translate3d(2vw,-110vh,0);opacity:0;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.85) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .fluid i,.waves,.core,.embers span{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="fluid">
+    <i></i><i></i><i></i>
+  </div>
+  <div class="waves"></div>
+  <div class="core"></div>
+  <div class="embers" id="embers"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const embers = document.getElementById('embers');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 22;
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = (Math.random() * 100) + 'vw';
+    const dur = 6 + Math.random() * 8;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.45 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  embers.appendChild(frag);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+🎓 BÀI 10: DESIGN SYSTEM — Hệ thống Thiết kế
+
+----
+
+2. VÍ DỤ ĐỜI THƯỜNG (dễ nhất)
+
+Hãy tưởng tượng bạn gọi món ở quán:
+
+#4ea1ff = nói thẳng:
+
+"Cho tôi ly cà phê sữa đá, 30ml sữa, 20ml cà phê, 5 viên đá."
+
+→ Bạn phải nhớ đúng từng con số. Quán đổi công thức → bạn không biết.
+
+var(--color-primary) = gọi tên món:
+
+"Cho tôi ly cà phê sữa đá."
+
+→ Bạn chỉ cần nhớ tên. Quán đổi công thức → ly của bạn tự đổi theo (vì quán pha theo công thức mới).
+
+→ Tên món (var) linh hoạt hơn số cụ thể (#)
+
+
+
+
+---
+tóm gọn all :
+var() : đổi all
+
+sài # đổi từng cái rất lâu
+
+
+nếu sài var()
+
+
+
+nó gọi Là nó thay màu giao diện full linh hoạt đúng chưa
+
+
+
+--- tên nó : 🎓 DESIGN SYSTEM — Hệ thống Thiết kế 
+nên sài

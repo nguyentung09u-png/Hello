@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Border Trace — Dual</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #05070f;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* ===== CARD ===== */
+  .trace-card {
+    position: relative;
+    padding: 2.5rem 3rem;
+    border-radius: 14px;
+    background: #0a0e1a;
+    color: #c084fc;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    overflow: hidden;
+    box-shadow:
+      0 0 40px -10px rgba(168, 85, 247, 0.5),
+      inset 0 0 20px -10px rgba(168, 85, 247, 0.4);
+  }
+
+  /* ===== 2 VỆT SÁNG CHẠY NGƯỢC CHIỀU ===== */
+  .trace-card::before,
+  .trace-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #22d3ee 40%,
+      #ffffff 50%,
+      #22d3ee 60%,
+      transparent
+    );
+    filter: blur(0.5px);
+    box-shadow:
+      0 0 8px #22d3ee,
+      0 0 16px rgba(34, 211, 238, 0.7);
+  }
+
+  /* Vệt trên — chạy trái → phải */
+  .trace-card::before {
+    top: 0;
+    animation: traceTop 2.5s linear infinite;
+  }
+
+  /* Vệt dưới — chạy phải → trái (ngược chiều) */
+  .trace-card::after {
+    bottom: 0;
+    animation: traceBottom 2.5s linear infinite;
+  }
+
+  @keyframes traceTop {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes traceBottom {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trace-card::before,
+    .trace-card::after {
+      animation-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="trace-card">Border Trace</div>
+
+</body>
+</html>

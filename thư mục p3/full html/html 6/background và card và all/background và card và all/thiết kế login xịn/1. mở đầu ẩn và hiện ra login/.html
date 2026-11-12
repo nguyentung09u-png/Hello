@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphism Login Form</title>
+    <!-- Nhúng Font chữ và Icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ================= RESET & CƠ BẢN ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Nền không gian tối */
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            overflow: hidden; /* Ngăn thanh cuộn do các khối 3D */
+            position: relative;
+        }
+
+        /* ================= CÁC KHỐI HÌNH HỌC TRÔI NỔI ================= */
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: float 8s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        /* Khối cầu */
+        .shape-sphere {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.05));
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        /* Khối lập phương */
+        .shape-cube {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            left: 80%;
+            transform: rotate(45deg);
+            animation-delay: 2s;
+        }
+
+        /* Khối kim cương */
+        .shape-diamond {
+            width: 50px;
+            height: 50px;
+            top: 15%;
+            right: 20%;
+            transform: rotate(30deg);
+            animation-delay: 4s;
+        }
+
+        /* Khối cầu thứ 2 nhỏ hơn */
+        .shape-sphere-2 {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+            bottom: 20%;
+            left: 25%;
+            animation-delay: 1s;
+        }
+
+        /* Hiệu ứng trôi nổi */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(15deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* ================= FORM ĐĂNG NHẬP (GLASS CARD) ================= */
+        .glass-card {
+            position: relative;
+            z-index: 10;
+            width: 380px;
+            padding: 40px 30px;
+            /* Hiệu ứng kính mờ */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Tiêu đề */
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-header h2 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .card-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-weight: 300;
+        }
+
+        /* Form nhập liệu */
+        .login-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Icon bên trong ô input */
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        /* Ô nhập liệu */
+        .input-group input {
+            width: 100%;
+            padding: 14px 15px 14px 40px; /* Chừa chỗ cho icon */
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 300;
+        }
+
+        /* Hiệu ứng khi click vào ô input */
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        /* Checkbox & Learn More */
+        .options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-container input {
+            accent-color: #00d2ff; /* Đổi màu checkbox mặc định */
+            cursor: pointer;
+        }
+
+        .learn-more {
+            color: #00d2ff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .learn-more:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        /* Nút Đăng nhập */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            /* Gradient màu xanh lam giống trong ảnh */
+            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+            margin-top: 5px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 210, 255, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        /* Trạng thái Loading */
+        .btn-login.loading {
+            background: linear-gradient(90deg, #3a7bd5 0%, #2a5298 100%);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Hiệu ứng xuất hiện cho form */
+        .glass-card {
+            animation: appear 1s ease-out forwards;
+        }
+
+        @keyframes appear {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Các khối 3D trôi nổi xung quanh -->
+    <div class="shape shape-sphere"></div>
+    <div class="shape shape-cube"></div>
+    <div class="shape shape-diamond"></div>
+    <div class="shape shape-sphere-2"></div>
+
+    <!-- Khung Form Đăng Nhập -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h2>Login Form</h2>
+            <p>Select your morphism</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <!-- Ô nhập tên -->
+            <div class="input-group">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" placeholder="Enter name" required>
+            </div>
+
+            <!-- Ô nhập mật khẩu (Trong ảnh ghi là Enter name, mình giữ nguyên cho giống) -->
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" placeholder="Enter name" required>
+            </div>
+
+            <!-- Ô nhập ký tự @ -->
+            <div class="input-group">
+                <i class="fa-solid fa-at"></i>
+                <input type="text" placeholder="" required>
+            </div>
+
+            <!-- Tùy chọn Checkbox và Link -->
+            <div class="options">
+                <label class="checkbox-container">
+                    <input type="checkbox">
+                    Save contents?
+                </label>
+                <a href="#" class="learn-more">Learn More</a>
+            </div>
+
+            <!-- Nút Đăng Nhập -->
+            <button type="submit" class="btn-login" id="loginBtn">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Xử lý sự kiện khi form được submit
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Ngăn chặn load lại trang
+
+            // Lấy giá trị của ô input đầu tiên (Tên)
+            const username = loginForm.querySelector('input[type="text"]').value.trim();
+
+            // 1. Thêm hiệu ứng Loading
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.classList.add('loading');
+
+            // 2. Giả lập thời gian gọi API (1.5 giây)
+            setTimeout(() => {
+                // Trở về trạng thái ban đầu
+                loginBtn.textContent = 'Login';
+                loginBtn.classList.remove('loading');
+                
+                // Hiển thị thông báo thành công
+                alert(`Chào mừng ${username}! Đăng nhập thành công (Glassmorphism).`);
+                
+                // Reset form
+                loginForm.reset();
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

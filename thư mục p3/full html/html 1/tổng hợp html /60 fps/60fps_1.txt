@@ -1,0 +1,72 @@
+Để đạt 60 FPS — Nguyên tắc chung
+
+Sự thật cần biết
+
+· 60 FPS = mỗi frame có ~16.6ms để hoàn thành.
+· Browser chia việc thành 3 luồng: Main (DOM/JS), Compositor (GPU), Worker (tính toán nền).
+· Muốn mượt: giảm việc cho Main Thread, đẩy animation sang Compositor, đẩy tính toán nặng sang Worker.
+
+3 nguyên tắc chính
+
+Nguyên tắc Cách làm
+1. Animation chỉ dùng transform + opacity Tránh animate top, left, width, height, margin
+2. Giảm việc cho Main Thread Task JS < 10ms; task nặng → Web Worker
+3. Giảm Paint/Composite Hạn chế blur, box-shadow lớn, animation vô hạn
+
+Code chung chung
+
+```css
+/* 1. Tạo GPU layer cho element animate */
+.animated-element {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* 2. Animation chỉ trên transform/opacity */
+@keyframes slide {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(100px); opacity: 0.5; }
+}
+
+/* 3. Tránh hiệu ứng nặng khi không cần */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+```
+
+```js
+// 4. Đồng bộ DOM update với nhịp refresh màn hình
+function updateUI(data) {
+  requestAnimationFrame(() => {
+    element.textContent = data;
+  });
+}
+
+// 5. Task nặng → Web Worker
+const worker = new Worker("worker.js");
+worker.postMessage(largeData);
+worker.onmessage = (e) => updateUI(e.data);
+```
+
+```js
+// worker.js — chạy ở thread riêng, không đụng DOM
+self.onmessage = (e) => {
+  const result = heavyComputation(e.data);
+  self.postMessage(result);
+};
+```
+
+Thứ tự ưu tiên khi bị lag
+
+1. Giảm backdrop-filter / filter: blur
+2. Thu gọn box-shadow lan rộng
+3. Bỏ animation vô hạn trên nền
+4. Chuyển animation sai (top/left) sang transform
+5. Chuyển task JS > 16ms sang Worker
+6. Thay alert() (block UI) bằng DOM
+
+Điều tôi không chắc
+
+· Không chắc thiết bị bạn test đạt được 60 FPS ổn định — phụ thuộc phần cứng và browser.
+· Không chắc trường hợp cụ thể của bạn cần Worker hay không — task JS nhẹ thì Worker còn chậm hơn.
+· Không có công thức chung đảm bảo 60 FPS cho mọi trang. Mỗi trang có bottleneck khác nhau, cần đo bằng DevTools Performance.

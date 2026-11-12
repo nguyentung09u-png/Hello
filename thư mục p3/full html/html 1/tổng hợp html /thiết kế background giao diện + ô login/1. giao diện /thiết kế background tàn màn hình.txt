@@ -1,0 +1,43 @@
+
+
+------- background nền chính -----
+
+1. Background toàn màn hình:
+   · Màu nền đen (#000000)
+   · 3 khối màu xanh navy (#0f1a3a) và xanh dương (#1a4a8a)
+   · Hiệu ứng blur mạnh (100px)
+   · Mix-blend-mode: screen để hòa trộn ánh sáng
+   · Animation float chuyển động mượt
+
+--------
+
+
+2. Hiệu ứng Particles:
+   · Canvas phủ kín toàn màn hình
+   · Các hạt có kích thước, tốc độ ngẫu nhiên
+   · Hiệu ứng nhấp nháy (pulse)
+   · Màu sắc đa dạng trong tông xanh
+   · Vẽ đường kết nối giữa các hạt gần nhau
+   · Hiệu ứng glow cho hạt lớn
+   · Tự động reset khi hạt ra khỏi màn hình
+3. Tối ưu hóa:
+   · Responsive design
+   · Số lượng particles tự động điều chỉnh theo kích thước màn hình
+   · Xử lý resize window
+   · Cleanup function
+   · Hiệu suất tốt với requestAnimationFrame
+
+
+---- kết thúc background nền chính -----
+
+
+
+
+
+
+-----
+
+lỗi thường gặp orb
+
+· Bảo GPT: "Xóa toàn bộ code liên quan tới Orb"
+· Orb = mấy cái khối tròn to đang di chuyển/phình to thu nhỏ

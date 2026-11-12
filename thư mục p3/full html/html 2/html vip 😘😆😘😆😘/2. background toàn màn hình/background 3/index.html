@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floating Embers</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(180deg, #0a0a1a 0%, #0c1530 50%, #050810 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #eaf2ff;
+    overflow: hidden;
+  }
+
+  .glow-base {
+    position: fixed; inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(80,140,255,.18), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 0%, rgba(160,100,255,.14), transparent 70%);
+    filter: blur(40px);
+  }
+
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; letter-spacing: -.02em; margin: 0 0 12px;
+    background: linear-gradient(135deg, #a0e9ff, #ff9ad4);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #9ab0d4; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="glow-base" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+
+  <div class="content">
+    <h1>Floating Embers</h1>
+    <p>Hạt sáng bay lên, màu ấm-lạnh chuyển nhẹ.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let parts = [];
+
+  const COLORS = ['#7ab8ff','#a8c8ff','#c8a0ff','#8fd8ff','#b0c0ff','#e0b8ff'];
+
+  function count() { return Math.min(140, Math.max(50, Math.floor(W / 12))); }
+
+  function make(anywhere) {
+    const r = Math.random() * 2.2 + 0.6;
+    return {
+      x: Math.random() * W,
+      y: anywhere ? Math.random() * H : H + 20,
+      r,
+      vy: -(0.3 + Math.random() * 0.9),
+      vx: (Math.random() - 0.5) * 0.4,
+      sway: Math.random() * Math.PI * 2,
+      swaySpeed: 0.4 + Math.random() * 0.8,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      glow: r > 1.6,
+      life: 0,
+      maxLife: 6 + Math.random() * 6,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (parts.length < need) parts.push(make(true));
+    if (parts.length > need) parts.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      p.life += 1/60;
+      p.sway += 0.03 * p.swaySpeed;
+      p.x += p.vx + Math.sin(p.sway) * 0.4;
+      p.y += p.vy;
+
+      // fade theo đời sống
+      const fade = Math.max(0, 1 - p.life / p.maxLife);
+      const alpha = 0.7 * fade;
+
+      // tái sinh nếu đã hết đời hoặc ra khỏi màn
+      if (p.life > p.maxLife || p.y < -20) {
+        parts[i] = make(false);
+        continue;
+      }
+
+      if (p.glow) {
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 8);
+        g.addColorStop(0, p.color + 'cc');
+        g.addColorStop(0.4, p.color + '44');
+        g.addColorStop(1, p.color + '00');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop() { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

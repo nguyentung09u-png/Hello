@@ -1,0 +1,38 @@
+Tổng quan cách làm: Vẽ bóng đèn bằng SVG, dùng biến CSS để đổi màu khi bật/tắt, dùng JS bắt sự kiện kéo dây và tính khoảng cách kéo, rồi gọi hàm easing để tạo hiệu ứng đàn hồi khi thả.
+
+Code chung chung:
+
+```html
+<svg class="lamp">
+  <path class="cord" d="M124 190 L124 348" stroke-width="6"/>
+  <circle class="hit" cx="124" cy="348" r="60"/>
+</svg>
+
+<style>
+  :root { --on: 0; }
+  .lamp-light { opacity: var(--on); }
+  .cord { stroke: hsl(270, 0%, calc(38% + var(--on) * 52%)); }
+</style>
+
+<script>
+  let lightOn = false, dragging = false;
+  const cord = document.querySelector('.cord');
+  
+  document.querySelector('.hit').addEventListener('mousedown', () => dragging = true);
+  window.addEventListener('mousemove', (e) => {
+    if (dragging) cord.setAttribute('d', `M124 190 L${e.offsetX} ${e.offsetY}`);
+  });
+  window.addEventListener('mouseup', () => {
+    if (dragging) toggleLight();
+    dragging = false;
+    // Gọi hàm easing để dây về vị trí cũ
+  });
+  
+  function toggleLight() {
+    lightOn = !lightOn;
+    document.documentElement.style.setProperty('--on', lightOn ? '1' : '0');
+  }
+</script>
+```
+
+🎯 Tóm 1 câu: Dùng SVG vẽ đèn và dây, biến --on đổi màu, JS bắt sự kiện kéo thả để cập nhật dây và gọi easing đưa dây về vị trí cũ kèm bật/tắt đèn.

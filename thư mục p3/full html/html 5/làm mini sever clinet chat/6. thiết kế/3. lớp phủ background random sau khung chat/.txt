@@ -1,0 +1,163 @@
+Tổng quan cách làm (ngắn)
+
+Theo cách tôi hiểu, để dựng Nature Scene cần 3 bước:
+
+1. HTML — tạo 1 khung .scene chứa 5 lớp con xếp chồng: sky / sun / mountains / trees / weather, thêm 1 lớp overlay để làm mờ.
+2. CSS — định vị tuyệt đối từng lớp (position:absolute + inset), và viết vài @keyframes cho các loại hạt rơi (mưa/tuyết/lá/đom đóm/tro).
+3. JS — có 3-4 mảng dữ liệu (palette màu, hàm sinh SVG núi, hàm sinh SVG cây, danh sách thời tiết), và 2 hàm: setWeather() sinh hạt, randomizeScene() bốc ngẫu nhiên; gọi setInterval(..., 10000).
+
+Lưu ý: tôi không chắc các con số (20 palette, 5 núi...) có đúng là tối ưu hay không — đây chỉ là một cách chia để dễ hình dung.
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{ margin:0; height:100vh; display:grid; place-items:center;
+        background:#02030a; font-family:system-ui; }
+
+  /* khung chứa cảnh */
+  .scene{
+    position:relative;
+    width:400px; height:400px;
+    border-radius:20px;
+    overflow:hidden;
+    border:2px solid #333;
+  }
+
+  /* 5 lớp con xếp chồng */
+  .sky       { position:absolute; inset:0; transition:background 1.5s ease; }
+  .sun       { position:absolute; top:12%; right:14%;
+               width:50px; height:50px; border-radius:50%;
+               background:radial-gradient(circle,#fff,#fde047,transparent 70%);
+               box-shadow:0 0 40px rgba(253,224,71,.5); }
+  .mountains { position:absolute; left:0; right:0; bottom:30%; height:40%; }
+  .trees     { position:absolute; left:0; right:0; bottom:0; height:35%; }
+  .weather   { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .overlay   { position:absolute; inset:0;
+               background:linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.55)); }
+
+  /* hạt thời tiết */
+  .weather span{ position:absolute; top:-20px;
+                 animation-timing-function:linear;
+                 animation-iteration-count:infinite; }
+  .weather.rain span{
+    width:2px; height:12px;
+    background:linear-gradient(transparent, #a5c8ff);
+    animation-name:fall;
+  }
+  .weather.snow span{
+    width:6px; height:6px; border-radius:50%;
+    background:#fff; box-shadow:0 0 4px #fff;
+    animation-name:fallSway;
+  }
+  @keyframes fall{ to{ transform:translateY(450px); } }
+  @keyframes fallSway{
+    0%  { transform:translate(0,0); }
+    50% { transform:translate(20px,200px); }
+    100%{ transform:translate(-10px,450px); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="scene" id="scene">
+    <div class="sky" id="sky"></div>
+    <div class="sun" id="sun"></div>
+    <div class="mountains" id="mountains"></div>
+    <div class="trees" id="trees"></div>
+    <div class="weather" id="weather"></div>
+    <div class="overlay"></div>
+  </div>
+
+<script>
+  // --- dữ liệu ---
+  const PALETTES = [
+    { sky:['#020617','#1e1b4b','#4c1d95'], mtn:'#1e1b4b', tree:'#0f172a' },
+    { sky:['#fef3c7','#fb923c','#dc2626'], mtn:'#7c2d12', tree:'#431407' },
+    { sky:['#d1fae5','#6ee7b7','#059669'], mtn:'#065f46', tree:'#064e3b' },
+    { sky:['#dbeafe','#93c5fd','#3b82f6'], mtn:'#1e40af', tree:'#1e3a8a' }
+  ];
+
+  const MOUNTAINS = [
+    (c)=>`<svg viewBox="0 0 400 150" preserveAspectRatio="none">
+      <path d="M0,150 L120,40 L240,110 L400,30 L400,150 Z" fill="${c}"/>
+    </svg>`,
+    (c)=>`<svg viewBox="0 0 400 150" preserveAspectRatio="none">
+      <path d="M0,150 L100,80 L200,120 L300,60 L400,150 Z" fill="${c}"/>
+    </svg>`
+  ];
+
+  const TREES = [
+    (c)=>`<svg viewBox="0 0 400 120" preserveAspectRatio="none">
+      ${[60,160,260,360].map(x => `
+        <path d="M${x},120 L${x-15},80 L${x-5},80 L${x-20},40 L${x},20 L${x+20},40 L${x+5},80 L${x+15},80 Z" fill="${c}"/>
+      `).join('')}
+    </svg>`,
+    (c)=>`<svg viewBox="0 0 400 120" preserveAspectRatio="none">
+      ${[80,200,320].map(x => `
+        <rect x="${x-3}" y="70" width="6" height="50" fill="${c}"/>
+        <circle cx="${x}" cy="55" r="25" fill="${c}"/>
+      `).join('')}
+    </svg>`
+  ];
+
+  const WEATHERS = ['rain','snow','none'];
+
+  // --- DOM ---
+  const skyEl       = document.getElementById('sky');
+  const sunEl       = document.getElementById('sun');
+  const mountainsEl = document.getElementById('mountains');
+  const treesEl     = document.getElementById('trees');
+  const weatherEl   = document.getElementById('weather');
+
+  // --- sinh hạt thời tiết ---
+  function setWeather(type){
+    weatherEl.className = 'weather ' + type;
+    weatherEl.innerHTML = '';
+    const count = { rain:40, snow:30, none:0 }[type] || 0;
+    for (let i=0; i<count; i++){
+      const p = document.createElement('span');
+      p.style.left = Math.random()*100 + '%';
+      p.style.animationDelay    = (Math.random()*5) + 's';
+      p.style.animationDuration = (3 + Math.random()*4) + 's';
+      weatherEl.appendChild(p);
+    }
+  }
+
+  // --- bốc tổ hợp ngẫu nhiên ---
+  function randomizeScene(){
+    const p = PALETTES[Math.floor(Math.random()*PALETTES.length)];
+    skyEl.style.background = `linear-gradient(180deg, ${p.sky[0]}, ${p.sky[1]}, ${p.sky[2]})`;
+    sunEl.style.opacity = p.sky[0].match(/^#0|^#1|^#2/) ? '0.3' : '0.85';
+    mountainsEl.innerHTML = MOUNTAINS[Math.floor(Math.random()*MOUNTAINS.length)](p.mtn);
+    treesEl.innerHTML     = TREES[Math.floor(Math.random()*TREES.length)](p.tree);
+    setWeather(WEATHERS[Math.floor(Math.random()*WEATHERS.length)]);
+  }
+
+  randomizeScene();
+  setInterval(randomizeScene, 10000);
+</script>
+</body>
+</html>
+```
+
+Giải thích ngắn:
+
+· HTML: 6 div xếp chồng trong .scene.
+· CSS: định vị từng lớp, 2 keyframe mẫu (fall, fallSway).
+· JS: 3 mảng dữ liệu (rút gọn) + setWeather() sinh hạt + randomizeScene() bốc ngẫu nhiên + setInterval 10s.
+
+Lưu ý:
+
+· Demo trên rút gọn còn 4 palette / 2 núi / 2 cây / 3 thời tiết để dễ đọc — code đầy đủ có 20/5/6/6.
+· Tôi không chắc Math.random() phân bố đều hoàn hảo — có thể trùng tổ hợp sớm hơn tính toán lý thuyết.
+
+---
+
+🎯 Tóm 1 câu: Dựng .scene chứa 5 lớp con (sky/sun/mountains/trees/weather) + overlay, CSS định vị tuyệt đối + keyframe cho hạt, JS có mảng palette/núi/cây/thời tiết và 2 hàm setWeather() + randomizeScene() chạy mỗi 10 giây — code trên là bản demo rút gọn.

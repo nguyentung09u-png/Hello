@@ -1,0 +1,66 @@
+1. chức năng là : dải sáng tự động xoay quanh viền
+
+
+Cách làm dải sáng tự động xoay quanh viền
+
+Nguyên lý:
+
+1. Tạo 1 lớp conic-gradient lớn hơn card (::before)
+2. Cho lớp đó animation xoay liên tục
+3. Phủ 1 lớp nền lên trên, chỉ chừa viền (::after)
+
+Code chung chung
+
+```html
+<div class="card">
+  <div class="content">Nội dung</div>
+</div>
+```
+
+```css
+.card {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 3px;             /* độ dày viền */
+}
+
+/* Dải sáng xoay */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: -50%;              /* lớn hơn card để không hở góc */
+  background: conic-gradient(from 0deg,
+      #00ffff, transparent, #7a6eff, transparent, #00ffff);
+  animation: spin 4s linear infinite;
+}
+
+/* Nền che giữa, chừa viền */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 3px;               /* bằng padding của .card */
+  background: #111;
+  border-radius: 17px;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+Tóm tắt
+
+Bước Làm gì
+1 ::before = conic-gradient + animation: spin
+2 ::after = nền tối, inset = độ dày viền
+3 inset: -50% để gradient không hở góc khi xoay
+
+Lưu ý: inset của ::after nên bằng padding của .card để viền đều nhau.

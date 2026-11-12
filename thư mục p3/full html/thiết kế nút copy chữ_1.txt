@@ -1,0 +1,109 @@
+🔧 Cách làm nút Copy — tổng quan + code chung
+
+Tổng quan 4 bước
+
+1. HTML — Tạo 1 <button> chứa: 2 icon SVG (copy + tick) và 1 <span> chữ "Copy". Gắn data-text để giữ nội dung cần copy.
+
+2. CSS — Tạo 4 trạng thái:
+
+· Thường: nền mờ, viền nhạt, bo góc
+· Hover: nền sáng hơn, nhấc nhẹ
+· Bấm: thu nhỏ 96%
+· Đã copy (.copied): đổi xanh + hiện tick
+
+3. JS — Bắt sự kiện click:
+
+· Copy data-text vào clipboard
+· Thêm class .copied → đổi giao diện
+· Sau ~1.6s tự xóa class → về trạng thái cũ
+· Hiện toast thông báo
+
+4. Fallback — Nếu navigator.clipboard không dùng được → tạo <textarea> ẩn + document.execCommand("copy").
+
+---
+
+Code chung (khung tối giản)
+
+```html
+<!-- HTML -->
+<button class="copy" data-text="Hello">
+  <svg class="ic-copy">…icon copy…</svg>
+  <svg class="ic-check">…icon tick…</svg>
+  <span class="label">Copy</span>
+</button>
+```
+
+```css
+/* CSS */
+.copy{
+  display:flex; align-items:center; gap:7px;
+  padding:10px 16px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);
+  color:#dfe3f0; font-weight:700; cursor:pointer;
+  transition:.22s;
+}
+.copy:hover{ background:rgba(255,255,255,.12); transform:translateY(-1px); }
+.copy:active{ transform:scale(.96); }
+
+.ic-check{ display:none; }                          /* tick ẩn mặc định */
+
+.copy.copied{                                       /* trạng thái đã copy */
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:#fff; border-color:transparent;
+}
+.copy.copied .ic-copy{ display:none; }
+.copy.copied .ic-check{ display:block; }
+```
+
+```js
+// JS
+document.querySelectorAll(".copy").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const text = btn.dataset.text;
+
+    // 1. Copy (có fallback)
+    let ok = false;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      }
+    } catch(e) {}
+    if (!ok) {                                     // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;left:-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+
+    if (!ok) return;
+
+    // 2. Đổi giao diện
+    btn.classList.add("copied");
+    btn.querySelector(".label").textContent = "Đã copy";
+
+    // 3. Tự reset sau 1.6s
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector(".label").textContent = "Copy";
+    }, 1600);
+
+    // 4. Toast
+    // toast('Đã copy: "' + text + '"');
+  });
+});
+```
+
+---
+
+🎯 Tóm 1 câu
+
+Tạo <button> với 2 icon + chữ, dùng CSS 4 trạng thái (thường/hover/bấm/đã-copy xanh + tick), JS bắt click để copy + đổi giao diện 1.6s rồi tự reset, kèm fallback textarea cho trình duyệt cũ.
+
+---
+
+Lưu ý: phần code trên là khung tối giản — có thể cần thêm toast, xử lý lỗi, và style chi tiết tùy dự án. Tôi không chắc môi trường của bạn có hỗ trợ Clipboard API hay không, nên fallback là cần thiết.

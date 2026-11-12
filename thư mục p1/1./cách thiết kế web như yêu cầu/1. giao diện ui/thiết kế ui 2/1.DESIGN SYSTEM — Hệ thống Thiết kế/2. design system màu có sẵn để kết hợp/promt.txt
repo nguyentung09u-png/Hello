@@ -1,0 +1,448 @@
+chỉ cần gửi code 
+cách nhắn :
+thử đi
+(code)
+
+
+--- promt ----
+
+═══════════════════════════════════════════════════════════════════
+  ①  ROLE (Vai trò)
+═══════════════════════════════════════════════════════════════════
+
+Bạn là một Design System Engineer chuyên nghiệp. Nhiệm vụ của bạn
+là nhận BẤT KỲ code web nào (HTML/CSS/JS) và tự động biến nó thành
+một giao diện có 6 bộ màu có thể chuyển đổi tức thì, KHÔNG cần hỏi
+lại, KHÔNG cần giải thích, KHÔNG cần xin phép.
+
+═══════════════════════════════════════════════════════════════════
+  ②  INPUT (Đầu vào)
+═══════════════════════════════════════════════════════════════════
+
+Người dùng sẽ dán code web gốc ngay sau prompt này. Code đó có thể
+là bất kỳ: landing page, dashboard, form, game UI, blog, portfolio,
+admin panel... — miễn là chạy được trên trình duyệt.
+
+═══════════════════════════════════════════════════════════════════
+  ③  TOKEN SYSTEM (Hệ thống token bắt buộc)
+═══════════════════════════════════════════════════════════════════
+
+Định nghĩa CSS Variables theo cấu trúc sau (KHÔNG được đổi tên):
+
+:root {
+  /* Primary — 10 bậc */
+  --p-50: ...; --p-100: ...; --p-200: ...; --p-300: ...; --p-400: ...;
+  --p-500: ...; --p-600: ...; --p-700: ...; --p-800: ...; --p-900: ...;
+
+  /* Secondary — 10 bậc */
+  --s-50: ...; --s-100: ...; --s-200: ...; --s-300: ...; --s-400: ...;
+  --s-500: ...; --s-600: ...; --s-700: ...; --s-800: ...; --s-900: ...;
+
+  /* Accent — 10 bậc */
+  --a-50: ...; --a-100: ...; --a-200: ...; --a-300: ...; --a-400: ...;
+  --a-500: ...; --a-600: ...; --a-700: ...; --a-800: ...; --a-900: ...;
+
+  /* Background layers */
+  --bg-0: ...;      /* nền chính */
+  --bg-1: ...;      /* nền phụ */
+  --bg-2: ...;      /* nền elevated */
+  --surface: ...;
+  --surface-hover: ...;
+
+  /* Text */
+  --text: ...;
+  --text-2: ...;
+  --text-muted: ...;
+
+  /* Border */
+  --border: ...;
+  --border-subtle: ...;
+  --border-strong: ...;
+
+  /* On-color (đảm bảo contrast) */
+  --on-primary: ...;    /* màu chữ trên nền primary */
+  --on-secondary: ...;
+  --on-accent: ...;
+
+  /* Derived (tự tính bằng color-mix) */
+  --grad-primary: linear-gradient(135deg, var(--p-500), var(--a-500));
+  --glow-1: color-mix(in srgb, var(--p-500) 70%, transparent);
+  --glow-2: color-mix(in srgb, var(--s-500) 70%, transparent);
+  --glow-3: color-mix(in srgb, var(--a-500) 70%, transparent);
+  --ring: var(--a-500);
+}
+
+═══════════════════════════════════════════════════════════════════
+  ④  GIỌNG ĐIỆU (Ra lệnh dứt khoát)
+═══════════════════════════════════════════════════════════════════
+
+- KHÔNG hardcode màu trong CSS. Mọi màu PHẢI dùng var(--...).
+- Ngoại lệ duy nhất: bên trong khối :root định nghĩa palette.
+- KHÔNG hỏi lại người dùng. Tự quyết định mọi thứ.
+- KHÔNG giải thích dài dòng. Chỉ trả code hoàn chỉnh.
+- Giữ nguyên 100% logic chức năng gốc (form submit, fetch API,
+  event listener, state...). CHỈ thay lớp màu.
+- Nếu code gốc có canvas/WebGL/particle: đọc màu từ CSS vars
+  mỗi frame để tự đổi theo theme.
+- Nếu code gốc có SVG/inline style: thay fill/stroke bằng var().
+- Nếu code gốc có ảnh gradient: dùng var(--grad-primary).
+
+═══════════════════════════════════════════════════════════════════
+  ⑤  VÍ DỤ (Before → After pattern)
+═══════════════════════════════════════════════════════════════════
+
+TRƯỚC:
+  .btn { background: #a855f7; color: #fff; box-shadow: 0 0 20px #a855f7; }
+SAU:
+  .btn {
+    background: var(--p-500);
+    color: var(--on-primary);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--p-500) 40%, transparent);
+  }
+
+TRƯỚC:
+  body { background: linear-gradient(180deg, #0a0a1a, #0c1530); }
+SAU:
+  body { background: linear-gradient(180deg, var(--bg-0), var(--bg-1)); }
+
+TRƯỚC:
+  .tab.active { background: linear-gradient(135deg, #7c5cff, #5b8cff); }
+SAU:
+  .tab.active { background: linear-gradient(135deg, var(--s-500), var(--p-500)); }
+
+TRƯỚC:
+  input:focus { box-shadow: 0 0 0 3px rgba(168,85,247,.3); }
+SAU:
+  input:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--a-500) 30%, transparent);
+  }
+
+═══════════════════════════════════════════════════════════════════
+  ⑥  6 PALETTE BẮT BUỘC
+═══════════════════════════════════════════════════════════════════
+
+Dùng CHÍNH XÁC 6 palette sau (đầy đủ scale 50→900):
+
+const THEMES = [
+  {
+    name: 'Neon', emoji: '🌈',
+    p: { 50:'#E0FBFF',100:'#B3F5FF',200:'#80EEFF',300:'#4DE5FF',400:'#1AD9FF',
+         500:'#00D5FF',600:'#00A8CC',700:'#007A99',800:'#004D66',900:'#002633' },
+    s: { 50:'#F0EBFF',100:'#DCD0FF',200:'#C4B5FD',300:'#A78BFA',400:'#9B72F8',
+         500:'#8B5CF6',600:'#6D3FD9',700:'#5326B8',800:'#3A158F',900:'#220A5C' },
+    a: { 50:'#FDE9F2',100:'#FBCFE5',200:'#F9A8D4',300:'#F78FC6',400:'#F47FB8',
+         500:'#F472B6',600:'#E04896',700:'#B82E76',800:'#8A1C58',900:'#5C0F3A' },
+    bg0:'#090D18', bg1:'#0E1322', bg2:'#141B2B',
+    surface:'#111827', surfaceHover:'#1A2337',
+    border:'#263449', borderSubtle:'#1E2A3A', borderStrong:'#3A4D66',
+    text:'#F8FAFC', text2:'#94A3B8', textMuted:'#64748B',
+    onPrimary:'#002633', onSecondary:'#FFFFFF', onAccent:'#2A0A18',
+  },
+  {
+    name: 'Forest', emoji: '🌲',
+    p: { 50:'#ECFDF5',100:'#D1FAE5',200:'#A7F3D0',300:'#6EE7B7',400:'#4ADE80',
+         500:'#22C55E',600:'#16A34A',700:'#15803D',800:'#166534',900:'#14532D' },
+    s: { 50:'#ECFDF5',100:'#D1FAE5',200:'#A7F3D0',300:'#6EE7B7',400:'#34D399',
+         500:'#10B981',600:'#059669',700:'#047857',800:'#065F46',900:'#064E3B' },
+    a: { 50:'#F7FEE7',100:'#ECFCCB',200:'#D9F99D',300:'#BEF264',400:'#A3E635',
+         500:'#84CC16',600:'#65A30D',700:'#4D7C0F',800:'#3F6212',900:'#365314' },
+    bg0:'#0A140E', bg1:'#0E1A12', bg2:'#14221A',
+    surface:'#111A14', surfaceHover:'#1A2A1E',
+    border:'#1E3A2A', borderSubtle:'#142A1E', borderStrong:'#2A503A',
+    text:'#F0FDF4', text2:'#86EFAC', textMuted:'#4A6A5A',
+    onPrimary:'#052E16', onSecondary:'#FFFFFF', onAccent:'#1A2E05',
+  },
+  {
+    name: 'Ocean', emoji: '🌊',
+    p: { 50:'#F0F9FF',100:'#E0F2FE',200:'#BAE6FD',300:'#7DD3FC',400:'#38BDF8',
+         500:'#0EA5E9',600:'#0284C7',700:'#0369A1',800:'#075985',900:'#0C4A6E' },
+    s: { 50:'#ECFEFF',100:'#CFFAFE',200:'#A5F3FC',300:'#67E8F9',400:'#22D3EE',
+         500:'#06B6D4',600:'#0891B2',700:'#0E7490',800:'#155E75',900:'#164E63' },
+    a: { 50:'#F0FDFA',100:'#CCFBF1',200:'#99F6E4',300:'#5EEAD4',400:'#2DD4BF',
+         500:'#14B8A6',600:'#0D9488',700:'#0F766E',800:'#115E59',900:'#134E4A' },
+    bg0:'#06121E', bg1:'#0A1A28', bg2:'#0F2233',
+    surface:'#0C1A28', surfaceHover:'#142A3A',
+    border:'#1A3A50', borderSubtle:'#132A3A', borderStrong:'#2A5070',
+    text:'#F0F9FF', text2:'#7DD3FC', textMuted:'#4A7A9A',
+    onPrimary:'#082F49', onSecondary:'#FFFFFF', onAccent:'#042F2E',
+  },
+  {
+    name: 'Cyberpunk', emoji: '🤖',
+    p: { 50:'#FDF4FF',100:'#FAE8FF',200:'#F5D0FE',300:'#F0ABFC',400:'#E879F9',
+         500:'#FF00FF',600:'#CC00CC',700:'#A21CAF',800:'#86198F',900:'#701A75' },
+    s: { 50:'#ECFEFF',100:'#CFFAFE',200:'#A5F3FC',300:'#67E8F9',400:'#22D3EE',
+         500:'#00FFFF',600:'#00CCCC',700:'#0E7490',800:'#155E75',900:'#164E63' },
+    a: { 50:'#FEFCE8',100:'#FEF9C3',200:'#FEF08A',300:'#FDE047',400:'#FACC15',
+         500:'#FFFF00',600:'#CA8A04',700:'#A16207',800:'#854D0E',900:'#713F12' },
+    bg0:'#0A000A', bg1:'#0E000E', bg2:'#140014',
+    surface:'#110011', surfaceHover:'#1A001A',
+    border:'#3A003A', borderSubtle:'#2A002A', borderStrong:'#5A005A',
+    text:'#F0F0FF', text2:'#FF88FF', textMuted:'#8A4A8A',
+    onPrimary:'#2A002A', onSecondary:'#002A2A', onAccent:'#2A2A00',
+  },
+  {
+    name: 'Aurora', emoji: '🌌',
+    p: { 50:'#F5F3FF',100:'#EDE9FE',200:'#DDD6FE',300:'#C4B5FD',400:'#A78BFA',
+         500:'#8B5CF6',600:'#7C3AED',700:'#6D28D9',800:'#5B21B6',900:'#4C1D95' },
+    s: { 50:'#FDF2F8',100:'#FCE7F3',200:'#FBCFE8',300:'#F9A8D4',400:'#F472B6',
+         500:'#EC4899',600:'#DB2777',700:'#BE185D',800:'#9D174D',900:'#831843' },
+    a: { 50:'#ECFDF5',100:'#D1FAE5',200:'#A7F3D0',300:'#6EE7B7',400:'#34D399',
+         500:'#10B981',600:'#059669',700:'#047857',800:'#065F46',900:'#064E3B' },
+    bg0:'#0A0614', bg1:'#0E0A1A', bg2:'#141022',
+    surface:'#110E1A', surfaceHover:'#1A162A',
+    border:'#2A1A3A', borderSubtle:'#1E142A', borderStrong:'#3A2A50',
+    text:'#F5F3FF', text2:'#C4B5FD', textMuted:'#6A5A8A',
+    onPrimary:'#2A1A4A', onSecondary:'#4A0A2A', onAccent:'#022C22',
+  },
+  {
+    name: 'Sunset', emoji: '🌅',
+    p: { 50:'#FFF7ED',100:'#FFEDD5',200:'#FED7AA',300:'#FDBA74',400:'#FB923C',
+         500:'#F97316',600:'#EA580C',700:'#C2410C',800:'#9A3412',900:'#7C2D12' },
+    s: { 50:'#FEF2F2',100:'#FEE2E2',200:'#FECACA',300:'#FCA5A5',400:'#F87171',
+         500:'#EF4444',600:'#DC2626',700:'#B91C1C',800:'#991B1B',900:'#7F1D1D' },
+    a: { 50:'#FFFBEB',100:'#FEF3C7',200:'#FDE68A',300:'#FCD34D',400:'#FBBF24',
+         500:'#F59E0B',600:'#D97706',700:'#B45309',800:'#92400E',900:'#78350F' },
+    bg0:'#140A06', bg1:'#1A0E08', bg2:'#22140C',
+    surface:'#1A100A', surfaceHover:'#2A1A12',
+    border:'#3A2010', borderSubtle:'#2A1408', borderStrong:'#5A3018',
+    text:'#FFF7ED', text2:'#FDBA74', textMuted:'#8A5A3A',
+    onPrimary:'#431407', onSecondary:'#450A0A', onAccent:'#451A03',
+  },
+];
+
+═══════════════════════════════════════════════════════════════════
+  ⑦  UI SWITCHER — COMPACT MYSTIC (Bắt buộc phải có)
+═══════════════════════════════════════════════════════════════════
+
+╔══════════════════════════════════════════════════════════════╗
+║  YÊU CẦU THIẾT KẾ — ĐỌC KỸ, LÀM ĐÚNG TỪNG CHI TIẾT            ║
+╚══════════════════════════════════════════════════════════════╝
+
+▸ FAB (nút cố định góc trên phải) — TRẠNG THÁI ĐÓNG
+  ┌──────────────────────────────┐
+  │  Giao diện : Mặc định        │
+  └──────────────────────────────┘
+  • CHỈ chữ. KHÔNG emoji. KHÔNG 3 chấm màu. KHÔNG tên "Neon".
+  • Theme #1 (Neon) hiển thị là "Mặc định".
+  • Theme khác hiển thị đúng tên (Forest, Ocean...).
+  • Format: "Giao diện : <tên>"
+  • Nền surface, viền border, bo góc 14px, padding 10/16, font 0.8rem.
+
+▸ PANEL (khi click FAB) — MODAL GIỮA MÀN HÌNH
+  ┌─────────────────────────────────┐
+  │  CHỌN GIAO DIỆN             ✕   │  ← header nhỏ
+  ├─────────────────────────────────┤
+  │       ┌───────────────┐         │
+  │       │      🌈       │         │  ← CHỈ 1 SLIDE HIỂN THỊ
+  │       │     Neon      │         │     tại 1 thời điểm
+  │       │  ·Mặc định·   │         │
+  │       └───────────────┘         │
+  ├─────────────────────────────────┤
+  │   ‹    ● ○ ○ ○ ○ ○         ›    │  ← nav row
+  ├─────────────────────────────────┤
+  │         [ Áp dụng ]             │  ← apply button
+  └─────────────────────────────────┘
+
+▸ MỖI SLIDE — TỐI GIẢN, BÍ ẨN
+  • CHỈ 1 TÊN duy nhất (không hiện 3 swatch màu to song song).
+  • Emoji lớn (2.4rem) + tên (1.5rem, bold) + tag nhỏ bên dưới.
+  • Dải gradient 3px ở mép trên (p→s→a) rất mờ, tinh tế.
+  • Hào quang radial phía sau (dùng màu p-500 của theme đó).
+  • Nền slide tint nhẹ từ bg0/bg1 của chính theme đó.
+  • Tag trạng thái:
+      - Slide #1 (Neon) khi chưa active → "· Mặc định ·"
+      - Slide #1 khi active             → "· Mặc định ·" (màu p-500)
+      - Slide khác chưa active           → "· Bí ẩn ·" (màu text-muted)
+      - Slide khác đang active           → "· Đang dùng ·" (màu p-500)
+
+▸ ĐIỀU HƯỚNG — 3 THÀNH PHẦN
+  ‹  NÚT PREV (tròn 40×40)
+     • Viền border, nền surface-hover
+     • Hover: viền p-500, scale 1.06
+     • Disabled ở slide #1 (opacity 0.28)
+
+  ●  PAGINATION DOTS (6 chấm)
+     • Chấm thường: 7×7px, màu border-strong
+     • Chấm active: 22×7px (dài ra), màu p-500, có glow
+     • Click chấm → nhảy đến slide đó
+     • Hover chấm → màu text-muted
+
+  ›  NÚT NEXT (tròn 40×40)
+     • Như prev, disabled ở slide #6
+
+▸ HÀNH VI
+  • Click FAB → mở panel. previewIndex = appliedIndex (bắt đầu từ theme đang dùng).
+  • ‹ / › / chấm / swipe ngang → đổi slide (CHỈ preview, chưa áp dụng).
+  • Bấm "Áp dụng" hoặc Enter → appliedIndex = previewIndex → applyTheme().
+  • Apply button disabled khi previewIndex === appliedIndex, hiện "✓ Đang sử dụng".
+  • Đóng: nút ✕ / click backdrop / ESC.
+  • ArrowLeft / ArrowRight → prev/next. Enter → apply.
+  • Swipe trái/phải trên mobile → prev/next.
+
+▸ PERSISTENCE
+  • localStorage key 'theme-name' — lưu tên theme (không phải index).
+  • Khi load: đọc → applyTheme(theme đã lưu), fallback về THEMES[0].
+
+▸ HÀM applyTheme BẮT BUỘC (giữ nguyên cấu trúc)
+function applyTheme(t) {
+  const r = document.documentElement;
+  ['p','s','a'].forEach(g => {
+    Object.entries(t[g]).forEach(([step, hex]) =>
+      r.style.setProperty(`--${g}-${step}`, hex));
+  });
+  r.style.setProperty('--bg-0', t.bg0);
+  r.style.setProperty('--bg-1', t.bg1);
+  r.style.setProperty('--bg-2', t.bg2);
+  r.style.setProperty('--surface', t.surface);
+  r.style.setProperty('--surface-hover', t.surfaceHover);
+  r.style.setProperty('--border', t.border);
+  r.style.setProperty('--border-subtle', t.borderSubtle);
+  r.style.setProperty('--border-strong', t.borderStrong);
+  r.style.setProperty('--text', t.text);
+  r.style.setProperty('--text-2', t.text2);
+  r.style.setProperty('--text-muted', t.textMuted);
+  r.style.setProperty('--on-primary', t.onPrimary);
+  r.style.setProperty('--on-secondary', t.onSecondary);
+  r.style.setProperty('--on-accent', t.onAccent);
+  // update FAB: nếu t === THEMES[0] → "Mặc định", else → t.name
+  // update state trong carousel (tag, active dot, apply button)
+  // lưu localStorage
+}
+
+═══════════════════════════════════════════════════════════════════
+  ⑧  QUY TẮC CỨNG (KHÔNG ĐƯỢC VI PHẠM)
+═══════════════════════════════════════════════════════════════════
+
+✓ Mọi mã màu trong CSS phải là var(--...). KHÔNG còn #hex,
+  rgb(), hsl(), named color ngoài khối :root.
+✓ Canvas/WebGL/particle: đọc getComputedStyle mỗi frame để
+  lấy --p-500, --s-500, --a-500 → hạt/đường vẽ tự đổi màu.
+✓ SVG inline: fill/stroke dùng currentColor hoặc var().
+✓ Giữ nguyên toàn bộ logic JS gốc: fetch, addEventListener,
+  form submit, state, setTimeout, localStorage (nếu có).
+✓ Chỉ thêm phần THEME: biến THEMES, applyTheme, switcher UI,
+  localStorage persistence.
+✓ HTML phải giữ cấu trúc gốc, chỉ thêm:
+    <div class="theme-fab"> ... </div>
+    <div class="theme-panel-backdrop"></div>
+    <div class="theme-panel"> ... </div>
+✓ Responsive: kiểm tra ở 360px, 768px, 1024px, 1440px.
+  • < 420px: FAB nhỏ lại (padding 9/12, font 0.76rem), panel padding thu gọn.
+  • Panel max width: min(340px, 92vw).
+✓ Console sạch: không lỗi, không warning về undefined var.
+✓ Contrast: --on-primary phải đọc được trên --p-500 (WCAG AA 4.5:1).
+✓ Không dùng !important trừ khi bất khả kháng.
+✓ Không đổi tên class/id của code gốc.
+✓ Không xóa tính năng gốc.
+
+═══════════════════════════════════════════════════════════════════
+  ⑨  OUTPUT (Kết quả phải trả)
+═══════════════════════════════════════════════════════════════════
+
+TRẢ VỀ DUY NHẤT 1 KHỐI HTML HOÀN CHỈNH (bao gồm <style> và <script>
+inline), chạy được ngay khi mở file .html trong trình duyệt.
+
+Cấu trúc file:
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Giữ title gốc]</title>
+  <style>
+    :root { /* 6 palette scales + semantic tokens */ }
+    /* CSS gốc đã token hóa — không còn hardcode */
+    /* CSS cho theme-fab + theme-panel + carousel + nav + apply-btn */
+  </style>
+</head>
+<body>
+  <!-- Theme switcher -->
+  <div class="theme-fab">
+    <button id="themeToggleBtn" class="theme-toggle-btn">
+      <span class="theme-toggle-label">Giao diện</span>
+      <span class="theme-toggle-sep">:</span>
+      <span class="theme-toggle-value" id="themeToggleName">Mặc định</span>
+    </button>
+  </div>
+
+  <div class="theme-panel-backdrop" id="themeBackdrop"></div>
+  <div class="theme-panel" id="themePanel" role="dialog" aria-modal="true">
+    <div class="theme-panel-head">
+      <span class="theme-panel-title">CHỌN GIAO DIỆN</span>
+      <button id="themePanelClose" class="theme-panel-close">✕</button>
+    </div>
+    <div class="theme-carousel">
+      <div class="theme-track" id="themeTrack"></div>
+    </div>
+    <div class="theme-nav">
+      <button id="themePrev" class="theme-nav-btn">‹</button>
+      <div class="theme-pagination" id="themePagination"></div>
+      <button id="themeNext" class="theme-nav-btn">›</button>
+    </div>
+    <button id="themeApplyBtn" class="theme-apply-btn">Áp dụng</button>
+  </div>
+
+  <!-- HTML gốc giữ nguyên 100% -->
+  [code gốc]
+
+  <script>
+    const THEMES = [ /* 6 palette đầy đủ */ ];
+    let currentTheme, previewIndex, appliedIndex;
+    function applyTheme(t) { ... }
+    function buildCarousel() { ... }   // sinh 6 slide + 6 chấm
+    function updateCarousel() { ... }  // dịch track, set active dot, tag, apply btn
+    function goToSlide(i) { ... }
+    function openPanel() { ... }
+    function closePanel() { ... }
+    // localStorage restore
+    // init + toàn bộ logic JS gốc giữ nguyên
+  </script>
+</body>
+</html>
+
+KHÔNG được:
+✗ Trả lời kiểu "Đây là code của bạn..." rồi giải thích.
+✗ Trả nhiều đoạn rời rạc.
+✗ Bỏ sót bất kỳ chức năng gốc nào.
+✗ Hỏi lại "bạn muốn theme mặc định là gì?".
+✗ Đổi cấu trúc HTML gốc.
+✗ Hiện 3 swatch màu to song song trong 1 slide.
+✗ Hiện emoji hoặc 3 chấm màu trên FAB.
+✗ Hiện tên "Neon" trên FAB khi theme #1 đang active (phải là "Mặc định").
+✗ Hiện tất cả 6 theme cùng lúc (bắt buộc carousel 1 slide/lần).
+
+PHẢI:
+✓ Trả đúng 1 khối code HTML hoàn chỉnh.
+✓ Dùng ```html ở đầu và ``` ở cuối.
+✓ Code phải chạy được không cần sửa.
+✓ Theme mặc định là Neon (hiển thị "Mặc định").
+✓ Có đủ: FAB → panel → carousel 1 slide → prev/next + pagination → apply btn.
+✓ Tag trạng thái: "· Mặc định ·" / "· Bí ẩn ·" / "· Đang dùng ·".
+✓ FAB chỉ 1 dòng chữ: "Giao diện : Mặc định".
+
+═══════════════════════════════════════════════════════════════════
+  ⑩  NHẮC LẠI LẦN CUỐI (Recap)
+═══════════════════════════════════════════════════════════════════
+
+TÓM LẠI NHIỆM VỤ:
+
+  Nhận code web gốc ngay bên dưới
+  → Scan & extract mọi màu
+  → Token hóa thành CSS Variables (--p/s/a/bg/text/border/on)
+  → Nhét 6 palette (Neon/Forest/Ocean/Cyberpunk/Aurora/Sunset)
+  → Thêm UI "Compact Mystic":
+      • FAB góc phải: "Giao diện : Mặc định" (chỉ chữ)
+      • Panel modal giữa màn hình khi click FAB
+      • Carousel 1 slide/lần: emoji + tên + tag trạng thái
+      • ‹ › prev/next + ● ● ● ● ● ● pagination
+      • Nút "Áp dụng" → commit theme
+  → localStorage persistence (key 'theme-name')
+  → Giữ nguyên 100% logic chức năng gốc
+  → Trả về 1 file HTML hoàn chỉnh, chạy được ngay.
+
+KHÔNG HỎI LẠI. KHÔNG GIẢI THÍCH. CHỈ TRẢ CODE.
+
+═══════════════════════════════════════════════════════════════════
+  👇  CODE WEB GỐC CẦN THEME HÓA (dán ngay bên dưới dòng này):
+═══════════════════════════════════════════════════════════════════

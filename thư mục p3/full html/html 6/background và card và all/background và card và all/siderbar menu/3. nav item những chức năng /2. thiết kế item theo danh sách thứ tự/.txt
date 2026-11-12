@@ -1,0 +1,191 @@
+PHÂN TÍCH TỔNG QUAN & HƯỚNG TRIỂN KHAI — NHÓM ĐIỀU HƯỚNG (NAV GROUP)
+
+---
+
+I. PHÂN TÍCH TỔNG QUAN
+
+1. Mô hình hoạt động (Mental Model)
+
+Nav Group hoạt động như một thùng chứa phân cấp (container). Nó không tự tương tác, mà đóng vai trò "người tổ chức": nhóm các chức năng liên quan lại với nhau, gắn cho chúng một cái nhãn (tiêu đề) để người dùng dễ quét mắt (scan) và tìm kiếm.
+
+Cấu trúc logic: [Nhãn chủ đề] → [Chức năng 1] → [Chức năng 2] → [Chức năng 3].
+
+2. Kiến trúc 2 lớp (Tĩnh & Động)
+
+· Lớp Tĩnh (Tiêu đề - Group Head): Chỉ để đọc, không thể click. Đóng vai trò như một cột mốc đánh dấu sự thay đổi chủ đề.
+· Lớp Động (Các Item - Nav Links): Các nút bấm thực sự. Chúng kế thừa sự sắp xếp của Group và phản hồi lại tương tác của người dùng (hover, click, active).
+
+3. Hướng triển khai (Thứ tự thực hiện)
+
+1. Tạo khung (Container): Dùng div với display: flex và flex-direction: column. Đặt gap để tạo khoảng thở giữa các phần tử.
+2. Định hình Tiêu đề (Head): Dùng typography (font-size nhỏ, uppercase, màu xám, letter-spacing) để làm nó "chìm" xuống, không tranh giành sự chú ý với các item.
+3. Định hình Nút bấm (Item): Dùng Flexbox để căn hàng icon và text. Thêm padding, border-radius, và các trạng thái :hover / [aria-current].
+4. Lắp ghép: Đặt Tiêu đề lên trên, các Item xếp nối tiếp bên dưới.
+5. Khoảng cách (Spacing): Dùng gap: 4px giữa các item, và margin-bottom cho tiêu đề (hoặc dùng gap chung) để tách tiêu đề khỏi danh sách item.
+
+---
+
+II. CODE MẪU TỔNG QUÁT (Dễ chỉnh sửa)
+
+Dưới đây là mã nguồn tối giản, cô lập đúng đối tượng Nav Group, bỏ qua các phần không liên quan (như Sidebar khung, Search, Footer) để bạn dễ dàng copy/paste.
+
+1. HTML (index.html)
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nav Group Template</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Khung nền tối để dễ nhìn -->
+  <div class="demo-bg">
+    
+    <!-- BẮT ĐẦU: NAV GROUP -->
+    <div class="sa-group">
+      <!-- 1. Tiêu đề nhóm -->
+      <div class="sa-group-head">Tổng quan</div>
+
+      <!-- 2. Các Item (Nút bấm) -->
+      <a href="#" class="sa-link" aria-current="page">
+        <div class="sa-link-icon">
+          <!-- Icon SVG (Ví dụ: Dashboard) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="sa-link-text">Dashboard</span>
+      </a>
+
+      <a href="#" class="sa-link">
+        <div class="sa-link-icon">
+          <!-- Icon SVG (Ví dụ: Phân tích) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 20V10M12 20V4M6 20v-6"></path>
+          </svg>
+        </div>
+        <span class="sa-link-text">Phân tích</span>
+      </a>
+    </div>
+    <!-- KẾT THÚC: NAV GROUP -->
+
+  </div>
+
+</body>
+</html>
+```
+
+2. CSS (style.css)
+
+```css
+/* ================= TOKENS ================= */
+:root {
+  --sa-panel: #070E13;
+  --sa-ink: #FFFFFF;
+  --sa-headline: #64748B;
+  --sa-row: #1E293B;
+  --sa-row-hover: rgba(30, 41, 59, 0.5);
+  --radius-sm: 8px;
+  --font-main: 'Onest', system-ui, sans-serif;
+}
+
+/* Reset cơ bản */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-main); background: #020617; }
+
+/* Khung nền demo */
+.demo-bg {
+  padding: 2rem;
+  width: 280px;
+  background: var(--sa-panel);
+  border: 1px solid #1A242C;
+  border-radius: 16px;
+  margin: 2rem auto;
+}
+
+/* ================= NAV GROUP (Lớp bao ngoài) ================= */
+.sa-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Khoảng cách giữa các thành phần con */
+}
+
+/* ================= GROUP HEAD (Tiêu đề) ================= */
+.sa-group-head {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--sa-headline);
+  font-weight: 600;
+  padding: 0 12px;        /* Thụt lề để thẳng hàng với chữ của Item */
+  margin-bottom: 4px;     /* Tách tiêu đề ra khỏi Item đầu tiên một chút */
+  
+  /* Chống bôi đen & click */
+  user-select: none; 
+  pointer-events: none; 
+}
+
+/* ================= NAV ITEM (Nút bấm) ================= */
+.sa-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--sa-headline);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* Hiệu ứng Hover / Active */
+.sa-link:hover {
+  color: var(--sa-ink);
+  background: var(--sa-row-hover);
+}
+.sa-link[aria-current="page"] {
+  color: var(--sa-ink);
+  background: var(--sa-row);
+}
+
+/* Icon & Text */
+.sa-link-icon { width: 20px; height: 20px; display: flex; flex-shrink: 0; }
+.sa-link-icon svg { width: 100%; height: 100%; }
+.sa-link-text { flex: 1; }
+```
+
+3. JavaScript (script.js)
+
+```javascript
+// Lưu ý: Nav Group và các Item bên trong CHỈ CẦN HTML & CSS.
+// Không có logic JS nào bắt buộc cho một nhóm tĩnh (chỉ hiển thị).
+// JS sẽ được dùng ở cấp độ Sidebar (để đóng/mở) hoặc Router (để chuyển trang),
+// không can thiệp vào cấu trúc hiển thị của Nav Group.
+```
+
+---
+
+III. CÁCH CHỈNH SỬA NHANH
+
+Muốn đổi Sửa ở đâu
+Tên chủ đề nhóm Chữ bên trong thẻ <div class="sa-group-head">...</div>
+Thêm Item mới Copy 1 thẻ <a class="sa-link">...</a> dán xuống dưới
+Đổi icon Thay thẻ <svg>...</svg> bên trong .sa-link-icon
+Khoảng cách giữa các item Sửa gap: 4px; trong .sa-group
+Chữ tiêu đề to/nhỏ hơn Sửa font-size trong .sa-group-head
+Màu chữ tiêu đề Sửa color: var(--sa-headline) trong .sa-group-head
+Màu nền khi Hover Sửa background trong .sa-link:hover
+
+---
+
+🎯 TÓM 1 CÂU
+
+Nav Group hoạt động như một khung Flexbox dọc (gap 4px) gồm 2 lớp: lớp tĩnh (tiêu đề in hoa, xám, không click được) để phân loại, và lớp động (các nút bấm có icon/chữ, phản hồi hover/active) để điều hướng; code mẫu cung cấp HTML/CSS độc lập, không cần JS, dễ dàng tùy biến bằng cách sửa token màu và copy-paste thẻ <a>.

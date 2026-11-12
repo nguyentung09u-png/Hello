@@ -1,0 +1,123 @@
+menu pannel
+chức năng 
+
+--- scrollview dọc---
+
+
+ScrollView — view chính cung cấp khả năng cuộn.
+2. Container (ViewGroup con bên trong) — chứa toàn bộ nội dung.
+3. Hướng sắp xếp — dọc (VERTICAL).
+4. Kích thước view — ràng buộc chiều ngang/cao.
+5. Cơ chế weight — chia không gian còn lại trong panel.
+6. Nội dung động — các item được thêm dần vào container.
+7. Thanh cuộn — hiện khi nội dung vượt chiều cao khung.
+8. Sự kiện chạm — vuốt để cuộn lên/xuống.
+
+
+scrollview dọc : giúp vuốt lên vuốt xuống vô hạn
+---
+
+
+
+---- nút copy nội dung ---
+
+
+1. Phần tử hiển thị — một TextView (hoặc Button) để chứa nội dung nút.
+2. Nội dung — icon 📋 + chữ "Copy" cỡ nhỏ.
+3. Container cha — một hàng ngang (LinearLayout HORIZONTAL) chứa Title + nút Copy.
+4. Cơ chế weight — Title chiếm phần lớn, đẩy nút Copy sang phải.
+5. Định dạng hình dáng — nền màu, viền mờ, bo góc, padding.
+6. Định dạng chữ — màu cyan, cỡ nhỏ, căn giữa.
+7. Sự kiện click — bắt hành vi người dùng bấm.
+8. Hành vi copy — lấy nội dung, đưa vào clipboard hệ thống.
+9. Phản hồi — hiện thông báo (Toast) xác nhận đã copy.
+
+
+
+copy hết nôi dụng full : final String fullText = titleText + "\n" + descText;
+copy nội dung có trong ô card thôi : final String fullText = descText;
+
+
+---- làm cho ô background Rounded Rectangle ngang rộng ra + ô card to ra --
+
+"Tăng chiều rộng của background Rounded Rectangle lên, để nó chiếm gần hết chiều ngang màn hình."
+
+và
+
+
+"Cho card thơ rộng ra, gần sát mép menuPanel, chừa lề nhỏ thôi."
+
+
+
+
+--- icon fab ---
+
+Load icon được tạo nên bởi các chức năng sau (nói chung):
+
+1. Nguồn ảnh — file icon.png nằm trong thư mục assets/ của project.
+2. Cơ chế truy cập assets — dùng AssetManager để mở file từ assets.
+3. Luồng đọc dữ liệu — mở InputStream từ file.
+4. Giải mã ảnh — dùng BitmapFactory để chuyển dữ liệu thô thành Bitmap.
+5. Đóng luồng — giải phóng tài nguyên sau khi đọc.
+6. Xử lý lỗi — bắt ngoại lệ nếu file thiếu hoặc lỗi đọc, trả về null.
+7. Đối tượng nhận ảnh — ImageView (FAB) nhận Bitmap qua setImageBitmap.
+8. Fallback — nếu ảnh không load được, dùng nền màu thay thế.
+9. Bo tròn ảnh — setClipToOutline + background oval để cắt ảnh theo hình tròn.
+
+
+
+
+
+--- thiết kế : background card +  tiêu đề - mô tả nội dung ---
+
+
+
+---background card ---
+background nền card : #161622
+
+
+-----
+
+tiêu đề :
+
+tiêu đề màu xanh lá cây : #00FF00
+1 card là 1 bài thơ 
+
+Ví dụ :
+
+thơ 1 
+
+thơ 2 
+
+
+
+---tới phần mô tả nội dung -----
+
+
+nội dung mô tả : #D0D0E0
+
+
+
+
+
+
+------ tạo card vòng lặp không giới hạn ---
+
+
+
+Cơ chế vòng lặp tạo card mỗi bài thơ được tạo nên bởi các chức năng sau (nói chung):
+
+1. Nguồn dữ liệu — mảng poems chứa danh sách các bài thơ (mỗi phần tử là 1 bài).
+2. Vòng lặp — duyệt qua từng phần tử trong mảng.
+3. Hàm tạo card — nhận tiêu đề + nội dung, trả về 1 card hoàn chỉnh.
+4. Container đích — nơi chứa tất cả card (contentContainer).
+5. Hành động thêm — mỗi vòng lặp, tạo 1 card và thêm vào container.
+6. Số vòng lặp — bằng số phần tử trong mảng → số card tương ứng.
+7. Tính tự động — không cần viết tay từng card, chỉ cần thêm dữ liệu vào mảng.
+8. Kết quả — danh sách card xếp dọc trong container.
+
+
+for (String[] poem : poems) {
+    LinearLayout card = createPoemCard(poem[0], poem[1]);
+    contentContainer.addView(card);
+}

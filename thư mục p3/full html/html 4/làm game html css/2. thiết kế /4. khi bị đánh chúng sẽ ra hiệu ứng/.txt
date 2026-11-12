@@ -1,0 +1,230 @@
+💥 HIT FEEDBACK — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Hit feedback = 3 hệ thống độc lập, cùng kích hoạt trong 1 hàm khi trúng đòn:
+
+```
+hit(target, dmg)
+    ├─ target.flash = 1              → HỆ 1: flash
+    ├─ spawnParticles(target.x, ...) → HỆ 2: particle
+    └─ addFloater(target.x, ..., dmg)→ HỆ 3: floater
+```
+
+Điểm mấu chốt: mỗi hệ có state riêng, vòng đời riêng, hàm update riêng, hàm draw riêng. Không liên quan đến nhau.
+
+---
+
+🔍 Ba hệ thống riêng biệt
+
+HỆ 1 — FLASH (đỏ loé trên người)
+
+Thành phần Chi tiết
+State entity.flash (float, gắn trên mỗi thực thể)
+Kích hoạt entity.flash = 1
+Update flash -= dt * 5 mỗi frame
+Draw Ellipse đỏ + globalCompositeOperation = 'lighter'
+
+HỆ 2 — FLOATER (số bay lên)
+
+Thành phần Chi tiết
+State Mảng floaters[] (toàn cục)
+Kích hoạt floaters.push({x, y, text, color, life:1, vy:-52})
+Update life -= dt*1.15, y += vy*dt, vy *= (1-2.2*dt)
+Draw strokeText (viền) + fillText (màu)
+
+HỆ 3 — PARTICLE (hạt văng)
+
+Thành phần Chi tiết
+State Mảng particles[] (toàn cục)
+Kích hoạt Vòng lặp push n hạt với vector ngẫu nhiên
+Update life -= dt*decay, vy += 340*dt, x += vx*dt
+Draw arc chấm tròn + 'lighter'
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// STATE TOÀN CỤC
+// ============================
+const particles = [];   // hệ 3
+const floaters  = [];   // hệ 2
+// flash nằm trên mỗi thực thể: entity.flash
+
+// ============================
+// HÀM KÍCH HOẠT CẢ 3
+// ============================
+function hit(target, dmg) {
+  target.hp -= dmg;
+
+  target.flash = 1;                                        // HỆ 1
+  spawnParticles(target.x, target.y - 20, '#ffd166', 6);   // HỆ 2
+  addFloater(target.x, target.y - 36, '-' + Math.round(dmg), '#ffe08a'); // HỆ 3
+}
+
+// ============================
+// HỆ 1: FLASH
+// ============================
+function updateFlash(entity, dt) {
+  entity.flash = Math.max(0, entity.flash - dt * 5);
+}
+
+function drawFlash(entity, ctx) {
+  if (entity.flash <= 0) return;
+
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = `rgba(255,90,90,${entity.flash * 0.55})`;
+  ctx.beginPath();
+  ctx.ellipse(entity.x, entity.y - 20, 14, 20, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// ============================
+// HỆ 2: FLOATER
+// ============================
+function addFloater(x, y, text, color) {
+  floaters.push({ x, y, text, color, life: 1, vy: -52 });
+}
+
+function updateFloaters(dt) {
+  for (let i = floaters.length - 1; i >= 0; i--) {
+    const f = floaters[i];
+    f.life -= dt * 1.15;
+    f.y += f.vy * dt;
+    f.vy *= (1 - 2.2 * dt);
+    if (f.life <= 0) floaters.splice(i, 1);
+  }
+}
+
+function drawFloaters(ctx) {
+  ctx.textAlign = 'center';
+  for (const f of floaters) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, f.life));
+    ctx.font = '800 15px Georgia, serif';
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+    ctx.strokeText(f.text, f.x, f.y);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ============================
+// HỆ 3: PARTICLE
+// ============================
+const rand = (a, b) => a + Math.random() * (b - a);
+
+function spawnParticles(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = rand(28, 155);
+    particles.push({
+      x, y,
+      vx: Math.cos(a) * sp,
+      vy: Math.sin(a) * sp - rand(20, 70),
+      life: 1,
+      decay: rand(1.1, 2.2),
+      size: rand(1.6, 4),
+      color
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life -= dt * p.decay;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+    p.vy += 340 * dt;     // trọng lực
+    p.vx *= (1 - 1.6 * dt); // ma sát
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+  }
+}
+
+function drawParticles(ctx) {
+  ctx.globalCompositeOperation = 'lighter';
+  for (const p of particles) {
+    const a = Math.max(0, Math.min(1, p.life));
+    ctx.globalAlpha = a * 0.9;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * (0.4 + a * 0.8), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// ============================
+// VÒNG LẶP
+// ============================
+function update(dt) {
+  for (const e of enemies) updateFlash(e, dt);   // HỆ 1
+  updateFloaters(dt);                            // HỆ 2
+  updateParticles(dt);                           // HỆ 3
+}
+
+function render(ctx) {
+  // ... vẽ nền, thực thể ...
+  for (const e of enemies) drawFlash(e, ctx);    // HỆ 1 (đè lên thực thể)
+  drawParticles(ctx);                            // HỆ 2
+  drawFloaters(ctx);                             // HỆ 3 (trên cùng)
+}
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  render(ctx);
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+🎨 Thứ tự vẽ quan trọng
+
+```
+1. Nền (sky, ground)
+2. Thực thể (lính, quái, vua)
+3. Flash đè lên từng thực thể   ← HỆ 1, vẽ ngay sau thực thể
+4. Particles                     ← HỆ 3, đè lên tất cả
+5. Floaters (chữ số)             ← HỆ 2, trên cùng
+```
+
+→ Sai thứ tự → hiệu ứng bị che, không thấy.
+
+---
+
+⚙️ Bảng so sánh 3 hệ thống
+
+Tiêu chí Flash Floater Particle
+State Trên thực thể Mảng toàn cục Mảng toàn cục
+Số lượng 1 / thực thể N dòng N chấm
+Update Trong updateXxx() updateFloaters() updateParticles()
+Draw Trong drawXxx() drawFloaters() drawParticles()
+Vòng đời ~0.2s ~0.9s ~0.5–0.9s
+Blend mode 'lighter' Bình thường 'lighter'
+Trọng lực Không Có (vy) Có (vy += 340*dt)
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Các con số cụ thể (dt*5, vy:-52, 340*dt, decay 1.1–2.2) — tôi không có dữ liệu so sánh để biết có tối ưu không.
+· Việc gộp updateParticles và updateFloaters thành 1 hàm chung có tốt hơn không — tôi không chắc; code gốc tách riêng nên tôi giữ tách riêng.
+· Dùng Math.random() thay vì seed cho particle có ảnh hưởng gì không — tôi cho là không quan trọng vì particle chỉ là hiệu ứng thị giác, nhưng đây là suy luận.
+· Có nên bọc ctx.save()/restore() quanh drawFloaters để khôi phục textAlign — tôi nghĩ là nên, nhưng code gốc không làm. Tôi không chắc đây có phải chủ ý của tác giả không.
+· Việc dùng chung 'lighter' cho cả flash và particle có phải để tiết kiệm code không — tôi không rõ.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: tạo 3 hệ độc lập — (1) flash là biến float trên mỗi thực thể, giảm -= dt*5, vẽ ellipse đỏ với 'lighter'; (2) floaters[] là mảng state toàn cục, giảm life -= dt*1.15, vẽ chữ bằng strokeText+fillText; (3) particles[] là mảng state toàn cục, chịu trọng lực vy += 340*dt, vẽ chấm với 'lighter' — cả 3 cùng kích hoạt trong hit() nhưng có update/draw riêng biệt.

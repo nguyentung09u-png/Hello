@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0705">
+<title>Dark Tech Background — Amber Data Streams</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0705;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 100% at 50% -10%, #1a1208 0%, #0d0906 45%, #060403 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Vertical data columns (transform-only, GPU) ---------- */
+  .streams{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    contain:strict;
+  }
+  .streams span{
+    position:absolute;
+    top:-30vh;
+    display:block;
+    width:1px;
+    background:linear-gradient(180deg,
+      rgba(251,191,36,0) 0%,
+      rgba(251,191,36,.55) 30%,
+      rgba(245,158,11,.85) 55%,
+      rgba(217,119,6,.55) 80%,
+      rgba(217,119,6,0) 100%);
+    animation:fall linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .streams span::after{
+    content:"";
+    position:absolute;
+    left:-1px;
+    top:0;
+    width:3px;
+    height:6px;
+    border-radius:50%;
+    background:rgba(253,224,71,.9);
+    box-shadow:0 0 6px rgba(251,191,36,.9);
+  }
+  @keyframes fall{
+    0%{transform:translate3d(0,-30vh,0);opacity:0;}
+    8%{opacity:1;}
+    92%{opacity:1;}
+    100%{transform:translate3d(0,130vh,0);opacity:0;}
+  }
+
+  /* ---------- Horizontal tick marks (static texture) ---------- */
+  .ticks{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:repeating-linear-gradient(
+      to bottom,
+      rgba(251,191,36,.07) 0 1px,
+      transparent 1px 14px
+    );
+    -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 25%, #000 75%, transparent 100%);
+            mask-image:linear-gradient(to right, transparent 0%, #000 25%, #000 75%, transparent 100%);
+    opacity:.5;
+  }
+
+  /* ---------- Warm horizon glow ---------- */
+  .horizon{
+    position:absolute;
+    left:50%;
+    bottom:-30vmin;
+    width:150vmax;
+    height:60vmin;
+    margin-left:-75vmax;
+    border-radius:50%;
+    background:radial-gradient(ellipse at 50% 50%,
+      rgba(251,146,60,.18) 0%,
+      rgba(217,119,6,.10) 30%,
+      rgba(120,53,15,.05) 55%,
+      rgba(120,53,15,0) 75%);
+    animation:horizonBreath 9s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes horizonBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.9;}
+    50%{transform:translate3d(0,0,0) scale(1.08);opacity:1;}
+  }
+
+  /* ---------- Corner accents ---------- */
+  .corner{
+    position:absolute;
+    width:18vmin;
+    height:18vmin;
+    pointer-events:none;
+    opacity:.6;
+  }
+  .corner.tl{top:4vmin;left:4vmin;border-top:1px solid rgba(251,191,36,.25);border-left:1px solid rgba(251,191,36,.25);}
+  .corner.br{bottom:4vmin;right:4vmin;border-bottom:1px solid rgba(251,191,36,.25);border-right:1px solid rgba(251,191,36,.25);}
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 80%, rgba(0,0,0,.75) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .streams span,.horizon{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="ticks"></div>
+  <div class="streams" id="streams"></div>
+  <div class="horizon"></div>
+  <div class="corner tl"></div>
+  <div class="corner br"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const streams = document.getElementById('streams');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 26;
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    const left = (i / COUNT) * 100 + (Math.random() * 2 - 1);
+    const dur = 4.5 + Math.random() * 6;
+    const delay = Math.random() * dur;
+    const h = 18 + Math.random() * 30;
+    s.style.left = left + 'vw';
+    s.style.height = h + 'vh';
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + delay + 's';
+    s.style.opacity = (0.45 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  streams.appendChild(frag);
+})();
+</script>
+</body>
+</html>

@@ -1,12 +1,3 @@
-
-tóm gọn all : 
-flex nó chỉ giúp sắp xếp thôi em
-
-
-
----
-
-
 Chuẩn luôn! Bạn tóm gọn cực kỳ chính xác.
 
 Để mình chốt lại thành 3 gạch đầu dòng cho bạn dễ nhớ nhất, kèm theo câu lệnh CSS tương ứng:

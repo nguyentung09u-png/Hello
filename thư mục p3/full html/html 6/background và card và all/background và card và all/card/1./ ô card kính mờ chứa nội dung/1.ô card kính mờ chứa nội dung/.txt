@@ -1,0 +1,88 @@
+Cách làm Card kính (Glassmorphism)
+
+Tổng quan các bước
+
+1. Chuẩn bị nền phía sau — orb màu hoặc gradient. Đây là điều kiện để thấy hiệu ứng kính.
+2. Tạo khung card — width, max-width, min-height, padding, border-radius.
+3. Nền gradient mờ — background: linear-gradient(...) với màu rgba(255,255,255, thấp).
+4. Viền sáng mảnh — border: 1px solid rgba(255,255,255,.14).
+5. Làm mờ phía sau — backdrop-filter: blur(...) saturate(...) + tiền tố -webkit-.
+6. Bóng đổ 2 lớp — lớp ngoài (bóng) + lớp inset (vệt sáng mép trên).
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glass Card</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:40px 20px;
+    background:#07070d;
+    font-family:system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* Nền phía sau — điều kiện để thấy kính */
+  .stage{
+    position:fixed;inset:0;z-index:-1;overflow:hidden;
+    background:radial-gradient(ellipse at 50% 0%, #16162c 0%, #07070d 60%);
+  }
+  .orb{
+    position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;
+  }
+  .orb-1{width:420px;height:420px;background:#7c5cff;top:-80px;left:-80px}
+  .orb-2{width:380px;height:380px;background:#22d3ee;bottom:-100px;right:-60px;opacity:.45}
+
+  /* Card kính */
+  .card{
+    width:100%;
+    max-width:520px;
+    min-height:220px;
+    padding:26px;
+    border-radius:22px;
+
+    background:linear-gradient(165deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,.03));
+
+    border:1px solid rgba(255,255,255,.14);
+
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+
+    box-shadow:
+      0 25px 60px -20px rgba(0,0,0,.7),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<div class="card"></div>
+
+</body>
+</html>
+```
+
+Lưu ý
+
+· Không chắc hiệu ứng hiển thị giống hệt nhau trên mọi trình duyệt — backdrop-filter hỗ trợ tốt trên Chrome/Edge/Safari; Firefox hỗ trợ từ bản 103+.
+· Trình duyệt cũ không hỗ trợ backdrop-filter: card vẫn hiện nhưng không có blur.
+· Nếu nền phía sau trơn 1 màu → hiệu ứng kính gần như không thấy.
+
+---
+
+Tóm 1 câu: Dựng nền orb/gradient phía sau → tạo khung card (kích thước + padding + bo góc) → thêm nền gradient mờ + viền sáng + backdrop-filter: blur + box-shadow 2 lớp.

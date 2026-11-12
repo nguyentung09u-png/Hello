@@ -1,0 +1,11 @@
+setup :
+pkg update && pkg upgrade -y
+pkg install ffmpeg -y
+
+
+cách sài :
+
+cd /storage/emulated/0/DCIM/ScreenRecorder/
+ffmpeg -i input.mp4 -vcodec libx264 -crf 28 -preset fast -acodec aac -b:a 128k output.mp4
+
+

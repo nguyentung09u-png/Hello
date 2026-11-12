@@ -1,0 +1,397 @@
+🌍 BACKGROUND RANDOM 3600 TỔ HỢP — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Hệ thống = 4 bảng độc lập + 4 PRNG riêng + hàm chọn + rebuild + 5 hàm vẽ:
+
+```
+BƯỚC 1: 4 BẢNG     viết 4 mảng: palette, núi, cây, thời tiết
+BƯỚC 2: PRNG       mulberry32(seed) — 4 seed khác nhau
+BƯỚC 3: HÀM CHỌN   pickBackground(level) trộn 4 lựa chọn
+BƯỚC 4: GÁN        game.bg = pickBackground(level)
+BƯỚC 5: REBUILD    buildGradients() + buildBackground()
+BƯỚC 6: VẼ         5 hàm đọc từ game.bg
+```
+
+Điểm mấu chốt: 4 thành phần độc lập → tổ hợp = 20 × 5 × 6 × 6 = 3600. Cùng level → cùng tổ hợp.
+
+---
+
+🔍 Sáu bước chi tiết
+
+Bước 1 — Viết 4 bảng độc lập
+
+Bảng 1 — 20 palette:
+
+```js
+const BACKGROUNDS = [
+  { name:'Hoàng Hôn', sky:[6 màu], ground:[4 màu],
+    sun:{x, y, core, glow, halo}, stars:0.6, haze:'rgba(...)' },
+  // ... 19 palette khác
+];
+```
+
+Bảng 2 — 5 hình núi:
+
+```js
+const RIDGE_SHAPES = ['sharp', 'round', 'flat', 'jagged', 'twin'];
+```
+
+Bảng 3 — 6 loại cây:
+
+```js
+const TREE_STYLES = ['pine', 'oak', 'palm', 'cactus', 'cherry', 'dead'];
+```
+
+Bảng 4 — 6 thời tiết:
+
+```js
+const WEATHERS = ['none', 'rain', 'snow', 'leaves', 'fireflies', 'ash'];
+```
+
+→ 4 mảng độc lập — không phụ thuộc nhau.
+
+Bước 2 — 4 PRNG seed riêng
+
+```js
+const rng1 = mulberry32(level * 1000003);  // palette
+const rng2 = mulberry32(level * 1000033);  // núi
+const rng3 = mulberry32(level * 1000037);  // cây
+const rng4 = mulberry32(level * 1000039);  // thời tiết
+```
+
+→ 4 seed khác nhau — tránh tương quan giữa 4 thành phần.
+
+Bước 3 — Hàm pickBackground(level)
+
+```js
+function pickBackground(level) {
+  const rng1 = mulberry32(level * 1000003);
+  const rng2 = mulberry32(level * 1000033);
+  const rng3 = mulberry32(level * 1000037);
+  const rng4 = mulberry32(level * 1000039);
+
+  return {
+    ...BACKGROUNDS[Math.floor(rng1() * BACKGROUNDS.length)],
+    ridgeShape: RIDGE_SHAPES[Math.floor(rng2() * RIDGE_SHAPES.length)],
+    treeStyle:  TREE_STYLES [Math.floor(rng3() * TREE_STYLES.length)],
+    weather:    WEATHERS    [Math.floor(rng4() * WEATHERS.length)]
+  };
+}
+```
+
+→ Trộn palette (spread ...) với 3 trường mới.
+
+Bước 4 — Gán khi bắt đầu màn
+
+```js
+function startLevel() {
+  game.bg = pickBackground(game.level);   // ← 1 lần
+  buildGradients();                       // ← rebuild gradient
+  buildBackground();                      // ← rebuild bgData
+  // ...
+}
+```
+
+Bước 5 — Rebuild 2 hàm
+
+Hàm Việc làm
+buildGradients() Tạo lại skyGrad + groundGrad từ bg.sky và bg.ground
+buildBackground() Tạo lại bgData.{stars, ridges, trees, rocks, weather}
+
+→ Mọi thứ phụ thuộc game.bg được làm mới.
+
+Bước 6 — 5 hàm vẽ đọc từ game.bg
+
+Hàm Đọc
+drawSky skyGrad (đã rebuild)
+drawStars bg.stars
+drawSun bg.sun.{x, y, core, glow, halo}
+drawRidges bg.ridgeShape + bg.ground[2..3]
+drawTree bg.treeStyle
+drawWeather bg.weather
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. BỐN BẢNG ĐỘC LẬP
+// ============================
+const BACKGROUNDS = [
+  { name:'Hoàng Hôn',
+    sky:['#0b0e2a','#241a4a','#5a2f5e','#a8484f','#dd7a45','#f4b063'],
+    ground:['#4a5b3c','#3a4a32','#26331f','#111a10'],
+    sun:{x:0.72, y:-0.018, core:'#fff3ce', glow:'rgba(...)', halo:'rgba(...)'},
+    stars:0.6, haze:'rgba(...)' },
+  // ... 19 palette khác
+];
+
+const RIDGE_SHAPES = ['sharp', 'round', 'flat', 'jagged', 'twin'];
+const TREE_STYLES  = ['pine', 'oak', 'palm', 'cactus', 'cherry', 'dead'];
+const WEATHERS     = ['none', 'rain', 'snow', 'leaves', 'fireflies', 'ash'];
+
+// ============================
+// 2. PRNG
+// ============================
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ============================
+// 3. HÀM CHỌN
+// ============================
+function pickBackground(level) {
+  const rng1 = mulberry32(level * 1000003);
+  const rng2 = mulberry32(level * 1000033);
+  const rng3 = mulberry32(level * 1000037);
+  const rng4 = mulberry32(level * 1000039);
+
+  return {
+    ...BACKGROUNDS[Math.floor(rng1() * BACKGROUNDS.length)],
+    ridgeShape: RIDGE_SHAPES[Math.floor(rng2() * RIDGE_SHAPES.length)],
+    treeStyle:  TREE_STYLES [Math.floor(rng3() * TREE_STYLES.length)],
+    weather:    WEATHERS    [Math.floor(rng4() * WEATHERS.length)]
+  };
+}
+
+// ============================
+// 4. STATE
+// ============================
+const game = { level: 1, bg: null };
+let bgData = null;
+let skyGrad, groundGrad;
+
+// ============================
+// 5. REBUILD GRADIENTS
+// ============================
+function buildGradients() {
+  const bg = game.bg || BACKGROUNDS[0];
+  skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON + 30);
+  bg.sky.forEach((c, i) => {
+    skyGrad.addColorStop(i / (bg.sky.length - 1), c);
+  });
+  groundGrad = ctx.createLinearGradient(0, HORIZON, 0, H);
+  bg.ground.forEach((c, i) => {
+    groundGrad.addColorStop(i / (bg.ground.length - 1), c);
+  });
+}
+
+// ============================
+// 6. REBUILD BGDATA
+// ============================
+function buildBackground() {
+  const lv = game.level || 1;
+  const rng = mulberry32(20240711 + lv * 313);
+  bgData = { stars: [], ridges: [], trees: [], rocks: [], weather: [] };
+
+  for (let i = 0; i < 80; i++) {
+    bgData.stars.push({ x:rng()*W, y:rng()*HORIZON*0.72,
+      r:rng()*1.3+0.25, a:rng()*0.55+0.15, tw:rng()*Math.PI*2 });
+  }
+  for (let i = 0; i < 26; i++) {
+    const y = HORIZON + 14 + rng() * (H*0.25);
+    bgData.trees.push({ x:rng()*W, y, s:0.5+rng()*1.2, variant:rng() });
+  }
+  bgData.trees.sort((a,b) => a.y - b.y);
+
+  for (let i = 0; i < 30; i++) {
+    const y = HORIZON + 25 + rng() * (H*0.3);
+    bgData.rocks.push({ x:rng()*W, y, r:1.8+rng()*4.2, sq:0.45+rng()*0.4 });
+  }
+  bgData.rocks.sort((a,b) => a.y - b.y);
+
+  const w = game.bg?.weather || 'none';
+  const n = w === 'none' ? 0 : (w === 'rain' ? 90 : 60);
+  for (let i = 0; i < n; i++) {
+    bgData.weather.push({
+      x: rng()*W, y: rng()*H,
+      vy: w === 'rain' ? 300+rng()*200 :
+          w === 'snow' ? 30+rng()*40 : 0,
+      vx: w === 'rain' ? -40 : w === 'snow' ? -10+rng()*20 : 0,
+      size: rng()*2+1, phase: rng()*Math.PI*2, rot: rng()*Math.PI*2
+    });
+  }
+}
+
+// ============================
+// 7. GÁN KHI BẮT ĐẦU MÀN
+// ============================
+function startLevel() {
+  game.bg = pickBackground(game.level);
+  buildGradients();
+  buildBackground();
+  // ...
+}
+
+function startGame() {
+  game.level = 1;
+  game.bg = pickBackground(1);
+  buildGradients();
+  buildBackground();
+  // ...
+}
+
+// ============================
+// 8. NĂM HÀM VẼ
+// ============================
+function drawSky() {
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, W, HORIZON);
+}
+
+function drawStars(t) {
+  const bg = game.bg;
+  if (bg.stars <= 0) return;
+  for (const s of bgData.stars) {
+    const tw = 0.55 + 0.45 * Math.sin(t*0.0016 + s.tw);
+    ctx.globalAlpha = s.a * tw * bg.stars;
+    ctx.fillStyle = '#fff6d8';
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawSun() {
+  const bg = game.bg;
+  const sx = W * bg.sun.x;
+  const sy = HORIZON + H * bg.sun.y;
+  const R = Math.max(W, H) * 0.30;
+  const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, R);
+  g.addColorStop(0.00, bg.sun.core);
+  g.addColorStop(0.10, bg.sun.glow);
+  g.addColorStop(0.30, bg.sun.halo);
+  g.addColorStop(1.00, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI*2); ctx.fill();
+}
+
+function drawRidges() {
+  const bg = game.bg;
+  const shape = bg.ridgeShape;
+  const pts = generateRidgePoints(shape, HORIZON+8, H*0.215, 6, W);
+  ctx.fillStyle = bg.ground[3];
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.lineTo(W+80, H); ctx.lineTo(-80, H); ctx.closePath(); ctx.fill();
+}
+
+function generateRidgePoints(shape, baseY, height, count, w) {
+  const pts = [{ x:-80, y:baseY }];
+  const step = (w + 160) / count;
+  const rng = mulberry32(shape.charCodeAt(0) + count*37);
+
+  for (let i = 0; i < count; i++) {
+    const cx = -80 + step * (i + 0.5);
+    let peakY, peakW;
+    switch (shape) {
+      case 'sharp':  peakY = baseY - height*(0.7+rng()*0.3); peakW = step*0.5;  break;
+      case 'round':  peakY = baseY - height*(0.4+rng()*0.3); peakW = step*0.75; break;
+      case 'flat':   peakY = baseY - height*(0.2+rng()*0.2); peakW = step*0.9;  break;
+      case 'jagged': peakY = baseY - height*(0.5+rng()*0.5); peakW = step*0.35; break;
+      case 'twin':   /* 2 đỉnh */ continue;
+    }
+    pts.push({ x:cx - peakW, y:baseY - height*0.15 });
+    pts.push({ x:cx,         y:peakY });
+    pts.push({ x:cx + peakW, y:baseY - height*0.15 });
+  }
+  pts.push({ x:w+80, y:baseY });
+  return pts;
+}
+
+function drawTree(tr, style, colors) {
+  const s = tr.s * (scaleAt(tr.y) * 1.05);
+  ctx.save();
+  ctx.translate(tr.x, tr.y);
+  ctx.scale(s, s);
+
+  if (style === 'pine')   { /* 3 tầng tam giác */ }
+  else if (style === 'oak')    { /* 3 ellipse tán */ }
+  else if (style === 'palm')   { /* thân cong + 5 lá */ }
+  else if (style === 'cactus') { /* 5 khối bo góc */ }
+  else if (style === 'cherry') { /* 3 tán hồng + hoa rơi */ }
+  else if (style === 'dead')   { /* cành khô */ }
+
+  ctx.restore();
+}
+
+function drawWeather() {
+  const w = game.bg?.weather;
+  if (!w || w === 'none') return;
+
+  if (w === 'rain') {
+    ctx.strokeStyle = 'rgba(180,200,240,0.55)';
+    for (const p of bgData.weather) {
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - 3, p.y + 12); ctx.stroke();
+    }
+  }
+  else if (w === 'snow') {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    for (const p of bgData.weather) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  else if (w === 'leaves')    { /* ellipse xoay */ }
+  else if (w === 'fireflies') { /* chấm vàng + 'lighter' */ }
+  else if (w === 'ash')       { /* chấm xám bay lên */ }
+}
+
+// ============================
+// 9. VÒNG LẶP
+// ============================
+function render(t) {
+  drawSky();
+  drawStars(t);
+  drawSun();
+  drawRidges();
+  drawGround();
+  for (const tr of bgData.trees) drawTree(tr, game.bg.treeStyle, ...);
+  drawWeather();
+  // ... nhân vật ...
+}
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  render(now);
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+Số palette 20 Thêm/bớt bộ màu
+Seed 1000003/33/37/39 4 số nguyên tố Đổi phân bố random
+Seed 20240711 + lv*313 Công thức Đổi vị trí cây/đá/núi
+Số cây 26 Rừng thưa/dày
+stars (0→1) Từ palette Sao ít/nhiều
+
+---
+
+⚠️ Điều tôi không chắc
+
+· 4 số nguyên tố 1000003, 1000033, 1000037, 1000039 — tôi chọn theo thói quen; không có cơ sở toán học khẳng định tối ưu.
+· Dùng 4 PRNG riêng có thực sự tránh tương quan tốt hơn 1 PRNG gọi 4 lần — tôi cho là có, nhưng không có dữ liệu kiểm định thống kê.
+· Công thức level * số nguyên tố — tôi chọn; bạn có thể đổi, miễn cùng level → cùng seed.
+· Số cây/đá/sao cụ thể (80, 26, 30) — tôi chọn theo trực giác.
+· 20 palette — tôi tự chọn, có thể không đủ đa dạng với một số người.
+· Hiệu năng khi rebuild mỗi màn — buildGradients + buildBackground chạy 1 lần/màn, chắc tốn < 10ms; tôi không có số đo cụ thể.
+· Chưa có fade transition giữa các màn — background mới hiện ngay, không mượt.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: viết 4 bảng mảng độc lập (BACKGROUNDS 20 palette + RIDGE_SHAPES 5 + TREE_STYLES 6 + WEATHERS 6) + 4 PRNG mulberry32(level * số_nguyên_tố_khác_nhau) để tránh tương quan + hàm pickBackground(level) trộn 4 lựa chọn bằng Math.floor(rng() * length) + gán game.bg 1 lần trong startLevel() + rebuild skyGrad/groundGrad/bgData + 5 hàm vẽ (drawSun, drawRidges, drawTree, drawWeather, drawSky) đọc từ game.bg — tổng 20 × 5 × 6 × 6 = 3600 tổ hợp, cùng level luôn ra cùng kết quả.

@@ -1,0 +1,8 @@
+1. đó là lớp sau card đủ màu hết xấu 
+nên xóa đi
+.card-wrap::before
+```
+
+
+
+2.Nhớ chuyển đổi khái niệm css/js sang android (java)

@@ -1,0 +1,75 @@
+Tổng quan cách làm
+
+Underline Slide In gồm 4 bước:
+
+1. Neo chữ — cho <span> position: relative để làm gốc tọa độ.
+2. Tạo gạch bằng ::after — thẻ giả, position: absolute nằm dưới chữ.
+3. Ẩn ban đầu — đặt width: 0 + transition: width.
+4. Kích hoạt — khi .active (hoặc :hover) đổi width: 100% → gạch chạy dài ra.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .text { display: flex; gap: 0.05em; font-size: 6rem; font-weight: 900; }
+
+  .text span {
+    position: relative;              /* gốc tọa độ cho ::after */
+    color: #a855f7;
+  }
+
+  .text span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 0;                        /* ẩn ban đầu */
+    height: 4px;
+    background: linear-gradient(90deg, #ff5c8a, #38bdf8);
+    border-radius: 2px;
+    transition: width 0.4s ease;     /* chạy mượt */
+  }
+
+  .text span.active::after {
+    width: 100%;                     /* chạy dài ra */
+  }
+</style>
+</head>
+<body>
+
+  <div class="text" id="text">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.text span');
+  let i = 0;
+
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[i].classList.add('active');
+    i = (i + 1) % spans.length;
+  }, 800);
+</script>
+</body>
+</html>
+```
+
+Biến thể:
+
+· Chạy từ phải sang → left: auto; right: 0.
+· Chạy từ giữa ra → left: 50%; transform: translateX(-50%).
+· Không cần JS → thay .active bằng :hover.
+
+---
+
+🎯 Tóm 1 câu: Cho <span> position: relative, tạo ::after với width: 0 + transition, khi .active đổi width: 100% để gạch chạy dài ra.

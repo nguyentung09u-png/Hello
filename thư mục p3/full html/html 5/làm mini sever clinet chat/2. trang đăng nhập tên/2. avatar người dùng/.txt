@@ -1,0 +1,151 @@
+Tổng quan cách làm (ngắn)
+
+Theo cách tôi hiểu, để làm khối Avatar Preview + hàng chọn avatar cần 3 bước:
+
+1. HTML — 1 div.avatar-preview (khung tròn lớn) + 1 div.avatar-row chứa nhiều button[data-emoji].
+2. CSS — preview bo tròn + gradient; button bo tròn, .selected đổi viền xanh, .bump phóng nhẹ khi đổi.
+3. JS — event delegation trên .avatar-row để bắt click, toggle class .selected, cập nhật preview; khi submit thì querySelector('button.selected').dataset.emoji.
+
+Lưu ý: tôi không chắc bạn muốn lưu vào localStorage hay biến runtime — code dưới để localStorage theo code cũ.
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{
+    margin:0; padding:40px;
+    background:#02030a; color:#fff;
+    font-family:system-ui,sans-serif;
+    display:flex; justify-content:center;
+  }
+  .box{
+    width:300px; padding:24px;
+    border-radius:20px;
+    background:rgba(20,22,40,.8);
+    text-align:center;
+  }
+
+  /* Avatar preview */
+  .avatar-preview{
+    width:80px; height:80px;
+    border-radius:50%;
+    margin:0 auto 16px;
+    display:flex; justify-content:center; align-items:center;
+    font-size:38px;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    box-shadow:0 8px 24px rgba(124,58,237,.5);
+    transition:transform .3s ease;
+  }
+  .avatar-preview.bump{ transform:scale(1.1); }
+
+  /* Hàng chọn */
+  .avatar-row{
+    display:flex; justify-content:center;
+    gap:6px; flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .avatar-row button{
+    width:36px; height:36px;
+    border-radius:50%;
+    border:2px solid transparent;
+    background:rgba(255,255,255,.08);
+    font-size:20px; cursor:pointer;
+    display:flex; justify-content:center; align-items:center;
+    transition:all .2s ease;
+    padding:0;
+  }
+  .avatar-row button:hover{
+    background:rgba(255,255,255,.15);
+    transform:translateY(-2px);
+  }
+  .avatar-row button.selected{
+    border-color:#67e8f9;
+    background:rgba(103,232,249,.2);
+    box-shadow:0 0 12px rgba(103,232,249,.5);
+  }
+
+  #result{ font-size:.85rem; color:#94a3b8; margin-top:8px; }
+</style>
+</head>
+<body>
+
+  <div class="box">
+    <div class="avatar-preview" id="avatar-preview">😀</div>
+
+    <div class="avatar-row" id="avatar-row">
+      <button data-emoji="😀" class="selected">😀</button>
+      <button data-emoji="😎">😎</button>
+      <button data-emoji="🐱">🐱</button>
+      <button data-emoji="🐶">🐶</button>
+      <button data-emoji="🦊">🦊</button>
+      <button data-emoji="🐼">🐼</button>
+      <button data-emoji="🌸">🌸</button>
+      <button data-emoji="🐧">🐧</button>
+    </div>
+
+    <button id="save-btn">Lưu</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const avatarRow     = document.getElementById('avatar-row');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const saveBtn       = document.getElementById('save-btn');
+    const resultEl      = document.getElementById('result');
+
+    // Event delegation
+    avatarRow.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+
+      avatarRow.querySelectorAll('button')
+        .forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      avatarPreview.textContent = btn.dataset.emoji;
+      avatarPreview.classList.add('bump');
+      setTimeout(() => avatarPreview.classList.remove('bump'), 300);
+    });
+
+    // Khi lưu — đọc button.selected
+    saveBtn.addEventListener('click', () => {
+      const selected = avatarRow.querySelector('button.selected');
+      const emoji = selected ? selected.dataset.emoji : '😀';
+      localStorage.setItem('mc_avatar', emoji);
+      resultEl.textContent = 'Đã lưu: ' + emoji;
+    });
+
+    // Khôi phục từ localStorage (nếu có)
+    const saved = localStorage.getItem('mc_avatar');
+    if (saved){
+      const btn = avatarRow.querySelector(`button[data-emoji="${saved}"]`);
+      if (btn) btn.click();
+    }
+  </script>
+</body>
+</html>
+```
+
+Giải thích ngắn:
+
+· .avatar-preview — 1 div bo tròn 80px, chứa emoji, có class .bump để phóng nhẹ khi đổi.
+· .avatar-row button — 8 button bo tròn 36px, mỗi cái có data-emoji, class .selected để highlight.
+· JS dùng event delegation trên .avatar-row (1 listener thay vì 8), toggle .selected, cập nhật preview.
+· Khi lưu: querySelector('button.selected').dataset.emoji → ghi localStorage.
+· Khôi phục: đọc localStorage, tìm button tương ứng rồi click() để kích hoạt logic có sẵn.
+
+Lưu ý:
+
+· Code không phụ thuộc thư viện ngoài — chạy trực tiếp khi mở file HTML.
+· Dùng emoji thay vì ảnh upload — nếu muốn upload ảnh thật thì phải dùng <input type="file"> + FileReader hoặc Firebase Storage, code trên chưa có.
+· Tôi không chắc bạn muốn lưu emoji hay ID ảnh — code trên lưu emoji theo code cũ.
+
+---
+
+🎯 Tóm 1 câu: Dựng div.avatar-preview bo tròn 80px + div.avatar-row chứa 8 button[data-emoji], CSS thêm .selected (viền xanh) và .bump (phóng nhẹ), JS event-delegation toggle class + cập nhật preview, lưu button.selected.dataset.emoji vào localStorage — code trên là demo tối thiểu, không cần thư viện ngoài.

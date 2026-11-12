@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070510">
+<title>Dark Tech Background — Ultraviolet Fiber Weave</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#070510;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 110% at 30% 20%, #150c2a 0%, #0a0618 45%, #040209 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Fiber weave (two interlaced diagonal bundles, painted once) ---------- */
+  .weave{
+    position:absolute;
+    inset:-15%;
+    background-image:
+      repeating-linear-gradient(72deg,
+        rgba(139,92,246,.18) 0 1px,
+        transparent 1px 3px,
+        rgba(139,92,246,.06) 3px 4px,
+        transparent 4px 130px),
+      repeating-linear-gradient(-72deg,
+        rgba(56,189,248,.16) 0 1px,
+        transparent 1px 3px,
+        rgba(56,189,248,.05) 3px 4px,
+        transparent 4px 130px);
+    -webkit-mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 52%, rgba(0,0,0,0) 84%);
+            mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 52%, rgba(0,0,0,0) 84%);
+    animation:weaveDrift 40s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes weaveDrift{
+    from{background-position:0 0, 0 0;}
+    to{background-position:260px 0, -260px 0;}
+  }
+
+  /* ---------- Iridescent bloom behind weave ---------- */
+  .iridescent{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(45% 40% at 22% 30%, rgba(139,92,246,.16), transparent 70%),
+      radial-gradient(50% 45% at 78% 72%, rgba(56,189,248,.14), transparent 70%),
+      radial-gradient(40% 35% at 50% 50%, rgba(217,70,239,.08), transparent 70%);
+    animation:iriBreath 16s ease-in-out infinite alternate;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes iriBreath{
+    from{transform:translate3d(0,0,0) scale(1);opacity:.85;}
+    to{transform:translate3d(0,0,0) scale(1.08);opacity:1;}
+  }
+
+  /* ---------- Traveling light threads along the weave (transform-only) ---------- */
+  .threads{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .threads span{
+    position:absolute;
+    display:block;
+    width:2px;
+    height:26vh;
+    background:linear-gradient(180deg,
+      rgba(139,92,246,0) 0%,
+      rgba(167,139,250,.75) 45%,
+      rgba(56,189,248,.85) 55%,
+      rgba(139,92,246,0) 100%);
+    border-radius:2px;
+    animation:threadFall linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .threads span.h{
+    width:26vw;
+    height:2px;
+    background:linear-gradient(90deg,
+      rgba(56,189,248,0) 0%,
+      rgba(167,139,250,.75) 45%,
+      rgba(56,189,248,.85) 55%,
+      rgba(56,189,248,0) 100%);
+    animation:threadSlide linear infinite;
+  }
+  @keyframes threadFall{
+    0%{transform:translate3d(0,-30vh,0);opacity:0;}
+    12%{opacity:1;}
+    88%{opacity:1;}
+    100%{transform:translate3d(0,130vh,0);opacity:0;}
+  }
+  @keyframes threadSlide{
+    0%{transform:translate3d(-30vw,0,0);opacity:0;}
+    12%{opacity:1;}
+    88%{opacity:1;}
+    100%{transform:translate3d(130vw,0,0);opacity:0;}
+  }
+
+  /* ---------- Corner angular accents ---------- */
+  .angles{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  .angles::before,
+  .angles::after{
+    content:"";
+    position:absolute;
+    width:16vmin;
+    height:16vmin;
+    border:1px solid rgba(167,139,250,.22);
+  }
+  .angles::before{top:5vmin;left:5vmin;border-right:none;border-bottom:none;}
+  .angles::after{bottom:5vmin;right:5vmin;border-left:none;border-top:none;}
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.48) 80%, rgba(0,0,0,.80) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .weave,.iridescent,.threads span{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="iridescent"></div>
+  <div class="weave"></div>
+  <div class="threads" id="threads"></div>
+  <div class="angles"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const threads = document.getElementById('threads');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const V_COUNT = 8;
+  const H_COUNT = 5;
+
+  for (let i = 0; i < V_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = (Math.random() * 100) + 'vw';
+    s.style.top = '0';
+    const dur = 7 + Math.random() * 8;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  for (let i = 0; i < H_COUNT; i++) {
+    const s = document.createElement('span');
+    s.className = 'h';
+    s.style.top = (Math.random() * 100) + 'vh';
+    s.style.left = '0';
+    const dur = 9 + Math.random() * 9;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  threads.appendChild(frag);
+})();
+</script>
+</body>
+</html>

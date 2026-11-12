@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050308">
+<title>Dark Tech Background — Amethyst Crystal Shatter</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#050308;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 110% at 50% 45%, #140a24 0%, #0b0616 45%, #030107 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Crystal shard grid (SVG data-uri, painted once) ---------- */
+  .crystal{
+    position:absolute;
+    inset:-8%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%23a78bfa' stroke-opacity='0.20' stroke-width='0.9'%3E%3Cpolygon points='90,10 140,60 120,140 60,140 40,60'/%3E%3Cpolygon points='90,40 115,70 105,120 75,120 65,70'/%3E%3Cline x1='90' y1='10' x2='90' y2='40'/%3E%3Cline x1='140' y1='60' x2='115' y2='70'/%3E%3Cline x1='120' y1='140' x2='105' y2='120'/%3E%3Cline x1='60' y1='140' x2='75' y2='120'/%3E%3Cline x1='40' y1='60' x2='65' y2='70'/%3E%3C/g%3E%3Cg fill='%23ddd6fe' fill-opacity='0.5'%3E%3Ccircle cx='90' cy='10' r='1.6'/%3E%3Ccircle cx='140' cy='60' r='1.6'/%3E%3Ccircle cx='120' cy='140' r='1.6'/%3E%3Ccircle cx='60' cy='140' r='1.6'/%3E%3Ccircle cx='40' cy='60' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:180px 180px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 88%);
+    animation:crystalDrift 70s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes crystalDrift{
+    from{background-position:0 0;}
+    to{background-position:180px 180px;}
+  }
+
+  /* ---------- Floating crystal facets (transform-only, GPU) ---------- */
+  .facets{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .facets i{
+    position:absolute;
+    background:linear-gradient(135deg,
+      rgba(196,181,253,.18) 0%,
+      rgba(139,92,246,.08) 45%,
+      rgba(167,139,250,.14) 100%);
+    border:1px solid rgba(221,214,254,.14);
+    clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+    animation:facetFloat 24s ease-in-out infinite alternate;
+  }
+  .facets i:nth-child(1){width:18vmin;height:22vmin;left:8%;top:12%;animation-duration:26s;transform:rotate(-12deg);}
+  .facets i:nth-child(2){width:12vmin;height:15vmin;right:10%;top:20%;animation-duration:20s;animation-delay:-4s;transform:rotate(24deg);}
+  .facets i:nth-child(3){width:22vmin;height:26vmin;left:24%;bottom:8%;animation-duration:30s;animation-delay:-8s;transform:rotate(8deg);}
+  .facets i:nth-child(4){width:14vmin;height:18vmin;right:22%;bottom:16%;animation-duration:22s;animation-delay:-2s;transform:rotate(-20deg);}
+  .facets i:nth-child(5){width:10vmin;height:13vmin;left:46%;top:32%;animation-duration:18s;animation-delay:-6s;transform:rotate(40deg);}
+
+  @keyframes facetFloat{
+    from{transform:translate3d(0,0,0) rotate(var(--r,0deg));opacity:.55;}
+    to{transform:translate3d(0,-2vmin,0) rotate(calc(var(--r,0deg) + 6deg));opacity:1;}
+  }
+
+  /* ---------- Violet bloom ---------- */
+  .bloom{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:90vmin;
+    height:90vmin;
+    margin-left:-45vmin;
+    margin-top:-45vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(167,139,250,.12) 0%,
+      rgba(109,40,217,.05) 44%,
+      rgba(109,40,217,0) 74%);
+    animation:bloomBreath 12s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes bloomBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.72;}
+    50%{transform:translate3d(0,0,0) scale(1.12);opacity:1;}
+  }
+
+  /* ---------- Rising amethyst motes ---------- */
+  .motes{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .motes span{
+    position:absolute;
+    width:2px;
+    height:2px;
+    border-radius:50%;
+    background:rgba(221,214,254,.9);
+    box-shadow:0 0 6px rgba(196,181,253,.8), 0 0 14px rgba(139,92,246,.5);
+    animation:moteRise linear infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes moteRise{
+    0%{transform:translate3d(0,10vh,0);opacity:0;}
+    15%{opacity:1;}
+    85%{opacity:.75;}
+    100%{transform:translate3d(1vw,-110vh,0);opacity:0;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.85) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .crystal,.facets i,.bloom,.motes span{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="crystal"></div>
+  <div class="bloom"></div>
+  <div class="facets">
+    <i style="--r:-12deg"></i>
+    <i style="--r:24deg"></i>
+    <i style="--r:8deg"></i>
+    <i style="--r:-20deg"></i>
+    <i style="--r:40deg"></i>
+  </div>
+  <div class="motes" id="motes"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const motes = document.getElementById('motes');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 20;
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = (Math.random() * 100) + 'vw';
+    const dur = 8 + Math.random() * 9;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  motes.appendChild(frag);
+})();
+</script>
+</body>
+</html>

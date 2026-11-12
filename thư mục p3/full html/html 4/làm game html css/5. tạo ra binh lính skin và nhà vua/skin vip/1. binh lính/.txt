@@ -1,0 +1,183 @@
+Tổng quan cách làm
+
+Vẽ binh lính là 1 hàm duy nhất drawSoldier(g, x, y, scale, time, seed), vẽ tuần tự từ sau ra trước theo 8 bước:
+
+```
+1. save() + translate(x,y) + scale(s,s)     — đặt vị trí & tỉ lệ
+2. translate(0, sin(t·2.2 + seed) · 1.1)    — nhấp nhô
+3. Giáo (cán + đầu)                         — vẽ trước, nằm sau lưng
+4. Chân + ủng
+5. Giáp thân (rrect + gradient 3 lớp)
+6. Đai lưng
+7. Giáp vai (2 ellipse + gradient)
+8. Đầu + mắt + mũ (gradient 3 lớp + highlight + sống mũi) + lông mũ
+9. restore()                                 — trả transform
+```
+
+Điểm cốt lõi:
+
+· Không dùng ảnh — mọi thứ là beginPath / arc / ellipse / fillRect / rrect.
+· Gradient tạo cảm giác khối: createLinearGradient(x1,y1,x2,y2) với 2–3 addColorStop.
+· seed khác nhau cho mỗi lính → nhấp nhô lệch pha.
+· save/restore để không ảnh hưởng các đối tượng vẽ sau.
+
+---
+
+Code chung chung
+
+```js
+// rrect — hình chữ nhật bo góc
+function rrect(g, x, y, w, h, r){
+  r = Math.min(r, w/2, h/2);
+  g.beginPath();
+  g.moveTo(x+r, y);
+  g.arcTo(x+w, y,   x+w, y+h, r);
+  g.arcTo(x+w, y+h, x,   y+h, r);
+  g.arcTo(x,   y+h, x,   y,   r);
+  g.arcTo(x,   y,   x+w, y,   r);
+  g.closePath();
+}
+
+// ===== VẼ BINH LÍNH =====
+function drawSoldier(g, x, y, s, t, seed){
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+
+  // 1) Nhấp nhô theo sin, lệch pha bằng seed
+  const bob = Math.sin(t * 2.2 + seed) * 1.1;
+  g.translate(0, bob);
+
+  // ===== 2) GIÁO (vẽ trước, nằm sau) =====
+  g.strokeStyle = '#5a3d24';   // cán gỗ nâu
+  g.lineWidth = 3;
+  g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(15, -68);
+  g.lineTo(15, 4);
+  g.stroke();
+
+  // đầu giáo — tam giác, 2 tông xám
+  g.fillStyle = '#aab8cc';
+  g.beginPath();
+  g.moveTo(15, -82); g.lineTo(20.5, -68);
+  g.lineTo(15, -63); g.lineTo(9.5, -68);
+  g.closePath(); g.fill();
+
+  g.fillStyle = '#e2ecff';
+  g.beginPath();
+  g.moveTo(15, -82); g.lineTo(15, -63); g.lineTo(9.5, -68);
+  g.closePath(); g.fill();
+
+  // ===== 3) CHÂN + ỦNG =====
+  g.fillStyle = '#232b45';
+  g.fillRect(-7.5, -15, 6, 15);
+  g.fillRect( 1.5, -15, 6, 15);
+
+  g.fillStyle = '#141a2e';
+  g.fillRect(-8.5, -5, 8, 5);
+  g.fillRect( 0.5, -5, 8, 5);
+
+  // ===== 4) GIÁP THÂN (rrect + gradient 3 lớp) =====
+  const bg = g.createLinearGradient(-12, -44, 12, -14);
+  bg.addColorStop(0,    '#7ba2d8');
+  bg.addColorStop(0.55, '#4a6fa5');
+  bg.addColorStop(1,    '#26395e');
+  g.fillStyle = bg;
+  rrect(g, -11, -42, 22, 28, 5);
+  g.fill();
+
+  // đường giữa ngực — vạch sáng mờ
+  g.strokeStyle = 'rgba(255,255,255,.18)';
+  g.lineWidth = 1.4;
+  g.beginPath();
+  g.moveTo(0, -40); g.lineTo(0, -16);
+  g.stroke();
+
+  // ===== 5) ĐAI LƯNG =====
+  g.fillStyle = '#b8912f';
+  g.fillRect(-11, -22, 22, 4.5);
+  g.fillStyle = '#f5d76e';
+  g.fillRect(-3, -23, 6, 6.5);
+
+  // ===== 6) GIÁP VAI (2 ellipse + gradient) =====
+  const pg = g.createLinearGradient(-20, -46, -6, -34);
+  pg.addColorStop(0, '#b8cdf0');
+  pg.addColorStop(1, '#4a6fa5');
+  g.fillStyle = pg;
+  g.beginPath(); g.ellipse(-12, -40, 7.5, 5.8, -0.2, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.ellipse( 12, -40, 7.5, 5.8,  0.2, 0, Math.PI*2); g.fill();
+
+  // ===== 7) ĐẦU + MẮT =====
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(0, -50, 8, 0, Math.PI*2); g.fill();
+
+  g.fillStyle = '#2b2038';
+  g.beginPath(); g.arc(-2.9, -51, 1.15, 0, Math.PI*2); g.fill();
+  g.beginPath(); g.arc( 2.9, -51, 1.15, 0, Math.PI*2); g.fill();
+
+  // ===== 8) MŨ GIÁP =====
+  const hg = g.createLinearGradient(-10, -60, 10, -44);
+  hg.addColorStop(0,   '#8fb3e0');
+  hg.addColorStop(0.5, '#5b7fb8');
+  hg.addColorStop(1,   '#33517f');
+  g.fillStyle = hg;
+  g.beginPath();
+  g.arc(0, -51, 9.4, Math.PI, 0);   // vòm trên
+  g.fill();
+  g.fillRect(-9.4, -52.5, 18.8, 4.5); // vành
+
+  // highlight trắng
+  g.fillStyle = 'rgba(255,255,255,.35)';
+  g.fillRect(-8, -55, 6, 2);
+
+  // sống mũi (nose guard)
+  g.fillStyle = '#41608f';
+  g.fillRect(-1.6, -52.5, 3.2, 9);
+
+  // ===== 9) LÔNG MŨ (2 lớp uốn cong) =====
+  g.fillStyle = '#c0392b';
+  g.beginPath();
+  g.moveTo(-1.5, -60);
+  g.quadraticCurveTo(5, -72, 13, -60);
+  g.quadraticCurveTo(5, -63, -1.5, -58);
+  g.closePath(); g.fill();
+
+  g.fillStyle = 'rgba(255,120,100,.5)';
+  g.beginPath();
+  g.moveTo(-1.5, -60);
+  g.quadraticCurveTo(4, -68, 9, -61);
+  g.quadraticCurveTo(3, -62, -1.5, -58);
+  g.closePath(); g.fill();
+
+  g.restore();
+}
+
+// ===== GỌI TRONG VÒNG LẶP =====
+// Mảng lính: mỗi lính 1 seed khác
+const soldiers = [
+  { x: 62,  y: 700, scale: 0.92, seed: 0.0 },
+  { x: 138, y: 700, scale: 0.92, seed: 1.7 },
+  { x: 312, y: 700, scale: 0.92, seed: 3.1 },
+  { x: 388, y: 700, scale: 0.92, seed: 4.6 },
+  { x: 225, y: 748, scale: 1.12, seed: 2.4 }
+];
+
+for (const s of soldiers){
+  drawSoldier(ctx, s.x, s.y, s.scale, time, s.seed);
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· Ý nghĩa 5 giá trị seed (0.0 / 1.7 / 3.1 / 4.6 / 2.4) — tôi không rõ tác giả chọn theo quy luật nào (rải đều pha? random?). Đây có thể là chọn thủ công hoặc random rồi cố định, tôi không dám khẳng định.
+· Vì sao chọn đúng các mã màu đó (#7ba2d8, #8fb3e0…) — tôi không có tài liệu xác nhận; đây có thể là bảng màu tác giả tự chọn theo cảm nhận "xanh thép hoàng gia".
+· Thứ tự vẽ có bắt buộc không — tôi tin là có (giáo phải sau, mũ phải trên đầu, giáp vai phải trên giáp thân), nhưng tôi không chắc có thứ tự nào khác cũng ra kết quả tương đương.
+· lineWidth = 3 của cán giáo — trong code gốc không chia cho cam.zoom, nên khi zoom xa có thể hơi dày. Tôi không chắc đây là lỗi hay cố ý.
+· Số lớp gradient — tôi đếm được 3 lớp cho thân, 2 cho vai, 3 cho mũ. Có thể còn chi tiết tôi bỏ sót khi đọc code.
+
+---
+
+🎯 Tóm 1 câu: Vẽ binh lính bằng 1 hàm Canvas 2D theo 9 bước tuần tự — save/translate/scale → translate(0, sin(t·2.2+seed)·1.1) nhấp nhô → vẽ giáo (stroke nâu + path xám) → chân/ủng (fillRect) → giáp thân (rrect + gradient 3 lớp #7ba2d8→#4a6fa5→#26395e) → đai vàng → giáp vai (2 ellipse gradient) → đầu/mắt (arc) → mũ (gradient 3 lớp #8fb3e0→#5b7fb8→#33517f + highlight trắng + sống mũi) → lông mũ (quadraticCurveTo 2 lớp) → restore(), không dùng ảnh.

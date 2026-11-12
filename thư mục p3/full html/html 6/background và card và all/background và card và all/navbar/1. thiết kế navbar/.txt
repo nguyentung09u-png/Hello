@@ -1,0 +1,130 @@
+Tổng quan cách làm Bottom Navbar
+
+Các bước chính
+
+1. HTML — tạo <nav> chứa 2 <a>, mỗi <a> có 1 icon SVG và 1 <span> label.
+2. CSS — neo navbar xuống đáy bằng position: fixed, tạo nền mờ bằng backdrop-filter: blur, dùng Flexbox để chia đều 2 tab theo cột.
+3. JS — bắt click, đổi URL bằng history.pushState, rồi toggle class .active theo route hiện tại.
+
+Khung code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* 1. Navbar cố định đáy, nền kính mờ */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  /* 2. Mỗi tab: icon trên + label dưới */
+  .bottom-nav a {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    max-width: 180px;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: color 0.15s, background-color 0.15s;
+  }
+
+  /* 3. Ba trạng thái còn lại */
+  .bottom-nav a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+  }
+  .bottom-nav a:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+  .bottom-nav a.active {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .bottom-nav a svg { width: 20px; height: 20px; }
+  .bottom-nav .nav-label { font-size: 12px; line-height: 1; }
+
+  /* 4. Chừa chỗ cho navbar khỏi che nội dung */
+  body { padding-bottom: 72px; }
+</style>
+</head>
+<body>
+
+<nav class="bottom-nav">
+  <a data-route="/" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    </svg>
+    <span class="nav-label">Trang chủ</span>
+  </a>
+  <a data-route="/gioi-thieu" href="/gioi-thieu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+    <span class="nav-label">Giới thiệu</span>
+  </a>
+</nav>
+
+<script>
+  const links = document.querySelectorAll('.bottom-nav a');
+
+  function render(route) {
+    links.forEach(l => {
+      const active = l.dataset.route === route;
+      l.classList.toggle('active', active);
+    });
+  }
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const route = link.dataset.route;
+      history.pushState({ route }, '', route);
+      render(route);
+    });
+  });
+
+  window.addEventListener('popstate', e => {
+    render((e.state && e.state.route) || location.pathname || '/');
+  });
+
+  render(location.pathname || '/');
+</script>
+
+</body>
+</html>
+```
+
+Vài điểm cần lưu ý
+
+· pushState không hoạt động khi mở file trực tiếp (file://) — cần chạy qua HTTP server (ví dụ python3 -m http.server). (Đây là hành vi đã biết của History API.)
+· Phần hiển thị nội dung 2 trang (panel <div>) tôi chưa đưa vào vì bạn chỉ hỏi navbar — cần thêm thì bổ sung riêng.
+· backdrop-filter được hỗ trợ rộng rãi trên trình duyệt hiện đại; tôi không chắc mọi bản Safari cũ đều render đúng nếu thiếu tiền tố -webkit- (đã thêm sẵn).
+· Màu sắc trong ví dụ dùng rgba trực tiếp cho đơn giản, không dùng CSS variables như bản trước — nếu cần theme token thì khai báo :root và thay vào.
+
+Tóm 1 câu
+
+Làm bằng 3 bước: HTML semantic (<nav> + 2 <a> có SVG và label) → CSS position: fixed + backdrop-filter: blur + Flexbox column → JS bắt click, history.pushState, toggle class .active theo route.

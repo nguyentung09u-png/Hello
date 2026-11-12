@@ -1,0 +1,104 @@
+Tổng quan cách làm
+
+Nguyên lý: chồng 2 lớp giả (pseudo-element) lên nhau:
+
+· Lớp dưới (::before) = conic-gradient, xoay liên tục, phình to hơn khung.
+· Lớp trên (::after) = nền che, nhỏ hơn khung một chút → chừa lại mép ngoài lộ gradient.
+
+Phần lộ ra chính là "viền sáng" đang xoay.
+
+Điều kiện để chạy đúng (suy luận có căn cứ):
+
+· Dùng position: fixed khi áp lên viewport để không tạo scrollbar.
+· inset: -50% để gradient không hở góc khi xoay.
+· inset của lớp che = độ dày viền mong muốn.
+· z-index âm để 2 lớp nằm dưới nội dung.
+· pointer-events: none để không chặn click.
+
+Tôi không chắc: z-index âm trên body::before/::after có hoạt động giống nhau trên mọi trình duyệt cũ (đặc biệt Safari đời thấp). Nếu lỗi, đổi sang 2 <div> riêng.
+
+---
+
+Code chung chung
+
+```html
+<div class="content">Nội dung</div>
+```
+
+```css
+/* 1. Dải sáng xoay — phủ toàn viewport */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  background: conic-gradient(from 0deg,
+      #00ffff,
+      transparent 25%,
+      #7a6eff,
+      transparent 55%,
+      #ec4899,
+      transparent 80%,
+      #00ffff);
+  animation: spin 6s linear infinite;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* 2. Nền che — chừa viền dày 4px */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 4px;                       /* = độ dày viền */
+  background: radial-gradient(circle at 50% 40%, #1e1b4b, #02030a 70%);
+  border-radius: 14px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 3. Nội dung nằm trên cùng */
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* 4. Vòng xoay */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 5. Tôn trọng giảm chuyển động */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Đổi
+Viền mỏng/dày body::after { inset: ... }
+Xoay nhanh/chậm animation: spin ...
+Thêm glow body::before { filter: blur(6px) }
+Đổi màu sửa hex trong conic-gradient
+
+---
+
+Nếu sợ xung đột với body::before/::after
+
+Dùng <div> riêng:
+
+```html
+<div class="frame" aria-hidden="true"></div>
+<div class="content">Nội dung</div>
+```
+
+```css
+.frame { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.frame::before { /* y hệt body::before ở trên, bỏ z-index */ }
+.frame::after  { /* y hệt body::after  ở trên, bỏ z-index */ }
+```
+
+---
+
+🎯 Tóm 1 câu: Chồng 2 pseudo-element — ::before phình inset: -50% chứa conic-gradient xoay, ::after với inset = độ dày viền làm nền che giữa — cả hai position: fixed, z-index âm, pointer-events: none; toàn bộ CSS thuần.

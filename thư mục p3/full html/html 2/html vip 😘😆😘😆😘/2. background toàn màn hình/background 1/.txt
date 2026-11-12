@@ -1,0 +1,254 @@
+Tổng quan cách làm
+
+Xếp 4 lớp chồng nhau bằng z-index. Lớp dưới cùng là orb, rồi tới viền sáng, rồi mask, trên cùng là canvas particles. Nội dung trang nằm trên tất cả.
+
+Nguyên lý từng lớp:
+
+· Orb — 3 khối tròn, filter: blur(100px) tán mờ, mix-blend-mode: screen cộng sáng, animation dịch chuyển.
+· Viền sáng — pseudo-element inset: -50% chứa conic-gradient, xoay bằng transform: rotate.
+· Mask — pseudo-element inset: 0 + mask-composite để chỉ chừa 4px mép.
+· Canvas — vẽ hạt bằng requestAnimationFrame, mỗi frame cộng vận tốc, vẽ đường nối khi gần nhau, reset khi ra ngoài.
+
+Điều kiện để chạy đúng (suy luận có căn cứ):
+
+· Background phải position: fixed để không tạo scrollbar.
+· z-index âm cho 3 lớp dưới, 0 cho canvas, 1+ cho nội dung.
+· pointer-events: none cho mọi lớp nền.
+
+Tôi không chắc:
+
+· mix-blend-mode: screen hiển thị giống nhau trên mọi trình duyệt — Safari đời cũ có thể khác.
+· mask-composite: exclude khớp với -webkit-mask-composite: xor trên mọi trình duyệt — cần test.
+
+---
+
+Code chung chung
+
+```html
+<div class="bg-orbs"></div>
+<canvas id="bg-particles"></canvas>
+<div class="content">Nội dung</div>
+```
+
+```css
+/* Nền gốc */
+body { background: #000; margin: 0; min-height: 100vh; }
+
+/* ===== 1. ORB ===== */
+.bg-orbs {
+  position: fixed; inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-orbs::before,
+.bg-orbs::after,
+.bg-orbs > span {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  mix-blend-mode: screen;
+  opacity: .55;
+  will-change: transform;
+}
+.bg-orbs::before {
+  width: 520px; height: 520px;
+  background: #0f1a3a;
+  top: -160px; left: -120px;
+  animation: float1 18s ease-in-out infinite;
+}
+.bg-orbs::after {
+  width: 460px; height: 460px;
+  background: #1a4a8a;
+  top: 20%; right: -140px;
+  animation: float2 22s ease-in-out infinite;
+}
+.bg-orbs > span {
+  width: 400px; height: 400px;
+  background: #0f1a3a;
+  bottom: -120px; left: 30%;
+  animation: float3 26s ease-in-out infinite;
+}
+@keyframes float1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(80px,60px) scale(1.15); }
+}
+@keyframes float2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(-100px,80px) scale(1.1); }
+}
+@keyframes float3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(60px,-70px) scale(1.2); }
+}
+
+/* ===== 2. VIỀN SÁNG ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  background: conic-gradient(from 0deg,
+    #00ffff, transparent 25%, #7a6eff, transparent 55%,
+    #ec4899, transparent 80%, #00ffff);
+  animation: borderSpin 6s linear infinite;
+  z-index: -2;
+  pointer-events: none;
+}
+@keyframes borderSpin { to { transform: rotate(360deg); } }
+
+/* ===== 3. MASK chừa 4px ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: -1;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 4px;
+}
+
+/* ===== 4. CANVAS ===== */
+#bg-particles {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== Nội dung ===== */
+.content {
+  position: relative;
+  z-index: 1;
+}
+```
+
+```html
+<!-- Đặt span bên trong .bg-orbs -->
+<div class="bg-orbs"><span></span></div>
+```
+
+```js
+(function () {
+  const canvas = document.getElementById('bg-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let W, H, dpr = 1, rafId = 0;
+  let particles = [];
+  const COLORS = ['#00ffff', '#7a6eff', '#4fc3f7', '#a0e9ff', '#6ee7ff'];
+
+  function count() {
+    return Math.min(140, Math.max(40, Math.round((W * H) / 16000)));
+  }
+  function make() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.8 + 0.6,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      phase: Math.random() * Math.PI * 2,
+      pulse: 0.6 + Math.random() * 0.6,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (particles.length < need) particles.push(make());
+    if (particles.length > need) particles.length = need;
+  }
+
+  function step(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // đường nối
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d2 = dx*dx + dy*dy;
+        const maxD = 110;
+        if (d2 < maxD * maxD) {
+          const alpha = (1 - Math.sqrt(d2) / maxD) * 0.18;
+          ctx.strokeStyle = 'rgba(120,200,255,' + alpha.toFixed(3) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // hạt
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10;
+      if (p.y > H + 10) p.y = -10;
+
+      const a = 0.4 + 0.6 * Math.abs(Math.sin(t * 0.001 * p.pulse + p.phase));
+      if (p.r > 1.4) { ctx.shadowColor = p.color; ctx.shadowBlur = 12; }
+      else ctx.shadowBlur = 0;
+
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+
+    rafId = requestAnimationFrame(step);
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { cancelAnimationFrame(rafId); rafId = 0; }
+    else if (!rafId) { rafId = requestAnimationFrame(step); }
+  });
+
+  resize();
+  rafId = requestAnimationFrame(step);
+})();
+```
+
+---
+
+Thứ tự z-index
+
+```
+-3  .bg-orbs         (orb)
+-2  body::before     (viền sáng)
+-1  body::after      (mask)
+ 0  #bg-particles    (canvas)
+ 1  .content         (nội dung)
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: mỗi lớp dùng position: fixed để không chiếm layout, tránh scrollbar.
+· Tôi không chắc mix-blend-mode: screen và mask-composite cho kết quả giống nhau trên mọi trình duyệt — cần test Safari/Firefox đời cũ.
+· Nếu trang đã có body::before/body::after khác → phải chuyển sang <div> riêng để tránh xung đột.
+
+🎯 Tóm 1 câu: Xếp 4 lớp position: fixed chồng qua z-index âm — orb (blur + screen + float), viền sáng (conic-gradient xoay), mask (mask-composite chừa 4px), canvas (vẽ hạt + đường nối bằng requestAnimationFrame) — và đặt nội dung ở z-index: 1.

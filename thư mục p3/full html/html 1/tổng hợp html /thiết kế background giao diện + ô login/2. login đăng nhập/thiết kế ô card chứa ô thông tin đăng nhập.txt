@@ -1,0 +1,61 @@
+1. Quy trình tạo Khung Card (Glassmorphic Login Card)
+
+ * Dựng khung chứa (HTML Container): Tạo một thẻ <div> hình chữ nhật để làm khung chính cho toàn bộ bộ giao diện.
+ * Căn chỉnh kích thước & Khoảng đệm:
+   * Cố định chiều rộng tối đa (max-width: 380px) để vừa vặn trên cả điện thoại lẫn máy tính.
+   * Thêm khoảng đệm bên trong (padding: 32px) để các thành phần không bị dính sát vào mép.
+ * Phủ màu nền kính mờ (Glassmorphism):
+   * Phủ màu nền xám xanh đen mỏng dạng trong suốt: background: rgba(18, 24, 38, 0.45).
+   * Áp dụng thuộc tính làm mờ hậu cảnh: backdrop-filter: blur(24px).
+ * Tạo viền & Bo góc:
+   * Bo góc lớn 24px (border-radius: 24px) tạo cảm giác mềm mại.
+   * Kẻ viền trắng mỏng 1px dạng trong suốt (rgba(255, 255, 255, 0.12)) giả hiệu ứng viền kính phản quang.
+ * Đổ bóng nổi 3D: Áp dụng box-shadow tối màu bên dưới để tách biệt hoàn toàn Card khỏi nền background.
+2. Quy trình tạo Ô Input Nhập Mật Khẩu (Password Input Box)
+ * Dựng khung hàng ngang (Input Wrapper): Tạo thẻ <div> sử dụng Flexbox (display: flex; align-items: center) để căn dàn hàng ngang 3 phần tử: Icon ổ khóa — Ô nhập liệu — Icon con mắt.
+ * Tạo hiệu ứng nền chìm (Darker Glass):
+   * Phủ lớp màu tối mỏng rgba(255, 255, 255, 0.06) để ô input chìm nhẹ xuống so với mặt phẳng của Card.
+   * Bo góc nhỏ hơn Card (border-radius: 12px / rounded-xl).
+   * Thêm đường viền định hình mỏng rgba(255, 255, 255, 0.15).
+ * Cấu hình thuộc tính cho Ô Nhập Liệu (Thẻ <input>):
+   * Thiết lập type="password" để tự động mã hóa chữ gõ thành dấu chấm ••••.
+   * Tắt toàn bộ đường viền/nền mặc định của trình duyệt (background: transparent, outline: none, border: none).
+   * Giãn rộng khoảng cách giữa các chấm mật khẩu (letter-spacing / tracking-widest) giúp nhìn rõ số lượng ký tự đã nhập.
+ * Tạo phản hồi khi click (Focus State): Dùng CSS pseudo-class :focus-within gắn vào khung chứa. Khi người dùng click vào gõ, đường viền sẽ lập tức đổi sang xanh neon và phát sáng nhẹ (box-shadow).
+3. Quy trình tạo Icon Con Mắt & Logic Ẩn/Hiện Mật Khẩu
+ * Chèn Icon vào giao diện:
+   * Đặt một nút bấm (<button type="button">) chứa icon con mắt (từ thư viện FontAwesome/Lucide hoặc SVG) ở mép phải trong khung input.
+ * Gắn sự kiện tương tác (Event Listener):
+   * Gắn sự kiện click onclick="togglePassword()" vào thẻ nút bấm chứa icon.
+ * Viết logic xử lý bằng JavaScript:
+   * Bước 1: Lấy thẻ ô input mật khẩu và thẻ icon qua ID (document.getElementById).
+   * Bước 2: Kiểm tra thuộc tính type hiện tại của ô input:
+     * Nếu type === 'password': Chuyển type thành 'text' (để hiện chuỗi mật khẩu rõ ràng) + Đổi hình icon thành con mắt gạch chéo (fa-eye-slash).
+     * Nếu type === 'text': Chuyển type ngược lại thành 'password' (để mã hóa thành dấu chấm) + Đổi hình icon về con mắt bình thường (fa-eye).
+
+------
+
+
+---phần xử lí sai / đúng ----
+Nhập đúng hiện toast + dialog thành công  đơn giản , nhập sai hiện toast sai
+
+
+----
+sai : hiện toast
+nội dung : sai mật khẩu
+
+---
+đúng :
+· AlertDialog.Builder - Tạo dialog
+· setTitle("Thành công") - Tiêu đề dialog
+· setMessage("...") - Nội dung dialog
+· setPositiveButton("OK", null) - Nút OK, nhấn xong tự đóng
+· builder.show() - Hiển thị dialog
+
+Kết quả khi nhập đúng 123456:
+
+1. Hiện Toast: "Đăng nhập thành công!"
+2. Hiện Dialog:
+   · Tiêu đề: Thành công
+   · Nội dung: Chào mừng bạn đã đăng nhập!
+   · Nút: OK

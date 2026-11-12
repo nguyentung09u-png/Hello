@@ -1,0 +1,197 @@
+🎯 CÁCH LÀM — TỔNG QUAN
+
+1. Nguyên tắc cốt lõi
+
+Một canvas duy nhất, phủ toàn màn hình, vẽ lại mỗi frame. Không có DOM nào nằm trong vùng chơi — chỉ HUD và overlay là HTML/CSS đè lên trên.
+
+2. Chia tầng theo chiều cao (H)
+
+Ba con số quyết định mọi thứ:
+
+```
+HORIZON ≈ 44% H   → đường chân trời
+G_TOP   ≈ 50% H   → mép đất xa (nơi quái xuất hiện từ trên)
+G_BOT   ≈ 94% H   → mép đất gần (giới hạn dưới của nhân vật)
+```
+
+Mọi toạ độ y của thực thể bị kẹp trong [G_TOP, G_BOT].
+
+3. Phối cảnh giả 3D
+
+Không dùng ma trận 3D. Chỉ scale theo y:
+
+```
+scaleAt(y) = 0.70 + (y - G_TOP)/(G_BOT - G_TOP) * 0.52
+```
+
+→ y càng lớn (càng gần camera) thì nhân vật vẽ càng to. Đây là suy luận từ code, không phải kỹ thuật 3D thật.
+
+4. Thứ tự vẽ (painter's algorithm)
+
+```
+nền tĩnh → thực thể (sort theo y) → hạt → chữ bay → marker
+```
+
+Thực thể có y nhỏ vẽ trước → bị thực thể y lớn đè lên. Đây là cách duy nhất để "ai ở dưới che ai ở trên" mà không cần z-buffer.
+
+5. Vòng lặp
+
+```js
+function loop(now){
+  dt = clamp((now - last)/1000, 0, 0.05);  // chặn dt nhảy vọt
+  update(dt);   // logic
+  render(now);  // vẽ
+  requestAnimationFrame(loop);
+}
+```
+
+update và render tách riêng — update theo dt (giây), render theo now (ms, cho animation).
+
+---
+
+💻 CODE KHUNG (rút gọn, chỉ giữ cấu trúc)
+
+```html
+<canvas id="cv"></canvas>
+<div id="hud"><!-- HUD HTML đè lên --></div>
+```
+
+```js
+// ---- 1. Khởi tạo ----
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W, H, DPR, HORIZON, G_TOP, G_BOT;
+
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+
+  cv.width  = W * DPR;          // canvas nét trên Retina
+  cv.height = H * DPR;
+  cv.style.width  = W + 'px';
+  cv.style.height = H + 'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);  // vẽ theo đơn vị CSS px
+
+  HORIZON = H * 0.44;
+  G_TOP   = H * 0.505;
+  G_BOT   = H * 0.94;
+
+  buildBackground();  // sinh dữ liệu nền 1 lần
+}
+
+// ---- 2. Phối cảnh ----
+const clamp = (v,a,b)=> v<a?a : v>b?b : v;
+const scaleAt = y =>
+  0.70 + clamp((y-G_TOP)/(G_BOT-G_TOP), 0, 1) * 0.52;
+
+// ---- 3. Vẽ nền (tĩnh, sinh 1 lần bằng seed) ----
+let bg;   // { stars, clouds, far, near, trees, rocks }
+
+function buildBackground(){
+  // dùng PRNG seed cố định để mỗi lần load giống hệt nhau
+  const rng = mulberry32(12345);
+  bg = {
+    stars:  [...Array(80)].map(_=>({ x:rng()*W, y:rng()*HORIZON*0.7, r:rng()*1.3 })),
+    trees:  [...Array(26)].map(_=>({ x:rng()*W, y:HORIZON+rng()*H*0.2, s:0.5+rng() })),
+    // ...
+  };
+}
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a>>>15, 1|a);
+    t = t + Math.imul(t ^ t>>>7, 61|t) ^ t;
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+
+// ---- 4. Vẽ từng lớp ----
+function drawSky(){
+  const g = ctx.createLinearGradient(0,0,0,HORIZON);
+  g.addColorStop(0, '#0b0e2a');
+  g.addColorStop(1, '#f4b063');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,HORIZON);
+}
+
+function drawGround(){
+  const g = ctx.createLinearGradient(0,HORIZON,0,H);
+  g.addColorStop(0, '#4a5b3c');
+  g.addColorStop(1, '#111a10');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,HORIZON,W,H-HORIZON);
+}
+
+function drawTrees(){
+  for (const t of bg.trees){
+    const s = t.s * scaleAt(t.y);
+    ctx.save();
+    ctx.translate(t.x, t.y);
+    ctx.scale(s, s);
+    // vẽ cây bằng path...
+    ctx.restore();
+  }
+}
+
+// ---- 5. Thực thể + sort theo y ----
+const king = { x:0, y:0, hp:100 };
+let soldiers = [], enemies = [];
+
+function drawEntities(t){
+  const list = [];
+  for (const s of soldiers) if (s.hp>0) list.push({ y:s.y, draw:()=>drawSoldier(s,t) });
+  for (const e of enemies)  if (e.hp>0) list.push({ y:e.y, draw:()=>drawEnemy(e,t)   });
+  list.push({ y:king.y, draw:()=>drawKing(king,t) });
+
+  list.sort((a,b)=> a.y - b.y);        // ← mấu chốt
+  for (const it of list) it.draw();
+}
+
+// ---- 6. Vòng lặp ----
+let last = performance.now();
+
+function loop(now){
+  let dt = (now - last)/1000;
+  last = now;
+  if (dt > 0.05) dt = 0.05;            // chặn spike
+
+  update(dt);
+  render(now);
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  time += dt;
+  // di chuyển, tấn công, va chạm...
+}
+
+function render(t){
+  ctx.clearRect(0,0,W,H);
+  drawSky();
+  drawSun();
+  drawRidge(bg.far);
+  drawGround();
+  drawTrees();
+  drawEntities(t);
+}
+
+// ---- 7. Khởi động ----
+addEventListener('resize', resize);
+resize();
+requestAnimationFrame(loop);
+```
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Hiệu năng cụ thể trên từng thiết bị — tôi không có số đo thực tế, chỉ suy từ việc code tạo gradient mỗi frame.
+· Việc gộp nền tĩnh vào canvas offscreen có tăng FPS bao nhiêu % — phụ thuộc thiết bị, tôi không có dữ liệu benchmark.
+· mulberry32 có phải PRNG tốt nhất cho việc này không — nó đủ dùng, nhưng tôi không khẳng định là tối ưu.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Làm bằng một canvas 2D vẽ lại mỗi frame; chia màn hình theo % chiều cao (trời/đất/HUD); giả 3D bằng cách scale nhân vật theo y; và sắp thứ tự vẽ theo y để lớp gần che lớp xa.

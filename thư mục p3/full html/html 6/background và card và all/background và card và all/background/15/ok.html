@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0608">
+<title>Dark Tech Background — Rose Signal Waves</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0608;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 100% at 50% 100%, #1a0810 0%, #0e040a 48%, #050205 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Horizontal frequency waves (SVG data-uri, static curves) ---------- */
+  .waves{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-repeat:repeat;
+    background-size:100% 100%;
+    background-position:0 0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23f43f5e' stroke-opacity='0.10' stroke-width='1'%3E%3Cpath d='M0 100 Q 150 40, 300 100 T 600 100 T 900 100 T 1200 100'/%3E%3Cpath d='M0 180 Q 150 120, 300 180 T 600 180 T 900 180 T 1200 180'/%3E%3Cpath d='M0 260 Q 150 200, 300 260 T 600 260 T 900 260 T 1200 260'/%3E%3Cpath d='M0 340 Q 150 280, 300 340 T 600 340 T 900 340 T 1200 340'/%3E%3Cpath d='M0 420 Q 150 360, 300 420 T 600 420 T 900 420 T 1200 420'/%3E%3Cpath d='M0 500 Q 150 440, 300 500 T 600 500 T 900 500 T 1200 500'/%3E%3Cpath d='M0 580 Q 150 520, 300 580 T 600 580 T 900 580 T 1200 580'/%3E%3Cpath d='M0 660 Q 150 600, 300 660 T 600 660 T 900 660 T 1200 660'/%3E%3Cpath d='M0 740 Q 150 680, 300 740 T 600 740 T 900 740 T 1200 740'/%3E%3C/g%3E%3Cg fill='none' stroke='%23fb7185' stroke-opacity='0.18' stroke-width='1.2'%3E%3Cpath d='M0 400 Q 150 340, 300 400 T 600 400 T 900 400 T 1200 400'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 88%);
+            mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 88%);
+    animation:waveShift 30s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes waveShift{
+    from{background-position:0 0;}
+    to{background-position:-240px 0;}
+  }
+
+  /* ---------- Signal bar graph (painted once, static) ---------- */
+  .bars{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:22%;
+    pointer-events:none;
+    background-image:repeating-linear-gradient(
+      to right,
+      rgba(251,113,133,.14) 0 2px,
+      transparent 2px 12px
+    );
+    -webkit-mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.4) 60%, rgba(0,0,0,0) 100%);
+            mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.4) 60%, rgba(0,0,0,0) 100%);
+    opacity:.7;
+  }
+
+  /* ---------- Vertical pulse strips (transform-only) ---------- */
+  .strips{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .strips span{
+    position:absolute;
+    top:-15vh;
+    width:3px;
+    height:30vh;
+    background:linear-gradient(180deg,
+      rgba(244,63,94,0) 0%,
+      rgba(251,113,133,.7) 45%,
+      rgba(244,63,94,.9) 55%,
+      rgba(244,63,94,0) 100%);
+    border-radius:2px;
+    animation:stripFall linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes stripFall{
+    0%{transform:translate3d(0,-20vh,0);opacity:0;}
+    12%{opacity:1;}
+    88%{opacity:1;}
+    100%{transform:translate3d(0,120vh,0);opacity:0;}
+  }
+
+  /* ---------- Rose horizon glow ---------- */
+  .horizon{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:100vmin;
+    height:100vmin;
+    margin-left:-50vmin;
+    margin-top:-50vmin;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(244,63,94,.10) 0%,
+      rgba(190,24,93,.04) 40%,
+      rgba(190,24,93,0) 72%);
+    animation:horizonBreath 10s ease-in-out infinite;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes horizonBreath{
+    0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.7;}
+    50%{transform:translate3d(0,0,0) scale(1.12);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 38%, rgba(0,0,0,.50) 80%, rgba(0,0,0,.82) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .waves,.strips span,.horizon{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="waves"></div>
+  <div class="horizon"></div>
+  <div class="bars"></div>
+  <div class="strips" id="strips"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const strips = document.getElementById('strips');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 20;
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = (Math.random() * 100) + 'vw';
+    const dur = 5 + Math.random() * 8;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + (Math.random() * dur) + 's';
+    s.style.opacity = (0.45 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  strips.appendChild(frag);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Design — Thực chiến</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0b0f14;
+    --surface: #131a22;
+    --surface-2: #1a2330;
+    --border: #1f2a36;
+    --text: #e6edf3;
+    --muted: #8b98a5;
+    --primary: #4ea1ff;
+    --success: #3ddc97;
+    --warning: #f5b942;
+    --danger: #ff5c5c;
+    --purple: #a855f7;
+    --radius: 10px;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 150ms;
+    --dur-base: 250ms;
+    --dur-slow: 400ms;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    padding: 40px 16px;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 8px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .section h2 {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+
+  .btn {
+    padding: 10px 18px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+  }
+  .btn:hover { background: #6cb2ff; }
+  .btn:active { transform: scale(0.97); }
+
+  /* ============================================
+     1. SHAKE INPUT — Input lắc khi lỗi
+     ============================================ */
+  .input-error {
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    width: 100%;
+    transition: border-color var(--dur-fast);
+  }
+  .input-error.error {
+    border-color: var(--danger);
+    animation: shakeX 0.4s ease;
+  }
+  @keyframes shakeX {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .error-msg {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 4px;
+    opacity: 0;
+    transition: opacity var(--dur-fast);
+  }
+  .error-msg.show { opacity: 1; }
+
+  /* ============================================
+     2. CHECKMARK DRAW — Dấu tick vẽ ra
+     ============================================ */
+  .check-wrap {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--success);
+    display: grid;
+    place-items: center;
+  }
+  .check-svg {
+    width: 32px; height: 32px;
+  }
+  .check-svg path {
+    stroke: white;
+    stroke-width: 4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+  }
+  .check-wrap.play .check-svg path {
+    animation: drawCheck 0.5s var(--ease-out) forwards;
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ============================================
+     3. CART BOUNCE — Giỏ hàng nảy khi thêm
+     ============================================ */
+  .cart-icon {
+    font-size: 32px;
+    display: inline-block;
+    transition: transform var(--dur-fast);
+  }
+  .cart-icon.bounce {
+    animation: cartBounce 0.5s var(--ease-spring);
+  }
+  @keyframes cartBounce {
+    0%, 100% { transform: scale(1) rotate(0); }
+    30%      { transform: scale(1.3) rotate(-8deg); }
+    60%      { transform: scale(1.1) rotate(5deg); }
+  }
+
+  /* ============================================
+     4. FADE SLIDE UP — Item list hiện lên
+     ============================================ */
+  .list-item {
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--dur-slow) var(--ease-out),
+                transform var(--dur-slow) var(--ease-out);
+  }
+  .list-item.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ============================================
+     5. EXPAND HEIGHT — Mở rộng chiều cao (FAQ)
+     ============================================ */
+  .faq-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .faq-q {
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .faq-q .arrow {
+    transition: transform var(--dur-base) var(--ease-out);
+    color: var(--primary);
+  }
+  .faq-item.open .arrow { transform: rotate(180deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--dur-base) var(--ease-out);
+  }
+  .faq-a-inner {
+    padding: 0 16px 14px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ============================================
+     6. POP IN — Badge nảy vào
+     ============================================ */
+  .pop-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--danger);
+    color: white;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    transform: scale(0);
+    transition: transform var(--dur-base) var(--ease-spring);
+  }
+  .pop-badge.show { transform: scale(1); }
+
+  /* ============================================
+     7. SLIDE IN FROM RIGHT — Panel trượt vào
+     ============================================ */
+  .panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base);
+    z-index: 100;
+  }
+  .panel-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .side-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(360px, 85vw);
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    transform: translateX(100%);
+    transition: transform var(--dur-slow) var(--ease-out);
+    z-index: 101;
+    padding: 24px;
+  }
+  .side-panel.open { transform: translateX(0); }
+
+  /* ============================================
+     8. BOUNCE IN — Item nhảy vào từ dưới
+     ============================================ */
+  .bounce-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity var(--dur-slow) var(--ease-out),
+                transform var(--dur-slow) var(--ease-spring);
+  }
+  .bounce-in.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ============================================
+     9. ROTATE LOADING — Icon xoay khi tải
+     ============================================ */
+  .refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .refresh-icon {
+    display: inline-block;
+    font-size: 16px;
+    transition: transform var(--dur-base);
+  }
+  .refresh-btn.loading .refresh-icon {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ============================================
+     10. SCALE + FADE LIST (thay thế)
+     ============================================ */
+  .switch-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: all var(--dur-base) var(--ease-out);
+  }
+  .switch-card.active {
+    background: rgba(78,161,255,0.1);
+    border-color: var(--primary);
+    transform: scale(1.02);
+  }
+
+  /* PREFERS-REDUCED-MOTION */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Motion Design — Thực chiến</h1>
+  <p class="sub">10 animation dùng được ngay trong dự án thật.</p>
+
+  <!-- 1. SHAKE INPUT -->
+  <div class="section">
+    <h2>1. Shake Input — Lắc khi lỗi</h2>
+    <div class="col">
+      <input class="input-error" id="shakeInput" placeholder="Nhập email..." />
+      <div class="error-msg" id="errorMsg">Email không hợp lệ</div>
+      <button class="btn" id="shakeBtn">Kiểm tra email</button>
+    </div>
+  </div>
+
+  <!-- 2. CHECKMARK DRAW -->
+  <div class="section">
+    <h2>2. Checkmark Draw — Dấu tick vẽ ra</h2>
+    <div class="row">
+      <div class="check-wrap" id="checkWrap">
+        <svg class="check-svg" viewBox="0 0 32 32">
+          <path d="M6 16 L13 23 L26 9" />
+        </svg>
+      </div>
+      <button class="btn" id="checkBtn">Phát Check</button>
+    </div>
+  </div>
+
+  <!-- 3. CART BOUNCE -->
+  <div class="section">
+    <h2>3. Cart Bounce — Giỏ hàng nảy</h2>
+    <div class="row">
+      <span class="cart-icon" id="cartIcon">🛒</span>
+      <button class="btn" id="cartBtn">Thêm vào giỏ</button>
+    </div>
+  </div>
+
+  <!-- 4. FADE SLIDE UP -->
+  <div class="section">
+    <h2>4. Fade Slide Up — Item hiện lên</h2>
+    <div class="col">
+      <button class="btn" id="listBtn">Hiện 4 item</button>
+      <div class="list-item" data-item>Item 1</div>
+      <div class="list-item" data-item>Item 2</div>
+      <div class="list-item" data-item>Item 3</div>
+      <div class="list-item" data-item>Item 4</div>
+    </div>
+  </div>
+
+  <!-- 5. EXPAND HEIGHT (FAQ) -->
+  <div class="section">
+    <h2>5. FAQ Accordion — Mở rộng chiều cao</h2>
+    <div class="faq-item">
+      <div class="faq-q">Làm sao để đổi mật khẩu? <span class="arrow">▼</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Vào Cài đặt → Tài khoản → Đổi mật khẩu. Nhập mật khẩu cũ, mật khẩu mới, xác nhận.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Có hỗ trợ hoàn tiền không? <span class="arrow">▼</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Có, trong vòng 7 ngày kể từ khi nhận hàng. Liên hệ CSKH để được hỗ trợ.</div></div>
+    </div>
+  </div>
+
+  <!-- 6. POP IN -->
+  <div class="section">
+    <h2>6. Pop In — Badge nảy vào</h2>
+    <div class="row">
+      <span class="pop-badge" id="popBadge">NEW</span>
+      <button class="btn" id="popBtn">Phát Badge</button>
+    </div>
+  </div>
+
+  <!-- 7. SLIDE IN FROM RIGHT -->
+  <div class="section">
+    <h2>7. Slide In From Right — Panel trượt</h2>
+    <button class="btn" id="panelBtn">Mở Panel →</button>
+  </div>
+
+  <!-- 8. BOUNCE IN -->
+  <div class="section">
+    <h2>8. Bounce In — Nhảy vào từ dưới</h2>
+    <div class="col">
+      <button class="btn" id="bounceBtn">Phát Bounce</button>
+      <div class="bounce-in" id="bounceBox" style="padding: 16px; background: var(--surface-2); border-radius: var(--radius); text-align: center;">
+        🎉 Nội dung nảy vào!
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. ROTATE LOADING -->
+  <div class="section">
+    <h2>9. Rotate Loading — Icon xoay khi tải</h2>
+    <button class="refresh-btn" id="refreshBtn">
+      <span class="refresh-icon">🔄</span>
+      <span class="refresh-text">Làm mới</span>
+    </button>
+  </div>
+
+  <!-- 10. SCALE + FADE SWITCH -->
+  <div class="section">
+    <h2>10. Card Switch — Thẻ đổi trạng thái</h2>
+    <div class="row" style="align-items: stretch;">
+      <div class="switch-card" data-card style="flex: 1; min-width: 140px; cursor: pointer;">Gói Basic</div>
+      <div class="switch-card" data-card style="flex: 1; min-width: 140px; cursor: pointer;">Gói Pro</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="panel-overlay" id="panelOverlay"></div>
+<div class="side-panel" id="sidePanel">
+  <h3 style="margin-bottom: 16px;">Bộ lọc</h3>
+  <p style="color: var(--muted); font-size: 14px;">Panel trượt từ phải. Bấm overlay hoặc nút đóng để tắt.</p>
+  <button class="btn" id="panelClose" style="margin-top: 16px;">Đóng</button>
+</div>
+
+<script>
+  /* ===== 1. SHAKE INPUT ===== */
+  document.getElementById('shakeBtn').addEventListener('click', () => {
+    const input = document.getElementById('shakeInput');
+    const msg = document.getElementById('errorMsg');
+    input.classList.remove('error');
+    msg.classList.remove('show');
+    void input.offsetWidth;
+    input.classList.add('error');
+    msg.classList.add('show');
+  });
+
+  /* ===== 2. CHECKMARK ===== */
+  document.getElementById('checkBtn').addEventListener('click', () => {
+    const wrap = document.getElementById('checkWrap');
+    wrap.classList.remove('play');
+    void wrap.offsetWidth;
+    wrap.classList.add('play');
+  });
+
+  /* ===== 3. CART BOUNCE ===== */
+  document.getElementById('cartBtn').addEventListener('click', () => {
+    const icon = document.getElementById('cartIcon');
+    icon.classList.remove('bounce');
+    void icon.offsetWidth;
+    icon.classList.add('bounce');
+  });
+
+  /* ===== 4. FADE SLIDE UP ===== */
+  document.getElementById('listBtn').addEventListener('click', () => {
+    document.querySelectorAll('[data-item]').forEach((item, i) => {
+      item.classList.remove('show');
+      setTimeout(() => item.classList.add('show'), i * 80);
+    });
+  });
+
+  /* ===== 5. FAQ ACCORDION ===== */
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        const inner = item.querySelector('.faq-a');
+        inner.style.maxHeight = inner.scrollHeight + 'px';
+      }
+    });
+  });
+
+  /* ===== 6. POP IN ===== */
+  document.getElementById('popBtn').addEventListener('click', () => {
+    const badge = document.getElementById('popBadge');
+    badge.classList.remove('show');
+    void badge.offsetWidth;
+    badge.classList.add('show');
+  });
+
+  /* ===== 7. SIDE PANEL ===== */
+  const panel = document.getElementById('sidePanel');
+  const overlay = document.getElementById('panelOverlay');
+  document.getElementById('panelBtn').addEventListener('click', () => {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+  });
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+  function closePanel() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+
+  /* ===== 8. BOUNCE IN ===== */
+  document.getElementById('bounceBtn').addEventListener('click', () => {
+    const box = document.getElementById('bounceBox');
+    box.classList.remove('show');
+    void box.offsetWidth;
+    box.classList.add('show');
+  });
+
+  /* ===== 9. ROTATE LOADING ===== */
+  document.getElementById('refreshBtn').addEventListener('click', function() {
+    if (this.classList.contains('loading')) return;
+    this.classList.add('loading');
+    this.querySelector('.refresh-text').textContent = 'Đang tải...';
+    setTimeout(() => {
+      this.classList.remove('loading');
+      this.querySelector('.refresh-text').textContent = 'Làm mới';
+    }, 1500);
+  });
+
+  /* ===== 10. CARD SWITCH ===== */
+  document.querySelectorAll('[data-card]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-card]').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    });
+  });
+
+  /* ===== ESC đóng panel ===== */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanel();
+  });
+</script>
+
+</body>
+</html>

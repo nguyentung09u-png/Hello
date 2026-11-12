@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Data Stream Background</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        canvas {
+            display: block;
+        }
+        /* Lớp phủ để tạo cảm giác màn hình CRT cũ */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+            z-index: 20;
+            text-shadow: 2px 2px 0px #ff00de, -2px -2px 0px #00ffff;
+            animation: glitch 1s infinite;
+        }
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px 0px #ff00de, -2px -2px 0px #00ffff; }
+            25% { text-shadow: -2px 2px 0px #ff00de, 2px -2px 0px #00ffff; }
+            50% { text-shadow: 2px -2px 0px #ff00de, -2px 2px 0px #00ffff; }
+            75% { text-shadow: -2px -2px 0px #ff00de, 2px 2px 0px #00ffff; }
+            100% { text-shadow: 2px 2px 0px #ff00de, -2px -2px 0px #00ffff; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    
+    <div class="content">
+        <h1>DATA STREAM</h1>
+        <p>Processing...</p>
+    </div>
+    <canvas id="matrixCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        // Thiết lập kích thước full màn hình
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // Các ký tự sẽ rơi xuống (Katakana + Latin + Numbers)
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+        const fontSize = 16;
+        const columns = canvas.width / fontSize; // Số lượng cột
+        // Mảng chứa vị trí y của mỗi giọt mưa
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        function draw() {
+            // Tạo hiệu ứng mờ dần thay vì xóa hoàn toàn
+            // Màu đen với độ trong suốt rất thấp (0.05) giúp tạo vệt đuôi
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0'; // Màu xanh lá đặc trưng của Matrix
+            ctx.font = fontSize + 'px monospace';
+            for(let i = 0; i < drops.length; i++) {
+                // Chọn ký tự ngẫu nhiên
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                
+                // Vẽ ký tự
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                // Reset giọt mưa về đầu khi chạm đáy hoặc ngẫu nhiên
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                // Tăng tọa độ y
+                drops[i]++;
+            }
+        }
+        // Chạy hàm draw mỗi 30ms
+        setInterval(draw, 30);
+        // Xử lý resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Tính lại số cột khi resize
+            const newColumns = canvas.width / fontSize;
+            // Giữ nguyên các giọt cũ nếu có thể, hoặc reset
+            if (newColumns > drops.length) {
+                for(let x = drops.length; x < newColumns; x++) {
+                    drops[x] = 1;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

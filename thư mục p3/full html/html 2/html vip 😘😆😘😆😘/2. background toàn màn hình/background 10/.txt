@@ -1,0 +1,210 @@
+Tổng quan cách làm
+
+3 lớp chồng nhau:
+
+1. Nền — body với radial-gradient lệch xuống đáy, navy → tím đen → đen.
+2. Glow — <div class="glow"> chứa 2 radial-gradient xanh ngọc/tím + filter: blur(60px), tĩnh.
+3. Canvas hạt — <canvas> chạy requestAnimationFrame, mỗi frame: vẽ sao nền → vẽ 3 dải ribbon.
+
+Nguyên lý ribbon:
+
+· Mỗi ribbon có baseY, amp1/2/3, f1/2/3, speed, hue, thick, alpha.
+· Đường biên của dải = 3 sóng sin cộng dồn (khác tần số, khác pha) → uốn lượn không lặp chu kỳ ngắn.
+· Dải = polygon: cạnh trên (trái → phải) + cạnh dưới (phải → trái) cùng công thức sóng, cạnh dưới cộng thêm thick.
+· Fill bằng linearGradient dọc dải: mờ trên → đậm giữa → mờ dưới.
+· Bật globalCompositeOperation = 'screen' khi fill → các dải sáng cộng dồn thay vì che nhau.
+
+Nguyên lý sao:
+
+· Mỗi sao có x, y, r, phase, speed.
+· Nhấp nháy: a = 0.4 + 0.6 * |sin(t * speed + phase)| — lệch pha.
+· Màu cố định rgba(220,235,255, ...).
+
+Bước vẽ dải — 8px/điểm:
+
+· for (x = -20; x <= W + 20; x += 8) → khoảng 183 điểm/cạnh với màn 1440px.
+· Bước nhỏ hơn (4px) mượt hơn nhưng nặng hơn; bước lớn hơn (12px) có thể gãy góc.
+
+Tối ưu (suy luận có căn cứ):
+
+· DPR cap 2.
+· visibilitychange → dừng khi tab ẩn.
+· prefers-reduced-motion → không chạy.
+· Chỉ 3 dải + tắt screen blend ngay sau khi fill.
+
+Tôi không chắc:
+
+· Bước 8px là tối ưu (mượt/chi phí) — chưa đo.
+· 3 tần số hiện tại cho ra dạng "giống cực quang" hay không — tuỳ gu.
+· screen blend hiển thị giống nhau 100% trên mọi GPU.
+
+---
+
+Code chung chung
+
+```html
+<div class="glow" aria-hidden="true"></div>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="content">Nội dung</div>
+```
+
+```css
+html, body { height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 100%, #0a0a24 0%, #050514 60%, #010108 100%);
+  margin: 0; min-height: 100vh;
+  display: grid; place-items: center;
+  color: #eaf2ff; overflow: hidden;
+}
+
+.glow {
+  position: fixed; inset: 0;
+  z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%,   rgba(60,200,180,.14), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%,  rgba(180,80,220,.12), transparent 70%);
+  filter: blur(60px);
+}
+
+canvas {
+  position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  display: block;
+}
+
+.content { position: relative; z-index: 1; }
+```
+
+```js
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let ribbons = [];
+  let stars = [];
+
+  function makeRibbon(i) {
+    return {
+      baseY: H * (0.25 + i * 0.18),
+      amp1: 40 + Math.random() * 50,
+      amp2: 20 + Math.random() * 30,
+      amp3: 10 + Math.random() * 20,
+      f1: 0.005 + Math.random() * 0.003,
+      f2: 0.012 + Math.random() * 0.005,
+      f3: 0.028 + Math.random() * 0.008,
+      speed: 0.4 + Math.random() * 0.5,
+      hue: 150 + i * 60,                  // 150 → 210 → 270
+      thick: 30 + Math.random() * 40,
+      alpha: 0.35 + Math.random() * 0.25,
+    };
+  }
+
+  function makeStar() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 0.4 + Math.random() * 1.2,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.5 + Math.random() * 1.5,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width  = W * dpr;
+    c.height = H * dpr;
+    c.style.width  = W + 'px';
+    c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    ribbons = [makeRibbon(0), makeRibbon(1), makeRibbon(2)];
+
+    const starCount = Math.min(180, Math.max(60, Math.floor(W * H / 12000)));
+    while (stars.length < starCount) stars.push(makeStar());
+    if (stars.length > starCount) stars.length = starCount;
+  }
+
+  function drawRibbon(r, t) {
+    const tt = t * 0.001 * r.speed;
+
+    ctx.beginPath();
+    // cạnh trên: trái → phải
+    for (let x = -20; x <= W + 20; x += 8) {
+      const y = r.baseY
+        + Math.sin(x * r.f1 + tt)       * r.amp1
+        + Math.sin(x * r.f2 - tt * 1.3) * r.amp2
+        + Math.sin(x * r.f3 + tt * 0.7) * r.amp3;
+      if (x === -20) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    // cạnh dưới: phải → trái
+    for (let x = W + 20; x >= -20; x -= 8) {
+      const y = r.baseY + r.thick
+        + Math.sin(x * r.f1 + tt)       * r.amp1
+        + Math.sin(x * r.f2 - tt * 1.3) * r.amp2
+        + Math.sin(x * r.f3 + tt * 0.7) * r.amp3;
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+
+    // gradient dọc dải
+    const grad = ctx.createLinearGradient(
+      0, r.baseY - r.amp1,
+      0, r.baseY + r.thick + r.amp1
+    );
+    grad.addColorStop(0,   'hsla(' + r.hue + ', 90%, 65%, 0)');
+    grad.addColorStop(0.4, 'hsla(' + r.hue + ', 90%, 65%, ' + r.alpha + ')');
+    grad.addColorStop(1,   'hsla(' + r.hue + ', 90%, 65%, 0)');
+    ctx.fillStyle = grad;
+
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // sao nền
+    for (const s of stars) {
+      const a = 0.4 + 0.6 * Math.abs(Math.sin(t * 0.001 * s.speed + s.phase));
+      ctx.fillStyle = 'rgba(220,235,255,' + a.toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3 dải ribbon
+    for (const r of ribbons) drawRibbon(r, t);
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: dùng Canvas 2D + requestAnimationFrame tiêu chuẩn, chạy trên trình duyệt hiện đại.
+· Tôi không chắc bước 8px và 3 tần số hiện tại là tối ưu — cần chỉnh theo gu và đo.
+· Tôi không chắc screen blend hiển thị giống nhau 100% trên mọi GPU — có thể lệch nhẹ về độ sáng.
+
+🎯 Tóm 1 câu: Nền radial-gradient navy lệch đáy + glow tĩnh + canvas vẽ 3 dải cực quang (polygon 3 sóng sin cộng dồn + gradient dọc + screen blend) + sao nền nhấp nháy — chạy requestAnimationFrame với DPR cap, visibility, reduced-motion.

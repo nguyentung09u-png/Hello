@@ -1,0 +1,17 @@
+Khi chuyển đổi code/logic từ Web (CSS/JavaScript) sang Android Java:
+
+- Giữ nguyên logic, hành vi, điều kiện và luồng hoạt động của bản gốc.
+- Không dịch máy móc cú pháp CSS/JS; hãy chuyển đổi khái niệm Web sang khái niệm tương đương trên Android Java.
+- CSS → Android UI/View, Layout, Drawable, Color, Dimension, Animation...
+- JavaScript → Java logic, Event Listener, Callback, State, Thread/Handler hoặc API Android tương ứng.
+- Nếu Web có DOM/Event/Timer/Animation/Storage thì tìm cách biểu diễn tương đương bằng Android API.
+- Ưu tiên API Android ổn định, tương thích và ít rủi ro crash.
+- Không tự ý thay đổi logic chỉ vì Android hoạt động khác Web.
+- Kiểm tra kỹ null, lifecycle, thread/UI thread, context, resource, type casting, View ID và trạng thái trước khi gọi API.
+- Không tạo code giả hoặc API không tồn tại.
+- Nếu một khái niệm CSS/JS không có tương đương 1:1 trên Android, hãy giữ nguyên ý nghĩa và hành vi mong muốn, sau đó chọn cách triển khai Android gần nhất.
+- Trước khi đưa code cuối cùng, tự kiểm tra các điểm có thể gây crash và sửa chúng.
+- Không bỏ qua các phần logic quan trọng của bản gốc.
+
+Mục tiêu: chuyển đổi hành vi từ Web → Android Java, không phải chỉ đổi cú pháp.
+Code Android cuối cùng phải chạy được và giữ hành vi gần nhất với bản gốc.

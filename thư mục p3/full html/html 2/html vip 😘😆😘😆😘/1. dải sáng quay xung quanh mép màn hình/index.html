@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viền sáng xoay quanh màn hình</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #02030a;
+    color: #f0ecfa;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ====================================================
+     1. DẢI SÁNG XOAY — phủ toàn viewport
+     position: fixed để không tạo scrollbar
+     inset: -50% để gradient không hở góc khi xoay
+     ==================================================== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    background: conic-gradient(from 0deg,
+        #00ffff,
+        transparent 25%,
+        #7a6eff,
+        transparent 55%,
+        #ec4899,
+        transparent 80%,
+        #00ffff);
+    animation: borderSpin 6s linear infinite;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  /* ====================================================
+     2. LỚP NỀN CHE GIỮA — chừa viền dày 4px
+     inset = độ dày viền mong muốn
+     ==================================================== */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 4px;
+    background: radial-gradient(circle at 50% 40%, #1e1b4b, #02030a 70%);
+    border-radius: 14px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ====================================================
+     3. NỘI DUNG — nằm trên cùng
+     ==================================================== */
+  .content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px 24px;
+    max-width: 560px;
+  }
+  .content h1 {
+    font-size: clamp(24px, 5vw, 40px);
+    margin: 0 0 14px;
+    background: linear-gradient(135deg, #fff, #67e8f9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -.02em;
+  }
+  .content p {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ====================================================
+     4. XOAY LIÊN TỤC
+     ==================================================== */
+  @keyframes borderSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ====================================================
+     5. TÔN TRỌNG prefers-reduced-motion
+     ==================================================== */
+  @media (prefers-reduced-motion: reduce) {
+    body::before { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="content">
+    <h1>Viền sáng xoay</h1>
+    <p>Dải sáng conic-gradient quay liên tục quanh mép toàn màn hình, phía trong là nền tối bo góc nhẹ.</p>
+  </div>
+
+</body>
+</html>

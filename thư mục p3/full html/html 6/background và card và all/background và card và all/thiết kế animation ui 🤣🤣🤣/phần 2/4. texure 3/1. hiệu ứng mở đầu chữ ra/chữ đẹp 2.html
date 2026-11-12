@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Staggered Scale Blur Reveal — đúng bản gốc</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    overflow: hidden;
+  }
+
+  .texture {
+    display: flex;
+    gap: 0.03em;
+    font-size: clamp(3rem, 15vw, 12rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: #e8e8f0;
+  }
+
+  .texture span {
+    display: inline-block;
+    opacity: 0;
+    animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.4) forwards;
+  }
+
+  @keyframes appear {
+    0%   { opacity: 0; transform: scale(2) skewX(30deg); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) skewX(0); filter: blur(0); }
+  }
+
+  /* Stagger delay — từng chữ lệch 0.12s */
+  .texture span:nth-child(1) { animation-delay: 0.1s; }
+  .texture span:nth-child(2) { animation-delay: 0.22s; }
+  .texture span:nth-child(3) { animation-delay: 0.34s; }
+  .texture span:nth-child(4) { animation-delay: 0.46s; }
+  .texture span:nth-child(5) { animation-delay: 0.58s; }
+  .texture span:nth-child(6) { animation-delay: 0.7s; }
+  .texture span:nth-child(7) { animation-delay: 0.82s; }
+</style>
+</head>
+<body>
+
+  <div class="texture">
+    <span>T</span>
+    <span>E</span>
+    <span>X</span>
+    <span>T</span>
+    <span>U</span>
+    <span>R</span>
+    <span>E</span>
+  </div>
+
+</body>
+</html>

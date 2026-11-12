@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bottom Nav — nhiều tab, chữ to</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0b1220;
+    color: #fff;
+  }
+
+  /* Chừa chỗ để navbar không che nội dung */
+  body { padding-bottom: 100px; }
+
+  /* ====== NAVBAR ====== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    gap: 8px;                       /* khoảng cách giữa tab */
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    /* Cuộn ngang khi nhiều tab */
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .bottom-nav::-webkit-scrollbar { display: none; }
+
+  /* ====== MỖI TAB ====== */
+  .bottom-nav a {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+
+    min-width: 96px;                /* tab rộng hơn */
+    padding: 12px 16px;
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 15px;                /* chữ to hơn (trước 12px) */
+    font-weight: 500;
+    border-radius: 10px;
+    transition: color 0.15s, background-color 0.15s;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .bottom-nav a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+  .bottom-nav a:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+  .bottom-nav a.active {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+  }
+
+  /* Icon to hơn (trước 20px) */
+  .bottom-nav a svg {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav .nav-label {
+    font-size: 15px;                /* đồng bộ với a */
+    line-height: 1;
+    white-space: nowrap;            /* không rớt dòng */
+  }
+</style>
+</head>
+<body>
+
+<nav class="bottom-nav" id="nav"></nav>
+
+<script>
+  // Sinh tab động — thử 12 tab để thấy cuộn ngang
+  const tabs = Array.from({ length: 12 }, (_, i) => ({
+    route: `/tab-${i + 1}`,
+    label: `Tab ${i + 1}`,
+  }));
+
+  const nav = document.getElementById('nav');
+  nav.innerHTML = tabs.map(t => `
+    <a data-route="${t.route}" href="${t.route}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+      </svg>
+      <span class="nav-label">${t.label}</span>
+    </a>
+  `).join('');
+
+  const links = nav.querySelectorAll('a');
+
+  function render(route) {
+    links.forEach(l => {
+      const isActive = l.dataset.route === route;
+      l.classList.toggle('active', isActive);
+      l.setAttribute('aria-current', isActive ? 'page' : 'false');
+    });
+  }
+
+  links.forEach(l => {
+    l.addEventListener('click', e => {
+      e.preventDefault();
+      const route = l.dataset.route;
+      if (route === location.pathname) return;
+      history.pushState({ route }, '', route);
+      render(route);
+    });
+  });
+
+  window.addEventListener('popstate', e => {
+    render((e.state && e.state.route) || location.pathname || '/');
+  });
+
+  render(location.pathname || '/');
+</script>
+
+</body>
+</html>

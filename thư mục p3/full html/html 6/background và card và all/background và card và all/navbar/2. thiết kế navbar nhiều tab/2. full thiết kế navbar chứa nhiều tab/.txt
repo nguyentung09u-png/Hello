@@ -1,0 +1,144 @@
+Làm bottom navbar nhiều tab — tổng quan + code
+
+Tổng quan các bước
+
+1. HTML: một <nav> chứa nhiều <a>, mỗi <a> có icon SVG + label.
+2. CSS container: position: fixed; bottom: 0 + backdrop-filter: blur + overflow-x: auto + scroll-snap-type.
+3. CSS tab: flex: 0 0 auto + min-width + scroll-snap-align.
+4. CSS trạng thái: :hover, :focus-visible, .active.
+5. JS (tùy chọn): bắt click, pushState, toggle .active theo route.
+
+Phần cuộn chỉ dùng CSS; JS không tham gia cuộn.
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #0b1220;
+    color: #fff;
+    padding-bottom: 100px; /* chừa chỗ cho navbar */
+  }
+
+  /* ===== Container ===== */
+  .scroll-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(255,255,255,0.15);
+
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .scroll-nav::-webkit-scrollbar { display: none; }
+
+  /* ===== Mỗi tab ===== */
+  .scroll-nav a {
+    flex: 0 0 auto;
+    min-width: 96px;
+    scroll-snap-align: center;
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 15px;
+    border-radius: 10px;
+    transition: color 0.15s, background-color 0.15s;
+    user-select: none;
+  }
+
+  /* ===== Trạng thái ===== */
+  .scroll-nav a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+  .scroll-nav a:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+  }
+  .scroll-nav a.active {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .scroll-nav a svg { width: 26px; height: 26px; }
+  .scroll-nav .nav-label { font-size: 15px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<nav class="scroll-nav" id="nav"></nav>
+
+<script>
+  // Sinh tab động
+  const tabs = Array.from({ length: 12 }, (_, i) => ({
+    route: `/tab-${i + 1}`,
+    label: `Tab ${i + 1}`,
+  }));
+
+  const nav = document.getElementById('nav');
+  nav.innerHTML = tabs.map(t => `
+    <a data-route="${t.route}" href="${t.route}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+      </svg>
+      <span class="nav-label">${t.label}</span>
+    </a>
+  `).join('');
+
+  const links = nav.querySelectorAll('a');
+
+  function render(route) {
+    links.forEach(l => l.classList.toggle('active', l.dataset.route === route));
+  }
+
+  links.forEach(l => l.addEventListener('click', e => {
+    e.preventDefault();
+    history.pushState({ route: l.dataset.route }, '', l.dataset.route);
+    render(l.dataset.route);
+  }));
+
+  window.addEventListener('popstate', e => {
+    render((e.state && e.state.route) || location.pathname || '/');
+  });
+
+  render(location.pathname || '/');
+</script>
+
+</body>
+</html>
+```
+
+Vài điểm cần lưu ý
+
+· Nếu thiếu flex: 0 0 auto, các tab có thể co lại cho vừa container → không tràn → không cuộn. Đây là lỗi phổ biến.
+· Ẩn scrollbar chỉ ẩn thanh cuộn, không tắt khả năng cuộn.
+· scroll-snap-type: mandatory có thể gây khó chịu; có thể đổi proximity cho nhẹ hơn. Tôi không chắc hành vi snap đồng đều trên mọi bản Android cũ.
+· Desktop dùng chuột khó cuộn ngang hơn mobile — đây là hạn chế đã biết.
+· pushState không chạy với file://; cần chạy qua HTTP server (ví dụ python3 -m http.server). Đây là hành vi đã biết của History API, tôi không chắc có workaround sạch cho file://.
+· Nếu ẩn scrollbar, cân nhắc thêm gradient ở mép để gợi ý còn tab phía sau (code trên chưa có).
+
+Tóm 1 câu
+
+Đặt overflow-x: auto + scroll-snap-type trên container, flex: 0 0 auto + min-width + scroll-snap-align trên mỗi tab, thêm 4 trạng thái bằng CSS, và tùy chọn dùng JS pushState + popstate để toggle class .active theo route — phần cuộn hoàn toàn bằng CSS.

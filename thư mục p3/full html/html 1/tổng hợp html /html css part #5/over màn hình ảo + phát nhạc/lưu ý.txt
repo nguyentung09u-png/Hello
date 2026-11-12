@@ -1,0 +1,16 @@
+mở nhạc .m4a lên rồi copy link
+https://github.com/tung010171/libobline/blob/main/gvvv.m4a
+
+
+xong tự chuyển sang
+/blob/
+thành
+/raw/
+
+
+
+https://github.com/tung010171/libobline/raw/main/gvvv.m4a
+
+
+
+phải raw mới được nhé kakaa

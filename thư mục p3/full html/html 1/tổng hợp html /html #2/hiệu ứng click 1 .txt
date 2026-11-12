@@ -1,0 +1,33 @@
+1.Toggle Active State (Bật/tắt trạng thái nổi của nút)
+
+
+
+
+
+1. Người dùng CLICK vào nút
+       ↓
+2. CHẶN sự kiện lan ra ngoài (stopPropagation)
+       ↓
+3. SO SÁNH nút vừa click với biến activeButton
+       ├── TRÙNG → TẮT active, gán activeButton = null → kết thúc
+       └── KHÁC  → đi tiếp
+       ↓
+4. XÓA class active khỏi activeButton (nút cũ)
+       ↓
+5. BẬT class active cho nút vừa click
+       ↓
+6. CẬP NHẬT activeButton = nút vừa click
+       ↓
+7. CSS TRANSITION + GPU ACCELERATION lo phần "nổi / hạ"
+
+
+
+-------
+
+
+3 bước chống lag (tóm gọn)
+
+# Bước Làm gì Tác dụng
+1 Bật GPU Acceleration Thêm will-change: transform, box-shadow + transform: translateZ(0) + backface-visibility: hidden vào nút Đẩy nút lên layer riêng của GPU → render mượt, không giật
+2 Đổi easing + tăng thời gian transition Đổi sang cubic-bezier(0.22, 1, 0.36, 1) và tăng 0.35s → 0.5s Bỏ hiệu ứng nảy ngược, chuyển động êm và chậm rãi
+3 Lưu tham chiếu nút active Dùng biến activeButton thay vì quét DOM mỗi lần click Xử lý tức thời, không lag khi có nhiều nút

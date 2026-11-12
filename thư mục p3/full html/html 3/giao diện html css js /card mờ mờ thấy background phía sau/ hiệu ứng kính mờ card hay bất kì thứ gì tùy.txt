@@ -1,0 +1,51 @@
+Glassmorphism — làm thế nào (chung chung)
+
+Nguyên tắc gồm 3 phần chính:
+
+1. Làm mờ hậu cảnh phía sau khung → backdrop-filter: blur()
+2. Nền bán trong suốt → background dùng rgba() hoặc linear-gradient có alpha thấp
+3. Viền mỏng sáng nhẹ → border: 1px solid rgba(...)
+
+Điều kiện để thấy rõ hiệu ứng: phía sau phải có gì đó (ảnh, màu, họa tiết) mới "mờ" ra được.
+
+---
+
+Code chung chung
+
+```css
+.glass {
+  /* Nền bán trong suốt */
+  background: rgba(255, 255, 255, 0.1);
+
+  /* Làm mờ hậu cảnh phía sau */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* Viền mỏng sáng */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  /* Bo góc + bóng nhẹ */
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+```
+
+```html
+<div class="glass">
+  Nội dung bên trong
+</div>
+```
+
+---
+
+Tinh chỉnh
+
+Muốn Sửa
+Mờ hơn tăng blur(20px)
+Trong hơn giảm alpha 0.1
+Đậm hơn tăng alpha 0.1
+Viền rõ hơn tăng alpha viền 0.2
+
+---
+
+Lưu ý: backdrop-filter được hỗ trợ rộng rãi trên trình duyệt hiện đại, nhưng tôi không chắc về mức hỗ trợ trên một số trình duyệt cũ — nên giữ cả -webkit- prefix.

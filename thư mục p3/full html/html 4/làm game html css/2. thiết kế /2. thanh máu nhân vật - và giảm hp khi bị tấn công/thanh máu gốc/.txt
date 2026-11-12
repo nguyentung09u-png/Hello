@@ -1,0 +1,185 @@
+🩸 OVERHEAD HEALTH BAR — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Health bar = 2 lệnh vẽ hình chữ nhật bo góc chồng lên nhau, đặt tại vị trí neo trên đầu nhân vật.
+
+```
+LỚP 1: NỀN ĐEN   → to hơn 1 chút, làm viền
+LỚP 2: RUỘT MÁU  → nhỏ hơn, co giãn theo %máu
+```
+
+Điểm mấu chốt: ruột máu không đổi màu mà đổi chiều rộng (w * pct).
+
+🔍 Các bước chính
+
+Bước 1 — Viết hàm vẽ hình chữ nhật bo góc
+
+Cần 1 hàm phụ trợ rr() vì canvas không có sẵn roundRect trong một số trình duyệt cũ:
+
+```js
+function rr(c, x, y, w, h, r) {
+  r = Math.min(r, w/2, h/2);   // chặn bo góc quá lớn
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y,     x + w, y + h, r);
+  c.arcTo(x + w, y + h, x,     y + h, r);
+  c.arcTo(x,     y + h, x,     y,     r);
+  c.arcTo(x,     y,     x + w, y,     r);
+  c.closePath();
+}
+```
+
+Bước 2 — Viết hàm drawBar() (2 lớp)
+
+```js
+function drawBar(x, y, w, h, pct, c1, c2) {
+  pct = clamp(pct, 0, 1);
+
+  // LỚP 1: nền đen, to hơn 1 chút → làm viền
+  ctx.fillStyle = 'rgba(0,0,0,0.62)';
+  rr(ctx, x - w/2 - 1.2, y - 1.2, w + 2.4, h + 2.4, (h + 2.4) / 2);
+  ctx.fill();
+
+  // nếu máu = 0, chỉ còn nền
+  if (pct <= 0) return;
+
+  // LỚP 2: ruột máu, gradient ngang, co giãn theo pct
+  const g = ctx.createLinearGradient(x - w/2, 0, x + w/2, 0);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.fillStyle = g;
+
+  rr(ctx, x - w/2, y, w * pct, h, h/2);
+  ctx.fill();
+}
+```
+
+Bước 3 — Gọi hàm trong drawSoldier()
+
+Đặt ở cuối, sau khi vẽ thân thể:
+
+```js
+// cuối drawSoldier()
+const sc = scaleAt(s.y);      // hệ số scale theo y
+const pct = s.hp / s.maxHp;   // %máu
+
+drawBar(
+  s.x,                    // tâm X
+  s.y - 50 * sc,          // Y: cách đầu 50 * scale
+  26 * sc * 0.75,         // rộng (nhỏ hơn nhân vật)
+  3.2,                    // cao cố định
+  pct,
+  '#2f9e5a', '#7ee08a'    // xanh đậm → xanh nhạt
+);
+```
+
+Bước 4 — Cập nhật pct mỗi frame
+
+Không cần bước riêng. pct = s.hp / s.maxHp đọc trực tiếp từ state → tự cập nhật.
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. HÀM BO GÓC (dùng chung)
+// ============================
+function rr(c, x, y, w, h, r) {
+  r = Math.min(r, w/2, h/2);
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y,     x + w, y + h, r);
+  c.arcTo(x + w, y + h, x,     y + h, r);
+  c.arcTo(x,     y + h, x,     y,     r);
+  c.arcTo(x,     y,     x + w, y,     r);
+  c.closePath();
+}
+
+// ============================
+// 2. HÀM VẼ THANH MÁU (2 lớp)
+// ============================
+function drawBar(x, y, w, h, pct, c1, c2) {
+  pct = clamp(pct, 0, 1);
+
+  // Lớp nền (viền đen)
+  ctx.fillStyle = 'rgba(0,0,0,0.62)';
+  rr(ctx, x - w/2 - 1.2, y - 1.2, w + 2.4, h + 2.4, (h + 2.4) / 2);
+  ctx.fill();
+
+  if (pct <= 0) return;
+
+  // Lớp ruột (gradient co giãn)
+  const g = ctx.createLinearGradient(x - w/2, 0, x + w/2, 0);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.fillStyle = g;
+
+  rr(ctx, x - w/2, y, w * pct, h, h/2);
+  ctx.fill();
+}
+
+// ============================
+// 3. NEO TRÊN ĐẦU NHÂN VẬT
+// ============================
+const scaleAt = y => 0.7 + (y - G_TOP) / (G_BOT - G_TOP) * 0.52;
+const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
+
+function drawSoldier(s) {
+  const sc = scaleAt(s.y);
+
+  // ... vẽ thân thể ...
+
+  // cuối cùng: vẽ thanh máu trên đầu
+  drawBar(
+    s.x,
+    s.y - 50 * sc,
+    26 * sc * 0.75,
+    3.2,
+    s.hp / s.maxHp,
+    '#2f9e5a', '#7ee08a'
+  );
+}
+
+// ============================
+// 4. VÒNG LẶP
+// ============================
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  update(dt);                       // cập nhật s.hp
+  ctx.clearRect(0, 0, W, H);
+
+  for (const s of soldiers) drawSoldier(s);  // → gọi drawBar()
+
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+Viền -1.2 / +2.4 1.2 px mỗi phía To → viền dày hơn
+Alpha nền 0.62 62% đen Cao → nền tối hơn
+Cao 3.2 Cố định Cao → thanh dày hơn
+Màu c1, c2 Xanh Đổi theo loại nhân vật
+Neo Y -50 * sc Cách đầu 50 × scale Cao/thấp tuỳ nhân vật
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Con số 1.2, 0.62, 3.2 có phải tối ưu không — tôi không có dữ liệu so sánh.
+· Dùng ctx.save() / ctx.restore() bọc quanh drawBar() có cần không — trong ví dụ này không cần vì không đổi state toàn cục (chỉ đổi fillStyle), nhưng tôi không chắc có trường hợp biên nào không.
+· Việc đọc s.hp trực tiếp mỗi frame có tốn kém không — tôi cho là không đáng kể, nhưng đây là suy luận.
+· arcTo có phải cách vẽ bo góc nhanh nhất không — tôi không có benchmark.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: viết 1 hàm rr() bo góc + 1 hàm drawBar() vẽ 2 lớp chữ nhật bo góc chồng nhau (nền đen rgba(0,0,0,0.62) to hơn 1.2px làm viền, ruột gradient ngang co giãn w * pct), rồi gọi drawBar() ở cuối drawSoldier() tại vị trí s.y - 50*sc — chỉ 2 lệnh vẽ, không ảnh, không sprite.

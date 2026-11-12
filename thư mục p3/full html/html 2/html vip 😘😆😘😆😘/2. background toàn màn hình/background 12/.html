@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silk Waves</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #0a1228 0%, #060718 60%, #010208 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #eaf2ff; overflow: hidden;
+  }
+  .glow {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 30% 50%, rgba(60,120,220,.14), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 70% 60%, rgba(140,80,220,.12), transparent 70%);
+    filter: blur(60px);
+  }
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; margin: 0 0 12px; letter-spacing: -.02em;
+    background: linear-gradient(135deg, #a0d0ff, #c8a0ff, #a0ffe0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #9ab0d4; font-size: 15px; }
+</style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+  <div class="content">
+    <h1>Silk Waves</h1>
+    <p>4 lớp sóng lụa xanh-tím chồng nhau, lệch pha.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+
+  // 4 lớp sóng, mỗi lớp có màu + tần số riêng
+  const LAYERS = [
+    { hue: 220, speed: 0.3,  f: 0.006, amp: 80, baseOffset: 0.05, alpha: 0.35 },
+    { hue: 250, speed: 0.45, f: 0.008, amp: 60, baseOffset: 0.20, alpha: 0.30 },
+    { hue: 200, speed: 0.6,  f: 0.010, amp: 50, baseOffset: 0.35, alpha: 0.28 },
+    { hue: 280, speed: 0.75, f: 0.013, amp: 40, baseOffset: 0.50, alpha: 0.25 },
+  ];
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function drawLayer(L, t) {
+    const tt = t * 0.001 * L.speed;
+    const baseY = H * L.baseOffset;
+
+    ctx.beginPath();
+    // cạnh trên: trái → phải
+    ctx.moveTo(-20, baseY + Math.sin(tt) * L.amp);
+    for (let x = -20; x <= W + 20; x += 10) {
+      const y = baseY
+        + Math.sin(x * L.f + tt)        * L.amp
+        + Math.cos(x * L.f * 0.5 - tt)  * L.amp * 0.4;
+      ctx.lineTo(x, y);
+    }
+    // cạnh dưới: phải → trái (giống cạnh trên + 200px)
+    ctx.lineTo(W + 20, H + 40);
+    for (let x = W + 20; x >= -20; x -= 10) {
+      const y = baseY + 200
+        + Math.sin(x * L.f + tt)        * L.amp
+        + Math.cos(x * L.f * 0.5 - tt)  * L.amp * 0.4;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(-20, H + 40);
+    ctx.closePath();
+
+    // gradient dọc
+    const g = ctx.createLinearGradient(0, baseY, 0, baseY + 200 + L.amp);
+    g.addColorStop(0,    'hsla(' + L.hue + ', 80%, 70%, ' + L.alpha + ')');
+    g.addColorStop(0.5,  'hsla(' + L.hue + ', 80%, 60%, ' + (L.alpha * 0.8) + ')');
+    g.addColorStop(1,    'hsla(' + L.hue + ', 80%, 50%, ' + (L.alpha * 0.3) + ')');
+
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const L of LAYERS) drawLayer(L, t);
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

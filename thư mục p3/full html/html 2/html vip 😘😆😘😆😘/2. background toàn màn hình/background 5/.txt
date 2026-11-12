@@ -1,0 +1,191 @@
+Tổng quan cách làm
+
+3 lớp chồng nhau:
+
+1. Nền — body với radial-gradient tỏa tròn từ tâm, màu xanh rêu → đen.
+2. Glow — <div class="grove"> chứa 2 radial-gradient xanh + filter: blur(50px) + animation drift.
+3. Canvas hạt — <canvas> chạy requestAnimationFrame, mỗi frame: cập nhật vị trí → vẽ halo + lõi.
+
+Nguyên lý hạt:
+
+· Mỗi con có x, y, vx, vy, r, color, sinPhase, sinSpeed, sinAmp, blinkPhase, blinkSpeed.
+· Mỗi frame:
+  · sinPhase += 0.02 * sinSpeed
+  · x += vx + cos(sinPhase) * sinAmp * 0.3
+  · y += vy + sin(sinPhase) * sinAmp * 0.3
+  · → đường uốn lượn, không thẳng.
+· Bounce ở biên (đệm 20px): đổi dấu vx hoặc vy.
+· Nhấp nháy: blink = 0.15 + 0.85 * pow(|sin(t*speed + phase)|, 1.8) → nhịp tối lâu, sáng nhanh, lệch pha mỗi con.
+· Halo 10× bán kính bằng createRadialGradient.
+
+Tối ưu (suy luận có căn cứ):
+
+· DPR cap 2 để nét trên retina.
+· visibilitychange → dừng khi tab ẩn.
+· prefers-reduced-motion → không chạy vòng lặp.
+· Số hạt cap 70 (vì halo lớn).
+
+Tôi không chắc:
+
+· Hệ số 0.02 cho sinPhase có phù hợp mọi kích thước màn — có thể cần chỉnh.
+· blinkSpeed dải 0.5–1.5 có tạo cảm giác tự nhiên — chưa kiểm chứng.
+
+---
+
+Code chung chung
+
+```html
+<div class="grove" aria-hidden="true"></div>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="content">Nội dung</div>
+```
+
+```css
+html, body { height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 50%, #0a1810 0%, #06100a 60%, #02060a 100%);
+  margin: 0; min-height: 100vh;
+  display: grid; place-items: center;
+  color: #f0f4e8; overflow: hidden;
+}
+
+.grove {
+  position: fixed; inset: 0;
+  z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 70%, rgba(60,120,60,.18), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 80% 30%, rgba(30,90,60,.15),  transparent 70%);
+  filter: blur(50px);
+  animation: groveDrift 20s ease-in-out infinite;
+}
+@keyframes groveDrift {
+  0%,100% { transform: translate(0, 0); }
+  50%     { transform: translate(20px, -15px); }
+}
+
+canvas {
+  position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  display: block;
+}
+
+.content { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grove { animation: none !important; }
+}
+```
+
+```js
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let flies = [];
+
+  const COLORS = ['#ffe066','#f0ff80','#c8f08a','#a8e8a0','#f8e878'];
+  const EDGE = 20;
+
+  function count() {
+    return Math.min(70, Math.max(25, Math.floor(W / 22)));
+  }
+
+  function make() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 1.2 + Math.random() * 1.6,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      sinPhase: Math.random() * Math.PI * 2,
+      sinSpeed: 0.3 + Math.random() * 0.6,
+      sinAmp: 0.4 + Math.random() * 0.8,
+      blinkPhase: Math.random() * Math.PI * 2,
+      blinkSpeed: 0.5 + Math.random() * 1.5,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width  = W * dpr;
+    c.height = H * dpr;
+    c.style.width  = W + 'px';
+    c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (flies.length < need) flies.push(make());
+    if (flies.length > need) flies.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (const f of flies) {
+      f.sinPhase += 0.02 * f.sinSpeed;
+      f.x += f.vx + Math.cos(f.sinPhase) * f.sinAmp * 0.3;
+      f.y += f.vy + Math.sin(f.sinPhase) * f.sinAmp * 0.3;
+
+      if (f.x < EDGE)     { f.x = EDGE;     f.vx =  Math.abs(f.vx); }
+      if (f.x > W - EDGE) { f.x = W - EDGE; f.vx = -Math.abs(f.vx); }
+      if (f.y < EDGE)     { f.y = EDGE;     f.vy =  Math.abs(f.vy); }
+      if (f.y > H - EDGE) { f.y = H - EDGE; f.vy = -Math.abs(f.vy); }
+
+      const blink = 0.15 + 0.85 * Math.pow(
+        Math.abs(Math.sin(t * 0.001 * f.blinkSpeed + f.blinkPhase)),
+        1.8
+      );
+
+      // halo
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 10);
+      g.addColorStop(0,   f.color + 'cc');
+      g.addColorStop(0.3, f.color + '66');
+      g.addColorStop(1,   f.color + '00');
+      ctx.fillStyle = g;
+      ctx.globalAlpha = blink;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r * 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // lõi
+      ctx.beginPath();
+      ctx.fillStyle = f.color;
+      ctx.globalAlpha = blink * 0.95;
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: dùng Canvas 2D + requestAnimationFrame tiêu chuẩn, chạy trên Chrome/Edge/Firefox/Safari hiện đại.
+· Tôi không chắc hệ số 0.02 và sinAmp * 0.3 cho ra chuyển động tự nhiên trên mọi kích thước màn.
+· Tôi không chắc Math.pow(..., 1.8) là số mũ tối ưu — có thể thử 1.5 hoặc 2.2 để thay đổi nhịp tối/sáng.
+
+🎯 Tóm 1 câu: Nền radial-gradient xanh rêu + lớp glow blur + canvas đom đóm (di chuyển sin/cos + bounce biên + nhấp nháy pow(|sin|,1.8) lệch pha + halo 10×) — chạy requestAnimationFrame với DPR cap, visibility, reduced-motion.

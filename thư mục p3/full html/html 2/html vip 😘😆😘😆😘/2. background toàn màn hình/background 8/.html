@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural Web</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 50%, #0a0f2a 0%, #060818 60%, #02030a 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #eaf2ff; overflow: hidden;
+  }
+  .glow {
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background:
+      radial-gradient(ellipse 50% 40% at 30% 30%, rgba(80,140,255,.14), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 70% 70%, rgba(160,80,255,.12), transparent 70%);
+    filter: blur(60px);
+  }
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; margin: 0 0 12px; letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff, #7ab8ff, #c8a0ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #9ab0d4; font-size: 15px; }
+</style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+  <div class="content">
+    <h1>Neural Web</h1>
+    <p>Mạng lưới thần kinh — đường nối đổi màu theo hướng.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let nodes = [];
+
+  const MAX_D = 150;
+  const CELL  = MAX_D;   // kích thước ô cho spatial hash
+
+  function count() { return Math.min(140, Math.max(50, Math.floor(W * H / 18000))); }
+
+  function make() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: 1 + Math.random() * 1.4,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.8 + Math.random() * 1.4,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const need = count();
+    while (nodes.length < need) nodes.push(make());
+    if (nodes.length > need) nodes.length = need;
+  }
+
+  // Spatial hash: Map key "cx,cy" → mảng node trong ô đó
+  function buildGrid() {
+    const grid = new Map();
+    for (const n of nodes) {
+      const cx = (n.x / CELL) | 0;
+      const cy = (n.y / CELL) | 0;
+      const key = cx + ',' + cy;
+      let arr = grid.get(key);
+      if (!arr) { arr = []; grid.set(key, arr); }
+      arr.push(n);
+    }
+    return grid;
+  }
+
+  function drawConnections(grid) {
+    for (const [key, list] of grid) {
+      const [cx, cy] = key.split(',').map(Number);
+      // 9 ô xung quanh (3x3) để không bỏ sót cặp nào
+      for (let ox = -1; ox <= 1; ox++) {
+        for (let oy = -1; oy <= 1; oy++) {
+          const nkey = (cx + ox) + ',' + (cy + oy);
+          const other = grid.get(nkey);
+          if (!other) continue;
+          for (let i = 0; i < list.length; i++) {
+            const a = list[i];
+            for (let j = 0; j < other.length; j++) {
+              const b = other[j];
+              if (a === b) continue;
+              // tránh vẽ 2 lần: chỉ vẽ khi key hiện tại <= key đối chiếu
+              if (nkey < key) continue;
+              if (nkey === key && j <= i) continue;
+              const dx = a.x - b.x, dy = a.y - b.y;
+              const d2 = dx*dx + dy*dy;
+              if (d2 < MAX_D * MAX_D) {
+                const d = Math.sqrt(d2);
+                const alpha = 0.28 * (1 - d / MAX_D);
+                const hue = 200 + (dx / MAX_D) * 60;  // 200 → 260 theo hướng
+                ctx.strokeStyle = 'hsla(' + hue + ', 90%, 70%, ' + alpha.toFixed(3) + ')';
+                ctx.lineWidth = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (const n of nodes) {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < -10) n.x = W + 10; else if (n.x > W + 10) n.x = -10;
+      if (n.y < -10) n.y = H + 10; else if (n.y > H + 10) n.y = -10;
+    }
+
+    const grid = buildGrid();
+    drawConnections(grid);
+
+    for (const n of nodes) {
+      const a = 0.55 + 0.45 * Math.sin(t * 0.001 * n.speed + n.phase);
+
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 6);
+      g.addColorStop(0, 'rgba(160,200,255,0.9)');
+      g.addColorStop(1, 'rgba(160,200,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = '#d8e8ff';
+      ctx.globalAlpha = a;
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

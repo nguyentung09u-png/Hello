@@ -1,0 +1,154 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 1 thẻ <button> vuông, có aria-label.
+2. CSS hình dáng — width/height bằng nhau + aspect-ratio: 1/1 + border-radius: 50%.
+3. CSS bóng + ring — box-shadow 2 lớp: lớp 1 tĩnh (bóng chính), lớp 2 động (ring cho pulse).
+4. CSS animation — @keyframes fabPulse lan ring spread 0 → 14px, alpha 0.55 → 0, mỗi 2.6s.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· box-shadow 2 lớp — lớp tĩnh làm bóng đổ, lớp động lan ra + mờ dần.
+· spread tăng — vòng lan rộng ra mà không làm nút to lên (khác transform: scale()).
+· Alpha giảm về 0 — vòng biến mất ở cuối chu kỳ.
+· ease-in-out — tăng/giảm tốc mượt.
+· infinite — lặp mãi.
+· animation: none khi .dragging — tránh rối khi kéo.
+
+Tôi không chắc:
+
+· Chu kỳ 2.6s có phù hợp mọi ngữ cảnh — có thể cần chỉnh theo gu.
+· Bạn muốn lan 14px hay rộng/hẹp hơn — code dưới dùng 14px.
+
+---
+
+Code chung chung
+
+```html
+<button class="fab" id="fab" type="button" aria-label="Mở trợ lý ảo"></button>
+```
+
+```css
+/* ===== Khung nút 1:1 ===== */
+.fab {
+  width: 60px;
+  height: 60px;
+  aspect-ratio: 1 / 1;              /* vuông */
+  border-radius: 50%;               /* bo tròn */
+  border: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  cursor: pointer;
+  z-index: 10000;
+
+  /* ===== Box-shadow 2 lớp ===== */
+  box-shadow:
+    0 8px 24px rgba(37,99,235,.45),   /* lớp 1: bóng chính tĩnh */
+    0 0 0 0    rgba(37,99,235,.55);   /* lớp 2: ring pulse (ban đầu) */
+
+  /* ===== Animation pulse ===== */
+  animation: fabPulse 2.6s ease-in-out infinite;
+  transition: box-shadow .2s ease;
+}
+
+/* Hover — bóng chính to hơn */
+.fab:hover {
+  box-shadow:
+    0 12px 28px rgba(37,99,235,.6),
+    0 0 0 0     rgba(37,99,235,.55);
+}
+
+/* Khi kéo — tắt pulse */
+.fab.dragging {
+  cursor: grabbing;
+  animation: none;
+  box-shadow:
+    0 16px 32px rgba(37,99,235,.65),
+    0 0 0 8px   rgba(37,99,235,.18);
+}
+
+/* Khi ẩn */
+.fab.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ===== Keyframes ===== */
+@keyframes fabPulse {
+  0%, 100% {
+    box-shadow:
+      0 8px 24px rgba(37,99,235,.45),
+      0 0 0 0    rgba(37,99,235,.55);   /* spread = 0px, alpha = .55 */
+  }
+  50% {
+    box-shadow:
+      0 8px 24px rgba(37,99,235,.45),
+      0 0 0 14px rgba(37,99,235,0);     /* spread = 14px, alpha = 0 */
+  }
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .fab {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+---
+
+Cách hoạt động
+
+```
+Timeline 1 chu kỳ 2.6s:
+
+0%          25%         50%         75%        100%
+●           ●           ●           ●           ●
+spread=0    spread≈7    spread=14   spread≈7    spread=0
+alpha=.55   alpha≈.28   alpha=0     alpha≈.28   alpha=.55
+
+→ Vòng lan ra từ 0 → 14px rồi mờ dần về 0
+→ Lặp lại liên tục
+```
+
+---
+
+Đổi màu pulse
+
+```css
+/* Tìm 3 số RGB trong box-shadow */
+rgba(37, 99, 235, .45)   /* ← đổi 37,99,235 thành màu khác */
+```
+
+Muốn Đổi RGB thành
+Xanh lá rgba(16, 185, 129, ...)
+Đỏ rgba(239, 68, 68, ...)
+Tím rgba(139, 92, 246, ...)
+Hồng rgba(236, 72, 153, ...)
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Chu kỳ nhanh hơn animation: fabPulse 1.5s ...
+Chu kỳ chậm hơn animation: fabPulse 4s ...
+Lan rộng hơn 50% { ... 0 0 0 20px ... }
+Lan hẹp hơn 50% { ... 0 0 0 10px ... }
+Vòng mờ hơn alpha từ .55 → .35
+Vòng đậm hơn alpha từ .55 → .75
+Tắt pulse Xóa animation + @keyframes fabPulse
+Tắt pulse riêng lẻ Thêm class .no-pulse { animation: none }
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: box-shadow spread + alpha + @keyframes là CSS chuẩn; prefers-reduced-motion là WCAG 2.1 requirement.
+· Tôi không chắc box-shadow animation mượt hơn transform: scale trên mọi GPU — về lý thuyết transform nhanh hơn, nhưng box-shadow cần thiết để tạo vòng lan không làm nút to.
+· Tôi không chắc chu kỳ 2.6s là tối ưu cho mọi ngữ cảnh — tùy thiết kế và gu.
+
+🎯 Tóm 1 câu: Pulse 1:1 icon = <button> vuông 1:1 bo tròn 50% với box-shadow 2 lớp (bóng tĩnh + ring động), @keyframes fabPulse lan ring từ spread 0px alpha 0.55 → 14px alpha 0 → lặp mỗi 2.6s — tắt pulse khi .dragging, tôn trọng prefers-reduced-motion.

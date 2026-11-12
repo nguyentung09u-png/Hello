@@ -1,0 +1,244 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 2 khối riêng: anchor (nút) + panel (khung), không lồng nhau.
+2. CSS — cả 2 đều position: fixed, left: 0; top: 0 — toạ độ do JS set.
+3. JS vị trí anchor — lưu posX, posY, cập nhật khi kéo.
+4. JS hàm positionPanel() — đọc posX, posY, tính toạ độ panel, gán left/top.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· offsetWidth/offsetHeight — đọc kích thước thật của panel để tính toán.
+· posX, posY của anchor — nguồn dữ liệu để tính vị trí panel.
+· Công thức: căn phải + ưu tiên trên → nếu vượt mép trên thì lật xuống dưới.
+· Clamp viewport — kẹp trong [MARGIN, W - pw - MARGIN].
+· Gọi lại positionPanel() ở 3 thời điểm: anchor di chuyển, mở panel, resize.
+
+Tôi không chắc:
+
+· Bạn muốn panel luôn trên hay tự lật — code dưới tự lật.
+· Bạn muốn căn phải hay căn trái/giữa — code dưới căn phải (mép phải panel = mép phải anchor).
+
+---
+
+Code chung chung
+
+```html
+<!-- Anchor -->
+<button class="anchor" id="anchor">Anchor</button>
+
+<!-- Panel -->
+<div class="panel" id="panel">Nội dung panel…</div>
+```
+
+```css
+/* Anchor */
+.anchor {
+  position: fixed;
+  left: 0; top: 0;                  /* toạ độ do JS set */
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 0;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  cursor: grab;
+  z-index: 10000;
+  touch-action: none;
+  will-change: transform;
+}
+
+/* Panel */
+.panel {
+  position: fixed;
+  left: 0; top: 0;                  /* toạ độ do JS set */
+  width: 300px;
+  background: #0f1729;
+  color: #e8e0ff;
+  border: 1px solid rgba(37,99,235,.35);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  opacity: 0;
+  transform: translateY(8px) scale(.96);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 9999;
+}
+.panel.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+```
+
+```js
+(function () {
+  const anchor = document.getElementById('anchor');
+  const panel  = document.getElementById('panel');
+
+  const ANCHOR_W = 60, ANCHOR_H = 60;
+  const GAP    = 12;     // khoảng cách panel ↔ anchor
+  const MARGIN = 8;      // mép an toàn viewport
+  const THRESHOLD = 6;
+
+  let posX = 0, posY = 0;
+  const clamp = (v,min,max) => v < min ? min : (v > max ? max : v);
+
+  /* ====================================================
+     TÍNH VỊ TRÍ PANEL THEO ANCHOR
+     ==================================================== */
+  function positionPanel() {
+    const pw = panel.offsetWidth  || 300;
+    const ph = panel.offsetHeight || 200;
+
+    // Mặc định: panel TRÊN anchor, căn phải
+    let px = posX + ANCHOR_W - pw;         // mép phải panel = mép phải anchor
+    let py = posY - ph - GAP;              // trên anchor, cách GAP
+
+    // Nếu vượt mép trên → lật xuống dưới
+    if (py < MARGIN) py = posY + ANCHOR_H + GAP;
+
+    // Clamp ngang
+    if (px + pw > window.innerWidth  - MARGIN) px = window.innerWidth  - pw - MARGIN;
+    if (px < MARGIN) px = MARGIN;
+
+    // Clamp dọc
+    if (py + ph > window.innerHeight - MARGIN) py = window.innerHeight - ph - MARGIN;
+    if (py < MARGIN) py = MARGIN;
+
+    panel.style.left = px + 'px';
+    panel.style.top  = py + 'px';
+  }
+
+  /* ====================================================
+     VỊ TRÍ ANCHOR — gọi positionPanel mỗi lần đổi
+     ==================================================== */
+  function setPos(x, y) {
+    posX = clamp(x, 0, window.innerWidth  - ANCHOR_W);
+    posY = clamp(y, 0, window.innerHeight - ANCHOR_H);
+    anchor.style.transform = `translate(${posX}px, ${posY}px)`;
+    positionPanel();                        // panel đi theo
+  }
+
+  // Mặc định: góc trên-trái
+  setPos(20, 20);
+
+  /* ====================================================
+     KÉO ANCHOR
+     ==================================================== */
+  let dragging = false, pointerId = null, moved = false;
+  let startX = 0, startY = 0, baseX = 0, baseY = 0;
+
+  anchor.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    dragging = true; moved = false;
+    pointerId = e.pointerId;
+    startX = e.clientX; startY = e.clientY;
+    baseX = posX; baseY = posY;
+    try { anchor.setPointerCapture(pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+
+  anchor.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!moved && (Math.abs(dx) > THRESHOLD || Math.abs(dy) > THRESHOLD)) moved = true;
+    if (moved) setPos(baseX + dx, baseY + dy);
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    if (e && e.pointerId !== pointerId) return;
+    dragging = false;
+    try { anchor.releasePointerCapture(pointerId); } catch (err) {}
+    pointerId = null;
+  }
+  anchor.addEventListener('pointerup', endDrag);
+  anchor.addEventListener('pointercancel', endDrag);
+  anchor.addEventListener('lostpointercapture', endDrag);
+
+  /* ====================================================
+     MỞ / ĐÓNG PANEL
+     ==================================================== */
+  function openPanel() {
+    positionPanel();                       // đo kích thước trước khi hiện
+    panel.classList.add('open');
+  }
+  function closePanel() { panel.classList.remove('open'); }
+
+  anchor.addEventListener('click', (e) => {
+    if (moved) { e.preventDefault(); e.stopPropagation(); return; }
+    openPanel();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanel();
+  });
+
+  window.addEventListener('resize', () => {
+    setPos(posX, posY);                    // clamp lại anchor
+    positionPanel();                       // cập nhật panel
+  });
+})();
+```
+
+---
+
+Sơ đồ trạng thái
+
+```
+Mặc định (panel trên anchor, căn phải):
+
+              ┌─────────────────┐
+              │   PANEL         │
+              └─────────────────┘
+                       ▼ GAP
+                   ╭──────╮
+                   │ANCHOR│
+                   ╰──────╯
+
+Sát mép trên → panel lật xuống dưới:
+
+                   ╭──────╮
+                   │ANCHOR│
+                   ╰──────╯
+                       ▼ GAP
+              ┌─────────────────┐
+              │   PANEL         │
+              └─────────────────┘
+```
+
+---
+
+Công thức vị trí
+
+Kiểu neo px py
+Trên, căn phải (mặc định) posX + ANCHOR_W - pw posY - ph - GAP
+Trên, căn trái posX posY - ph - GAP
+Trên, căn giữa posX + ANCHOR_W/2 - pw/2 posY - ph - GAP
+Dưới, căn phải posX + ANCHOR_W - pw posY + ANCHOR_H + GAP
+Phải, căn trên posX + ANCHOR_W + GAP posY
+Trái, căn trên posX - pw - GAP posY
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Panel luôn trên (không lật) Xóa dòng if (py < MARGIN) py = posY + ANCHOR_H + GAP;
+Panel luôn dưới Đổi py = posY - ph - GAP → py = posY + ANCHOR_H + GAP
+Panel căn trái Đổi px = posX + ANCHOR_W - pw → px = posX
+Panel căn giữa px = posX + ANCHOR_W / 2 - pw / 2
+Khoảng cách xa hơn GAP = 12 → 20
+Mép an toàn rộng hơn MARGIN = 8 → 16
+Reset anchor Đổi setPos(20, 20)
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: offsetWidth/offsetHeight + left/top + clamp là kỹ thuật chuẩn để neo element theo element khác; Popper.js và Floating UI làm việc tương tự nhưng phức tạp hơn (auto-place nhiều phía, mũi tên, xử lý scroll).
+· Tôi không chắc hành vi khi panel lật xuống dưới mà vẫn vượt mép dưới — code trên clamp thêm 1 lần, có thể panel dính đáy trong trường hợp hiếm.
+· Tôi không chắc bạn muốn anchor kéo được hay cố định — code trên anchor kéo được; có thể bỏ block Pointer Events nếu muốn cố định.
+
+🎯 Tóm 1 câu: Anchor Panel = anchor + panel đều position: fixed + left/top do JS set, dùng hàm positionPanel() đọc offsetWidth/Height + posX/posY để tính vị trí (mặc định trên + căn phải, tự lật khi vượt mép, clamp viewport) — gọi lại mỗi khi anchor di chuyển, mở panel, và resize.

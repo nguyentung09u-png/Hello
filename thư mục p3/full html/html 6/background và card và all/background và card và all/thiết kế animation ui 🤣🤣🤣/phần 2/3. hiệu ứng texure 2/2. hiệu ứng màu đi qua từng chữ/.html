@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Neon Wave</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Arial Black', sans-serif;
+    overflow: hidden;
+  }
+
+  .neon-text {
+    display: flex;
+    gap: 0.06em;
+    font-size: clamp(3rem, 14vw, 11rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+
+  .neon-text span {
+    position: relative;
+    color: #1a1a2e;
+    -webkit-text-stroke: 1px rgba(56, 189, 248, 0.3);
+    transition: color 0.4s ease;
+  }
+
+  /* Lớp neon phía trước — ẩn ban đầu */
+  .neon-text span::before {
+    content: attr(data-char);
+    position: absolute;
+    inset: 0;
+    color: #fff;
+    -webkit-text-stroke: 0;
+    text-shadow:
+      0 0 8px   #fff,
+      0 0 20px  #38bdf8,
+      0 0 40px  #38bdf8,
+      0 0 80px  #0ea5e9,
+      0 0 120px #0284c7;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Khi active — neon sáng lên */
+  .neon-text span.active {
+    color: #38bdf8;
+  }
+  .neon-text span.active::before {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+  <div class="neon-text" id="neonText">
+    <span data-char="N">N</span>
+    <span data-char="E">E</span>
+    <span data-char="O">O</span>
+    <span data-char="N">N</span>
+  </div>
+
+<script>
+  const spans = document.querySelectorAll('.neon-text span');
+  let index = 0;
+
+  setInterval(() => {
+    spans.forEach(s => s.classList.remove('active'));
+    spans[index].classList.add('active');
+    index = (index + 1) % spans.length;
+  }, 600);
+</script>
+</body>
+</html>

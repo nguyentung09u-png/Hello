@@ -1,0 +1,116 @@
+Tổng quan cách làm (4 bước)
+
+```
+BƯỚC 1 — Bounds    khai báo biên world rộng (WIDE_L..WIDE_R, WIDE_T..WIDE_B)
+BƯỚC 2 — Fill      vẽ nền (sky/water/sao/mây/đồi) phủ kín biên đó
+BƯỚC 3 — Clamp     giới hạn cam.x/y để không kéo ra ngoài biên (chỉ khi zoom ≥ 1)
+BƯỚC 4 — Culling   bỏ qua đối tượng nằm ngoài khung nhìn khi vẽ
+BƯỚC 5 (tuỳ) — Wrap/Procedural: lặp tile hoặc sinh mới khi cam di chuyển
+```
+
+Nguyên tắc chung: camera không biết gì về world — nó chỉ translate + scale. World phải tự phủ đủ rộng để không lộ mép khi zoom xa.
+
+---
+
+Code chung chung
+
+1. Bounds — khai báo biên
+
+```js
+// World rộng tối thiểu W/MIN_ZOOM theo ngang, H/MIN_ZOOM theo dọc
+const MIN_ZOOM = 0.45;
+const WIDE_L = -W * 2;
+const WIDE_R =  W * 3;
+const WIDE_T = -H * 2;
+const WIDE_B =  H * 3;
+const WIDE_W = WIDE_R - WIDE_L;
+const WIDE_H = WIDE_B - WIDE_T;
+```
+
+2. Fill — vẽ nền phủ kín
+
+```js
+function drawSky(t){
+  const g = ctx.createLinearGradient(0, WIDE_T, 0, SEA_TOP);
+  g.addColorStop(0, '#05061a');
+  g.addColorStop(1, '#1e3f66');
+  ctx.fillStyle = g;
+  ctx.fillRect(WIDE_L, WIDE_T, WIDE_W, SEA_TOP - WIDE_T);
+}
+
+function drawWater(t){
+  const g = ctx.createLinearGradient(0, SEA_TOP, 0, WIDE_B);
+  g.addColorStop(0, '#0d3a5a');
+  g.addColorStop(1, '#03101f');
+  ctx.fillStyle = g;
+  ctx.fillRect(WIDE_L, SEA_TOP, WIDE_W, WIDE_B - SEA_TOP);
+}
+
+// Sao, mây rải ngẫu nhiên trong [WIDE_L, WIDE_R] × [WIDE_T, SEA_TOP]
+```
+
+3. Clamp — giới hạn camera
+
+```js
+function clampCamera(){
+  if (cam.zoom >= 1){
+    // Khung nhìn nhỏ hơn world → clamp trong biên world
+    cam.x = clamp(cam.x, W - W*cam.zoom, 0);
+    cam.y = clamp(cam.y, H - H*cam.zoom, 0);
+  }
+  // zoom < 1: bỏ clamp để tránh min>max gây giật
+}
+```
+
+Suy luận: công thức W - W*zoom đến 0 là vị trí hợp lệ để mép world không lọt vào view khi zoom ≥ 1. Tôi tin đúng nhưng chưa test runtime.
+
+4. Culling — lọc ngoài màn hình
+
+```js
+function drawStars(t){
+  const viewL = -cam.x / cam.zoom - 40;
+  const viewR = (W - cam.x) / cam.zoom + 40;
+  const viewT = -cam.y / cam.zoom - 40;
+  const viewB = (H - cam.y) / cam.zoom + 40;
+
+  for (const s of stars){
+    if (s.x < viewL || s.x > viewR) continue;
+    if (s.y < viewT || s.y > viewB) continue;
+    // ... vẽ sao
+  }
+}
+```
+
+5. Tuỳ chọn — Wrap / Procedural
+
+```js
+// Cách A: tile-wrap (lặp vô tận)
+function wrapX(x){
+  return ((x - WIDE_L) % WIDE_W + WIDE_W) % WIDE_W + WIDE_L;
+}
+
+// Cách B: procedural (sinh mới khi view tới biên)
+function maybeSpawnStars(viewL, viewR){
+  if (viewL < lastSpawnL - 200){
+    // sinh thêm sao bên trái
+    lastSpawnL = viewL;
+  }
+}
+```
+
+Tôi không chắc cách nào phù hợp với dự án cụ thể — phụ thuộc yêu cầu.
+
+---
+
+Điều tôi không chắc
+
+· Con số WIDE_L = -W*2 … WIDE_B = H*3 — tôi chọn theo trực giác; công thức đúng là world ≥ W/MIN_ZOOM và H/MIN_ZOOM, cộng thêm biên an toàn.
+· Clamp W - W*zoom đến 0 — suy luận toán học từ transform screen = world*zoom + cam.x; tôi tin đúng nhưng chưa test runtime.
+· Bỏ clamp khi zoom < 1 — cách này giảm giật, nhưng tôi không chắc có gây mép đen trong vài trường hợp biên không.
+· Culling sao + sóng + đồi — code thuyền cull sao + sóng; chưa cull mây, đồi — có thể tối ưu thêm nhưng tôi không rõ có đáng không.
+· Wrap / Procedural — tôi chỉ nêu khái niệm, chưa viết code hoàn chỉnh vì phụ thuộc cách tổ chức dữ liệu.
+· Chưa test runtime — tất cả dựa trên lý thuyết, có thể cần điều chỉnh sau khi chạy thực tế.
+
+---
+
+🎯 Tóm 1 câu: Làm Virtual Infinite World = (1) khai báo biên rộng WIDE_* ≥ W/MIN_ZOOM, (2) vẽ sky/water/sao/mây phủ kín biên đó bằng fillRect + rải random, (3) clamp camera bằng clamp(cam.x, W - W*zoom, 0) khi zoom ≥ 1 và bỏ clamp khi zoom < 1 để tránh giật, (4) cull đối tượng ngoài view bằng cách so s.x/s.y với viewL/viewR/viewT/viewB, tùy chọn (5) dùng tile-wrap ((x-L)%W+W)%W+L hoặc procedural sinh thêm khi view tới biên — nhưng các con số tôi đưa chỉ là gợi ý, cần test runtime để chắc không lộ mép đen.

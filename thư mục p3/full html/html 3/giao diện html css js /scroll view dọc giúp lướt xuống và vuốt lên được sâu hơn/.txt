@@ -1,0 +1,233 @@
+📜 ScrollView dọc — Tổng quan & code khung
+
+I. Tổng quan các bước làm
+
+1. Tạo viewport — thẻ cha có height xác định + overflow: hidden.
+2. Tạo content — thẻ con chứa item, cao tự nhiên.
+3. Đo kích thước — viewport.clientHeight, content.scrollHeight → tính maxScroll.
+4. Lắng nghe input — wheel / touch / key / scrollbar drag.
+5. Cập nhật vị trí — biến scrollY, kẹp trong [0, maxScroll].
+6. Render — dịch content bằng transform: translate3d(0, -scrollY, 0) (GPU).
+7. Làm mượt — gom input vào rAF, thêm passive: true.
+8. Tùy chọn — momentum, snap, thanh cuộn custom, parallax.
+
+Lưu ý: đây là hướng custom ScrollView (transform-based). Nếu chỉ cần scroll thường thì dùng native overflow-y: auto — đơn giản, mượt, browser tự lo.
+
+---
+
+II. Code khung (chung chung, chạy được)
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin: 0; background: #0a0e1a; color: #e6e9f0;
+         font-family: system-ui, sans-serif; }
+
+  /* Viewport: khung nhìn cố định */
+  .scrollview {
+    position: relative;
+    height: 400px;              /* chiều cao cố định */
+    overflow: hidden;           /* cắt phần tràn */
+    border: 1px solid #2a3352;
+    border-radius: 12px;
+    max-width: 480px;
+    margin: 40px auto;
+    touch-action: none;         /* tự xử lý touch, không cho browser scroll */
+  }
+
+  /* Content: dịch chuyển bằng transform */
+  .scroll-content {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .item {
+    padding: 20px;
+    border-bottom: 1px solid #1a1f36;
+  }
+
+  /* Scrollbar custom (thumb) */
+  .scrollbar {
+    position: absolute;
+    top: 4px; right: 4px; bottom: 4px;
+    width: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 99px;
+    pointer-events: none;
+  }
+  .scrollbar-thumb {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40px;
+    background: #39a0ff;
+    border-radius: 99px;
+    transition: opacity 0.2s;
+  }
+</style>
+</head>
+<body>
+
+<div class="scrollview" id="sv">
+  <div class="scroll-content" id="content">
+    <!-- 30 item demo -->
+    <div class="item">Item 01</div>
+    <div class="item">Item 02</div>
+    <!-- ... -->
+  </div>
+  <div class="scrollbar">
+    <div class="scrollbar-thumb" id="thumb"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- 1. LẤY PHẦN TỬ ---------- */
+const sv      = document.getElementById('sv');
+const content = document.getElementById('content');
+const thumb   = document.getElementById('thumb');
+
+/* ---------- 2. SINH ITEM DEMO ---------- */
+for (let i = 3; i <= 30; i++) {
+  const d = document.createElement('div');
+  d.className = 'item';
+  d.textContent = 'Item ' + String(i).padStart(2, '0');
+  content.appendChild(d);
+}
+
+/* ---------- 3. STATE ---------- */
+let scrollY    = 0;      // vị trí hiện tại
+let targetY    = 0;      // vị trí đích (để smooth)
+let maxScroll  = 0;
+let viewH      = 0;
+let contentH   = 0;
+let dirty      = false;  // cần render?
+
+/* ---------- 4. ĐO KÍCH THƯỚC ---------- */
+function measure() {
+  viewH     = sv.clientHeight;
+  contentH  = content.scrollHeight;
+  maxScroll = Math.max(0, contentH - viewH);
+}
+measure();
+
+/* ---------- 5. KẸP GIÁ TRỊ ---------- */
+function clamp(v, min, max) {
+  return v < min ? min : v > max ? max : v;
+}
+
+/* ---------- 6. INPUT: WHEEL ---------- */
+sv.addEventListener('wheel', (e) => {
+  targetY = clamp(targetY + e.deltaY, 0, maxScroll);
+  dirty = true;
+}, { passive: true });
+
+/* ---------- 7. INPUT: TOUCH ---------- */
+let touchStartY = 0;
+let touchStartScroll = 0;
+
+sv.addEventListener('touchstart', (e) => {
+  touchStartY = e.touches[0].clientY;
+  touchStartScroll = targetY;
+}, { passive: true });
+
+sv.addEventListener('touchmove', (e) => {
+  const dy = touchStartY - e.touches[0].clientY;
+  targetY = clamp(touchStartScroll + dy, 0, maxScroll);
+  dirty = true;
+}, { passive: true });
+
+/* ---------- 8. INPUT: KEYBOARD ---------- */
+window.addEventListener('keydown', (e) => {
+  const step = 40;
+  if (e.key === 'ArrowDown') targetY = clamp(targetY + step, 0, maxScroll);
+  if (e.key === 'ArrowUp')   targetY = clamp(targetY - step, 0, maxScroll);
+  if (e.key === 'PageDown')  targetY = clamp(targetY + viewH, 0, maxScroll);
+  if (e.key === 'PageUp')    targetY = clamp(targetY - viewH, 0, maxScroll);
+  if (e.key === 'Home')      targetY = 0;
+  if (e.key === 'End')       targetY = maxScroll;
+  dirty = true;
+});
+
+/* ---------- 9. RENDER LOOP ---------- */
+function render() {
+  // Smooth nội suy (bỏ nếu muốn cứng/1:1)
+  scrollY += (targetY - scrollY) * 0.18;
+
+  if (Math.abs(targetY - scrollY) < 0.1) {
+    scrollY = targetY;
+    dirty = false;
+  } else {
+    dirty = true;
+  }
+
+  // Dịch content — GPU layer
+  content.style.transform = `translate3d(0, ${-scrollY}px, 0)`;
+
+  // Cập nhật thanh cuộn
+  const ratio = maxScroll > 0 ? scrollY / maxScroll : 0;
+  const thumbH = Math.max(30, (viewH / contentH) * viewH);
+  thumb.style.height = thumbH + 'px';
+  thumb.style.transform = `translateY(${ratio * (viewH - thumbH - 8)}px)`;
+}
+
+function loop() {
+  if (dirty) render();
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* ---------- 10. RESIZE ---------- */
+window.addEventListener('resize', () => {
+  measure();
+  targetY = clamp(targetY, 0, maxScroll);
+  dirty = true;
+});
+</script>
+
+</body>
+</html>
+```
+
+---
+
+III. Các mảnh ghép tùy chọn (không bắt buộc)
+
+Tính năng Cách làm (hướng chung)
+Momentum Lưu velocity từ deltaY/touch, sau khi nhả thì giảm dần mỗi frame.
+Snap Sau khi dừng, tính nearestIndex * itemHeight và lerp targetY tới đó.
+Parallax Thêm layer khác, translateY(scrollY * 0.3) để trôi chậm hơn.
+Virtual list Chỉ render item trong [scrollY - buffer, scrollY + viewH + buffer].
+Overscroll bounce Cho scrollY vượt biên + spring back bằng lerp.
+
+---
+
+IV. Ưu / nhược của custom ScrollView
+
+Ưu
+
+· Kiểm soát 100% hành vi (snap, momentum, hiệu ứng).
+· Có thể dùng cho canvas/WebGL list.
+· Không phụ thuộc scrollbar native.
+
+Nhược
+
+· Không mượt bằng native (native dùng thread riêng).
+· Phải tự xử lý a11y, keyboard, screen reader.
+· Tốn công maintain.
+
+Khuyến nghị: nếu không có nhu cầu đặc biệt, chỉ cần:
+
+```css
+.viewport { height: 400px; overflow-y: auto; }
+```
+
+→ browser lo hết. Custom scroll chỉ nên làm khi cần hiệu ứng mà native không đáp ứng được.
+
+---
+
+🎯 Tóm 1 câu
+
+Custom vertical ScrollView = viewport (overflow:hidden) + content dịch bằng transform: translateY + input (wheel/touch/key) cập nhật biến scrollY + clamp [0, scrollHeight−clientHeight] + render trong requestAnimationFrame + listener passive: true, kèm tùy chọn momentum/snap/parallax — chỉ nên làm khi native overflow-y: auto không đáp ứng được nhu cầu.

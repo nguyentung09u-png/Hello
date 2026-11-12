@@ -1,0 +1,102 @@
+---- lò xo + viền ---
+
+Khi click vào fab hoặc button
+
+Spring Animation (Lò xo) :
+
+Chức năng  ScaleAnimation (Thay đổi tỉ lệ)
+
+· Vai trò: Đây là lõi của hiệu ứng. Nó thay đổi kích thước Card theo thời gian.
+· Cách hoạt động:
+  · Khi nhấn: Scale từ 100% lên 105% (to ra).
+  · Khi thả: Scale từ 105% xuống 100% (co về).
+
+
+---------
+
+setDuration(200) (Thời gian chạy)
+
+· Vai trò: Điều chỉnh thời gian diễn ra hiệu ứng.
+· Giá trị: 200 mili giây là đủ nhanh để tạo cảm giác "đàn hồi" mà không bị giật.
+
+-------
+
+
+DecelerateInterpolator (Giảm tốc)
+
+· Vai trò: Quyết định tốc độ chuyển động của Card. Thay vì co về đều đặn, nó bắt đầu nhanh và chậm dần về cuối.
+· Tác dụng: Tạo cảm giác như một lực cản (ma sát) kéo Card về vị trí cũ, rất giống lò xo thật
+
+
+
+
+
+Và thêm viền
+
+
+----
+Giữ nguyên chỉ thêm Cho phép nhấn vào Rounded Rectangle (Khung) card
+
+Nhấn vào nó sẽ hiện Hào Quang Phát Sáng Tức Thì
+
+Bừng sáng ngay lập tức với hiệu ứng Neon 
+
+
+chỉ hiện viền Neon phát sáng quanh Card, không có gradient nền, đúng theo yêu cầu của bạn.
+#3b82f6 màu xanh blue
+
+viền solid border là viền nối nét liền , không đứt đoạn
+-------
+stroke width là độ rộng nét  viền 4px
+"Solid Border" (Viền liền nét)
+
+
+-------
+// Tắt sau 1.5 giây
+handler.postDelayed gồm 2 thành phần:
+
+· Runnable → Khối lệnh cần chạy sau khi delay.
+· 1500 → Thời gian delay (1.5 giây).
+
+
+---kết thúc lò xo + viền -----
+
+
+
+
+
+-----
+Spatial 3D Tilt = Card xoay 3D theo hướng tay bạn vuốt (giống thẻ thật).
+
+Bản chất Xoay/nghiêng Card trong không gian 3D
+
+
+
+---
+kết hợp cả ACTION_DOWN và ACTION_MOVE để xử lý toàn bộ vòng đời tương tác của ngón tay.
+
+-ACTION_DOWN (Nhịp chạm): Chịu trách nhiệm xóa bỏ độ trễ (delay). Vừa đặt ngón tay xuống là Card phải nghiêng ngay tại vị trí chạm.
+-ACTION_MOVE (Nhịp trượt): Chịu trách nhiệm duy trì sự mượt mà. Ngón tay rê đến đâu, Card xoay đuổi theo đến đó.
+
+-ACTION_UP Nảy về vị trí phẳng
+Nhấc ngón tay ra -> Chạy animation kéo các góc xoay về lại 0 phẳng phiu ban đầu.
+---
+
+3 thành phần cần có:
+ * Khung nhìn 3D: Chiều sâu/ống kính ảo (cameraDistance trên Android hoặc perspective trên Web).
+ * Bộ bắt sự kiện cảm ứng: Lắng nghe ngón tay chạm và di chuyển (OnTouchListener).
+ * Công thức chuẩn hóa: Quy đổi vị trí ngón tay chạm (x, y) về góc xoay 2 trục (RotationX, RotationY).
+Quy trình 5 bước thực hiện:
+ * Tạo chiều sâu 3D (Setup)
+   * Đặt khoảng cách camera cho Card để khi nghiêng có hiệu ứng xa - gần chân thực.
+ * Chặn ScrollView cướp thao tác
+   * Gọi requestDisallowInterceptTouchEvent(true) để ép hệ thống ưu tiên cho Card xoay trước, không bị cuộn trang chen ngang.
+ * Nghiêng tức thì tại điểm chạm (ACTION_DOWN)
+   * Vừa hạ ngón tay xuống -> Tính độ lệch so với tâm Card -> Đổi RotationX và RotationY để Card chìm xuống ngay góc đó.
+ * Xoay đuổi theo ngón tay (ACTION_MOVE)
+   * Ngón tay trượt đến đâu -> Tính lại tọa độ -> Cập nhật góc xoay mượt mà theo đường rê.
+ * Nảy về vị trí phẳng (ACTION_UP)
+   * Nhấc ngón tay ra -> Chạy animation kéo các góc xoay về lại 0^\circ phẳng phiu ban đầu.
+
+
+

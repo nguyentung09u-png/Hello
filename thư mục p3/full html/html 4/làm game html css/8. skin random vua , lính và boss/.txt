@@ -1,0 +1,392 @@
+🎨 SKIN RANDOM MỖI MÀN — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Skin random = 1 bảng màu cố định + 1 PRNG có seed + 4 điểm đọc màu:
+
+```
+BƯỚC 1: BẢNG MÀU   viết object SKINS chứa nhiều bộ màu
+BƯỚC 2: PRNG       dùng mulberry32(seed) thay Math.random()
+BƯỚC 3: HÀM CHỌN   viết pickSkin(level) trả về 4 bộ
+BƯỚC 4: GÁN        game.skin = pickSkin(level) khi bắt đầu màn
+BƯỚC 5: ĐỌC MÀU    4 hàm draw đọc từ game.skin thay vì màu cứng
+```
+
+Điểm mấu chốt: PRNG có seed = level → cùng level luôn ra cùng bộ màu. Không random mỗi frame.
+
+---
+
+🔍 Năm bước chi tiết
+
+Bước 1 — Viết bảng màu SKINS
+
+Mỗi loại quân có nhiều bộ màu, mỗi bộ là 1 object chứa các mã màu cụ thể:
+
+```js
+const SKINS = {
+  guard: [   // 7 bộ
+    { armor: ['#c94b4b','#8a2c2c'], helmet: '#9aa3b0', crest: '#d8443c' },
+    { armor: ['#3a5ac9','#1f3a8a'], helmet: '#c9c9c9', crest: '#4f9ff7' },
+    // ...
+  ],
+  archer: [  // 6 bộ
+    { tunic: ['#3d7a3d','#1e4a1e'], hood: '#1e4a1e' },
+    // ...
+  ],
+  king: [    // 6 bộ
+    { robe: ['#f0d074','#d8ab3c','#a3791d'], cape: '#6d1b36', crown: '#ffd447' },
+    // ...
+  ],
+  boss: [    // 6 bộ
+    { body: ['#4a2f5f','#241536'], eye: '#ff4d4d', aura: 'rgba(255,60,60,0.55)' },
+    // ...
+  ]
+};
+```
+
+Điểm mấu chốt: mỗi loại có số trường khác nhau tuỳ chi tiết cần đổi màu.
+
+Bước 2 — Viết PRNG mulberry32
+
+```js
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+```
+
+→ Cùng seed → cùng dãy số → dùng cho tính deterministic.
+
+Bước 3 — Viết hàm pickSkin(level)
+
+```js
+function pickSkin(level) {
+  const rng = mulberry32(level * 7919 + 42);   // ← seed từ level
+  return {
+    guard:  SKINS.guard [Math.floor(rng() * SKINS.guard.length)],
+    archer: SKINS.archer[Math.floor(rng() * SKINS.archer.length)],
+    king:   SKINS.king  [Math.floor(rng() * SKINS.king.length)],
+    boss:   SKINS.boss  [Math.floor(rng() * SKINS.boss.length)]
+  };
+}
+```
+
+Pattern Math.floor(rng() * length):
+
+· rng() trả về float 0 → 1
+· Nhân với length → float 0 → length
+· Math.floor → int 0 → length-1 → index hợp lệ
+
+Bước 4 — Gán skin khi bắt đầu màn
+
+Trong startLevel():
+
+```js
+function startLevel() {
+  game.skin = pickSkin(game.level);   // ← gán 1 lần
+  game.waveActive = true;
+  // ...
+}
+```
+
+Trong startGame():
+
+```js
+game.skin = pickSkin(1);              // ← màn 1 ban đầu
+```
+
+→ Chỉ gán 1 lần — không đổi giữa các frame.
+
+Bước 5 — Sửa 4 hàm draw đọc màu
+
+Trước:
+
+```js
+function drawGuard(s, t) {
+  bg.addColorStop(0, '#c94b4b');        // ← màu cứng
+  bg.addColorStop(1, '#8a2c2c');
+  ctx.fillStyle = '#9aa3b0';            // ← màu cứng
+  // ...
+}
+```
+
+Sau:
+
+```js
+function drawGuard(s, t) {
+  const sk = game.skin?.guard || SKINS.guard[0];   // ← đọc skin
+  bg.addColorStop(0, sk.armor[0]);                  // ← màu từ skin
+  bg.addColorStop(1, sk.armor[1]);
+  ctx.fillStyle = sk.helmet;                        // ← màu từ skin
+  // ...
+}
+```
+
+Fallback || SKINS.guard[0]:
+
+· Nếu game.skin là null/undefined → dùng bộ #0
+· Đảm bảo không lỗi khi chưa gán skin
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. BẢNG MÀU — SKINS
+// ============================
+const SKINS = {
+  guard: [
+    { armor: ['#c94b4b','#8a2c2c'], helmet: '#9aa3b0', crest: '#d8443c' },
+    { armor: ['#3a5ac9','#1f3a8a'], helmet: '#c9c9c9', crest: '#4f9ff7' },
+    { armor: ['#3a8a4a','#1a5a2a'], helmet: '#b8d8b8', crest: '#7ee08a' },
+    { armor: ['#8a3ac9','#5a1a8a'], helmet: '#d4a8e0', crest: '#c061e0' },
+    { armor: ['#c9a03a','#8a6a1a'], helmet: '#ffd447', crest: '#ffe27a' },
+    { armor: ['#3a3a3a','#1a1a1a'], helmet: '#6a6a6a', crest: '#8a8a8a' },
+    { armor: ['#c96a3a','#8a3a1a'], helmet: '#d4a878', crest: '#ffa86a' },
+  ],
+  archer: [
+    { tunic: ['#3d7a3d','#1e4a1e'], hood: '#1e4a1e' },
+    { tunic: ['#3a5a8a','#1e2f4a'], hood: '#1e2f4a' },
+    { tunic: ['#7a3d3d','#4a1e1e'], hood: '#4a1e1e' },
+    { tunic: ['#7a5a3d','#4a3a1e'], hood: '#4a3a1e' },
+    { tunic: ['#5a3d7a','#2f1e4a'], hood: '#2f1e4a' },
+    { tunic: ['#3d7a7a','#1e4a4a'], hood: '#1e4a4a' },
+  ],
+  king: [
+    { robe: ['#f0d074','#d8ab3c','#a3791d'], cape: '#6d1b36', crown: '#ffd447' },
+    { robe: ['#c0d0e0','#8098b0','#506880'], cape: '#2a3a5a', crown: '#d0e0ff' },
+    { robe: ['#d0a0e0','#a060b0','#603080'], cape: '#3a1a5a', crown: '#e0a0ff' },
+    { robe: ['#a0e0b0','#60a070','#305040'], cape: '#1a4a2a', crown: '#a0ffb0' },
+    { robe: ['#e0a0a0','#b06060','#703030'], cape: '#5a1a1a', crown: '#ffb0b0' },
+    { robe: ['#e0c0a0','#b08060','#704830'], cape: '#3a2010', crown: '#ffd0a0' },
+  ],
+  boss: [
+    { body: ['#4a2f5f','#241536'], eye: '#ff4d4d', aura: 'rgba(255,60,60,0.55)' },
+    { body: ['#5f2f2f','#361515'], eye: '#ffaa00', aura: 'rgba(255,150,0,0.55)' },
+    { body: ['#2f4a5f','#152436'], eye: '#00ffff', aura: 'rgba(0,200,255,0.55)' },
+    { body: ['#3a5f2f','#1a3615'], eye: '#aaff00', aura: 'rgba(150,255,0,0.55)' },
+    { body: ['#5f5f2f','#363615'], eye: '#ffff00', aura: 'rgba(255,255,0,0.55)' },
+    { body: ['#5f2f5f','#361536'], eye: '#ff00ff', aura: 'rgba(255,0,255,0.55)' },
+  ]
+};
+
+// ============================
+// 2. PRNG CÓ SEED
+// ============================
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ============================
+// 3. HÀM CHỌN SKIN THEO LEVEL
+// ============================
+function pickSkin(level) {
+  const rng = mulberry32(level * 7919 + 42);
+  return {
+    guard:  SKINS.guard [Math.floor(rng() * SKINS.guard.length)],
+    archer: SKINS.archer[Math.floor(rng() * SKINS.archer.length)],
+    king:   SKINS.king  [Math.floor(rng() * SKINS.king.length)],
+    boss:   SKINS.boss  [Math.floor(rng() * SKINS.boss.length)]
+  };
+}
+
+// ============================
+// 4. STATE
+// ============================
+const game = {
+  level: 1,
+  skin: null
+};
+
+// ============================
+// 5. GÁN SKIN KHI BẮT ĐẦU MÀN
+// ============================
+function startLevel() {
+  game.skin = pickSkin(game.level);
+  game.waveActive = true;
+  // ...
+}
+
+function startGame() {
+  game.level = 1;
+  game.skin = pickSkin(1);
+  // ...
+}
+
+// ============================
+// 6. SỬA 4 HÀM DRAW
+// ============================
+
+// --- drawGuard ---
+function drawGuard(s, t) {
+  const sk = game.skin?.guard || SKINS.guard[0];
+  const buffed = game.buffTimer > 0;
+
+  // ... vẽ chân, giáo, v.v. ...
+
+  // Thân — đọc từ skin
+  const bg = ctx.createLinearGradient(-8, -29, 8, -11);
+  if (buffed) { bg.addColorStop(0,'#ffb35c'); bg.addColorStop(1,'#d97a1f'); }
+  else        { bg.addColorStop(0, sk.armor[0]); bg.addColorStop(1, sk.armor[1]); }
+  ctx.fillStyle = bg;
+  rr(ctx, -8, -29, 16, 18, 5.5); ctx.fill();
+
+  // Vai + mũ — đọc từ skin.helmet
+  ctx.fillStyle = buffed ? '#e8b23c' : sk.helmet;
+  ctx.beginPath(); ctx.ellipse(-8, -27, 3.4, 2.8, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse( 8, -27, 3.4, 2.8, 0, 0, Math.PI*2); ctx.fill();
+
+  // ... vẽ đầu, mắt ...
+
+  // Mũ — đọc từ skin.helmet
+  ctx.fillStyle = buffed ? '#e8b23c' : sk.helmet;
+  ctx.beginPath(); ctx.arc(0, -36, 7, Math.PI, Math.PI*2); ctx.fill();
+  ctx.fillRect(-7, -36.4, 14, 2.6);
+
+  // Lông mũ — đọc từ skin.crest
+  ctx.fillStyle = buffed ? '#fff0a0' : sk.crest;
+  ctx.beginPath(); ctx.ellipse(0, -43, 1.9, 4, 0, 0, Math.PI*2); ctx.fill();
+}
+
+// --- drawArcher ---
+function drawArcher(a, t) {
+  const sk = game.skin?.archer || SKINS.archer[0];
+
+  // ... vẽ chân, cung ...
+
+  // Thân — đọc từ skin.tunic
+  const bg = ctx.createLinearGradient(-7, -26, 7, -10);
+  bg.addColorStop(0, sk.tunic[0]);
+  bg.addColorStop(1, sk.tunic[1]);
+  ctx.fillStyle = bg;
+  rr(ctx, -7, -26, 14, 16, 5); ctx.fill();
+
+  // ... vẽ đầu, mắt ...
+
+  // Mũ trùm — đọc từ skin.hood
+  ctx.fillStyle = sk.hood;
+  ctx.beginPath(); ctx.arc(0, -33, 6.8, Math.PI, Math.PI * 2); ctx.fill();
+  ctx.fillRect(-6.8, -33.4, 13.6, 2.2);
+}
+
+// --- drawKing ---
+function drawKing(k, t) {
+  const sk = game.skin?.king || SKINS.king[0];
+
+  // ... vẽ aura ...
+
+  // Áo choàng — đọc từ skin.cape
+  ctx.fillStyle = sk.cape;
+  ctx.beginPath();
+  ctx.moveTo(-11, -30);
+  ctx.quadraticCurveTo(-17, -13, -13, 0);
+  ctx.lineTo(13, 0);
+  ctx.quadraticCurveTo(17, -13, 11, -30);
+  ctx.closePath(); ctx.fill();
+
+  // Áo — đọc từ skin.robe (3 màu gradient)
+  const rg = ctx.createLinearGradient(-10, -32, 10, 0);
+  rg.addColorStop(0, sk.robe[0]);
+  rg.addColorStop(0.5, sk.robe[1]);
+  rg.addColorStop(1, sk.robe[2]);
+  ctx.fillStyle = rg;
+  ctx.beginPath();
+  ctx.moveTo(-8.5, -31);
+  ctx.lineTo(8.5, -31);
+  ctx.lineTo(12, -1);
+  ctx.lineTo(-12, -1);
+  ctx.closePath(); ctx.fill();
+
+  // ... vẽ đầu, râu, mắt ...
+
+  // Vương miện — đọc từ skin.crown
+  ctx.fillStyle = sk.crown;
+  ctx.beginPath();
+  ctx.moveTo(-8.5, -43); ctx.lineTo(-8.5, -48.5);
+  ctx.lineTo(-4.2, -45); ctx.lineTo(0, -51);
+  ctx.lineTo(4.2, -45); ctx.lineTo(8.5, -48.5);
+  ctx.lineTo(8.5, -43);
+  ctx.closePath(); ctx.fill();
+}
+
+// --- drawEnemy (chỉ boss dùng skin) ---
+function drawEnemy(e, t) {
+  const sk = game.skin?.boss || SKINS.boss[0];
+
+  // ... vẽ shadow, aura ...
+
+  // Aura boss — đọc từ skin.aura
+  if (e.giant) {
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 24);
+    g.addColorStop(0, sk.aura);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI*2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ... vẽ chân ...
+
+  // Thân — boss dùng skin, zombie thường giữ màu cố định
+  const tg = ctx.createLinearGradient(-8, -29, 8, -11);
+  if (e.giant) {
+    tg.addColorStop(0, sk.body[0]);
+    tg.addColorStop(1, sk.body[1]);
+  } else {
+    tg.addColorStop(0, '#4a2f5f');
+    tg.addColorStop(1, '#241536');
+  }
+  ctx.fillStyle = tg;
+  rr(ctx, -8, -29, 16, 18, 5.5); ctx.fill();
+
+  // ... vẽ đầu, mũ trùm ...
+
+  // Mắt — boss dùng skin.eye
+  ctx.fillStyle = e.giant ? sk.eye : '#ff4d4d';
+  ctx.beginPath();
+  ctx.arc(-2.3 + e.face*0.8, -35.8, e.giant ? 1.6 : 1.15, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc( 2.3 + e.face*0.8, -35.8, e.giant ? 1.6 : 1.15, 0, Math.PI*2);
+  ctx.fill();
+}
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+Số bộ trong SKINS 7/6/6/6 Thêm/bớt màu
+Seed level * 7919 + 42 Công thức Đổi cách chọn skin
+Số lần rng() 4 1 cho mỗi loại
+**Fallback `  SKINS.x[0]`**
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Số bộ màu cụ thể (7, 6, 6, 6) — tôi chọn theo trực giác, không có dữ liệu tối ưu.
+· Công thức seed level * 7919 + 42 — tôi chọn; 7919 là số nguyên tố, 42 là số bất kỳ. Không có cơ sở toán học khẳng định đây là tối ưu.
+· PRNG mulberry32 — tôi cho là phân bố đều, nhưng không có dữ liệu kiểm định thống kê.
+· Việc rng() gọi 4 lần liên tiếp có tương quan gì giữa 4 lần không — tôi không chắc, thường thì không.
+· Bảng màu chỉ đổi giáp/áo/vương miện/thân boss — da, mắt, râu, ngọc, giày vẫn cố định. Nếu muốn đổi luôn thì cần thêm trường vào SKINS.
+· Fallback || SKINS.x[0] chỉ chạy khi game.skin là null/undefined — trong thực tế hiếm khi xảy ra vì startLevel() luôn gán trước.
+· Có nên lưu skin vào localStorage để chơi lại giữ nguyên skin không — tôi không làm, vì skin tính từ level là deterministic rồi.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: viết bảng màu SKINS (object 4 mảng — 7 guard / 6 archer / 6 king / 6 boss, mỗi phần tử là 1 object chứa các mã màu cụ thể) + viết PRNG mulberry32(seed) (cùng seed → cùng dãy số) + viết hàm pickSkin(level) dùng seed level * 7919 + 42 gọi rng() 4 lần để chọn index Math.floor(rng() * length) cho từng loại + gán game.skin = pickSkin(level) 1 lần trong startLevel() + sửa 4 hàm draw đọc game.skin?.{loại} || SKINS.{loại}[0] thay vì màu cứng.

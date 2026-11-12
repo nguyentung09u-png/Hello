@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Wave Text</title>
+<style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0e1a;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+  }
+
+  .wave {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 800;
+    color: #a855f7;
+    display: flex;
+    gap: 8px;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .wave span {
+    display: inline-block;
+    animation: waveUp 1.2s ease-in-out infinite;
+  }
+
+  /* So le thời gian cho từng ký tự */
+  .wave span:nth-child(1) { animation-delay: 0s; }
+  .wave span:nth-child(2) { animation-delay: 0.1s; }
+  .wave span:nth-child(3) { animation-delay: 0.2s; }
+  .wave span:nth-child(4) { animation-delay: 0.3s; }
+  .wave span:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes waveUp {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-25px); }
+  }
+</style>
+</head>
+<body>
+
+  <h1 class="wave">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </h1>
+
+</body>
+</html>

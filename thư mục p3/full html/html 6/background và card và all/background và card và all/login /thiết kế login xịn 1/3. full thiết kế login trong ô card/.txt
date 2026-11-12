@@ -1,0 +1,55 @@
+Tổng quan cách làm: Tạo khung card với hiệu ứng kính mờ, bên trong chứa tiêu đề, ô nhập mật khẩu kèm icon, nút Login và tùy chọn phụ; sau đó thêm hiệu ứng trượt lên khi tải trang.
+
+Code chung chung:
+
+```html
+<div class="card">
+  <h2>Login</h2>
+  <div class="input-box">
+    <i class="icon">🔒</i>
+    <input type="password" placeholder="Password" />
+  </div>
+  <div class="options">
+    <label><input type="checkbox" /> Remember</label>
+    <a href="#">Forgot?</a>
+  </div>
+  <button>Login</button>
+</div>
+
+<style>
+  .card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+    padding: 40px 30px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUpFade 0.8s ease-out forwards;
+  }
+  @keyframes slideUpFade {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .input-box { position: relative; }
+  .input-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); }
+  input, button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    margin-bottom: 15px;
+  }
+  button {
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    border: none;
+    cursor: pointer;
+  }
+  .options { display: flex; justify-content: space-between; color: #fff; font-size: 12px; }
+</style>
+```
+
+🎯 Tóm 1 câu: Dùng HTML tạo cấu trúc card (tiêu đề, input có icon, checkbox/link, nút), CSS tạo Glassmorphism (backdrop-filter: blur) và hiệu ứng slideUpFade, kèm JS xử lý nút nếu cần.

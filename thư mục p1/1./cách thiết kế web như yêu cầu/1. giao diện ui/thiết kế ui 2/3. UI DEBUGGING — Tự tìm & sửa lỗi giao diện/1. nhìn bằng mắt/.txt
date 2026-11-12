@@ -1,0 +1,11 @@
+# Câu hỏi Nếu sai = lỗi gì
+1 Có thanh cuộn ngang không? Lỗi tràn ngang
+2 Chữ có đè lên nhau không? Lỗi position
+3 Có chỗ nào quá chật / quá trống không? Lỗi spacing
+4 Ảnh/chữ có bị cắt không? Lỗi overflow
+5 Chữ có khó đọc không? Lỗi contrast
+
+
+
+---- xem responsive --
+có phù hợp cho pc/mobile điện thoại ko ?

@@ -1,0 +1,175 @@
+Tổng quan cách làm (3 lớp)
+
+Lớp 1 — HTML: 1 <div> chứa 3 <button>, mỗi nút có data-zoom để phân biệt.
+Lớp 2 — CSS: tạo hình tròn vàng, hiệu ứng bấm, class .active cho nút =.
+Lớp 3 — JS: gắn click → gọi hàm zoom → đổi cam.targetZoom → lerp mượt.
+
+---
+
+Code chung chung
+
+1. HTML
+
+```html
+<div id="zoomBar">
+  <button data-zoom="in">−</button>
+  <button data-zoom="reset" class="active">=</button>
+  <button data-zoom="out">+</button>
+</div>
+```
+
+2. CSS
+
+```css
+#zoomBar{
+  position:absolute; left:50%; bottom:16px;
+  transform:translateX(-50%);
+  display:flex; gap:10px;
+  pointer-events:auto; z-index:6;
+}
+#zoomBar button{
+  width:52px; height:52px;
+  border-radius:50%;
+  border:1px solid rgba(245,215,110,.4);
+  background:rgba(12,9,24,.75);
+  color:#f5d76e;
+  font-size:22px; font-weight:900; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(0,0,0,.6);
+  transition:transform .1s, background .15s, box-shadow .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+#zoomBar button:active{ transform:scale(.9); }
+
+#zoomBar button.active{
+  background:linear-gradient(180deg,#ffeaa0,#f5d76e 40%,#d4a017 100%);
+  color:#2a1a00;
+  border-color:#f5d76e;
+  box-shadow:0 0 20px rgba(245,215,110,.7), 0 2px 10px rgba(0,0,0,.5);
+}
+```
+
+3. JS — State camera
+
+```js
+const cam = {
+  zoom:1, targetZoom:1,
+  x:0, y:0, targetX:0, targetY:0,
+  smooth:0.20
+};
+const ZOOM_STEP = 1.20;
+const MIN_ZOOM  = 0.18;
+const MAX_ZOOM  = 3.0;
+
+const clamp = (v,a,b) => v<a?a : v>b?b : v;
+```
+
+4. JS — Zoom giữ điểm neo (mặc định tâm)
+
+```js
+function zoomBy(factor, anchorX, anchorY){
+  if (anchorX === undefined) anchorX = W/2;
+  if (anchorY === undefined) anchorY = H/2;
+
+  const oldZ = cam.targetZoom;
+  const newZ = clamp(oldZ * factor, MIN_ZOOM, MAX_ZOOM);
+  if (newZ === oldZ) return;
+
+  const wx = (anchorX - cam.targetX) / oldZ;
+  const wy = (anchorY - cam.targetY) / oldZ;
+
+  cam.targetZoom = newZ;
+  cam.targetX = anchorX - wx * newZ;
+  cam.targetY = anchorY - wy * newZ;
+
+  clampCamera();          // tuỳ dự án có/không
+  refreshZoomButtons();
+}
+
+function resetZoom(){
+  cam.targetZoom = 1;
+  cam.targetX = 0;
+  cam.targetY = 0;
+  refreshZoomButtons();
+}
+```
+
+5. JS — Bật/tắt class active cho nút =
+
+```js
+function refreshZoomButtons(){
+  const atReset = Math.abs(cam.targetZoom - 1) < 0.001;
+  document.querySelector('[data-zoom="reset"]')
+    .classList.toggle('active', atReset);
+}
+```
+
+6. JS — Lerp camera mỗi frame
+
+```js
+function updateCamera(dt){
+  const k = 1 - Math.pow(1 - cam.smooth, dt * 60);
+  cam.zoom += (cam.targetZoom - cam.zoom) * k;
+  cam.x    += (cam.targetX    - cam.x)    * k;
+  cam.y    += (cam.targetY    - cam.y)    * k;
+  // clampCamera(); // nếu có biên world
+}
+```
+
+7. JS — Gắn sự kiện click
+
+```js
+document.querySelectorAll('#zoomBar button').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const k = btn.dataset.zoom;
+    if (k === 'in')    zoomBy(1 / ZOOM_STEP);  // − gần hơn
+    if (k === 'out')   zoomBy(ZOOM_STEP);      // + xa hơn
+    if (k === 'reset') resetZoom();
+  });
+  btn.addEventListener('pointerdown', e => e.stopPropagation());
+});
+```
+
+8. JS — Áp camera khi vẽ
+
+```js
+function render(t){
+  ctx.save();
+  ctx.translate(cam.x, cam.y);
+  ctx.scale(cam.zoom, cam.zoom);
+
+  // ... vẽ world ...
+
+  ctx.restore();
+}
+```
+
+9. Vòng lặp chính
+
+```js
+function loop(ts){
+  const dt = Math.min((ts - last)/1000, 0.05);
+  last = ts;
+  updateCamera(dt);
+  render(ts/1000);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+```
+
+---
+
+Điều tôi không chắc
+
+· ZOOM_STEP = 1.20, MIN_ZOOM = 0.18, MAX_ZOOM = 3.0 — tôi chọn theo trực giác, không có dữ liệu tối ưu.
+· Điểm neo mặc định W/2, H/2 — hợp lý nhưng không bắt buộc; có thể đổi sang toạ độ con trỏ.
+· clampCamera() — chỉ cần khi world có biên. Nếu world vô hạn thực sự thì bỏ được. Tôi không chắc bạn muốn giữ hay bỏ.
+· e.stopPropagation() ở cả click và pointerdown — tôi tin là đủ để nút không kích hoạt canvas, nhưng trên một số trình duyệt mobile có thể vẫn có sự kiện lan, tôi không test được.
+· class="active" — chỉ làm sáng nút =. Tôi không chắc bạn muốn làm mờ nút +/− khi đã chạm MIN_ZOOM/MAX_ZOOM.
+
+---
+
+🎯 Tóm 1 câu: Nút − = + gồm HTML 3 <button data-zoom="in|reset|out">, CSS hình tròn vàng 52×52 với border-radius:50%, backdrop-filter:blur, transition và .active, JS gắn click (có stopPropagation) gọi zoomBy(1/1.20 | 1.20) hoặc resetZoom() để đổi cam.targetZoom, updateCamera(dt) lerp mượt k = 1 - Math.pow(1-smooth, dt*60), render() dùng ctx.scale(cam.zoom, cam.zoom), và refreshZoomButtons() bật/tắt class active khi zoom bằng 1.0.

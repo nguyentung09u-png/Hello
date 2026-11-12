@@ -1,0 +1,81 @@
+1. dải sáng tự động xoay quanh viền + Hào quang phát sáng
+
+Nguyên lý gồm 2 phần:
+
+1. Dải sáng xoay = lớp conic-gradient + animation: spin
+2. Hào quang = box-shadow trên card (hoặc lớp blur phụ)
+
+Code chung chung
+
+```html
+<div class="card">
+  <div class="content">Nội dung</div>
+</div>
+```
+
+```css
+.card {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 3px;
+  background: #0e0f1a;
+  animation: glow 4s linear infinite;   /* 👈 hào quang đổi màu */
+}
+
+/* Dải sáng xoay quanh viền */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg,
+      #00ffff, transparent 25%,
+      #7a6eff, transparent 60%,
+      #ff00e5, transparent 85%,
+      #00ffff);
+  animation: spin 4s linear infinite;
+}
+
+/* Che ruột, chừa viền */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: #0e0f1a;
+  border-radius: 17px;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hào quang đổi màu */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(0, 204, 238, 0.7),
+                         0 0 36px rgba(0, 204, 238, 0.4); }
+  33%      { box-shadow: 0 0 18px rgba(122, 110, 255, 0.7),
+                         0 0 36px rgba(122, 110, 255, 0.4); }
+  66%      { box-shadow: 0 0 18px rgba(255, 68, 238, 0.7),
+                         0 0 36px rgba(255, 68, 238, 0.4); }
+}
+```
+
+Tóm tắt
+
+Thành phần Làm bằng
+Dải sáng xoay ::before + conic-gradient + animation: spin
+Viền ::after che ruột, inset = độ dày
+Hào quang box-shadow trên .card + @keyframes glow
+
+Lưu ý:
+
+· inset của ::after nên bằng padding của .card để viền đều.
+· box-shadow đổi màu không tự khớp với màu conic-gradient — cần chỉnh tay.
+· Nếu muốn hào quang mềm, lan rộng hơn thì thêm lớp phụ với filter: blur() — tôi không chắc hiệu năng trên mọi máy.

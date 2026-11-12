@@ -1,0 +1,109 @@
+Đúng — chỉ cần 3 thứ
+
+1️⃣ WebViewLoader.java — load WebView
+
+```java
+package core.webview;
+
+import android.app.Activity;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+
+public class WebViewLoader {
+
+    public static WebView load(Activity activity, String fileName,
+                               Object jsBridge, String bridgeName) {
+        WebView webView = new WebView(activity);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setAllowFileAccess(true);
+
+        if (jsBridge != null && bridgeName != null) {
+            webView.addJavascriptInterface(jsBridge, bridgeName);
+        }
+
+        activity.setContentView(webView);
+        webView.loadUrl("file:///android_asset/" + fileName);
+        return webView;
+    }
+}
+```
+
+---
+
+2️⃣ JsBridge.java — cầu nối
+
+```java
+package core.webview;
+
+import android.app.Activity;
+import android.webkit.JavascriptInterface;
+
+import java.lang.reflect.Method;
+
+public class JsBridge {
+
+    private final Activity act;
+    public JsBridge(Activity act) { this.act = act; }
+
+    @JavascriptInterface
+    public String call(String methodName, String data) {
+        try {
+            Method m = act.getClass().getMethod(methodName, String.class);
+            Object r = m.invoke(act, data);
+            return r == null ? "" : r.toString();
+        } catch (Exception e) {
+            return "ERR: " + e.getMessage();
+        }
+    }
+}
+```
+
+---
+
+3️⃣ Cách gọi — trong Activity bất kỳ
+
+```java
+public class Login extends Activity {
+
+    private WebView webView;
+
+    @Override
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
+
+        // 👇 1 dòng load
+        webView = WebViewLoader.load(this, "1.html", new JsBridge(this), "Android");
+    }
+
+    // Method JS gọi được — public + 1 String
+    public String login(String key) {
+        // xử lý
+        return "OK";
+    }
+
+    public String getSavedKey(String _) {
+        return getSharedPreferences("app", MODE_PRIVATE)
+                .getString("saved_key", "");
+    }
+}
+```
+
+Bên HTML:
+
+```js
+Android.call("login", "abc123");      // → Login.login("abc123")
+Android.call("getSavedKey", "");      // → Login.getSavedKey("")
+```
+
+---
+
+Tóm gọn
+
+Thành phần Vai trò
+WebViewLoader Load HTML + gắn bridge
+JsBridge Cho JS gọi method Java qua call("tên", "data")
+Activity Viết method public String xxx(String) — JS gọi được ngay
+
+Copy 2 file + viết 1 dòng + thêm method = xong. Không cần gì khác.

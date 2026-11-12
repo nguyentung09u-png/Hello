@@ -1,0 +1,85 @@
+Làm scroll ngang — tổng quan và code
+
+Tổng quan 3 bước
+
+1. Container — bật overflow-x: auto để cho phép cuộn ngang.
+2. Tab con — đặt flex: 0 0 auto để chúng không bị co lại (nếu co thì không tràn → không cuộn được).
+3. (Tùy chọn) Snap — thêm scroll-snap-type trên container và scroll-snap-align trên tab để khi vuốt xong tự dừng ở tab gần nhất.
+
+Không cần JavaScript cho phần cuộn.
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; padding-bottom: 100px; }
+
+  /* 1. Container: bật cuộn ngang */
+  .scroll-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+
+    overflow-x: auto;             /* bật cuộn ngang */
+    scroll-snap-type: x mandatory; /* tùy chọn: bắt dính */
+
+    /* ẩn scrollbar (tùy chọn) */
+    scrollbar-width: none;
+  }
+  .scroll-nav::-webkit-scrollbar { display: none; }
+
+  /* 2. Tab con: không co lại */
+  .scroll-nav a {
+    flex: 0 0 auto;             /* không co, không giãn */
+    min-width: 96px;
+    scroll-snap-align: center;  /* tùy chọn: căn giữa khi snap */
+
+    padding: 12px 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background: #333;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="scroll-nav">
+  <a href="#">Tab 1</a>
+  <a href="#">Tab 2</a>
+  <a href="#">Tab 3</a>
+  <a href="#">Tab 4</a>
+  <a href="#">Tab 5</a>
+  <a href="#">Tab 6</a>
+  <a href="#">Tab 7</a>
+  <a href="#">Tab 8</a>
+  <a href="#">Tab 9</a>
+  <a href="#">Tab 10</a>
+</nav>
+
+</body>
+</html>
+```
+
+Vài điểm cần lưu ý
+
+· Nếu thiếu flex: 0 0 auto, các tab có thể co lại cho vừa container → không tràn → không cuộn. Đây là lỗi phổ biến.
+· overflow-x: auto chỉ hiện thanh cuộn khi cần; scroll thì luôn hiện.
+· Ẩn scrollbar bằng scrollbar-width: none + ::-webkit-scrollbar chỉ ẩn thanh cuộn, không tắt khả năng cuộn — nên cân nhắc thêm gradient ở mép để gợi ý còn nội dung (tôi chưa đưa vào code trên).
+· scroll-snap-type: mandatory có thể gây khó chịu với một số người dùng; có thể đổi thành proximity nếu muốn snap nhẹ hơn.
+· Desktop dùng chuột khó cuộn ngang hơn mobile (phải shift + lăn hoặc trackpad). Đây là hạn chế đã biết của scroll ngang.
+· Tôi không chắc scroll-snap hoạt động đồng đều trên mọi bản Android cũ.
+
+Tóm 1 câu
+
+Đặt overflow-x: auto trên container, flex: 0 0 auto + min-width trên mỗi tab, và tùy chọn thêm scroll-snap-type: x mandatory (container) + scroll-snap-align: center (tab) — chỉ cần CSS, không cần JS.

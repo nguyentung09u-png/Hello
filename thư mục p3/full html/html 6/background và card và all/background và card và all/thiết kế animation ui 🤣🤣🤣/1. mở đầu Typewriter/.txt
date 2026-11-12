@@ -1,0 +1,109 @@
+① Mở đầu           →  Ô chữ trống, con trỏ nhấp nháy
+② Gõ ra từ từ      →  Từng ký tự hiện ra: "F" → "Fr" → "Fro" → "Frontend"
+③ Giữ nguyên       →  Đứng yên vài giây cho người đọc kịp đọc
+④ Xóa từ từ        →  "Fronten" → "Fronte" → ... → "F" → ""
+⑤ Chuyển chữ mới   →  Bắt đầu gõ chữ tiếp theo
+⑥ Lặp vô hạn       →  Quay lại bước ②
+
+
+
+---
+
+Typewriter không con trỏ — Cách làm
+
+Tổng quan 3 bước
+
+Bước Việc làm
+1 Viết HTML: 1 thẻ <span> để chứa chữ
+2 Viết CSS: căn giữa + gradient chạy màu
+3 Viết JS: 3 biến điều khiển gõ/xóa/đổi chữ
+
+---
+
+Code
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0e1a;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+  }
+
+  .typewriter {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #a855f7, #ec4899, #f59e0b, #a855f7);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 4s linear infinite;
+  }
+
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="typewriter">
+    <span id="text"></span>
+  </div>
+
+<script>
+  const textEl = document.getElementById('text');
+  const words = ['Frontend Dev', 'UI Designer', 'Freelancer'];
+
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+
+  function type() {
+    const word = words[wordIndex];
+
+    if (!isDeleting) {
+      charIndex++;
+      textEl.textContent = word.slice(0, charIndex);
+
+      if (charIndex === word.length) {
+        isDeleting = true;
+        setTimeout(type, 1500);
+        return;
+      }
+      setTimeout(type, 100);
+    } else {
+      charIndex--;
+      textEl.textContent = word.slice(0, charIndex);
+
+      if (charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+        setTimeout(type, 400);
+        return;
+      }
+      setTimeout(type, 50);
+    }
+  }
+
+  type();
+</script>
+</body>
+</html>
+```
+
+---
+
+Tóm 1 câu
+
+Viết 1 thẻ <span> trong HTML, thêm CSS gradient chạy màu để làm đẹp, rồi dùng JS với 3 biến để gõ – đứng – xóa – đổi chữ theo vòng lặp.

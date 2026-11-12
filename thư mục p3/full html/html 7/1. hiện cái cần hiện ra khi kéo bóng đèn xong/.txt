@@ -1,0 +1,68 @@
+Tổng quan cách làm
+
+Delayed reveal gồm 3 phần phối hợp:
+
+1. Bộ đếm thời gian — quyết định "đợi bao lâu" (dùng setTimeout trong JS, hoặc transition-delay trong CSS).
+2. Trigger — sự kiện kích hoạt (kéo xong, click, load...) gắn/tháo class ẩn-hiện.
+3. Transition — CSS transition: opacity, transform để thay đổi trạng thái diễn ra mượt thay vì giật.
+
+Luồng chung: sự kiện xảy ra → đợi N giây → đổi class → CSS transition chạy → phần tử hiện ra.
+
+---
+
+Code mẫu chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  /* Phần tử cần hiện ra — mặc định ẩn */
+  .reveal-target {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+  }
+
+  /* Khi có class .show — hiện ra */
+  .reveal-target.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- Trigger: nút bấm (có thể thay bằng sự kiện kéo, click, load...) -->
+<button id="triggerBtn">Kích hoạt</button>
+
+<!-- Phần tử sẽ hiện sau delay -->
+<div class="reveal-target" id="target">
+  Nội dung hiện ra sau khi đợi
+</div>
+
+<script>
+  const btn = document.getElementById('triggerBtn');
+  const target = document.getElementById('target');
+
+  const DELAY_MS = 1500; // đợi 1.5 giây
+
+  btn.addEventListener('click', () => {
+    // Bước 1: đợi
+    setTimeout(() => {
+      // Bước 2: trigger — thêm class để CSS transition chạy
+      target.classList.add('show');
+    }, DELAY_MS);
+  });
+</script>
+
+</body>
+</html>
+```
+
+---
+
+Lưu ý: đoạn trên là ví dụ tối giản, dùng setTimeout (JS) kết hợp transition (CSS). Có thể thay bằng transition-delay thuần CSS nếu không cần logic phức tạp — nhưng khi cần "đợi theo sự kiện" như kéo đèn thì setTimeout linh hoạt hơn.

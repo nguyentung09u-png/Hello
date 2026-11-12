@@ -1,0 +1,176 @@
+💥 HIT FLASH — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Hit flash = 3 bước tách biệt trong vòng lặp game:
+
+```
+BƯỚC 1: BẬT      → gán flash = 1 khi trúng đòn
+BƯỚC 2: GIẢM DẦN → mỗi frame, flash -= dt * tốc_độ
+BƯỚC 3: VẼ       → nếu flash > 0, chồng ellipse đỏ lên nhân vật
+```
+
+Điểm mấu chốt: tách trạng thái (biến flash) khỏi hình ảnh (lệnh vẽ). Biến chỉ là 1 con số, không phải đối tượng phức tạp.
+
+🔍 Ba bước chi tiết
+
+Bước 1 — Khai báo biến trên mỗi thực thể
+
+```js
+const enemy = {
+  x: 100, y: 200,
+  hp: 50,
+  flash: 0        // ← thêm 1 trường
+};
+```
+
+→ Mỗi nhân vật có biến flash riêng, khởi tạo 0.
+
+Bước 2 — Bật khi trúng đòn
+
+```js
+function dealDamage(target, amount){
+  target.hp -= amount;
+  target.flash = 1;      // ← chỉ 1 dòng
+}
+```
+
+→ Bất kỳ chỗ nào gây sát thương đều gọi target.flash = 1.
+
+Bước 3 — Giảm dần mỗi frame
+
+```js
+function update(dt){
+  // ...
+  entity.flash = Math.max(0, entity.flash - dt * 5);
+  //                                  ↑
+  //                          tốc độ tắt (5/giây)
+}
+```
+
+→ Math.max(0, ...) để không âm. dt * 5 nghĩa là tắt trong ~0.2 giây.
+
+Bước 4 — Vẽ đè lên nhân vật
+
+```js
+function draw(entity){
+  // ... vẽ thân thể bình thường ...
+
+  if (entity.flash > 0){
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(255,90,90,${entity.flash * 0.55})`;
+    ctx.beginPath();
+    ctx.ellipse(entity.x, entity.y - 20, 14, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+```
+
+→ Đặt sau khi vẽ xong nhân vật → đè lên trên.
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. THỰC THỂ có trường flash
+// ============================
+const enemies = [];
+
+function spawnEnemy(x, y){
+  enemies.push({
+    x, y,
+    hp: 50,
+    flash: 0        // ← bắt buộc khởi tạo
+  });
+}
+
+// ============================
+// 2. GÂY SÁT THƯƠNG
+// ============================
+function hit(target, dmg){
+  target.hp -= dmg;
+  target.flash = 1;   // ← BẬT
+}
+
+// ============================
+// 3. CẬP NHẬT mỗi frame
+// ============================
+function update(dt){
+  for (const e of enemies){
+    e.flash = Math.max(0, e.flash - dt * 5);   // ← GIẢM DẦN
+  }
+}
+
+// ============================
+// 4. VẼ
+// ============================
+function drawEnemy(e){
+  // vẽ thân thể...
+  ctx.fillStyle = '#4a2f5f';
+  ctx.beginPath();
+  ctx.arc(e.x, e.y - 30, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // hit flash — LUÔN đặt cuối cùng
+  if (e.flash > 0){
+    ctx.globalCompositeOperation = 'lighter';   // ← CỘNG SÁNG
+    ctx.fillStyle = `rgba(255,90,90,${e.flash * 0.55})`;
+    ctx.beginPath();
+    ctx.ellipse(e.x, e.y - 20, 14, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over'; // ← KHÔI PHỤC
+  }
+}
+
+// ============================
+// 5. VÒNG LẶP
+// ============================
+function loop(now){
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  update(dt);
+  ctx.clearRect(0, 0, W, H);
+  for (const e of enemies) drawEnemy(e);
+
+  requestAnimationFrame(loop);
+}
+```
+
+---
+
+🎨 4 tham số có thể điều chỉnh
+
+Tham số Vị trí trong code Tác dụng
+Tốc độ tắt dt * 5 Số lớn → tắt nhanh
+Màu rgba(255,90,90, ...) Đỏ / trắng / vàng...
+Độ mờ tối đa flash * 0.55 0.55 → hơi mờ, 1.0 → đục
+Kích thước ellipse(0, -20, 14, 20) To/nhỏ tuỳ nhân vật
+
+---
+
+⚙️ Vì sao dùng 'lighter'?
+
+Chế độ Kết quả
+'source-over' (mặc định) Đỏ che nhân vật → trông như bị sơn đè
+'lighter' Đỏ cộng vào màu cũ → trông như loé sáng
+
+→ Đây là suy luận của tôi về lý do tác giả chọn 'lighter': nó cho cảm giác "bị đánh trúng thì loé lên", phù hợp hơn so với việc tô đè.
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Tốc độ dt * 5 có phải con số tối ưu — tôi không có benchmark so sánh với tốc độ khác.
+· Có nên dùng save()/restore() thay vì đổi globalCompositeOperation thủ công không — cả hai cách đều chạy; cách nào nhanh hơn thì tôi không rõ.
+· Alpha 0.55 có phải giá trị phổ biến không — tôi không có dữ liệu tham chiếu.
+· Việc vẽ ellipse thay vì vẽ lại hình dạng nhân vật có thể gây lệch khớp ở nhân vật không phải hình tròn — nhưng trong ví dụ này nhân vật đủ đơn giản để không thành vấn đề.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: thêm 1 biến flash vào mỗi thực thể, gán = 1 khi trúng đòn, giảm -= dt * 5 mỗi frame, rồi nếu flash > 0 thì vẽ 1 ellipse đỏ với globalCompositeOperation = 'lighter' đè lên nhân vật — chỉ gồm 1 số, 1 timer, và 1 lệnh vẽ.

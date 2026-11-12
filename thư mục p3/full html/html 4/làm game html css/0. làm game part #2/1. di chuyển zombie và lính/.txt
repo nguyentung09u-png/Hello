@@ -1,0 +1,103 @@
+🎞️ Frame-based Movement — Tổng quan + Code khung
+
+1️⃣ Tổng quan (5 bước)
+
+Bước Việc Ở đâu
+1 Khai báo {x, y, speed} state
+2 Xác định target {x, y} trong update
+3 Tính vector (dx, dy) + chuẩn hóa trong update
+4 Cộng vào (x, y): += hướng × speed × dt trong update
+5 Vẽ tại (x, y) bằng ctx.translate trong render
+
+Mấu chốt: chỉ dòng += làm di chuyển thật. ctx.translate chỉ là vẽ.
+
+---
+
+2️⃣ Code khung (chung chung)
+
+```javascript
+// ===== 1. STATE =====
+const e = { x: 200, y: 300, speed: 155 };   // speed = pixel/giây
+
+// ===== 2. HÀM DI CHUYỂN =====
+function moveToward(e, target, dt) {
+  // Vector hướng
+  const dx = target.x - e.x;
+  const dy = target.y - e.y;
+  const d  = Math.hypot(dx, dy);
+
+  // Ngưỡng dừng — tránh rung quanh đích
+  if (d < 3) return;
+
+  // Chuẩn hóa (chia cho độ dài) rồi cộng vào tọa độ
+  e.x += (dx / d) * e.speed * dt;
+  e.y += (dy / d) * e.speed * dt;
+}
+
+// ===== 3. VÒNG LẶP =====
+let last = performance.now();
+
+function loop(now) {
+  // dt = thời gian trôi qua giữa 2 frame (giây)
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  // Đích — có thể là vị trí địch, home, chuột…
+  const target = { x: 100, y: 300 };
+
+  // Cập nhật
+  moveToward(e, target, dt);
+
+  // Vẽ
+  render(e);
+  requestAnimationFrame(loop);
+}
+
+// ===== 4. RENDER =====
+function render(e) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(e.x, e.y);       // ← chỉ vẽ tại tọa độ đó, KHÔNG di chuyển
+  ctx.beginPath();
+  ctx.arc(0, 0, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+loop(performance.now());
+```
+
+---
+
+3️⃣ Tại sao code này hoạt động
+
+· (x, y) là world space — không phụ thuộc camera hay màn hình.
+· dx/d, dy/d là vector đơn vị → đi đúng speed, không nhanh/chậm theo khoảng cách.
+· × dt làm tốc độ độc lập FPS — máy 30 hay 60 FPS đều đi cùng quãng đường trong 1 giây.
+· d < 3 → return tránh "overshoot" và rung lắc quanh đích.
+· ctx.translate chỉ dịch hệ tọa độ vẽ, không sửa e.x / e.y.
+
+---
+
+4️⃣ Tham số có thể chỉnh
+
+Tham số Tác dụng
+speed Nhanh / chậm
+dt clamp (0.05) Chống nhảy vọt khi tab mất focus
+Ngưỡng dừng (d < 3) Tránh rung quanh đích
+\|\| 0.001 (nếu cần) Tránh chia cho 0 khi trùng vị trí
+
+---
+
+🎯 Tóm 1 câu
+
+Khai báo {x, y, speed} → mỗi frame tính (dx, dy) = target - vị_trí → chuẩn hóa bằng Math.hypot → cộng x += (dx/d) × speed × dt (và tương tự cho y) → vẽ tại (x, y) bằng ctx.translate.
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Con số cụ thể (155, 0.05, 3) — tôi chọn theo thông lệ; không có dữ liệu tối ưu.
+· Math.hypot vs Math.sqrt(dx*dx+dy*dy) — hiệu năng có thể khác; tôi không chắc sự khác biệt đáng kể trong game 2D nhỏ.
+· Ngưỡng dừng d < 3 có thể gây overshoot nhẹ khi speed lớn; nhiều game dùng step = Math.min(speed*dt, d) — tôi không chắc cách nào tốt hơn cho bạn.

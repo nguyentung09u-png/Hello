@@ -1,0 +1,226 @@
+🎯 Crosshair + Magic Bolt — Tổng quan + Code khung
+
+1️⃣ Tổng quan (6 bước)
+
+Bước Việc Hàm
+1 Bắt sự kiện chuột, đổi screen → world pointermove + screenToWorld()
+2 Lưu vị trí vào G.aimWorld trong listener
+3 Vẽ crosshair tại G.aimWorld drawCrosshair()
+4 Khi bắn: tính góc atan2 + push bolt tryShoot()
+5 Mỗi frame: cộng vx×dt, vy×dt + va chạm update()
+6 Vẽ bolt bằng radial gradient drawBolts()
+
+Mấu chốt: crosshair và bolt là 2 hệ thống độc lập, chỉ gặp nhau ở biến G.aimWorld.
+
+---
+
+2️⃣ Code khung (chung chung)
+
+```javascript
+// ===== 1. STATE =====
+const G = {
+  aimWorld: { x: 0, y: 0 },   // vị trí ngắm (world space)
+  bolts: [],                    // mảng đạn
+  enemies: [],                  // mảng địch {x, y, hp, scale}
+  king: { x: 0, y: 0 },         // vua
+  shootCd: 0,
+  mouse: { down: false }
+};
+
+const cam = { x: 0, y: 0, zoom: 1 };
+
+// ===== 2. ĐỔI SCREEN → WORLD =====
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - cam.x) / cam.zoom,
+    y: (sy - cam.y) / cam.zoom
+  };
+}
+
+// ===== 3. BẮT SỰ KIỆN CHUỘT =====
+canvas.addEventListener('pointermove', e => {
+  const r = canvas.getBoundingClientRect();
+  const sx = e.clientX - r.left;
+  const sy = e.clientY - r.top;
+  const w = screenToWorld(sx, sy);
+  G.aimWorld.x = w.x;
+  G.aimWorld.y = w.y;
+});
+
+canvas.addEventListener('pointerdown', e => {
+  G.mouse.down = true;
+  tryShoot();
+});
+
+window.addEventListener('pointerup', () => { G.mouse.down = false; });
+
+// ===== 4. BẮN =====
+function tryShoot() {
+  if (G.shootCd > 0) return;
+  G.shootCd = 0.2;
+
+  const sx = G.king.x;
+  const sy = G.king.y;
+  const tx = G.aimWorld.x;
+  const ty = G.aimWorld.y;
+
+  // Góc từ vua → chuột
+  const ang = Math.atan2(ty - sy, tx - sx);
+  const speed = 1000;
+
+  // Tạo đạn
+  G.bolts.push({
+    x: sx + Math.cos(ang) * 26,
+    y: sy + Math.sin(ang) * 26,
+    vx: Math.cos(ang) * speed,
+    vy: Math.sin(ang) * speed,
+    life: 2.0
+  });
+}
+
+// ===== 5. UPDATE =====
+function update(dt) {
+  G.shootCd = Math.max(0, G.shootCd - dt);
+  if (G.mouse.down) tryShoot();
+
+  for (let i = G.bolts.length - 1; i >= 0; i--) {
+    const b = G.bolts[i];
+
+    // Bay
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.life -= dt;
+
+    // Va chạm
+    let hit = false;
+    for (const e of G.enemies) {
+      const r = 22 * (e.scale || 1);
+      const dx = e.x - b.x;
+      const dy = e.y - b.y;
+      if (dx*dx + dy*dy < r*r) {
+        e.hp -= 30;
+        hit = true;
+        break;
+      }
+    }
+
+    // Xóa
+    if (hit || b.life <= 0) G.bolts.splice(i, 1);
+  }
+}
+
+// ===== 6. VẼ CROSSHAIR =====
+function drawCrosshair() {
+  const { x, y } = G.aimWorld;
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Vòng tròn
+  ctx.strokeStyle = 'rgba(255,232,170,0.85)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.stroke();
+
+  // Tâm
+  ctx.fillStyle = 'rgba(255,120,70,0.95)';
+  ctx.beginPath(); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); ctx.fill();
+
+  // 4 vạch
+  ctx.strokeStyle = 'rgba(255,232,170,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(-22, 0); ctx.lineTo(-8, 0);
+  ctx.moveTo(8, 0);   ctx.lineTo(22, 0);
+  ctx.moveTo(0, -22); ctx.lineTo(0, -8);
+  ctx.moveTo(0, 8);   ctx.lineTo(0, 22);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// ===== 7. VẼ BOLT =====
+function drawBolts() {
+  for (const b of G.bolts) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+
+    // Quầng vàng (radial gradient)
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
+    g.addColorStop(0,    'rgba(255,255,230,1)');
+    g.addColorStop(0.32, 'rgba(255,212,110,0.9)');
+    g.addColorStop(1,    'rgba(255,140,50,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+
+    // Lõi trắng
+    ctx.fillStyle = '#fffbe0';
+    ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// ===== 8. VÒNG LẶP =====
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(cam.x, cam.y);
+  ctx.scale(cam.zoom, cam.zoom);
+
+  // ... vẽ world, vua, zombie ...
+
+  drawBolts();
+  drawCrosshair();
+
+  ctx.restore();
+}
+
+loop(performance.now());
+```
+
+---
+
+3️⃣ Tại sao code này hoạt động
+
+· screenToWorld cần thiết khi có camera, để chuột và world khớp nhau.
+· G.aimWorld là "cầu nối" duy nhất giữa crosshair (hiển thị) và shooting (logic).
+· atan2 cho góc chính xác mọi hướng (kể cả trái/phải/xuống).
+· cos/sin × speed biến góc → vector vận tốc đơn vị có độ dài = speed.
+· dx² + dy² < r² kiểm tra va chạm hình tròn không cần sqrt.
+· Radial gradient + lõi trắng tạo cảm giác phát sáng cho bolt.
+
+---
+
+4️⃣ Tham số có thể chỉnh
+
+Tham số Mặc định Tác dụng
+Bán kính crosshair 13 To / nhỏ
+Độ dài 4 vạch 22 Ngắn / dài
+shootCd 0.2s Tần suất bắn
+speed 1000 Tốc độ tia
+life 2.0s Tia tồn tại bao lâu
+Bán kính va chạm 22 Tầm trúng
+Bán kính quầng 14 To / nhỏ
+
+---
+
+🎯 Tóm 1 câu
+
+Crosshair: pointermove → screenToWorld() → lưu G.aimWorld → drawCrosshair() vẽ vòng tròn + 4 vạch; Magic Bolt: tryShoot() tính ang = atan2(ty - sy, tx - sx) → push {x, y, vx = cos(ang)×speed, vy = sin(ang)×speed, life} vào G.bolts[] → update() cộng vx×dt, vy×dt + kiểm tra dx² + dy² < r² → drawBolts() vẽ radial gradient vàng + lõi trắng.
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Con số cụ thể (13, 22, 0.2, 1000, 2.0, 22, 14, 3.2) — tôi chọn theo thông lệ, không có dữ liệu tối ưu.
+· screenToWorld bắt buộc khi có camera — đúng trong code có camera; nếu không có camera, có thể dùng trực tiếp tọa độ chuột.
+· Va chạm hình tròn (dx² + dy² < r²) đơn giản nhưng có thể không khớp chính xác với hình chữ nhật; tôi không chắc cách này phù hợp mọi loại địch.
+· shootCd reset ngay trong tryShoot() — nếu gọi liên tục mỗi frame, sẽ bắn đúng nhịp; nhưng cách này không xử lý "buông chuột giữa cooldown" — tôi không chắc đây là hành vi mong muốn trong mọi game.

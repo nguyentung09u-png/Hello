@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertical List — 2 Tab</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:40px 20px;background:#07070d;color:#eaeaf4;
+    font-family:system-ui,sans-serif;overflow-x:hidden;
+  }
+
+  .stage{
+    position:fixed;inset:0;z-index:-1;overflow:hidden;
+    background:radial-gradient(ellipse at 50% 0%, #16162c 0%, #07070d 60%);
+  }
+  .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+  .orb-1{width:420px;height:420px;background:#7c5cff;top:-80px;left:-80px}
+  .orb-2{width:380px;height:380px;background:#22d3ee;bottom:-100px;right:-60px;opacity:.45}
+
+  .card{
+    width:100%;max-width:600px;min-height:300px;
+    padding:24px;border-radius:22px;
+    background:linear-gradient(165deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:
+      0 25px 60px -20px rgba(0,0,0,.7),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  .tab-wrap{
+    padding:5px;border-radius:100px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.4);
+  }
+  .tab-list{
+    position:relative;display:flex;gap:4px;
+    overflow-x:auto;overflow-y:hidden;
+    scroll-behavior:smooth;
+    scrollbar-width:none;-ms-overflow-style:none;
+    border-radius:100px;
+  }
+  .tab-list::-webkit-scrollbar{display:none;width:0;height:0}
+
+  .indicator{
+    position:absolute;top:0;left:0;height:100%;width:0;
+    border-radius:100px;
+    background:linear-gradient(135deg,#7c5cff,#5b8cff);
+    box-shadow:0 8px 20px -8px rgba(124,92,255,.9);
+    transition:transform .4s ease, width .4s ease;
+    pointer-events:none;
+  }
+
+  .tab-btn{
+    position:relative;z-index:1;flex:1 0 auto;min-width:80px;
+    padding:10px 16px;font:inherit;font-weight:600;font-size:14px;
+    color:#8b8ba3;background:none;border:0;border-radius:100px;
+    cursor:pointer;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+    transition:color .3s ease;
+  }
+  .tab-btn.is-active{color:#fff}
+
+  /* ===== PANEL — Vertical List ===== */
+  .tab-panel{display:none;margin-top:18px}
+  .tab-panel.is-active{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:32px;
+    min-height:180px;
+    padding:12px 0;
+  }
+
+  /* ===== MỖI ITEM: tiêu đề trên, button dưới ===== */
+  .item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+
+  /* ===== TIÊU ĐỀ GLITCH + SHINE ===== */
+  .title-wrap{
+    position:relative;overflow:hidden;
+    display:inline-block;padding:.1em .2em;
+  }
+  .title-wrap::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      repeating-linear-gradient(45deg,
+        rgba(255,255,255,.03) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(-45deg,
+        rgba(0,0,0,.05) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;pointer-events:none;z-index:2;
+  }
+  .title-wrap::after{
+    content:"";position:absolute;inset:-20% -10%;
+    background:
+      linear-gradient(115deg,
+        transparent 35%, rgba(255,255,255,.9) 48%,
+        #fff 50%, rgba(255,255,255,.9) 52%, transparent 65%),
+      repeating-linear-gradient(115deg,
+        rgba(255,255,255,.15) 0 2px, transparent 2px 6px);
+    background-blend-mode:overlay;
+    transform:translateX(-120%);
+    animation:shine 3s ease-in-out infinite;
+    mix-blend-mode:overlay;pointer-events:none;z-index:3;
+  }
+  @keyframes shine{
+    0%, 60% { transform:translateX(-120%); }
+    85%     { transform:translateX( 120%); }
+    100%    { transform:translateX( 120%); }
+  }
+
+  .title{
+    display:flex;gap:.03em;
+    font-size:28px;font-weight:700;letter-spacing:.04em;
+    color:#eaeaf4;
+    text-shadow:
+      0 0 8px rgba(56,189,248,.6),
+      0 0 20px rgba(56,189,248,.3);
+  }
+  .title span{
+    display:inline-block;
+    animation:glitchShift 3s infinite steps(1);
+  }
+  @keyframes glitchShift{
+    0%, 85%, 100% { transform:translate(0,0); }
+    87%  { transform:translate(-3px, 1px); }
+    89%  { transform:translate( 3px,-1px); }
+    91%  { transform:translate(-2px, 2px); }
+    93%  { transform:translate( 2px,-2px); }
+    95%  { transform:translate(-1px,-1px); }
+  }
+
+  /* ===== NEON BUTTON ===== */
+  .action-btn{
+    display:inline-flex;align-items:center;
+    padding:14px 32px;
+    font:inherit;font-size:15px;font-weight:700;
+    letter-spacing:.02em;text-decoration:none;
+    border-radius:100px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+
+    background:rgba(10,20,40,.35);
+    border:1px solid rgba(56,189,248,.5);
+
+    box-shadow:
+      0 0 12px rgba(56,189,248,.5),
+      0 0 30px rgba(56,189,248,.25),
+      inset 0 0 12px rgba(56,189,248,.15);
+
+    transition:transform .2s ease, box-shadow .25s ease;
+  }
+  .action-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:
+      0 0 18px rgba(56,189,248,.75),
+      0 0 44px rgba(56,189,248,.4),
+      inset 0 0 16px rgba(56,189,248,.25);
+  }
+  .action-btn:active{ transform:translateY(0); }
+
+  .action-btn .ch{
+    display:inline-block;
+    color:#fff;
+    text-shadow:
+      0 0 6px  #fff,
+      0 0 14px #38bdf8,
+      0 0 28px #38bdf8,
+      0 0 50px #0ea5e9;
+
+    opacity:0;
+    transform:translateY(60%);
+    animation:
+      chReveal .5s cubic-bezier(.2,.9,.3,1.4) forwards,
+      neonFlicker 2.2s ease-in-out infinite alternate;
+  }
+  @keyframes chReveal{
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes neonFlicker{
+    0%, 18%, 22%, 100%{
+      text-shadow:
+        0 0 6px  #fff,
+        0 0 14px #38bdf8,
+        0 0 28px #38bdf8,
+        0 0 50px #0ea5e9;
+    }
+    20%{ text-shadow:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .action-btn .ch{
+      animation:chReveal .01s forwards;
+      opacity:1; transform:none;
+    }
+    .title span{ animation:none; }
+    .title-wrap::after{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<div class="card" id="cardRoot">
+  <div class="tab-wrap">
+    <div class="tab-list" role="tablist" id="tabList">
+      <span class="indicator" id="indicator" aria-hidden="true"></span>
+      <!-- JS sinh tab-btn vào đây -->
+    </div>
+  </div>
+  <!-- JS sinh tab-panel vào đây -->
+</div>
+
+<script>
+(function(){
+  /* ============================================================
+     1. DỮ LIỆU — mỗi phần tử: tab, title, href
+     ============================================================ */
+  const BUTTON_TEXT = "Nhấn vào đây";
+
+  const poems = [
+    { tab:"Tab 1", title:"tiktok",   href:"https://tung010171.github.io/tunghaha/" },
+    { tab:"Tab 1", title:"github",   href:"https://github.com/" },
+    { tab:"Tab 2", title:"youtube",  href:"https://youtube.com/" },
+    { tab:"Tab 2", title:"facebook", href:"https://facebook.com/" },
+  ];
+
+  /* ============================================================
+     2. HÀM TÁCH CHỮ
+     ============================================================ */
+  function splitTitle(scope){
+    scope.querySelectorAll('.title').forEach(el => {
+      const text = el.dataset.text || '';
+      el.textContent = '';
+      [...text].forEach((c, i) => {
+        const span = document.createElement('span');
+        span.textContent = c === ' ' ? '\u00A0' : c;
+        span.style.animationDelay = (0.3 * i) + 's';
+        el.appendChild(span);
+      });
+    });
+  }
+
+  function splitButton(scope){
+    scope.querySelectorAll('.action-btn').forEach(btn => {
+      const text = btn.dataset.text || '';
+      btn.innerHTML = '';
+      [...text].forEach((c, i) => {
+        const span = document.createElement('span');
+        span.className = 'ch';
+        span.textContent = c === ' ' ? '\u00A0' : c;
+        span.style.animationDelay = (0.05 * i) + 's, 0s';
+        btn.appendChild(span);
+      });
+    });
+  }
+
+  /* ============================================================
+     3. NHÓM THEO TAB + SINH GIAO DIỆN
+     ============================================================ */
+  const cardRoot  = document.getElementById('cardRoot');
+  const tabList   = document.getElementById('tabList');
+  const indicator = document.getElementById('indicator');
+
+  /* Nhóm theo tab, giữ thứ tự xuất hiện */
+  const groups = new Map();
+  poems.forEach(item => {
+    if (!groups.has(item.tab)) groups.set(item.tab, []);
+    groups.get(item.tab).push(item);
+  });
+
+  let first = true;
+
+  groups.forEach((items, tabName) => {
+    /* --- Tab button --- */
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (first ? ' is-active' : '');
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', first ? 'true' : 'false');
+    btn.tabIndex = first ? 0 : -1;
+    btn.textContent = tabName;
+    tabList.appendChild(btn);
+
+    /* --- Panel chứa các .item --- */
+    const panel = document.createElement('div');
+    panel.className = 'tab-panel' + (first ? ' is-active' : '');
+    panel.setAttribute('role', 'tabpanel');
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="title-wrap">
+          <p class="title" data-text="${item.title}"></p>
+        </div>
+        <a class="action-btn"
+           href="${item.href}"
+           target="_blank" rel="noopener"
+           data-text="${BUTTON_TEXT}"></a>
+      `;
+      panel.appendChild(el);
+      splitTitle(el);
+      splitButton(el);
+    });
+
+    cardRoot.appendChild(panel);
+    first = false;
+  });
+
+  /* ============================================================
+     4. TAB NAV LOGIC
+     ============================================================ */
+  const buttons = Array.from(tabList.querySelectorAll('.tab-btn'));
+  const panels  = Array.from(cardRoot.querySelectorAll('.tab-panel'));
+
+  function moveIndicator(btn){
+    const lr = tabList.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    indicator.style.width = br.width + 'px';
+    indicator.style.transform = 'translateX(' + (br.left - lr.left + tabList.scrollLeft) + 'px)';
+  }
+
+  function centerTab(btn){
+    const lr = tabList.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    const center = br.left - lr.left + tabList.scrollLeft + br.width/2;
+    const target = center - tabList.clientWidth/2;
+    const max = tabList.scrollWidth - tabList.clientWidth;
+    tabList.scrollTo({ left: Math.max(0, Math.min(max, target)), behavior:'smooth' });
+  }
+
+  function replayButton(panel){
+    panel.querySelectorAll('.action-btn').forEach(btn => {
+      btn.querySelectorAll('.ch').forEach(ch => {
+        const oldDelay = ch.style.animationDelay;
+        ch.style.animation = 'none';
+        void ch.offsetWidth;
+        ch.style.animation = '';
+        ch.style.animationDelay = oldDelay;
+      });
+    });
+  }
+
+  function activate(btn){
+    const i = buttons.indexOf(btn);
+    buttons.forEach((b,j)=>{
+      b.classList.toggle('is-active', i===j);
+      b.setAttribute('aria-selected', i===j ? 'true' : 'false');
+      b.tabIndex = i===j ? 0 : -1;
+    });
+    panels.forEach((p,j)=>p.classList.toggle('is-active', i===j));
+    moveIndicator(btn);
+    centerTab(btn);
+    replayButton(panels[i]);
+  }
+
+  buttons.forEach(b => b.addEventListener('click', () => activate(b)));
+
+  tabList.addEventListener('keydown', e => {
+    const i = buttons.indexOf(document.activeElement);
+    if (i < 0) return;
+    let t = null;
+    if (e.key === 'ArrowRight') t = buttons[(i+1) % buttons.length];
+    if (e.key === 'ArrowLeft')  t = buttons[(i-1+buttons.length) % buttons.length];
+    if (t){ e.preventDefault(); activate(t); t.focus(); }
+  });
+
+  window.addEventListener('resize', () => {
+    const active = tabList.querySelector('.tab-btn.is-active');
+    if (active) moveIndicator(active);
+  });
+
+  requestAnimationFrame(() => {
+    const active = tabList.querySelector('.tab-btn.is-active');
+    if (active) moveIndicator(active);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+1. boder 4 góc tròn 
+border-radius: 18px;
+
+
+px càng lớn là cắt càng tròn
+
+
+tóm gọn : boder này ko có màu nhé
+kiểu góc vuông nó cắt thành góc tròn

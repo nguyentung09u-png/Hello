@@ -1,0 +1,128 @@
+Tổng quan cách làm
+
+3 bước:
+
+1. HTML — 1 <div class="card"> chứa 3 khối con: header / body / footer.
+2. CSS khung — width cố định + border-radius + overflow: hidden + display: flex; flex-direction: column + background/border/shadow.
+3. CSS con — mỗi khối có padding; header/footer có style riêng.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· width cố định → tạo khung hẹp theo chiều ngang → cảm giác "dọc".
+· border-radius: 16px → bo góc → Rounded Rectangle.
+· overflow: hidden → cắt con theo góc bo, tránh con tràn ra ngoài.
+· display: flex; flex-direction: column → các con xếp trên → giữa → dưới.
+· box-shadow → khối nổi lên khỏi nền.
+· Không cần JS — thuần CSS.
+
+Tôi không chắc:
+
+· Bạn muốn card trong flow hay position: fixed — code dưới để trong flow, bạn thêm position: fixed nếu cần.
+· Bạn muốn chiều cao cố định hay tự co — code dưới để tự co.
+
+---
+
+Code chung chung
+
+```html
+<div class="card">
+  <div class="card-header">Tiêu đề</div>
+  <div class="card-body">Nội dung…</div>
+  <div class="card-footer">
+    <button type="button">Nút</button>
+  </div>
+</div>
+```
+
+```css
+/* ===== Khung card — Rounded Rectangle khung dọc ===== */
+.card {
+  width: 300px;                        /* bề ngang cố định */
+  max-width: calc(100vw - 32px);       /* không tràn mobile */
+  display: flex;                       /* khẳng định dọc */
+  flex-direction: column;
+  background: #0f1729;                 /* nền */
+  color: #e8e0ff;
+  border: 1px solid rgba(37,99,235,.35);
+  border-radius: 16px;                 /* bo góc 4 cạnh */
+  box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 8px 20px rgba(37,99,235,.25);
+  overflow: hidden;                    /* cắt con theo góc bo */
+  font-family: system-ui, sans-serif;
+}
+
+/* ===== Header ===== */
+.card-header {
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ===== Body ===== */
+.card-body {
+  padding: 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* ===== Footer ===== */
+.card-footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.card-footer button {
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  color: #e8e0ff;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+```
+
+---
+
+Sơ đồ cấu trúc
+
+```
+      width: 300px
+      ◄────────────►
+      ┌────────────┐  ▲
+      │  HEADER    │  │ border-radius: 16px
+      ├────────────┤  │
+      │  BODY      │  │ height: auto
+      │            │  │ (co theo nội dung)
+      ├────────────┤  │
+      │  FOOTER    │  │
+      └────────────┘  ▼
+      ↑            ↑
+      bo góc      bo góc
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Rộng hơn width: 400px
+Hẹp hơn width: 260px
+Bo nhiều hơn border-radius: 24px
+Bo ít hơn border-radius: 8px
+Cao tối đa + scroll body max-height: 60vh + .card-body { flex: 1 1 auto; min-height: 0; overflow-y: auto }
+Card nổi cố định Thêm position: fixed; right: 20px; bottom: 20px; z-index: 9999 vào .card
+Đổi màu header background của .card-header
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: border-radius + width + display: flex; flex-direction: column + overflow: hidden là CSS chuẩn; không cần JS.
+· Tôi không chắc bạn muốn card cố định hay trong flow — code trên để trong flow, có gợi ý cách thêm position: fixed.
+· Tôi không chắc bạn muốn chiều cao cố định hay tự co — code trên để tự co.
+
+🎯 Tóm 1 câu: Rounded Rectangle khung dọc = 1 <div class="card"> với width cố định + border-radius: 16px + overflow: hidden + display: flex; flex-direction: column + background/border/shadow, chứa header / body / footer xếp dọc — thuần HTML/CSS, không cần JS.

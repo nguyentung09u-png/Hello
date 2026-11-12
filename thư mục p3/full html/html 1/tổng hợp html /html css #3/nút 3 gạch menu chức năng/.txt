@@ -1,0 +1,135 @@
+phân biệt drawer và drawer item :
+
+
+có item là 1 cái layout
+
+còn có drawer
+
+☰ → Drawer
+  ├── Mục 1  ← "drawer item" / "nav item" / "menu item"
+  ├── Mục 2  ← "drawer item"
+  └── Mục 3  ← "drawer item"
+
+-----
+
+Click-to-Navigate
+Mỗi bài thơ
+
+
+Ok, thêm Header / Top Bar — thanh trên cùng chứa nút ☰ và tiêu đề.
+
+3 thành phần riêng biệt — nút ☰ (mở), drawer (trượt), overlay (nền mờ).
+
+---
+
+Code chung
+
+HTML:
+
+```html
+<header class="topbar">
+  <button id="menuBtn">☰</button>
+  <span id="pageTitle">Ứng dụng</span>
+</header>
+
+<div class="drawer" id="drawer">
+  <div class="item">Mục 1</div>
+  <div class="item">Mục 2</div>
+  <div class="item">Mục 3</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+```
+
+CSS:
+
+```css
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 100;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+#menuBtn {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  font-size: 26px;
+  cursor: pointer;
+  padding: 5px 12px;
+  margin-right: 15px;
+}
+
+#pageTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.drawer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #111;
+  transform: translateX(-100%);
+  transition: transform 0.35s ease;
+  z-index: 200;
+  padding-top: 80px;      /* tránh đè lên topbar */
+}
+.drawer.open { transform: translateX(0); }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 150;
+}
+.overlay.open { opacity: 1; pointer-events: auto; }
+```
+
+JS:
+
+```js
+const menuBtn = document.getElementById('menuBtn');
+const drawer = document.getElementById('drawer');
+const overlay = document.getElementById('overlay');
+const pageTitle = document.getElementById('pageTitle');
+
+menuBtn.onclick = () => {
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+};
+
+overlay.onclick = () => {
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+};
+
+// Đổi tiêu đề khi chọn mục
+document.querySelectorAll('.item').forEach(item => {
+  item.onclick = () => {
+    pageTitle.textContent = item.textContent;
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+  };
+});
+```
+
+---
+
+Lưu ý
+
+· padding-top: 80px trên drawer — để mục đầu tiên không bị topbar che.
+· z-index: drawer (200) > overlay (150) > topbar (100).
+· Tôi không chắc bạn muốn topbar cố định hay cuộn theo nội dung — code trên là cố định (position: fixed).
+· Nếu muốn topbar trong suốt → đổi background: #0a0a0a thành background: rgba(10, 10, 10, 0.8).

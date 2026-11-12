@@ -1,0 +1,119 @@
+Mượt = Nhịp đúng × onDraw nhẹ — Tổng quan và code chung
+
+Tổng quan (6 bước)
+
+1. Đăng ký vòng lặp — dùng postInvalidateOnAnimation() để hệ thống gọi lại onDraw ở frame kế tiếp, đồng bộ với vsync màn hình.
+2. Đo thời gian onDraw — bọc onDraw bằng System.nanoTime() để biết frame nào tốn bao lâu. (Suy luận: cần đo trước khi tối ưu, tránh tối ưu mù.)
+3. Không tạo object trong onDraw — khai báo mảng / Paint / Path là field của View, chỉ ghi đè giá trị trong onDraw.
+4. Cache kết quả bất biến — kết quả đo text, tính toán không đổi theo frame → cache lại, chỉ tính lại khi dữ liệu đổi.
+5. Chỉ vẽ phần cần thiết — bỏ qua mặt khuất, bỏ shadow/blur nếu không bắt buộc, gộp lệnh vẽ.
+6. Lặp lại — sau mỗi onDraw, gọi lại bước 1.
+
+Ngân sách frame (tham khảo)
+
+Refresh rate Ngân sách lý thuyết
+60Hz ~16.6ms
+90Hz ~11.1ms
+120Hz ~8.3ms
+
+Lưu ý: đây là giới hạn lý thuyết; thực tế còn trừ thời gian layout/measure/GPU — tôi không chắc ngân sách hiệu dụng chính xác là bao nhiêu trên từng thiết bị.
+
+Code chung (Android Canvas)
+
+```java
+public class SmoothView extends View {
+
+    // ---- 1. Buffer dùng lại (không new trong onDraw) ----
+    private final float[] proj  = new float[16];
+    private final float[] zs    = new float[8];
+    private final int[]   order = new int[6];
+
+    // ---- 2. Paint / Path dùng lại ----
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path  path  = new Path();
+
+    // ---- 3. Cache cho kết quả bất biến ----
+    private float cachedTextSize = -1f;
+    private String cachedText    = null;
+    private float cachedMaxW     = -1f;
+
+    // ---- 4. Đo frame time ----
+    private long lastFrameNs = 0;
+
+    public SmoothView(Context c) { super(c); init(); }
+
+    private void init() {
+        // set cờ Paint 1 lần, KHÔNG set lại trong onDraw nếu không cần
+        paint.setTextAlign(Paint.Align.CENTER);
+    }
+
+    @Override
+    protected void onDraw(Canvas c) {
+        long t0 = System.nanoTime();
+
+        int w = getWidth(), h = getHeight();
+        if (w == 0 || h == 0) return;
+
+        // ... tính toán với buffer có sẵn (proj, zs, order) ...
+
+        // cache: chỉ đo text khi chuỗi hoặc maxW đổi
+        float size = getCachedTextSize(someText, paint, maxW);
+
+        // vẽ tối thiểu — bỏ qua phần không cần
+        // ...
+
+        // ---- đo frame ----
+        lastFrameNs = System.nanoTime() - t0;
+        // (tuỳ chọn) Log.d("Frame", "onDraw = " + lastFrameNs / 1_000_000f + "ms");
+
+        // ---- lặp lại ----
+        postInvalidateOnAnimation();
+    }
+
+    private float getCachedTextSize(String s, Paint p, float maxW) {
+        if (s == null) return cachedTextSize;
+        if (s.equals(cachedText) && maxW == cachedMaxW && cachedTextSize > 0) {
+            return cachedTextSize;
+        }
+        float size = 14f;
+        p.setTextSize(size);
+        while (p.measureText(s) > maxW && size > 6f) {
+            size -= 0.5f;
+            p.setTextSize(size);
+        }
+        cachedText = s;
+        cachedMaxW = maxW;
+        cachedTextSize = size;
+        return size;
+    }
+}
+```
+
+Đối chiếu Web (khái niệm tương đương)
+
+```js
+function loop(t) {
+  const t0 = performance.now();
+
+  // ... vẽ tối thiểu ...
+
+  console.log('frame', performance.now() - t0, 'ms');
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+```
+
+· postInvalidateOnAnimation() ↔ requestAnimationFrame().
+· Đo frame time bằng performance.now() ↔ System.nanoTime().
+
+Điểm cần lưu ý (tôi không chắc)
+
+· Ngân sách hiệu dụng thực tế nhỏ hơn con số lý thuyết — tôi không có số liệu cụ thể trên mọi thiết bị.
+· setLayerType(LAYER_TYPE_HARDWARE, null) có thể giúp hoặc làm chậm tuỳ trường hợp — cần test.
+· Khoá fps bằng Window.setFrameRate() (API 30+) không phải thiết bị nào cũng hỗ trợ — tôi không chắc tỉ lệ hỗ trợ.
+
+---
+
+🎯 Tóm 1 câu
+
+Cách làm = đăng ký vòng lặp bằng postInvalidateOnAnimation() (vế nhịp) + tối ưu onDraw bằng 4 việc cơ bản — không tạo object mỗi frame, cache kết quả bất biến, bỏ hiệu ứng đắt, chỉ vẽ phần cần — kèm đo frame time bằng System.nanoTime() để kiểm tra có nằm dưới ngân sách của màn hình hay không.

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Bottom Navigation - Blue Theme</title>
+  <style>
+    :root {
+      --nav-height: 60px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-muted: #888;
+      --badge-bg: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: white;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 20px calc(var(--nav-height) + var(--safe-bottom) + 20px) 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--surface-color);
+      padding: 20px;
+      border-radius: 12px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    /* THANH ĐIỀU HƯỚNG MÀU XANH DƯƠNG */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      /* Đổi sang gradient màu xanh dương */
+      background: linear-gradient(to top, #1e3a8a, #3b82f6); 
+      
+      padding-bottom: var(--safe-bottom);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      z-index: 100;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-list {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      list-style: none;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 11px;
+      font-weight: 500;
+      gap: 4px;
+      width: 100%;
+      height: 100%;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+    }
+
+    .icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav-icon {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background-color: var(--badge-bg);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      /* Đổi viền badge cho hợp với nền xanh */
+      border: 2px solid #3b82f6; 
+    }
+
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; gap: 15px; }
+  </style>
+</head>
+<body>
+
+  <main class="content" id="main-content">
+    <section id="screen-home" class="screen active">
+      <h2>Trang chủ</h2>
+      <div class="card">Chạy bộ buổi sáng</div>
+      <div class="card">Ghi chú đường mòn</div>
+      <div class="card">Nội dung cuộn 1</div>
+      <div class="card">Nội dung cuộn 2</div>
+      <div class="card">Nội dung cuộn 3</div>
+    </section>
+
+    <section id="screen-search" class="screen">
+      <h2>Tìm kiếm</h2>
+      <div class="card">Thanh tìm kiếm ở đây</div>
+    </section>
+
+    <section id="screen-inbox" class="screen">
+      <h2>Hộp thư đến</h2>
+      <div class="card">Tin nhắn 1</div>
+      <div class="card">Tin nhắn 2</div>
+      <div class="card">Tin nhắn 3</div>
+    </section>
+
+    <section id="screen-profile" class="screen">
+      <h2>Hồ sơ</h2>
+      <div class="card">Thông tin cá nhân</div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="#home" class="nav-link active" data-target="screen-home" aria-current="page">
+          <div class="icon-wrapper">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </div>
+          <span>Trang chủ</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#search" class="nav-link" data-target="screen-search">
+          <div class="icon-wrapper">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          </div>
+          <span>Tìm kiếm</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#inbox" class="nav-link" data-target="screen-inbox">
+          <div class="icon-wrapper">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z"/></svg>
+            <span class="badge">3</span>
+          </div>
+          <span>Hộp thư</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#profile" class="nav-link" data-target="screen-profile">
+          <div class="icon-wrapper">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <span>Hồ sơ</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const screens = document.querySelectorAll('.screen');
+      const contentArea = document.getElementById('main-content');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+
+          navLinks.forEach(nav => {
+            nav.classList.remove('active');
+            nav.removeAttribute('aria-current');
+          });
+          screens.forEach(screen => screen.classList.remove('active'));
+
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
+
+          const targetId = link.getAttribute('data-target');
+          const targetScreen = document.getElementById(targetId);
+          if (targetScreen) {
+            targetScreen.classList.add('active');
+            contentArea.scrollTop = 0; 
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+Tổng quan cách làm
+
+Có 2 cách để dùng Be Vietnam Pro:
+
+1. Google Fonts — nạp 1 dòng <link>, trình duyệt tự lo file. Nhanh, đơn giản, cần mạng.
+2. Tự host (self-host) — tải file .woff2 về, khai báo @font-face. Nhanh hơn khi deploy, không phụ thuộc Google, nhưng phải tự tải + quản lý.
+
+Cấu trúc 1 khai báo font gồm:
+
+· @font-face — tên font, đường dẫn file, weight, style, font-display.
+· font-family — áp vào element (body/h1/button…).
+· Fallback stack — font dự phòng khi font chính không tải được (system-ui, sans-serif).
+· font-display: swap — hiện chữ bằng font dự phòng trước, đổi sang Be Vietnam Pro khi tải xong (tránh màn hình trắng chữ).
+
+OpenType features (ligature, fraction, tabular-nums…) bật qua font-feature-settings hoặc font-variant-numeric.
+
+Tôi không chắc:
+
+· Repo GitHub chính thức (bettergui/BeVietnamPro trong câu trả lời trước) — mình đã nói rõ "không chắc URL chính xác". Bạn nên xác nhận lại trước khi tự host.
+· Một số OpenType feature có được bật mặc định trên mọi trình duyệt hay không.
+
+---
+
+Code chung chung
+
+Cách 1 — Google Fonts (khuyên dùng)
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+```
+
+```css
+:root {
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Số không nhảy khi giá trị thay đổi */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bật small caps nếu font hỗ trợ */
+.smallcaps {
+  font-variant-caps: all-small-caps;
+}
+```
+
+Cách 2 — Tự host (self-host)
+
+```css
+/* Đặt file trong /fonts/ */
+@font-face {
+  font-family: "Be Vietnam Pro";
+  src: url("/fonts/BeVietnamPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  src: url("/fonts/BeVietnamPro-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  src: url("/fonts/BeVietnamPro-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  src: url("/fonts/BeVietnamPro-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* lặp cho 800, 900, và italic nếu cần */
+```
+
+```css
+body {
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+}
+```
+
+---
+
+Tinh chỉnh
+
+Muốn Dùng
+Số không nhảy font-variant-numeric: tabular-nums
+Bật ligature font-feature-settings: "liga" 1 (thường mặc định đã bật)
+Phân số tự động font-variant-numeric: diagonal-fractions
+Chỉ số trên/dưới <sup>, <sub> (font hỗ trợ sẵn)
+Chữ nghiêng font-style: italic (cần khai báo font italic)
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: Google Fonts là cách nạp font phổ biến, có tài liệu; font-display: swap là chuẩn CSS.
+· Tôi không chắc repo GitHub để tự host — cần bạn xác nhận nguồn chính thức trước khi tải file .woff2.
+· Tôi không chắc toàn bộ 9 weight + italic đều cần cho UI hiện tại — thường chỉ cần 400, 500, 600, 700 là đủ; thêm 800 cho tiêu đề nếu muốn.
+· Nếu Google Fonts bị chặn, trang sẽ fallback về system-ui — không lỗi, chỉ khác font.
+
+🎯 Tóm 1 câu: Nạp Be Vietnam Pro qua Google Fonts (1 dòng <link>) hoặc tự host (khai báo @font-face với file .woff2), rồi gán font-family: "Be Vietnam Pro", system-ui, sans-serif cho body — thêm font-display: swap để tránh màn hình trắng chữ.

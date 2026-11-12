@@ -1,0 +1,108 @@
+🎬 Screen Shake — Tổng quan + Code khung
+
+1️⃣ Tổng quan (4 bước)
+
+Bước Việc làm Ở đâu
+1 Khai báo biến shake = 0 state
+2 Khi có va chạm → shake += lượng (có trần) trong sự kiện
+3 Mỗi frame → shake -= dt * tốc_độ (về 0) trong update
+4 Khi vẽ → ctx.translate(rand(-shake, shake), rand(-shake, shake)) trong render
+
+Điểm mấu chốt: chỉ cần 1 biến + 3 chỗ chèn code. Không cần thư viện.
+
+---
+
+2️⃣ Code khung (chung chung)
+
+```javascript
+// ===== 1. STATE =====
+const G = { shake: 0 };
+const rand = (a, b) => a + Math.random() * (b - a);
+
+// ===== 2. KÍCH HOẠT (gọi khi có va chạm) =====
+function addShake(amount, max) {
+  G.shake = Math.min(G.shake + amount, max);
+}
+
+// Ví dụ gọi:
+addShake(5, 14);   // giết zombie
+addShake(2, 8);    // trúng đòn nhẹ
+addShake(9, 20);   // vua bị đánh
+
+// ===== 3. DECAY (mỗi frame) =====
+function update(dt) {
+  if (G.shake > 0) {
+    G.shake = Math.max(0, G.shake - dt * 42);
+  }
+  // ... logic game ...
+}
+
+// ===== 4. ÁP DỤNG KHI VẼ =====
+function render() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.save();
+
+  if (G.shake > 0.1) {
+    const s = G.shake * 0.7;
+    ctx.translate(rand(-s, s), rand(-s, s));
+  }
+
+  // ... vẽ toàn bộ game ở đây ...
+
+  ctx.restore();
+}
+
+// ===== 5. VÒNG LẶP =====
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+loop(performance.now());
+```
+
+---
+
+3️⃣ Tại sao code này hoạt động
+
+· Biến shake là năng lượng — càng lớn, biên độ rand(-s, s) càng rộng.
+· Trần (Math.min) — tránh rung vô hạn khi có nhiều va chạm dồn dập.
+· Decay (-= dt * 42) — rung giảm dần rồi tắt tự nhiên, không cần reset thủ công.
+· rand() mỗi frame — tạo cảm giác rung lắc, không phải trượt mượt.
+· ctx.save/restore — cô lập shake, không ảnh hưởng HUD hay lớp khác.
+
+---
+
+4️⃣ Tham số có thể chỉnh
+
+Tham số Giá trị mẫu Tác dụng
+Lượng cộng 2 / 5 / 9 Mạnh nhẹ tuỳ sự kiện
+Trần 8 / 14 / 20 Giới hạn rung tối đa
+Decay dt * 42 Số càng lớn = tắt càng nhanh
+Hệ số biên độ * 0.7 1.0 = full, 0.3 = nhẹ
+Ngưỡng áp dụng > 0.1 Bỏ qua rung li ti
+
+---
+
+5️⃣ Thường đi kèm (juice khác)
+
+Screen shake thường ghép với: particle burst, flash màu, âm thanh, damage floater, và đôi khi hit-stop. Trong câu trả lời trước có nêu code mẫu của từng cái.
+
+---
+
+🎯 Tóm 1 câu
+
+Khai báo shake = 0, cộng khi va chạm (+= lượng, clamp trần), trừ mỗi frame (-= dt * tốc_độ), rồi ctx.translate(rand(-shake, shake) * hệ_số) khi vẽ — hết.
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Các con số cụ thể (42, 0.7, 5, 14…) — tôi chọn theo thông lệ, không có dữ liệu đo lường tối ưu.
+· Ngẫu nhiên mỗi frame có thể giật cục ở FPS cao; một số game dùng noise mượt — tôi không chắc cách nào tốt hơn cho game của bạn.
+· Screen shake có thể gây khó chịu với người nhạy cảm chuyển động; code khung này chưa có tuỳ chọn tắt.

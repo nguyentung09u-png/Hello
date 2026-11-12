@@ -1,0 +1,68 @@
+Cách làm:
+
+· Auto Slide: dùng setInterval gọi hàm next() mỗi 6 giây.
+· Touch Swipe: lắng nghe touchstart/touchend, tính khoảng cách vuốt, gọi next()/prev().
+· Keyboard Nav: lắng nghe keydown, kiểm tra ArrowLeft/ArrowRight.
+
+
+
+Keyboard Nav Phím ← → để chuyển card và Nav Buttons (‹ ›) Nút trái/phải để chuyển card
+---
+
+Code chung
+
+Auto Slide:
+
+```js
+let autoTimer = setInterval(next, 6000);
+
+function resetAuto() {
+  clearInterval(autoTimer);
+  autoTimer = setInterval(next, 6000);
+}
+// Gọi resetAuto() sau mỗi lần người dùng tương tác (click/vuốt/phím)
+```
+
+Touch Swipe:
+
+```js
+let touchStartX = 0;
+
+carousel.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+carousel.addEventListener('touchend', (e) => {
+  const diff = e.changedTouches[0].clientX - touchStartX;
+  if (diff > 50) {
+    prev();
+    resetAuto();
+  } else if (diff < -50) {
+    next();
+    resetAuto();
+  }
+});
+```
+
+Keyboard Nav:
+
+```js
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') {
+    prev();
+    resetAuto();
+  } else if (e.key === 'ArrowRight') {
+    next();
+    resetAuto();
+  }
+});
+```
+
+---
+
+Lưu ý
+
+· Ngưỡng vuốt 50px — có thể đổi thành 30px (nhạy hơn) hoặc 80px (khó hơn).
+· resetAuto() quan trọng — nếu không gọi, auto slide và tương tác người dùng có thể xung đột (tự chuyển khi đang vuốt).
+· Tôi không chắc ngưỡng 50px phù hợp với mọi thiết bị — cần test thực tế.
+· keydown trên document — có thể bị chặn nếu focus vào ô input. Có thể dùng if (e.target.tagName === 'INPUT') return; để bỏ qua khi đang gõ.

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050810">
+<title>Dark Tech Background — Ice Blue Diagonal Mesh</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#050810;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(130% 100% at 50% 50%, #0a1424 0%, #060b16 48%, #03060c 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Diagonal mesh (skewed grid, painted once) ---------- */
+  .mesh{
+    position:absolute;
+    inset:-20%;
+    background-image:
+      repeating-linear-gradient(60deg,
+        rgba(125,211,252,.09) 0 1px,
+        transparent 1px 90px),
+      repeating-linear-gradient(-60deg,
+        rgba(96,165,250,.09) 0 1px,
+        transparent 1px 90px);
+    -webkit-mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.55) 50%, rgba(0,0,0,0) 82%);
+            mask-image:radial-gradient(110% 100% at 50% 50%, #000 0%, rgba(0,0,0,.55) 50%, rgba(0,0,0,0) 82%);
+    animation:meshDrift 60s linear infinite;
+    will-change:background-position;
+    backface-visibility:hidden;
+  }
+  @keyframes meshDrift{
+    from{background-position:0 0, 0 0;}
+    to{background-position:180px 0, -180px 0;}
+  }
+
+  /* ---------- Slow shimmering dots ---------- */
+  .dots{
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(rgba(186,230,253,.28) 1px, transparent 1px);
+    background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(80% 70% at 50% 50%, rgba(0,0,0,.95) 0%, rgba(0,0,0,0) 78%);
+            mask-image:radial-gradient(80% 70% at 50% 50%, rgba(0,0,0,.95) 0%, rgba(0,0,0,0) 78%);
+    opacity:.35;
+    animation:dotShimmer 10s ease-in-out infinite alternate;
+    will-change:opacity,transform;
+    transform:translate3d(0,0,0);
+  }
+  @keyframes dotShimmer{
+    from{opacity:.22;}
+    to{opacity:.55;}
+  }
+
+  /* ---------- Floating vertical light bars (transform-only) ---------- */
+  .bars{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    contain:strict;
+  }
+  .bars span{
+    position:absolute;
+    top:-25vh;
+    width:1px;
+    background:linear-gradient(180deg,
+      rgba(125,211,252,0) 0%,
+      rgba(125,211,252,.55) 40%,
+      rgba(96,165,250,.85) 55%,
+      rgba(125,211,252,.55) 70%,
+      rgba(125,211,252,0) 100%);
+    animation:barFall linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes barFall{
+    0%{transform:translate3d(0,-25vh,0);opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{transform:translate3d(0,130vh,0);opacity:0;}
+  }
+
+  /* ---------- Soft cyan bloom ---------- */
+  .bloom{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(55% 45% at 20% 15%, rgba(56,189,248,.12), transparent 70%),
+      radial-gradient(55% 45% at 85% 85%, rgba(129,140,248,.10), transparent 70%);
+    animation:bloomBreath 14s ease-in-out infinite alternate;
+    will-change:transform,opacity;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes bloomBreath{
+    from{transform:translate3d(0,0,0) scale(1);opacity:.8;}
+    to{transform:translate3d(0,0,0) scale(1.06);opacity:1;}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 80%, rgba(0,0,0,.72) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.028;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .mesh,.dots,.bars span,.bloom{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="mesh"></div>
+  <div class="dots"></div>
+  <div class="bars" id="bars"></div>
+  <div class="bloom"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const bars = document.getElementById('bars');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const COUNT = 18;
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    const left = Math.random() * 100;
+    const dur = 6 + Math.random() * 9;
+    const delay = Math.random() * dur;
+    const h = 25 + Math.random() * 40;
+    s.style.left = left + 'vw';
+    s.style.height = h + 'vh';
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + delay + 's';
+    s.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  bars.appendChild(frag);
+})();
+</script>
+</body>
+</html>

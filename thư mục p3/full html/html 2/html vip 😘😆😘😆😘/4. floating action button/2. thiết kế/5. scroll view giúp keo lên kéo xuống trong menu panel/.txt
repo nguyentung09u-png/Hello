@@ -1,0 +1,159 @@
+Tổng quan cách làm
+
+Cấu trúc 3 phần + 5 dòng CSS cốt lõi:
+
+1. HTML — 3 khối xếp dọc: header, body, footer trong .panel.
+2. CSS khung — .panel dùng display: flex; flex-direction: column + max-height + overflow: hidden.
+3. CSS body — .panel-body dùng flex: 1 1 auto + min-height: 0 + overflow-y: auto.
+4. CSS header/footer — flex: 0 0 auto để không co giãn.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· max-height trên panel giới hạn chiều cao → body biết khi nào phải scroll.
+· min-height: 0 trên body — bắt buộc trong flexbox, vì flex item mặc định có min-height: auto → không co nhỏ hơn nội dung → overflow: auto không hoạt động nếu thiếu.
+· flex: 1 1 auto — body chiếm hết phần còn lại giữa header và footer.
+· overflow: hidden trên panel — cắt phần body tràn ra ngoài.
+· Không cần JS — cuộn là hành vi gốc của trình duyệt.
+
+Tôi không chắc:
+
+· Bạn muốn panel cao bao nhiêu — mình chọn 60vh, có thể đổi.
+· Bạn muốn scrollbar mặc định hay custom — code có cả 2 tuỳ chọn.
+
+---
+
+Code chung chung
+
+```html
+<div class="panel">
+  <div class="panel-header">Header — cố định</div>
+
+  <div class="panel-body">
+    <p>Nội dung 1…</p>
+    <p>Nội dung 2…</p>
+    <p>Nội dung 3…</p>
+    <p>Nội dung 4…</p>
+    <p>Nội dung 5…</p>
+    <p>Nội dung 6…</p>
+    <!-- nhiều nội dung để test scroll -->
+  </div>
+
+  <div class="panel-footer">Footer — cố định</div>
+</div>
+```
+
+```css
+/* ===== Khung panel ===== */
+.panel {
+  display: flex;
+  flex-direction: column;      /* 3 phần xếp dọc */
+  max-height: 60vh;            /* giới hạn chiều cao — điều kiện cần để scroll */
+  overflow: hidden;            /* cắt phần tràn */
+  width: 300px;
+  background: #0f1729;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  font-family: system-ui, sans-serif;
+  color: #e8e0ff;
+}
+
+/* ===== Header — cố định trên ===== */
+.panel-header {
+  flex: 0 0 auto;              /* không co, không giãn */
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ===== Body — vùng cuộn ===== */
+.panel-body {
+  flex: 1 1 auto;              /* chiếm phần còn lại */
+  min-height: 0;               /* BẮT BUỘC cho overflow trong flex */
+  overflow-y: auto;            /* bật scroll dọc */
+  overscroll-behavior: contain;/* chặn scroll lan ra trang nền */
+  padding: 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* ===== Footer — cố định dưới ===== */
+.panel-footer {
+  flex: 0 0 auto;              /* không co, không giãn */
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 13px;
+  color: #c8c1de;
+}
+
+/* ===== Custom scrollbar (tuỳ chọn) ===== */
+.panel-body::-webkit-scrollbar { width: 6px; }
+.panel-body::-webkit-scrollbar-track { background: transparent; }
+.panel-body::-webkit-scrollbar-thumb {
+  background: rgba(16,185,129,.35);
+  border-radius: 999px;
+}
+.panel-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(16,185,129,.55);
+}
+/* Firefox */
+.panel-body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16,185,129,.4) transparent;
+}
+```
+
+---
+
+Sơ đồ cấu trúc
+
+```
+┌─────────────────────────┐
+│  .panel-header          │ ← flex: 0 0 auto (cố định)
+├─────────────────────────┤
+│  .panel-body            │ ← flex: 1 1 auto + overflow-y: auto
+│  ↑                      │    (cuộn khi nội dung dài)
+│  │                      │
+│  ↓                      │
+│  ...nội dung dài...     │
+├─────────────────────────┤
+│  .panel-footer          │ ← flex: 0 0 auto (cố định)
+└─────────────────────────┘
+```
+
+---
+
+Điều kiện để scroll hoạt động
+
+Cần đủ 3 điều kiện:
+
+# Điều kiện Thuộc tính
+1 Panel có chiều cao giới hạn max-height: 60vh
+2 Body có overflow overflow-y: auto
+3 Body cho phép co nhỏ hơn nội dung min-height: 0 (bắt buộc trong flex)
+
+Thiếu bất kỳ điều kiện nào → body không cuộn được.
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Panel cao hơn max-height: 60vh → 80vh
+Panel thấp hơn max-height: 60vh → 40vh
+Không giới hạn cao Bỏ max-height (panel tự co theo nội dung, không scroll)
+Bỏ custom scrollbar Xóa 2 block ::-webkit-scrollbar + scrollbar-width
+Đổi màu scrollbar background của ::-webkit-scrollbar-thumb
+Tắt scroll Xóa overflow-y: auto
+Tắt chặn scroll chain Xóa overscroll-behavior: contain
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: min-height: 0 là yêu cầu kỹ thuật của flexbox (CSS Flexible Box Layout spec) — nếu thiếu, flex item không co nhỏ hơn nội dung, overflow vô hiệu; overscroll-behavior là chuẩn CSS; ::-webkit-scrollbar hỗ trợ Chrome/Safari/Edge.
+· Tôi không chắc custom scrollbar hiển thị giống nhau 100% trên mọi trình duyệt — Firefox dùng scrollbar-width/scrollbar-color thay vì ::-webkit-scrollbar.
+· Tôi không chắc 60vh là chiều cao tối ưu cho mọi ngữ cảnh — tuỳ vào nội dung và thiết kế.
+
+🎯 Tóm 1 câu: Scroll view trong panel = .panel { display: flex; flex-direction: column; max-height: 60vh; overflow: hidden } + .panel-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain } + header/footer flex: 0 0 auto — toàn bộ CSS thuần, cuộn là hành vi gốc của trình duyệt, không cần JS.

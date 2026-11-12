@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay Intro · Center Row</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%; overflow: hidden;
+    background: #0e0e12; color: #fff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* ========== OVERLAY ========== */
+  .overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; flex-direction: column;
+    padding: clamp(1.4rem, 3vw, 2.6rem);
+    background: #0e0e12;
+    overflow: hidden;
+    transform: translateY(0);
+    transition: transform 1s cubic-bezier(.77,0,.18,1),
+                opacity .9s ease;
+    will-change: transform, opacity;
+  }
+  .overlay.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ========== THANH TOP ========== */
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: .72rem; letter-spacing: .28em; text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+    z-index: 5;
+    opacity: 0;
+    animation: fadeDown .9s .3s ease forwards;
+  }
+  .top-bar .dot {
+    display: inline-block; width: 6px; height: 6px;
+    background: #6effb0; border-radius: 50%;
+    margin-right: .6rem; vertical-align: middle;
+    box-shadow: 0 0 10px #6effb0;
+  }
+  .lang { display: flex; gap: 1rem; }
+  .lang span:first-child { color: #fff; }
+
+  /* ========== VÙNG GIỮA — HÀNG NGANG ========== */
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    position: relative;
+    z-index: 5;
+  }
+
+  /* Chữ "Xin chào" */
+  .greeting-block {
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    opacity: 0;
+    animation: fadeUp .9s .5s ease forwards;
+  }
+  .greeting-label {
+    font-size: .72rem; letter-spacing: .38em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+    margin-bottom: 1rem;
+  }
+  .greeting {
+    font-size: clamp(2.6rem, 6vw, 4.8rem);
+    font-weight: 700; letter-spacing: -.03em;
+    line-height: 1.02;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .greeting em {
+    font-style: normal;
+    color: rgba(255,255,255,.35);
+  }
+
+  /* Nút "Bắt đầu" */
+  .action-block {
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp .9s .7s ease forwards;
+  }
+  .action-label {
+    font-size: .72rem; letter-spacing: .38em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+  }
+
+  /* ========== NÚT BẮT ĐẦU ========== */
+  .start-btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 1rem;
+    padding: 1.1rem 2.4rem;
+    font-size: .85rem; font-weight: 600;
+    letter-spacing: .28em; text-transform: uppercase;
+    color: #0e0e12;
+    background: #fff;
+    border: 1px solid #fff;
+    border-radius: 100px;
+    cursor: pointer;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition: transform .4s cubic-bezier(.16,1,.3,1),
+                background .4s ease, color .4s ease;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none; -webkit-appearance: none;
+    outline: none; user-select: none;
+  }
+  .start-btn:hover {
+    background: transparent;
+    color: #fff;
+    transform: translateZ(0) translateY(-3px);
+  }
+  .start-btn:active {
+    transform: translateZ(0) translateY(-1px) scale(.98);
+  }
+  .start-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.25);
+  }
+  .start-btn .arrow {
+    display: inline-block;
+    transition: transform .4s cubic-bezier(.16,1,.3,1);
+    will-change: transform;
+  }
+  .start-btn:hover .arrow { transform: translateX(6px); }
+
+  /* Thanh tiến trình dưới nút */
+  .progress {
+    position: relative;
+    width: 180px; height: 1px;
+    background: rgba(255,255,255,.12);
+    overflow: hidden;
+  }
+  .progress::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left;
+    will-change: transform;
+    transition: transform .8s cubic-bezier(.16,1,.3,1);
+  }
+  .action-block:hover .progress::after {
+    transform: scaleX(1);
+  }
+
+  /* ========== WATERMARK ========== */
+  .watermark {
+    position: absolute;
+    right: -2vw; bottom: -6vh;
+    font-size: clamp(10rem, 26vw, 22rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -.06em;
+    color: rgba(255,255,255,.035);
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+  }
+
+  /* ========== THANH BOTTOM ========== */
+  .bottom-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: .72rem; letter-spacing: .28em; text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+    z-index: 5;
+    opacity: 0;
+    animation: fadeUp .9s .9s ease forwards;
+  }
+  .bottom-bar .scroll-hint {
+    display: inline-flex; align-items: center; gap: .6rem;
+  }
+  .bottom-bar .scroll-hint::after {
+    content: "↓";
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(4px); }
+  }
+
+  /* ========== KEYFRAMES ========== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 760px) {
+    .stage {
+      flex-direction: column;
+      gap: 2.4rem;
+    }
+    .greeting-block,
+    .action-block { align-items: center; text-align: center; }
+    .greeting { white-space: normal; }
+    .progress { width: 140px; }
+    .bottom-bar { font-size: .62rem; letter-spacing: .2em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+
+  <!-- Thanh top -->
+  <div class="top-bar">
+    <span><span class="dot"></span>2025 / 01</span>
+    <div class="lang">
+      <span>VI</span>
+      <span>EN</span>
+    </div>
+  </div>
+
+  <!-- Vùng giữa — hàng ngang -->
+  <div class="stage">
+    <div class="greeting-block">
+      <div class="greeting-label">Chào mừng</div>
+      <h1 class="greeting">Xin chào<em>.</em></h1>
+    </div>
+
+    <div class="action-block">
+      <div class="action-label">Sẵn sàng?</div>
+      <button class="start-btn" id="startBtn">
+        Bắt đầu
+        <span class="arrow">→</span>
+      </button>
+      <div class="progress"></div>
+    </div>
+  </div>
+
+  <!-- Thanh bottom -->
+  <div class="bottom-bar">
+    <span>Intro · v1.0</span>
+    <span class="scroll-hint">Cuộn</span>
+  </div>
+
+  <!-- Watermark -->
+  <div class="watermark">01</div>
+</div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const btn     = document.getElementById('startBtn');
+  let done = false;
+
+  btn.addEventListener('click', () => {
+    if (done) return;
+    done = true;
+    btn.disabled = true;
+    overlay.classList.add('hidden');
+    setTimeout(() => overlay.remove(), 1400);
+  });
+
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+</script>
+
+</body>
+</html>

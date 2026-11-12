@@ -1,0 +1,28 @@
+1.margin-bottom chỉnh rộng - nhỏ khoảng cách
+
+px càng lớn càng xa
+px càng nhỏ càng hẹp gần
+
+ví dụ :
+
+
+
+
+┌─────────────────────────────┐
+│                             │
+│         HỘP A               │  ← phần tử trên
+│                             │
+└─────────────────────────────┘
+         ↕     
+         |
+         |
+         |
+         |
+         |
+         mấy dấu mũi tên cho vui thôi , khoảng của các card đó theo dọc
+         ↕
+┌─────────────────────────────┐
+│                             │
+│         HỘP B               │  ← phần tử dưới
+│                             │
+└─────────────────────────────┘

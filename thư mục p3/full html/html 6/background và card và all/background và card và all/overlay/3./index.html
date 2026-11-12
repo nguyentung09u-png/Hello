@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay Intro · Texture Text</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%; overflow: hidden;
+    background: #05060a; color: #fff;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  /* ===== TRANG BÊN DƯỚI ===== */
+  .page {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0e1420, #05060a);
+  }
+  .page h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: rgba(255,255,255,.9);
+  }
+
+  /* ===== OVERLAY — 4 DẢI NGANG ===== */
+  .overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    overflow: hidden;
+  }
+  .band {
+    position: relative;
+    background: #05060a;
+    transform: translateY(0);
+    transition: transform .9s cubic-bezier(.77,0,.18,1);
+    will-change: transform;
+  }
+  /* Blueprint grid mờ trên mỗi dải */
+  .band::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(120,180,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,180,255,.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  /* Dải lẻ trượt lên, chẵn trượt xuống — lệch nhịp */
+  .overlay.hidden .band:nth-child(odd)  { transform: translateY(-100%); }
+  .overlay.hidden .band:nth-child(even) { transform: translateY(100%); }
+  .overlay.hidden .band:nth-child(2) { transition-delay: .05s; }
+  .overlay.hidden .band:nth-child(3) { transition-delay: .10s; }
+  .overlay.hidden .band:nth-child(4) { transition-delay: .15s; }
+  .overlay.hidden { pointer-events: none; }
+
+  /* ===== KHỐI NỘI DUNG — overlay lên trên 4 dải ===== */
+  .stage {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2rem;
+    transition: opacity .35s ease;
+  }
+  .overlay.hidden .stage {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .stage > * { pointer-events: auto; }
+
+  /* ===== CHỮ "XIN CHÀO." VỚI TEXTURE ===== */
+  .greeting-wrap {
+    position: relative;
+    display: inline-block;
+    isolation: isolate;      /* cô lập blend mode */
+  }
+
+  .greeting {
+    display: block;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1;
+
+    /* Lớp kim loại chảy */
+    background: linear-gradient(
+      100deg,
+      #5a5a78 0%,
+      #ffffff 18%,
+      #7a7a9a 36%,
+      #ffffff 54%,
+      #5a5a78 72%,
+      #ffffff 100%
+    );
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+    filter: drop-shadow(0 4px 24px rgba(120,150,255,.15));
+    animation: textureFlow 5s linear infinite,
+               fadeIn .9s .2s ease both;
+    will-change: background-position, opacity;
+  }
+  @keyframes textureFlow {
+    to { background-position: 300% 0; }
+  }
+
+  /* Lớp grain phủ — cùng nội dung, đè lên */
+  .greeting.grain {
+    position: absolute;
+    inset: 0;
+    background: none;
+    background-image:
+      radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px),
+      radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 2px 2px;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    mix-blend-mode: overlay;
+    filter: none;
+    animation: grainShift .35s steps(3) infinite;
+    pointer-events: none;
+  }
+  @keyframes grainShift {
+    0%   { background-position: 0 0, 2px 2px; }
+    33%  { background-position: 1px 1px, 3px 0; }
+    66%  { background-position: -1px 1px, 1px 3px; }
+    100% { background-position: 0 0, 2px 2px; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ===== NÚT BẮT ĐẦU — outline vuông, dưới chữ ===== */
+  .start-btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: .8rem;
+    padding: 1rem 2.6rem;
+    font-size: .82rem; font-weight: 600;
+    letter-spacing: .32em; text-transform: uppercase;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.5);
+    border-radius: 2px;
+    cursor: pointer;
+    transform: translateZ(0);
+    transition: background .35s ease, color .35s ease,
+                border-color .35s ease, transform .35s ease;
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none; -webkit-appearance: none;
+    outline: none; user-select: none;
+    opacity: 0;
+    animation: fadeUp .8s .7s ease forwards;
+  }
+  .start-btn:hover {
+    background: #fff;
+    color: #05060a;
+    border-color: #fff;
+    transform: translateZ(0) translateY(-2px);
+  }
+  .start-btn:active {
+    transform: translateZ(0) translateY(0);
+  }
+  .start-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.22);
+  }
+  .start-btn .arrow {
+    display: inline-block;
+    transition: transform .35s ease;
+    will-change: transform;
+  }
+  .start-btn:hover .arrow { transform: translateX(5px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== TICK MARKS 2 BÊN ===== */
+  .ticks {
+    position: absolute; top: 0; bottom: 0;
+    width: 14px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.35) 0 1px,
+      transparent 1px 14px
+    );
+    pointer-events: none;
+    z-index: 5;
+  }
+  .ticks.left  { left: 1.4rem; }
+  .ticks.right { right: 1.4rem; }
+
+  /* ===== REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .greeting { opacity: 1; }
+    .start-btn { opacity: 1; transform: none; }
+    .overlay.hidden .stage { opacity: 1; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .ticks { display: none; }
+    .start-btn { padding: .85rem 2rem; font-size: .72rem; letter-spacing: .22em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Trang bên dưới -->
+<div class="page">
+  <h2>Chào mừng bạn</h2>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay">
+  <!-- 4 dải nền -->
+  <div class="band"></div>
+  <div class="band"></div>
+  <div class="band"></div>
+  <div class="band"></div>
+
+  <!-- Tick marks 2 bên -->
+  <div class="ticks left"></div>
+  <div class="ticks right"></div>
+
+  <!-- Nội dung -->
+  <div class="stage">
+    <div class="greeting-wrap">
+      <span class="greeting">Xin chào.</span>
+      <span class="greeting grain" aria-hidden="true">Xin chào.</span>
+    </div>
+
+    <button class="start-btn" id="startBtn">
+      Bắt đầu
+      <span class="arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('overlay');
+  const btn     = document.getElementById('startBtn');
+  let done = false;
+
+  btn.addEventListener('click', () => {
+    if (done) return;
+    done = true;
+    btn.disabled = true;
+    overlay.classList.add('hidden');       // 4 dải tách ra
+    setTimeout(() => overlay.remove(), 1400);
+  });
+
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+</script>
+
+</body>
+</html>

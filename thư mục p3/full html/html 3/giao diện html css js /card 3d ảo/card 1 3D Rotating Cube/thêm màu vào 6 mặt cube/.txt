@@ -1,0 +1,89 @@
+Thêm viền neon vào từng mặt cube — Tổng quan và code chung
+
+Tổng quan (4 bước)
+
+1. Khai báo Paint mới — Paint.Style.STROKE với màu cyan, độ dày, góc bo.
+2. Setup trong init() — set style, strokeWidth, color, strokeJoin, strokeCap.
+3. Chèn 1 lệnh vẽ trong vòng lặp 6 mặt, ngay sau khi vẽ viền mờ cũ.
+4. Điều kiện — chỉ vẽ khi faceZ[f] > 0 (mặt hướng ra trước) và alpha > 0.
+
+Các thành phần
+
+Thành phần Vai trò
+faceNeonPaint (Paint) Chứa style/màu/độ dày viền neon
+setStyle(STROKE) Chỉ vẽ viền, không tô nền
+setStrokeWidth(dp(2.5)) Độ dày nét
+setColor(0xFF00FFFF) Màu cyan sáng
+setStrokeJoin(ROUND) Góc nối bo tròn
+setStrokeCap(ROUND) Đầu/cuối nét bo tròn
+canvas.drawPath(facePath, faceNeonPaint) Lệnh vẽ
+if (faceZ[f] > 0) Chỉ vẽ mặt hướng ra trước
+setAlpha(alpha) Đồng bộ độ mờ với mặt cube
+
+Code chung
+
+```java
+// 1. Khai báo field
+private final Paint faceNeonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+// 2. Setup trong init()
+private void init() {
+    // ... phần khác giữ nguyên ...
+
+    faceNeonPaint.setStyle(Paint.Style.STROKE);
+    faceNeonPaint.setStrokeWidth(dp(2.5f));
+    faceNeonPaint.setColor(0xFF00FFFF);
+    faceNeonPaint.setStrokeJoin(Paint.Join.ROUND);
+    faceNeonPaint.setStrokeCap(Paint.Cap.ROUND);
+}
+
+// 3. Trong onDraw, vòng lặp 6 mặt
+for (int oi = 0; oi < FACES; oi++) {
+    int f = order[oi];
+    int[] idx = faces[f];
+
+    int alpha = 255;
+    // ... xử lý alpha theo zoomAmount ...
+
+    // dựng facePath từ 4 đỉnh (đã có sẵn)
+    facePath.reset();
+    facePath.moveTo(proj[idx[0]][0], proj[idx[0]][1]);
+    for (int k = 1; k < 4; k++) {
+        facePath.lineTo(proj[idx[k]][0], proj[idx[k]][1]);
+    }
+    facePath.close();
+
+    // vẽ nền
+    facePaint.setColor(...);
+    facePaint.setAlpha(alpha);
+    canvas.drawPath(facePath, facePaint);
+
+    // vẽ viền mờ cũ (nếu có)
+    edgePaint.setAlpha(alpha);
+    canvas.drawPath(facePath, edgePaint);
+
+    // 4. vẽ viền neon — chỉ mặt hướng ra trước
+    if (faceZ[f] > 0) {
+        faceNeonPaint.setAlpha(alpha);
+        canvas.drawPath(facePath, faceNeonPaint);
+    }
+
+    // vẽ chữ thơ
+    if (faceZ[f] > 0) {
+        drawPoemOnFace(canvas, proj, idx, f);
+    }
+}
+```
+
+Điểm cần lưu ý (tôi không chắc)
+
+· Viền neon từng mặt là viền tĩnh — không chạy dọc chu vi mặt. Muốn chạy phải dùng PathMeasure + getSegment() cho từng mặt, phức tạp hơn và tốn CPU đáng kể vì nhân với 6 mặt.
+· Màu #00FFFF có thể trùng màu với dải sáng conic viền ngoài (nếu có) — tôi không chắc đây là thẩm mỹ tốt trên mọi màn hình.
+· Thứ tự vẽ quan trọng: neon phải vẽ sau nền và viền mờ thì mới nổi lên trên.
+· Tôi không chắc setStrokeJoin(ROUND) + setStrokeCap(ROUND) có đủ để làm viền mượt ở mọi góc bo của hình chiếu 3D — cần test thực tế.
+
+---
+
+🎯 Tóm 1 câu
+
+Cách làm = 1 Paint.Style.STROKE mới (faceNeonPaint) setup màu + độ dày + join/cap trong init(), rồi chèn 1 lệnh canvas.drawPath(facePath, faceNeonPaint) ngay sau khi vẽ viền mờ cũ trong vòng lặp 6 mặt, bọc trong if (faceZ[f] > 0) để chỉ vẽ mặt hướng ra trước — vẽ chồng lên viền cũ chứ không thay thế.

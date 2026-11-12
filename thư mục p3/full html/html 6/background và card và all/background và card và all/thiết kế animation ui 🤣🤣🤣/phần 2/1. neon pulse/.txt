@@ -1,0 +1,76 @@
+Neon Pulse — Tổng quan chung
+
+Cấu tạo 3 phần
+
+Phần Vai trò
+HTML 1 thẻ <div> chứa chữ
+CSS Viền + màu + hiệu ứng phát sáng nhấp nháy
+JS Không cần
+
+Luồng hoạt động
+
+```
+color → currentColor → viền + bóng lấy màu theo
+   → @keyframes pulse đổi độ nhòe yếu ↔ mạnh
+   → animation lặp 2s
+```
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    min-height: 100vh;
+    background: #05060a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+  }
+
+  .neon {
+    font-size: 1.8rem;
+    font-weight: 800;
+    padding: 16px 40px;
+    border-radius: 14px;
+    border: 2px solid currentColor;
+    color: #22d3ee;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow:
+        0 0 5px  currentColor,
+        0 0 15px currentColor,
+        inset 0 0 5px currentColor;
+      text-shadow: 0 0 5px currentColor;
+    }
+    50% {
+      box-shadow:
+        0 0 20px currentColor,
+        0 0 45px currentColor,
+        inset 0 0 20px currentColor;
+      text-shadow: 0 0 15px currentColor;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="neon">NEON</div>
+
+</body>
+</html>
+```
+
+---
+
+🎯 Tóm 1 câu
+
+Neon Pulse = 1 thẻ div + CSS dùng color làm nguồn cho currentColor, rồi box-shadow nhiều lớp (kèm inset) + text-shadow tỏa sáng, và @keyframes pulse đổi độ nhòe từ yếu ↔ mạnh theo chu kỳ 2s để tạo viền neon nhấp nháy như đang thở — không cần JavaScript.

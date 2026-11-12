@@ -1,0 +1,9 @@
+❌ NÚT XẤU:                       ✅ NÚT TỐT:
+┌──────────────┐                 ┌──────────────┐
+│  Gửi đi      │                 │   Gửi đi     │
+└──────────────┘                 └──────────────┘
+- Không có hover                 - Hover: sáng lên
+- Không có focus                 - Focus: có viền
+- Không có disabled              - Disabled: mờ đi
+- Không có loading               - Loading: có spinner
+- Bấm không phản hồi             - Bấm: nhún nhẹ

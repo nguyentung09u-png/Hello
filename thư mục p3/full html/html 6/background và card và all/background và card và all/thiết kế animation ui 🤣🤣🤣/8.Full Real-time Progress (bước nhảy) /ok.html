@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-time Progress — Bước nhảy</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1rem;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.15), transparent 60%),
+      #05070f;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .stage {
+    width: min(560px, 92vw);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* ===== THANH PROGRESS ===== */
+  .progress {
+    position: relative;
+    width: 100%;
+    height: 26px;
+    border-radius: 999px;
+    background: #0a0e1a;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    overflow: hidden;
+    box-shadow:
+      0 0 25px -8px rgba(168, 85, 247, 0.7),
+      inset 0 0 12px -4px rgba(0, 0, 0, 0.8);
+  }
+
+  .progress-fill {
+    position: relative;
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.25) 0px,
+        rgba(255, 255, 255, 0.25) 10px,
+        transparent 10px,
+        transparent 20px
+      );
+    background-blend-mode: overlay;
+    box-shadow:
+      0 0 20px rgba(168, 85, 247, 0.85),
+      0 0 40px rgba(236, 72, 153, 0.55);
+    transition: width 0.4s cubic-bezier(0.4, 0.2, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .progress-fill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.18) 0px,
+      rgba(255, 255, 255, 0.18) 6px,
+      transparent 6px,
+      transparent 16px
+    );
+    animation: stripeMove 1.2s linear infinite;
+  }
+
+  @keyframes stripeMove {
+    to { background-position: 40px 0; }
+  }
+
+  .progress-fill::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 14px 4px #fff,
+      0 0 28px 8px rgba(192, 132, 252, 0.9),
+      0 0 50px 14px rgba(168, 85, 247, 0.6);
+    animation: headPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes headPulse {
+    0%, 100% { transform: scale(0.85); opacity: 0.85; }
+    50%      { transform: scale(1.15); opacity: 1; }
+  }
+
+  /* ===== % ===== */
+  .percent {
+    text-align: center;
+    font-family: 'Consolas', monospace;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #22d3ee;
+    text-shadow: 0 0 14px rgba(34, 211, 238, 0.9);
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill::before,
+    .progress-fill::after {
+      animation-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="progress">
+      <div class="progress-fill" id="fill"></div>
+    </div>
+    <div class="percent" id="percent">0%</div>
+  </div>
+
+<script>
+  const fill    = document.getElementById('fill');
+  const percent = document.getElementById('percent');
+
+  /* Các mốc % cần nhảy tới */
+  const STEPS = [5, 10, 30, 50, 70, 80, 90, 100];
+  const STEP_DELAY = 700;   // mỗi mốc cách nhau 0.7 giây
+  const END_PAUSE  = 1500;  // dừng ở 100% rồi reset sau 1.5 giây
+
+  let index = 0;
+
+  function nextStep() {
+    const value = STEPS[index];
+
+    fill.style.width = value + '%';
+    percent.textContent = value + '%';
+
+    index++;
+
+    if (index < STEPS.length) {
+      // Chưa hết dãy → chờ rồi nhảy mốc kế
+      setTimeout(nextStep, STEP_DELAY);
+    } else {
+      // Đã tới 100% → chờ rồi reset về 0 và chạy lại
+      setTimeout(() => {
+        fill.style.width = '0%';
+        percent.textContent = '0%';
+        index = 0;
+        setTimeout(nextStep, 400);
+      }, END_PAUSE);
+    }
+  }
+
+  /* Bắt đầu sau 300ms */
+  setTimeout(nextStep, 300);
+</script>
+
+</body>
+</html>

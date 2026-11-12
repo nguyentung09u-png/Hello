@@ -1,0 +1,210 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 1 <div class="panel"> chứa header (tay cầm kéo) + body (nội dung).
+2. CSS hình dáng — position: fixed + border-radius + box-shadow + overflow: hidden.
+3. CSS tay cầm — .panel-header có cursor: grab + touch-action: none + user-select: none.
+4. JS kéo — Pointer Events gắn chỉ vào header (pointerdown/move/up), setPointerCapture, THRESHOLD phân biệt click/drag, clamp viewport, transform: translate().
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· position: fixed neo vào viewport — không cuộn theo trang.
+· transform: translate() di chuyển không reflow — mượt hơn left/top.
+· Chỉ gắn sự kiện lên header — không đụng vào body → card/nút bên trong vẫn click được.
+· setPointerCapture giữ sự kiện khi con trỏ ra ngoài header.
+· clamp kẹp vị trí trong [0, W-w] × [0, H-h].
+· touch-action: none trên header — kéo mobile không bị cuộn trang.
+
+Tôi không chắc:
+
+· Ngưỡng THRESHOLD = 6px có phù hợp trên mobile — có thể cần 8–10px.
+· Bạn muốn lưu vị trí sau reload không — code dưới không lưu, có thể thêm.
+
+---
+
+Code chung chung
+
+```html
+<div class="panel" id="panel">
+  <div class="panel-header" id="panelHeader">
+    <span>Tiêu đề panel</span>
+    <button class="close-btn" type="button" aria-label="Đóng">✕</button>
+  </div>
+  <div class="panel-body">
+    <p>Nội dung panel…</p>
+    <button type="button">Nút trong body vẫn click được</button>
+  </div>
+</div>
+```
+
+```css
+/* ===== Khung panel ===== */
+.panel {
+  position: fixed;
+  left: 0; top: 0;                 /* JS set bằng transform */
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: #0f1729;
+  color: #e8e0ff;
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 40px rgba(16,185,129,.12);
+  overflow: hidden;
+  z-index: 9999;
+  will-change: transform;
+}
+
+/* ===== Header — tay cầm kéo ===== */
+.panel-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: grab;
+  touch-action: none;              /* chặn scroll khi kéo trên mobile */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.panel.dragging .panel-header { cursor: grabbing; }
+
+.panel-header .close-btn {
+  margin-left: auto;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: grid; place-items: center;
+}
+
+/* ===== Body — nội dung, không phải tay cầm ===== */
+.panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px;
+  font-size: 13.5px;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+```
+
+```js
+(function () {
+  const panel  = document.getElementById('panel');
+  const header = document.getElementById('panelHeader');
+  const THRESHOLD = 6;
+
+  let panelX = 0, panelY = 0;
+
+  const clamp = (v, min, max) => v < min ? min : (v > max ? max : v);
+
+  function setPanelPos(x, y) {
+    const w = panel.offsetWidth  || 300;
+    const h = panel.offsetHeight || 200;
+    panelX = clamp(x, 0, window.innerWidth  - w);
+    panelY = clamp(y, 0, window.innerHeight - h);
+    panel.style.transform = `translate(${panelX}px, ${panelY}px)`;
+  }
+
+  // Vị trí ban đầu: góc dưới-phải, cách mép 20px
+  function initPos() {
+    setPanelPos(
+      window.innerWidth  - panel.offsetWidth  - 20,
+      window.innerHeight - panel.offsetHeight - 20
+    );
+  }
+
+  // Drag state
+  let dragging = false, pointerId = null, moved = false;
+  let startX = 0, startY = 0, baseX = 0, baseY = 0;
+
+  header.addEventListener('pointerdown', (e) => {
+    // Bỏ qua khi click vào nút bên trong header
+    if (e.target.closest('button')) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+    dragging = true; moved = false;
+    pointerId = e.pointerId;
+    startX = e.clientX; startY = e.clientY;
+    baseX = panelX; baseY = panelY;
+    try { header.setPointerCapture(pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+
+  header.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!moved && (Math.abs(dx) > THRESHOLD || Math.abs(dy) > THRESHOLD)) {
+      moved = true;
+      panel.classList.add('dragging');
+    }
+    if (moved) setPanelPos(baseX + dx, baseY + dy);
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    if (e && e.pointerId !== pointerId) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+    try { header.releasePointerCapture(pointerId); } catch (err) {}
+    pointerId = null;
+  }
+
+  header.addEventListener('pointerup', endDrag);
+  header.addEventListener('pointercancel', endDrag);
+  header.addEventListener('lostpointercapture', endDrag);
+
+  // Resize → clamp lại
+  window.addEventListener('resize', () => setPanelPos(panelX, panelY));
+
+  // Khởi động
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPos);
+  } else {
+    initPos();
+  }
+  window.addEventListener('load', initPos);
+})();
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Kéo từ toàn bộ panel, không chỉ header Đổi header.addEventListener → panel.addEventListener + bỏ qua button/input/a
+Lưu vị trí sau reload Thêm localStorage.setItem('panel-pos', ...) trong endDrag
+Ngưỡng click/drag khác THRESHOLD = 6 → 10 cho mobile
+Đổi kích thước width: 300px / max-height: 60vh
+Đổi vị trí ban đầu Sửa initPos()
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: position: fixed neo viewport; transform: translate() di chuyển không reflow; Pointer Events + setPointerCapture là chuẩn W3C; touch-action: none bắt buộc cho kéo mobile.
+· Tôi không chắc THRESHOLD = 6px phù hợp trên mobile — có thể cần tăng lên 8–10px.
+· Tôi không chắc bạn muốn kéo từ header hay toàn panel — code trên chọn header để không chặn click vào nút bên trong.
+
+🎯 Tóm 1 câu: Draggable Panel = <div class="panel"> + .panel-header làm tay cầm (cursor grab + touch-action none), position: fixed + border-radius + shadow, kèm ~40 dòng JS Pointer Events (pointerdown/move/up + setPointerCapture + THRESHOLD + clamp viewport + transform: translate()) — chỉ kéo từ header nên nút bên trong vẫn click được.

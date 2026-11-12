@@ -1,0 +1,133 @@
+Cách làm Button Neon + Reveal
+
+Tổng quan các bước
+
+1. Khung — thẻ <a> (để chuyển link) + display:inline-flex + padding + border-radius:100px.
+2. Màu & viền — nền tối trong suốt + viền neon xanh.
+3. Glow — box-shadow nhiều lớp (ngoài + inset) để button phát sáng.
+4. Tương tác — :hover nâng lên + tăng glow; :active hạ về.
+5. Chữ — màu trắng + text-shadow nhiều lớp xanh loe dần (hiệu ứng neon).
+6. Tách chữ — JS chia mỗi ký tự vào <span class="ch">.
+7. Reveal — mỗi chữ ẩn bằng opacity:0 + translateY, chạy keyframe hiện ra.
+8. Delay — JS gắn animation-delay tăng dần theo vị trí ký tự.
+9. Nhấp nháy — thêm keyframe thứ 2 cho text-shadow bật/tắt.
+10. Replay — khi chuyển tab, reset animation để chạy lại.
+11. A11y — tắt animation nếu người dùng bật chế độ giảm chuyển động.
+
+Code chung chung
+
+```html
+<a class="action-btn"
+   href="https://tung010171.github.io/tunghaha/"
+   target="_blank"
+   rel="noopener"
+   data-text="Nhấn vào đây"></a>
+```
+
+```css
+.action-btn{
+  display:inline-flex;
+  align-items:center;
+  padding:14px 32px;
+  font:inherit;font-size:15px;font-weight:700;
+  letter-spacing:.02em;
+  text-decoration:none;
+  border-radius:100px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+
+  background:rgba(10,20,40,.35);
+  border:1px solid rgba(56,189,248,.5);
+
+  box-shadow:
+    0 0 12px rgba(56,189,248,.5),
+    0 0 30px rgba(56,189,248,.25),
+    inset 0 0 12px rgba(56,189,248,.15);
+
+  transition:transform .2s ease, box-shadow .25s ease;
+}
+.action-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    0 0 18px rgba(56,189,248,.75),
+    0 0 44px rgba(56,189,248,.4),
+    inset 0 0 16px rgba(56,189,248,.25);
+}
+.action-btn:active{ transform:translateY(0); }
+
+.action-btn .ch{
+  display:inline-block;
+  color:#fff;
+  text-shadow:
+    0 0 6px  #fff,
+    0 0 14px #38bdf8,
+    0 0 28px #38bdf8,
+    0 0 50px #0ea5e9;
+
+  opacity:0;
+  transform:translateY(60%);
+  animation:
+    chReveal .5s cubic-bezier(.2,.9,.3,1.4) forwards,
+    neonFlicker 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes chReveal{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@keyframes neonFlicker{
+  0%, 18%, 22%, 100%{
+    text-shadow:
+      0 0 6px  #fff,
+      0 0 14px #38bdf8,
+      0 0 28px #38bdf8,
+      0 0 50px #0ea5e9;
+  }
+  20%{ text-shadow:none; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .action-btn .ch{
+    animation:chReveal .01s forwards;
+    opacity:1; transform:none;
+  }
+}
+```
+
+```js
+/* Tách chữ + gắn delay */
+document.querySelectorAll('.action-btn').forEach(btn => {
+  const text = btn.dataset.text || '';
+  btn.innerHTML = '';
+  [...text].forEach((c, i) => {
+    const span = document.createElement('span');
+    span.className = 'ch';
+    span.textContent = c === ' ' ? '\u00A0' : c;
+    span.style.animationDelay = (0.05 * i) + 's, 0s';
+    btn.appendChild(span);
+  });
+});
+
+/* Replay khi chuyển tab */
+function replayButton(panel){
+  panel.querySelectorAll('.action-btn').forEach(btn => {
+    btn.querySelectorAll('.ch').forEach(ch => {
+      const oldDelay = ch.style.animationDelay;
+      ch.style.animation = 'none';
+      void ch.offsetWidth;
+      ch.style.animation = '';
+      ch.style.animationDelay = oldDelay;
+    });
+  });
+}
+```
+
+Lưu ý
+
+· Không chắc hiệu ứng hiển thị giống hệt nhau trên mọi trình duyệt — text-shadow nhiều lớp có thể render khác nhau chút ít.
+· Neon nổi rõ nhất khi nền button tối và trong suốt. Nếu đổi sang nền gradient đậm, neon sẽ mờ đi.
+· animation-delay dùng 2 giá trị vì có 2 animation (reveal theo vị trí, flicker bắt đầu ngay).
+
+---
+
+Tóm 1 câu: Dựng thẻ <a> khung pill nền tối + viền neon + glow; JS tách chữ vào <span> gắn delay tăng dần; mỗi chữ ẩn rồi reveal bằng keyframe + nhấp nháy neon song song; replay khi chuyển tab.

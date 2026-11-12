@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Daily Task Tracker</title>
+<style>
+  :root {
+    --bg:        #0a0e1a;
+    --bg-2:      #111827;
+    --card:      #1a1f36;
+    --border:    #2a3352;
+    --text:      #e6e9f0;
+    --text-dim:  #8892b0;
+    --blue:      #39a0ff;
+    --blue-glow: rgba(57, 160, 255, 0.35);
+    --red:       #ff4d6d;
+    --red-glow:  rgba(255, 77, 109, 0.35);
+    --cyan:      #00ffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at top, #131a33 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 720px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px var(--blue-glow);
+  }
+
+  .task-card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.25s ease;
+    animation: slideIn 0.35s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .task-card.active {
+    border-color: var(--blue);
+    box-shadow: 0 0 24px var(--blue-glow);
+  }
+
+  .task-card.done {
+    border-left: 5px solid var(--blue);
+    opacity: 0.95;
+  }
+
+  .task-card.skip {
+    border-left: 5px solid var(--red);
+    opacity: 0.95;
+  }
+
+  .task-index {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    min-width: 28px;
+  }
+
+  .task-name {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-no {
+    background: rgba(255, 77, 109, 0.12);
+    color: var(--red);
+    border: 1px solid rgba(255, 77, 109, 0.35);
+  }
+
+  .btn-no:hover {
+    background: rgba(255, 77, 109, 0.22);
+    box-shadow: 0 0 16px var(--red-glow);
+    transform: translateY(-1px);
+  }
+
+  .btn-yes {
+    background: rgba(57, 160, 255, 0.12);
+    color: var(--blue);
+    border: 1px solid rgba(57, 160, 255, 0.35);
+  }
+
+  .btn-yes:hover {
+    background: rgba(57, 160, 255, 0.22);
+    box-shadow: 0 0 16px var(--blue-glow);
+    transform: translateY(-1px);
+  }
+
+  .btn:active { transform: translateY(0) scale(0.97); }
+
+  .result {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .result.done { color: var(--blue); }
+  .result.skip { color: var(--red); }
+
+  /* ===== CARD HÍT ĐẤT ===== */
+  .pushup-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .pushup-body { width: 100%; }
+
+  .pushup-title {
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .pushup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .pushup-slot {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+  }
+
+  .pushup-slot.done {
+    border-color: var(--blue);
+    box-shadow: 0 0 12px var(--blue-glow);
+  }
+
+  .pushup-slot.skip {
+    border-color: var(--red);
+    opacity: 0.85;
+  }
+
+  .slot-name {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .pushup-status {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .pushup-status.full {
+    color: var(--blue);
+    text-shadow: 0 0 10px var(--blue-glow);
+    font-weight: 800;
+  }
+
+  /* ===== OUTPUT ===== */
+  #output {
+    width: 100%;
+    max-width: 720px;
+    margin-top: 24px;
+    display: none;
+  }
+
+  #output.show { display: block; animation: slideIn 0.5s ease; }
+
+  .output-title {
+    color: var(--blue);
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 12px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  pre.box-table {
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .box-border { color: #3a4570; }
+  .box-mark-ok { color: var(--blue); font-weight: 700; }
+  .box-mark-no { color: var(--red);  font-weight: 700; }
+  .box-head { color: var(--cyan); font-weight: 700; }
+
+  .summary {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--blue);
+  }
+
+  .summary .score { color: var(--cyan); }
+
+  .reset-btn {
+    display: block;
+    margin: 20px auto 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+</style>
+</head>
+<body>
+
+<h1>🚀 DAILY TASK TRACKER</h1>
+<p class="subtitle">Trả lời từng câu — Yes hoặc No</p>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progress"></div>
+</div>
+
+<div id="list"></div>
+
+<!-- ===== CARD HÍT ĐẤT ===== -->
+<div class="task-card pushup-card" id="card-pushup">
+  <div class="pushup-body">
+    <div class="pushup-title">💪 Hít đất — 20 cái / buổi</div>
+    <div class="pushup-grid">
+      <div class="pushup-slot" data-slot="0">
+        <span class="slot-name">🌅 Sáng</span>
+        <div class="btn-group">
+          <button class="btn btn-no"  onclick="pushup(0, false)">❌</button>
+          <button class="btn btn-yes" onclick="pushup(0, true)">✔</button>
+        </div>
+      </div>
+      <div class="pushup-slot" data-slot="1">
+        <span class="slot-name">☀️ Trưa</span>
+        <div class="btn-group">
+          <button class="btn btn-no"  onclick="pushup(1, false)">❌</button>
+          <button class="btn btn-yes" onclick="pushup(1, true)">✔</button>
+        </div>
+      </div>
+      <div class="pushup-slot" data-slot="2">
+        <span class="slot-name">🌇 Chiều</span>
+        <div class="btn-group">
+          <button class="btn btn-no"  onclick="pushup(2, false)">❌</button>
+          <button class="btn btn-yes" onclick="pushup(2, true)">✔</button>
+        </div>
+      </div>
+      <div class="pushup-slot" data-slot="3">
+        <span class="slot-name">🌙 Tối</span>
+        <div class="btn-group">
+          <button class="btn btn-no"  onclick="pushup(3, false)">❌</button>
+          <button class="btn btn-yes" onclick="pushup(3, true)">✔</button>
+        </div>
+      </div>
+    </div>
+    <div class="pushup-status" id="pushup-status">0 / 4 buổi</div>
+  </div>
+</div>
+
+<div id="output">
+  <p class="output-title">📊 KẾT QUẢ HÔM NAY</p>
+  <pre class="box-table" id="table"></pre>
+  <p class="summary" id="summary"></p>
+  <button class="reset-btn" onclick="location.reload()">↻ Làm lại</button>
+</div>
+
+<script>
+const TASKS = [
+  "Chơi game",
+  "Đăng 10 video trên TikTok",
+  "Nhắn đủ tin nhắn với gái và tạo sự thiếu thốn cho nó",
+  "Nhắn tin (xin 3 id TikTok)",
+  "Học code DeepSeek - Gemini",
+  "Nghiên cứu những gì mới mẻ",
+  "Sáng quét nhà phụ mẹ",
+];
+
+const answers = new Array(TASKS.length).fill(null);
+const pushupAnswers = [null, null, null, null];
+
+const listEl = document.getElementById("list");
+const progressEl = document.getElementById("progress");
+
+// ============ RENDER TASK CARDS ============
+TASKS.forEach((name, i) => {
+  const card = document.createElement("div");
+  card.className = "task-card" + (i === 0 ? " active" : "");
+  card.id = "card-" + i;
+  card.innerHTML = `
+    <span class="task-index">${String(i + 1).padStart(2, "0")}</span>
+    <span class="task-name">${name}</span>
+    <div class="btn-group">
+      <button class="btn btn-no"  onclick="answer(${i}, false)">❌ No</button>
+      <button class="btn btn-yes" onclick="answer(${i}, true)">✔ Yes</button>
+    </div>
+  `;
+  listEl.appendChild(card);
+});
+
+// ============ HANDLE ANSWER ============
+function answer(i, done) {
+  answers[i] = done;
+
+  const card = document.getElementById("card-" + i);
+  card.classList.remove("active");
+  card.classList.add(done ? "done" : "skip");
+  card.querySelector(".btn-group").innerHTML =
+    `<span class="result ${done ? "done" : "skip"}">${done ? "✔" : "❌"}</span>`;
+
+  if (i + 1 < TASKS.length) {
+    document.getElementById("card-" + (i + 1)).classList.add("active");
+  } else {
+    document.getElementById("card-pushup").classList.add("active");
+  }
+
+  updateProgress();
+  checkFinish();
+}
+
+// ============ HANDLE PUSHUP ============
+function pushup(slot, done) {
+  pushupAnswers[slot] = done;
+
+  const el = document.querySelector(`.pushup-slot[data-slot="${slot}"]`);
+  el.classList.remove("done", "skip");
+  el.classList.add(done ? "done" : "skip");
+  el.querySelector(".btn-group").innerHTML =
+    `<span class="result ${done ? "done" : "skip"}">${done ? "✔" : "❌"}</span>`;
+
+  updatePushupStatus();
+  updateProgress();
+  checkFinish();
+}
+
+function updatePushupStatus() {
+  const done = pushupAnswers.filter(a => a === true).length;
+  const st = document.getElementById("pushup-status");
+  st.textContent = `${done} / 4 buổi`;
+  st.classList.toggle("full", done === 4);
+}
+
+// ============ PROGRESS ============
+function updateProgress() {
+  const totalItems = TASKS.length + 4;
+  const doneItems =
+    answers.filter(a => a !== null).length +
+    pushupAnswers.filter(a => a !== null).length;
+  progressEl.style.width = (doneItems / totalItems * 100) + "%";
+}
+
+// ============ CHECK FINISH ============
+function checkFinish() {
+  const allTasksDone = answers.every(a => a !== null);
+  const allPushupDone = pushupAnswers.every(a => a !== null);
+  if (allTasksDone && allPushupDone) {
+    document.getElementById("card-pushup").classList.remove("active");
+    setTimeout(showResult, 350);
+  }
+}
+
+// ============ BOX-DRAWING TABLE ============
+function buildBoxTable(rows, headers) {
+  const widths = headers.map((h, i) =>
+    Math.max(
+      [...h].length,
+      ...rows.map(r => [...String(r[i])].length)
+    )
+  );
+
+  const pad = (s, w) => {
+    const len = [...s].length;
+    return s + " ".repeat(Math.max(0, w - len));
+  };
+
+  const top    = "┌" + widths.map(w => "─".repeat(w + 2)).join("┬") + "┐";
+  const mid    = "├" + widths.map(w => "─".repeat(w + 2)).join("┼") + "┤";
+  const bottom = "└" + widths.map(w => "─".repeat(w + 2)).join("┴") + "┘";
+
+  const rowLine = r => "│ " + r.map((c, i) => pad(String(c), widths[i])).join(" │ ") + " │";
+
+  const lines = [top, rowLine(headers), mid];
+  rows.forEach(r => lines.push(rowLine(r)));
+  lines.push(bottom);
+  return lines;
+}
+
+// ============ SHOW RESULT ============
+function showResult() {
+  const headers = ["#", "mark", "task_name", "done"];
+  const rows = TASKS.map((name, i) => [
+    i + 1,
+    answers[i] ? "✔" : "❌",
+    name,
+    answers[i] ? 1 : 0,
+  ]);
+
+  // Thêm dòng hít đất
+  const pushupDone = pushupAnswers.filter(a => a === true).length === 4;
+  rows.push([8, pushupDone ? "✔" : "❌", "Hít đất 4 buổi × 20 cái", pushupDone ? 1 : 0]);
+
+  const lines = buildBoxTable(rows, headers);
+  const pre = document.getElementById("table");
+
+  pre.innerHTML = lines.map((line, idx) => {
+    if (idx === 0 || idx === lines.length - 1 || idx === 2) {
+      return `<span class="box-border">${escapeHtml(line)}</span>`;
+    }
+    if (idx === 1) {
+      return `<span class="box-head">${escapeHtml(line)}</span>`;
+    }
+    return escapeHtml(line)
+      .replace(/✔/g, `<span class="box-mark-ok">✔</span>`)
+      .replace(/❌/g, `<span class="box-mark-no">❌</span>`);
+  }).join("\n");
+
+  const total = rows.filter(r => r[3] === 1).length;
+  document.getElementById("summary").innerHTML =
+    `🏆 Hoàn thành: <span class="score">${total}/${rows.length}</span>`;
+
+  document.getElementById("output").classList.add("show");
+  document.getElementById("output").scrollIntoView({ behavior: "smooth" });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+</script>
+
+</body>
+</html>

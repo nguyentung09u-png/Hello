@@ -1,0 +1,4 @@
+1. nó giúp lướt lên lướt xuống scroll mượt
+- tối ưu 60fps
+- tốc độ lướt lên xuống
+- giúp fix lag

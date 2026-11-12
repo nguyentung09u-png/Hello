@@ -1,0 +1,294 @@
+🔍 CAMERA ZOOM — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Camera zoom = 1 biến zoom nhân vào transform, gồm 5 bước:
+
+```
+BƯỚC 1: STATE     tạo object cam {zoom, x, y, target, ...}
+BƯỚC 2: ÁP        ctx.translate() + ctx.scale() trong render
+BƯỚC 3: MƯỢT      updateCamera() lerp mỗi frame
+BƯỚC 4: ĐỔI TOẠ ĐỘ screenToWorld() cho click chuột
+BƯỚC 5: SỰ KIỆN   wheel, phím, touch, UI → gọi zoomAt()
+```
+
+Điểm mấu chốt: hàm vẽ không cần biết về zoom — chúng vẽ toạ độ world như bình thường. Chỉ 1 chỗ áp camera, mọi thứ tự động.
+
+---
+
+🔍 Năm bước chi tiết
+
+Bước 1 — Tạo object cam
+
+```js
+const cam = {
+  x: 0, y: 0,              // pan
+  zoom: 1,                 // hiện tại
+  targetZoom: 1,           // đích (để mượt)
+  targetX: 0, targetY: 0,
+  minZoom: 0.45,
+  maxZoom: 2.8,
+  smooth: 0.18
+};
+```
+
+→ 2 cặp zoom/targetZoom và x/targetX để tách hiển thị khỏi đích.
+
+Bước 2 — Áp camera trong render()
+
+```js
+function render(t) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(cam.x, cam.y);       // pan
+  ctx.scale(cam.zoom, cam.zoom);     // zoom
+
+  drawSky(); drawGround(); drawEntities(t);
+
+  ctx.restore();
+}
+```
+
+→ Chỉ 2 dòng thêm vào, mọi thứ sau đó tự động bị biến đổi.
+
+Bước 3 — Lerp mỗi frame
+
+```js
+function updateCamera(dt) {
+  const k = 1 - Math.pow(1 - cam.smooth, dt * 60);
+  cam.zoom += (cam.targetZoom - cam.zoom) * k;
+  cam.x    += (cam.targetX    - cam.x)    * k;
+  cam.y    += (cam.targetY    - cam.y)    * k;
+}
+```
+
+→ Mỗi frame tiến 18% về đích → mượt trong ~10 frame.
+
+Bước 4 — Đổi toạ độ click
+
+```js
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - cam.x) / cam.zoom,
+    y: (sy - cam.y) / cam.zoom
+  };
+}
+```
+
+→ Bắt buộc dùng trong pointerPos() để click-to-move chính xác khi zoom.
+
+Bước 5 — zoomAt() + 4 kênh sự kiện
+
+```js
+function zoomAt(sx, sy, factor) {
+  const oldZ = cam.targetZoom;
+  const newZ = clamp(oldZ * factor, cam.minZoom, cam.maxZoom);
+  if (newZ === oldZ) return;
+
+  const wx = (sx - cam.targetX) / oldZ;
+  const wy = (sy - cam.targetY) / oldZ;
+
+  cam.targetZoom = newZ;
+  cam.targetX = sx - wx * newZ;
+  cam.targetY = sy - wy * newZ;
+}
+```
+
+Sau đó gắn 4 kênh: wheel, phím +/-/0, pinch 2 ngón, 3 nút UI.
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// 1. STATE
+// ============================
+const cam = {
+  x: 0, y: 0,
+  zoom: 1,
+  targetZoom: 1,
+  targetX: 0, targetY: 0,
+  minZoom: 0.45,
+  maxZoom: 2.8,
+  smooth: 0.18
+};
+
+const clamp = (v,a,b) => v<a?a : v>b?b : v;
+
+// ============================
+// 2. ÁP CAMERA KHI VẼ
+// ============================
+function render(t) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  if (shake > 0.2) ctx.translate(rand(-shake,shake), rand(-shake,shake));
+
+  ctx.translate(cam.x, cam.y);
+  ctx.scale(cam.zoom, cam.zoom);
+
+  drawSky(); drawSun(); drawGround();
+  drawEntities(t);
+  drawParticles(); drawFloaters(); drawMarkers();
+
+  ctx.restore();
+}
+
+// ============================
+// 3. UPDATE CAMERA — lerp mỗi frame
+// ============================
+function updateCamera(dt) {
+  const k = 1 - Math.pow(1 - cam.smooth, dt * 60);
+  cam.zoom += (cam.targetZoom - cam.zoom) * k;
+  cam.x    += (cam.targetX    - cam.x)    * k;
+  cam.y    += (cam.targetY    - cam.y)    * k;
+}
+
+// ============================
+// 4. ĐỔI TOẠ ĐỘ MÀN HÌNH → WORLD
+// ============================
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - cam.x) / cam.zoom,
+    y: (sy - cam.y) / cam.zoom
+  };
+}
+
+function pointerPos(e) {
+  const r = cv.getBoundingClientRect();
+  return screenToWorld(e.clientX - r.left, e.clientY - r.top);
+}
+
+// ============================
+// 5. ZOOM TẠI 1 ĐIỂM
+// ============================
+function zoomAt(sx, sy, factor) {
+  const oldZ = cam.targetZoom;
+  const newZ = clamp(oldZ * factor, cam.minZoom, cam.maxZoom);
+  if (newZ === oldZ) return;
+
+  const wx = (sx - cam.targetX) / oldZ;
+  const wy = (sy - cam.targetY) / oldZ;
+
+  cam.targetZoom = newZ;
+  cam.targetX = sx - wx * newZ;
+  cam.targetY = sy - wy * newZ;
+}
+
+function resetZoom() {
+  cam.targetZoom = 1;
+  cam.targetX = 0;
+  cam.targetY = 0;
+}
+
+// ============================
+// 6. BỐN KÊNH SỰ KIỆN
+// ============================
+
+// 6a. Con lăn chuột
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = cv.getBoundingClientRect();
+  const factor = e.deltaY < 0 ? 1.12 : 1/1.12;
+  zoomAt(e.clientX - r.left, e.clientY - r.top, factor);
+}, { passive: false });
+
+// 6b. Phím tắt
+document.addEventListener('keydown', e => {
+  if (e.code === 'Equal')  { zoomAt(W/2, H/2, 1.15);  e.preventDefault(); }
+  if (e.code === 'Minus')  { zoomAt(W/2, H/2, 1/1.15); e.preventDefault(); }
+  if (e.code === 'Digit0') { resetZoom();             e.preventDefault(); }
+});
+
+// 6c. Pinch 2 ngón (mobile)
+let pinchDist = 0;
+cv.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchDist = Math.hypot(dx, dy);
+  }
+}, { passive: true });
+
+cv.addEventListener('touchmove', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const d = Math.hypot(dx, dy);
+    if (pinchDist === 0) { pinchDist = d; return; }
+
+    const factor = d / pinchDist;
+    const r = cv.getBoundingClientRect();
+    const cx = (e.touches[0].clientX + e.touches[1].clientX)/2 - r.left;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY)/2 - r.top;
+    zoomAt(cx, cy, factor);
+    pinchDist = d;
+  }
+}, { passive: false });
+
+cv.addEventListener('touchend', () => { pinchDist = 0; });
+
+// 6d. Nút UI
+document.getElementById('zoomIn').onclick    = () => zoomAt(W/2, H/2, 1.2);
+document.getElementById('zoomOut').onclick   = () => zoomAt(W/2, H/2, 1/1.2);
+document.getElementById('zoomReset').onclick = resetZoom;
+
+// ============================
+// 7. GỌI TRONG VÒNG LẶP
+// ============================
+function loop(now) {
+  const dt = Math.min((now - last)/1000, 0.05);
+  last = now;
+
+  update(dt);           // updateCamera(dt) gọi bên trong
+  render(now);
+  requestAnimationFrame(loop);
+}
+
+function update(dt) {
+  updateCamera(dt);     // ← lerp camera mỗi frame
+  // ... logic game ...
+}
+```
+
+```html
+<!-- Nút UI -->
+<div id="zoomControls">
+  <button id="zoomIn">＋</button>
+  <button id="zoomReset">⟲</button>
+  <button id="zoomOut">−</button>
+</div>
+```
+
+---
+
+🎨 Tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+minZoom 0.45 Xa nhất (nhỏ hơn = xa hơn)
+maxZoom 2.8 Gần nhất (lớn hơn = gần hơn)
+smooth 0.18 Mượt (0 = tức thì, 1 = cực chậm)
+factor wheel 1.12 Bước zoom mỗi lần lăn
+factor phím 1.15 Bước zoom phím
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Các con số cụ thể (0.45, 2.8, 0.18) — tôi chọn theo trực giác, không có dữ liệu tối ưu.
+· 1 - Math.pow(1-smooth, dt*60) có phải công thức lerp chuẩn không — tôi cho là phổ biến để đảm bảo khung hình độc lập, nhưng đây là suy luận, không dám khẳng định là duy nhất đúng.
+· Có nên kẹp camera trong biên thế giới khi zoom xa không — tôi chưa làm trong khung này; có thể thấy vùng đen nếu pan ra ngoài.
+· screenToWorld có cần dùng cam (hiện tại) hay cam.target — tôi dùng cam để khớp với những gì đang thấy trên màn hình; dùng target có thể gây lệch nhẹ trong lúc zoom mượt. Tôi không chắc cách nào tốt hơn.
+· Pinch 2 ngón — tôi không chắc đã xử lý hết edge case (3 ngón, ngón nhấc giữa chừng, kết hợp pan...).
+· Có nên giới hạn factor để tránh zoom nhảy quá nhanh không — tôi nghĩ là có, nhưng không làm trong khung này.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: tạo object cam {x, y, zoom, targetZoom, targetX, targetY, minZoom, maxZoom, smooth} + áp ctx.translate(cam.x, cam.y) rồi ctx.scale(cam.zoom, cam.zoom) trong render() + updateCamera() lerp k = 1 - Math.pow(1-smooth, dt*60) mỗi frame + screenToWorld(sx, sy) = ((sx-cam.x)/cam.zoom, (sy-cam.y)/cam.zoom) để đổi toạ độ click + zoomAt(sx, sy, factor) giữ điểm dưới con trỏ cố định bằng cách bù cam.targetX/Y + gắn 4 kênh sự kiện (wheel, phím +/-/0, pinch 2 ngón, 3 nút UI).

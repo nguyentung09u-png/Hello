@@ -1,0 +1,31 @@
+1.khi click vào button
+có cái ô màu gì đó nó lang ra ngoài rộng lắm
+
+nó là :
+Focus ring và Tap highlight
+
+
+bảo gpt xóa
+
+
+
+
+
+2. chống lag
+
+3 bước chống lag (tóm gọn)
+
+# Bước Làm gì Tác dụng
+1 Bật GPU Acceleration Thêm will-change: transform, box-shadow + transform: translateZ(0) + backface-visibility: hidden vào nút Đẩy nút lên layer riêng của GPU → render mượt, không giật
+2 Đổi easing + tăng thời gian transition Đổi sang cubic-bezier(0.22, 1, 0.36, 1) và tăng 0.35s → 0.5s Bỏ hiệu ứng nảy ngược, chuyển động êm và chậm rãi
+3 Lưu tham chiếu nút active Dùng biến activeButton thay vì quét DOM mỗi lần click Xử lý tức thời, không lag khi có nhiều nút
+
+---
+
+Ghi nhớ nhanh
+
+· Bước 1 → máy khỏe hơn (phần cứng)
+· Bước 2 → mắt thấy mượt hơn (thị giác)
+· Bước 3 → code chạy nhanh hơn (thuật toán)
+
+→ Ba bước này độc lập, thiếu 1 trong 3 vẫn có thể lag ở một khía cạnh nào đó.

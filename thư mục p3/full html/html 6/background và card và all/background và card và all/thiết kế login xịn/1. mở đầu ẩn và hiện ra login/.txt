@@ -1,0 +1,28 @@
+Tổng quan cách làm: Đặt phần tử ở trạng thái ban đầu (mờ + dịch xuống dưới), sau đó kích hoạt chuyển đổi sang trạng thái hiển thị (rõ + về vị trí gốc) thông qua một class hoặc keyframes.
+
+Code chung chung:
+
+```html
+<style>
+  .element {
+    opacity: 0;                /* Ban đầu: trong suốt */
+    transform: translateY(20px); /* Ban đầu: đẩy xuống 20px */
+    transition: all 0.5s ease;  /* Chuyển động mượt trong 0.5s */
+  }
+  .element.show {
+    opacity: 1;                /* Kết thúc: rõ */
+    transform: translateY(0);   /* Kết thúc: về vị trí gốc */
+  }
+</style>
+
+<div class="element">Nội dung</div>
+
+<script>
+  // Kích hoạt hiệu ứng (ví dụ sau khi tải trang)
+  setTimeout(() => {
+    document.querySelector('.element').classList.add('show');
+  }, 100);
+</script>
+```
+
+🎯 Tóm 1 câu: Tạo trạng thái ẩn ban đầu (opacity: 0, translateY), sau đó thêm class .show để chuyển đổi sang trạng thái hiển thị (opacity: 1, translateY(0)) kèm transition.

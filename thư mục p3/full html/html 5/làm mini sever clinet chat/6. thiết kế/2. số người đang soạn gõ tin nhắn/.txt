@@ -1,0 +1,145 @@
+Full tổng quan: Dòng "[Số] người đang gõ..." được làm từ gì
+
+Theo code chúng ta đã viết, dòng này gồm 3 thành phần:
+
+---
+
+1. HTML — Được JS tạo động
+
+Không nằm cố định trong HTML. Khi listener onValue('typing') chạy và count > 0, JS tạo:
+
+```js
+const line = document.createElement('div');
+line.className = 'typing-line';
+line.innerHTML = `
+  <span>💬</span>
+  <span>${count} người đang gõ</span>
+  <span class="typing-dots"><span></span><span></span><span></span></span>
+`;
+typingArea.appendChild(line);
+```
+
+Cấu trúc DOM sinh ra:
+
+```html
+<div class="typing-line">
+  <span>💬</span>
+  <span>3 người đang gõ</span>
+  <span class="typing-dots">
+    <span></span><span></span><span></span>
+  </span>
+</div>
+```
+
+---
+
+2. CSS — Style cho 3 phần
+
+a) Khung dòng .typing-area (chứa 1 dòng):
+
+```css
+.typing-area{
+  padding:0 16px 6px 16px;
+  min-height:20px;          /* giữ chỗ, không nhảy layout */
+  display:flex; align-items:center;
+}
+```
+
+b) Dòng .typing-line (chữ + số + dots):
+
+```css
+.typing-line{
+  display:flex; align-items:center; gap:6px;
+  font-size:.78rem; color:var(--text-muted);
+  animation:fadeIn .2s ease-out;   /* xuất hiện mượt */
+}
+```
+
+c) 3 chấm nhảy .typing-dots:
+
+```css
+.typing-dots{
+  display:inline-flex; gap:3px; align-items:center;
+  padding:3px 7px; border-radius:10px;
+  background:#F3F4F6;
+}
+.typing-dots span{
+  width:5px; height:5px; border-radius:50%;
+  background:#9CA3AF;
+  animation:bounce 1.4s infinite;
+}
+.typing-dots span:nth-child(1){ animation-delay:0s; }
+.typing-dots span:nth-child(2){ animation-delay:.2s; }
+.typing-dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes bounce{
+  0%,60%,100%{ transform:translateY(0); opacity:.4; }
+  30%{ transform:translateY(-4px); opacity:1; }
+}
+```
+
+Điểm chính:
+
+· nth-child + animation-delay khác nhau → 3 chấm nhảy lệch nhịp.
+· min-height ở typing-area → dù có hiện hay ẩn, khung không co giãn.
+
+---
+
+3. JS — Logic đếm và hiển thị
+
+```js
+onValue(ref(db, 'typing'), snapshot => {
+  const data = snapshot.val() || {};
+  const count = Object.keys(data).length;   // ← đếm số người đang gõ
+
+  typingArea.innerHTML = '';
+  if (count === 0) return;                  // ← 0 người: ẩn hoàn toàn
+
+  const line = document.createElement('div');
+  line.className = 'typing-line';
+  line.innerHTML = `
+    <span>💬</span>
+    <span>${count} người đang gõ</span>
+    <span class="typing-dots"><span></span><span></span><span></span></span>
+  `;
+  typingArea.appendChild(line);
+});
+```
+
+Điểm chính:
+
+· Object.keys(data).length — đếm tổng entry trong node typing trên Firebase.
+· if (count === 0) return — không ai gõ thì xóa sạch, không hiện gì.
+· ${count} — nội suy số vào chuỗi (không cần if-else cho từng trường hợp).
+
+---
+
+Bảng đối chiếu hiển thị
+
+Số người Điều kiện code Hiển thị
+0 count === 0 → return (ẩn hoàn toàn)
+1 count = 1 💬 1 người đang gõ ● ● ●
+2 count = 2 💬 2 người đang gõ ● ● ●
+3+ count = 3, 4, 5... 💬 N người đang gõ ● ● ●
+
+Lưu ý: Code không phân biệt "1 người" (số ít) vs "nhiều người" (số nhiều) — tiếng Việt không biến đổi danh từ theo số lượng như tiếng Anh (1 person / 2 people), nên chỉ cần ${count} người là đủ cho mọi trường hợp.
+
+---
+
+Luồng dữ liệu
+
+```
+Người dùng A gõ vào ô chat
+      ↓
+set(typing/A, {name, avatar}) trên Firebase
+      ↓
+onValue('typing') trigger ở MỌI client
+      ↓
+count = Object.keys(data).length
+      ↓
+Nếu count > 0 → render "💬 N người đang gõ ● ● ●"
+Nếu count = 0 → xóa sạch, ẩn
+```
+
+---
+
+🎯 Tóm 1 câu: Dòng "[Số] người đang gõ..." gồm JS tạo div.typing-line với 3 span (💬 + ${count} người đang gõ + 3 chấm), CSS dùng flexbox + @keyframes bounce với delay 0/0.2/0.4s cho 3 chấm, và logic Object.keys(data).length đếm số entry trên Firebase — nếu count = 0 thì return để ẩn hoàn toàn.

@@ -1,0 +1,201 @@
+Tổng quan cách làm
+
+4 phần ghép lại:
+
+1. HTML — 1 <button> chứa 1 <svg> inline, có aria-label cho screen reader.
+2. CSS hình dáng — width/height bằng nhau + border-radius: 50% + display: flex căn giữa icon.
+3. CSS nổi — position: fixed + background: linear-gradient + box-shadow 2 lớp + @keyframes pulse.
+4. JS kéo — Pointer Events (pointerdown/move/up), setPointerCapture, THRESHOLD phân biệt click/drag, clamp giới hạn viewport, transform: translate() di chuyển.
+
+Nguyên lý chính (suy luận có căn cứ):
+
+· border-radius: 50% + width = height → hình tròn.
+· position: fixed + z-index cao → luôn nổi.
+· transform: translate() để di chuyển không reflow — mượt hơn left/top.
+· setPointerCapture giữ sự kiện khi con trỏ ra ngoài element.
+· touch-action: none để kéo trên mobile không bị cuộn trang.
+
+Tôi không chắc:
+
+· Kích thước 60px có tối ưu mọi ngữ cảnh — Material Design khuyến nghị 56dp.
+· Ngưỡng THRESHOLD = 6px có phù hợp trên mobile — có thể cần 8–10px.
+
+---
+
+Code chung chung
+
+```html
+<button class="fab" id="fab" aria-label="Mở trợ lý ảo" type="button">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="8" width="16" height="12" rx="3"/>
+    <circle cx="9" cy="14" r="1.3" fill="#fff"/>
+    <circle cx="15" cy="14" r="1.3" fill="#fff"/>
+    <line x1="12" y1="4" x2="12" y2="8"/>
+    <circle cx="12" cy="3" r="1"/>
+  </svg>
+</button>
+```
+
+```css
+/* ===== HÌNH DÁNG + VỊ TRÍ ===== */
+.fab {
+  position: fixed;
+  left: 0; top: 0;                   /* JS set bằng transform */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 10000;
+  will-change: transform;
+
+  /* ===== MÀU & NỔI ===== */
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow:
+    0 8px 24px rgba(16, 185, 129, .45),
+    0 0 0 0   rgba(16, 185, 129, .55);
+
+  /* ===== TƯƠNG TÁC ===== */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow .2s ease;
+
+  /* ===== PULSE ===== */
+  animation: fabPulse 2.6s ease-in-out infinite;
+}
+
+.fab svg {
+  width: 30px; height: 30px;
+  pointer-events: none;              /* sự kiện rơi vào button */
+}
+
+.fab:hover {
+  box-shadow:
+    0 12px 28px rgba(16, 185, 129, .6),
+    0 0 0 0     rgba(16, 185, 129, .55);
+}
+
+.fab.dragging {
+  cursor: grabbing;
+  animation: none;
+  box-shadow:
+    0 16px 32px rgba(16, 185, 129, .65),
+    0 0 0 8px   rgba(16, 185, 129, .18);
+}
+
+@keyframes fabPulse {
+  0%, 100% {
+    box-shadow:
+      0 8px 24px rgba(16, 185, 129, .45),
+      0 0 0 0    rgba(16, 185, 129, .55);
+  }
+  50% {
+    box-shadow:
+      0 8px 24px rgba(16, 185, 129, .45),
+      0 0 0 14px rgba(16, 185, 129, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab { animation: none !important; transition: none !important; }
+}
+```
+
+```js
+(function () {
+  const fab = document.getElementById('fab');
+  const FAB_W = 60, FAB_H = 60;      // khớp với CSS
+  const THRESHOLD = 6;                // px — phân biệt click vs drag
+
+  let posX = 0, posY = 0;
+  const clamp = (v, min, max) => v < min ? min : (v > max ? max : v);
+
+  function render() {
+    fab.style.transform = 'translate(' + posX + 'px,' + posY + 'px)';
+  }
+  function setPos(x, y) {
+    posX = clamp(x, 0, innerWidth  - FAB_W);
+    posY = clamp(y, 0, innerHeight - FAB_H);
+    render();
+  }
+
+  // Vị trí ban đầu: góc dưới-phải, cách mép 20px
+  setPos(innerWidth - FAB_W - 20, innerHeight - FAB_H - 20);
+
+  // Drag state
+  let dragging = false, pointerId = null;
+  let startX = 0, startY = 0, baseX = 0, baseY = 0, moved = false;
+
+  fab.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    dragging = true; moved = false;
+    pointerId = e.pointerId;
+    startX = e.clientX; startY = e.clientY;
+    baseX = posX; baseY = posY;
+    try { fab.setPointerCapture(pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+
+  fab.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!moved && (Math.abs(dx) > THRESHOLD || Math.abs(dy) > THRESHOLD)) {
+      moved = true;
+      fab.classList.add('dragging');
+    }
+    if (moved) setPos(baseX + dx, baseY + dy);
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    if (e && e.pointerId !== pointerId) return;
+    dragging = false;
+    fab.classList.remove('dragging');
+    try { fab.releasePointerCapture(pointerId); } catch (err) {}
+    pointerId = null;
+  }
+
+  fab.addEventListener('pointerup', endDrag);
+  fab.addEventListener('pointercancel', endDrag);
+  fab.addEventListener('lostpointercapture', endDrag);
+
+  // Click chỉ tính khi KHÔNG kéo
+  fab.addEventListener('click', (e) => {
+    if (moved) { e.preventDefault(); e.stopPropagation(); return; }
+    // TODO: hành động khi click
+  });
+
+  window.addEventListener('resize', () => setPos(posX, posY));
+})();
+```
+
+---
+
+Tinh chỉnh nhanh
+
+Muốn Sửa
+Đổi kích thước width/height CSS + FAB_W/FAB_H JS
+Đổi màu background của .fab
+Tắt pulse Xóa animation + @keyframes fabPulse
+Đổi vị trí ban đầu Sửa setPos(...) khi khởi tạo
+Không cho kéo Xóa toàn bộ block JS drag
+Ngưỡng click/drag THRESHOLD = 6 → 10 cho mobile
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: border-radius: 50% + width = height tạo hình tròn; Pointer Events chuẩn W3C; setPointerCapture giữ sự kiện khi con trỏ ra ngoài element; transform: translate() di chuyển không reflow.
+· Tôi không chắc 60px là tối ưu mọi ngữ cảnh — Material Design khuyến nghị 56dp.
+· Tôi không chắc THRESHOLD = 6px phù hợp trên mobile — có thể tăng lên 8–10px để tránh nhầm click khi run tay.
+
+🎯 Tóm 1 câu: Draggable FAB = <button> + SVG icon với border-radius: 50% + position: fixed + gradient + box-shadow 2 lớp + pulse, kèm ~40 dòng JS Pointer Events (pointerdown/move/up + setPointerCapture + THRESHOLD + clamp viewport + transform: translate()).

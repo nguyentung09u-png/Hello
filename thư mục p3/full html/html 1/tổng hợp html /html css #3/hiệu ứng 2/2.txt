@@ -1,0 +1,64 @@
+1. hào quang viền + đổi màu random viền
+
+Cách làm Halo + hào quang đổi màu
+
+Nguyên lý:
+
+1. Halo = 1 lớp gradient bị blur mạnh, opacity thấp, tràn ra ngoài card
+2. Hào quang đổi màu = box-shadow trên .card, đổi màu theo @keyframes
+
+Code chung chung
+
+```html
+<div class="card">
+  <div class="halo"></div>
+  <div class="content">Nội dung</div>
+</div>
+```
+
+```css
+.card {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;                /* để halo không đè nội dung */
+  animation: glow 4s linear infinite; /* 👈 hào quang đổi màu */
+}
+
+/* Halo — lớp sáng mờ tràn ra ngoài */
+.card .halo {
+  position: absolute;
+  inset: -15%;                       /* tràn ra ngoài */
+  background: conic-gradient(from 0deg,
+      #00ccee, #7a6eff, #ff44ee, #00ccee);
+  filter: blur(35px);                /* 👈 làm mờ */
+  opacity: 0.4;                      /* 👈 giảm sáng */
+  z-index: -1;
+  border-radius: 30px;
+  animation: spin 4s linear infinite;
+}
+
+/* Hào quang đổi màu */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 18px rgba(0, 204, 238, 0.7); }
+  33%      { box-shadow: 0 0 18px rgba(122, 110, 255, 0.7); }
+  66%      { box-shadow: 0 0 18px rgba(255, 68, 238, 0.7); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+Tóm tắt
+
+Thành phần Làm bằng
+Halo <div class="halo"> + blur() + opacity thấp
+Hào quang đổi màu box-shadow trên .card + @keyframes
+
+Lưu ý:
+
+· .halo cần z-index: -1 và .card cần isolation: isolate để quầng sáng không đè lên chữ — tôi không chắc hoạt động giống nhau trên mọi trình duyệt.
+· opacity và blur càng lớn thì quầng càng mềm nhưng càng mờ — cần chỉnh cho vừa mắt.

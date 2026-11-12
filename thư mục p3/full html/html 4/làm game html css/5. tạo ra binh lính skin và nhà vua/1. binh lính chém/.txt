@@ -1,0 +1,263 @@
+Tổng quan cách làm
+
+```
+BƯỚC 1 — STATE      mảng kiếm sĩ, mỗi phần tử có { ox, oy, cd, seed, animT, hit, faceRight }
+BƯỚC 2 — TRANG PHỤC  vẽ 13 chi tiết từ sau ra trước bằng path + gradient
+BƯỚC 3 — KIẾM       save/translate/rotate rồi vẽ 6 chi tiết theo swordAngle
+BƯỚC 4 — ANIMATION  animT chạy 0.55 → 0, tính swordAngle = lerp giữa A/B/C
+BƯỚC 5 — VỆT CHÉM   arc(10,-30, 46, B, C) mờ dần theo sin(p × π)
+BƯỚC 6 — HIT        cửa sổ 0.24–0.32s quét zombie trong 60px trừ 1.5 HP (1 lần)
+BƯỚC 7 — FLIP       scale(-1, 1) khi mục tiêu bên trái
+```
+
+Nguyên tắc chung: tách state (animT, hit, faceRight) khỏi hình ảnh (swordAngle, slashPct). Vẽ chỉ đọc animT, không sửa state.
+
+---
+
+Code chung chung
+
+1. State
+
+```js
+const SWORD_ANIM_DUR = 0.55;
+const SWORD_RANGE = 60;
+
+const swordSoldiers = [];
+for (let i = 0; i < 10; i++){
+  const ang = (i / 10) * TAU - Math.PI/2;
+  swordSoldiers.push({
+    ox: Math.cos(ang) * 145,
+    oy: Math.sin(ang) * 145,
+    scale: 0.95,
+    cd: rand(0.5, 2.0),
+    seed: Math.random() * 10,
+    animT: 0, hit: false,
+    faceRight: true
+  });
+}
+
+// 3 pose cố định
+const A = -Math.PI * 0.25;   // neutral
+const B = -Math.PI * 0.90;   // windup
+const C =  Math.PI * 0.40;   // slash
+```
+
+2. Hàm vẽ — drawSwordSoldier()
+
+```js
+function drawSwordSoldier(g, x, y, s, t, seed, animT, faceRight){
+  g.save();
+  g.translate(x, y);
+  g.scale(faceRight ? s : -s, s);      // flip theo hướng
+
+  const bob = Math.sin(t * 3 + seed) * 1.0;
+  g.translate(0, bob);
+
+  // ===== Tính swordAngle + slashPct từ animT =====
+  let swordAngle = A;
+  let slashPct = 0;
+  if (animT > 0){
+    const e = SWORD_ANIM_DUR - animT;
+    if (e < 0.22){
+      swordAngle = A + (B - A) * (e / 0.22);              // windup A→B
+    } else if (e < 0.36){
+      const p = (e - 0.22) / 0.14;
+      swordAngle = B + (C - B) * p;                       // slash B→C
+      slashPct = Math.sin(p * Math.PI);                   // 0→1→0
+    } else {
+      const p = (e - 0.36) / 0.19;
+      swordAngle = C + (A - C) * p;                       // recover C→A
+    }
+  }
+
+  // ===== 1. Bóng =====
+  g.globalAlpha = 0.35; g.fillStyle = '#000';
+  g.beginPath(); g.ellipse(0, 4, 13, 4.5, 0, 0, TAU); g.fill();
+  g.globalAlpha = 1;
+
+  // ===== 2-3. Chân + giày =====
+  g.fillStyle = '#232b45';
+  g.fillRect(-8, -14, 6, 14);
+  g.fillRect( 2, -14, 6, 14);
+  g.fillStyle = '#141a2e';
+  g.fillRect(-9, -4, 8, 4);
+  g.fillRect( 1, -4, 8, 4);
+
+  // ===== 4. Giáp thân (rrect + gradient 3 lớp) =====
+  const bodyG = g.createLinearGradient(-12, -42, 12, -10);
+  bodyG.addColorStop(0,    '#e07070');
+  bodyG.addColorStop(0.55, '#a83030');
+  bodyG.addColorStop(1,    '#5a1010');
+  g.fillStyle = bodyG;
+  rrect(g, -10, -40, 20, 30, 5); g.fill();
+
+  // ===== 5. Đai lưng =====
+  g.fillStyle = '#b8912f'; g.fillRect(-10, -22, 20, 3.5);
+
+  // ===== 6. Giáp vai bạc =====
+  g.fillStyle = '#b8c0cc';
+  g.beginPath(); g.ellipse(-10, -38, 6, 4.5, -0.2, 0, TAU); g.fill();
+  g.beginPath(); g.ellipse( 10, -38, 6, 4.5,  0.2, 0, TAU); g.fill();
+
+  // ===== 7-8. Đầu + mắt =====
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(0, -48, 7.5, 0, TAU); g.fill();
+  g.fillStyle = '#2b2038';
+  g.beginPath(); g.arc(2.5, -49, 1.1, 0, TAU); g.fill();
+
+  // ===== 9. Mũ sắt (gradient 3 lớp) =====
+  const helmG = g.createLinearGradient(-9, -58, 9, -40);
+  helmG.addColorStop(0,   '#c8d0dc');
+  helmG.addColorStop(0.5, '#7a8290');
+  helmG.addColorStop(1,   '#4a5058');
+  g.fillStyle = helmG;
+  g.beginPath(); g.arc(0, -48, 9, Math.PI, 0); g.fill();
+  g.fillRect(-9, -50, 18, 5);
+
+  // ===== 10. Chùm lông đỏ =====
+  g.fillStyle = '#c0392b';
+  g.beginPath();
+  g.moveTo(-2, -58); g.quadraticCurveTo(4, -68, 10, -60);
+  g.quadraticCurveTo(4, -62, -2, -56); g.closePath(); g.fill();
+
+  // ===== 11-12. Tay trái =====
+  g.strokeStyle = '#7a1818'; g.lineWidth = 5; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(-6, -36); g.lineTo(-10, -22); g.stroke();
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(-10, -22, 3, 0, TAU); g.fill();
+
+  // ===== 13. TAY PHẢI + KIẾM (xoay theo swordAngle) =====
+  g.save();
+  g.translate(10, -30);
+  g.rotate(swordAngle);
+  // Cánh tay
+  g.strokeStyle = '#7a1818'; g.lineWidth = 5;
+  g.beginPath(); g.moveTo(0, 0); g.lineTo(16, 0); g.stroke();
+  // Bàn tay
+  g.fillStyle = '#e8c39e';
+  g.beginPath(); g.arc(16, 0, 3, 0, TAU); g.fill();
+  // Chuôi nâu
+  g.fillStyle = '#5a3a1e';
+  g.fillRect(12, -1.5, 6, 3);
+  // Chắn vàng
+  g.fillStyle = '#d4a017';
+  g.fillRect(18, -4, 3, 8);
+  // Lưỡi kiếm
+  g.strokeStyle = '#c8d8e8'; g.lineWidth = 3; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(21, 0); g.lineTo(56, 0); g.stroke();
+  // Highlight lưỡi
+  g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(21, -1); g.lineTo(54, -1); g.stroke();
+  // Đầu mũi nhọn
+  g.fillStyle = '#e8f0f8';
+  g.beginPath();
+  g.moveTo(56, -2.5); g.lineTo(63, 0); g.lineTo(56, 2.5);
+  g.closePath(); g.fill();
+  g.restore();
+
+  // ===== VỆT CHÉM (chỉ trong slash) =====
+  if (slashPct > 0){
+    g.globalAlpha = slashPct * 0.75;
+    g.strokeStyle = 'rgba(255,255,255,0.95)';
+    g.lineWidth = 5; g.lineCap = 'round';
+    g.beginPath();
+    g.arc(10, -30, 46, B, C);
+    g.stroke();
+    g.globalAlpha = 1;
+  }
+
+  g.restore();
+}
+```
+
+3. Update — kích hoạt + hit detection
+
+```js
+for (const s of swordSoldiers){
+  s.cd -= dt;
+  if (s.animT > 0) s.animT = Math.max(0, s.animT - dt);
+
+  // Bắt đầu animation khi hết cooldown + có mục tiêu
+  if (s.cd <= 0 && s.animT <= 0){
+    const ax = heroX + s.ox, ay = heroY + s.oy;
+    const tgt = nearestZombie(ax, ay);
+    if (tgt && Math.hypot(tgt.x - ax, tgt.y - ay) < SWORD_RANGE + 40){
+      s.animT = SWORD_ANIM_DUR;
+      s.hit = false;
+      s.cd = rand(1.0, 1.6);
+      s.faceRight = tgt.x >= ax;             // quay theo mục tiêu
+      SFX.swordSwing();
+    }
+  }
+
+  // Hit detection 1 lần trong cửa sổ 0.24–0.32s
+  if (s.animT > 0 && !s.hit){
+    const e = SWORD_ANIM_DUR - s.animT;
+    if (e >= 0.24 && e <= 0.32){
+      s.hit = true;
+      const ax = heroX + s.ox, ay = heroY + s.oy;
+      let anyHit = false;
+      for (const z of zombies){
+        if (z.dead) continue;
+        const dx = z.x - ax, dy = z.y - ay;
+        if (dx*dx + dy*dy < SWORD_RANGE * SWORD_RANGE){
+          z.hp -= 1.5;
+          z.hit = 1;
+          anyHit = true;
+          boom(z.x, z.y - 12, '#ffe0a0', 5, 0.6, true);
+          if (z.hp <= 0) killZombie(z);
+        }
+      }
+      if (anyHit) SFX.swordHit();
+    }
+  }
+}
+```
+
+4. Âm thanh
+
+```js
+SFX.swordSwing = () => tone(600, .18, 'sawtooth', .015, 200);   // whoosh
+SFX.swordHit   = () => tone(1200, .06, 'square',   .025, 800);  // clang
+```
+
+5. Vẽ trong render — chèn vào entities
+
+```js
+for (const s of swordSoldiers){
+  entities.push({
+    y: heroY + s.oy,
+    fn: () => drawSwordSoldier(ctx,
+      heroX + s.ox, heroY + s.oy,
+      s.scale, time, s.seed, s.animT, s.faceRight)
+  });
+}
+```
+
+6. Reset trong resetGame()
+
+```js
+for (const s of swordSoldiers){
+  s.cd = rand(0.5, 2.0);
+  s.animT = 0;
+  s.hit = false;
+  s.faceRight = true;
+}
+```
+
+---
+
+Điều tôi không chắc
+
+· 3 góc A/B/C (-0.25π, -0.90π, 0.40π) — tôi chọn theo trực giác; không có dữ liệu tối ưu.
+· SWORD_ANIM_DUR = 0.55s và tỉ lệ 3 giai đoạn (0.22/0.14/0.19) — tôi chọn; có thể cần chỉnh để động tác tự nhiên hơn.
+· slashPct = sin(p × π) (parabol) — tôi tin đúng để mờ 2 đầu; có thể dùng tam giác đơn giản.
+· Vệt chém arc(10, -30, 46, B, C) — tôi tin khớp với kiếm; nhưng khi scale(-1, 1), có thể vẽ lệch do arc dùng toạ độ local bị flip.
+· SWORD_RANGE = 60 — tôi chọn; có thể hơi ngắn với boss scale 2.2.
+· Cửa sổ hit 0.24–0.32s (80ms) — có thể bỏ sót zombie di chuyển nhanh ở 30fps.
+· Màu giáp đỏ — tôi chọn để phân biệt với xạ thủ xanh; có thể chưa hợp tông tổng thể.
+· Chưa test runtime — code chạy theo lý thuyết, có thể còn lỗi nhỏ.
+
+---
+
+🎯 Tóm 1 câu: Làm kiếm sĩ = state {ox, oy, cd, seed, animT, hit, faceRight} + hàm vẽ 13 chi tiết (giáp đỏ rrect gradient 3 lớp, giáp vai bạc, mũ sắt gradient, chùm lông quadraticCurveTo) + kiếm vẽ trong save/rotate(swordAngle) với chuôi nâu + chắn vàng #d4a017 + lưỡi #c8d8e8 + highlight trắng + đầu mũi nhọn + animation 0.55s chia 3 giai đoạn (windup A→B 0.22s, slash B→C 0.14s với slashPct = sin(p × π), recover C→A 0.19s) + vệt chém arc(10,-30, 46, B, C) mờ theo slashPct × 0.75 + hit detection 1 lần trong 0.24–0.32s với tầm 60px trừ 1.5 HP + flip scale(-1, 1) theo mục tiêu + 2 âm swordSwing/swordHit.

@@ -1,0 +1,230 @@
+3D Focus Carousel — Tổng quan và code chung
+
+Tổng quan (6 nhóm thành phần)
+
+1. Hình học cube — 8 đỉnh, 6 mặt, mỗi mặt 4 chỉ số.
+2. Chiếu 3D → 2D — ma trận quay Rx·Ry, phối cảnh s = P/(P−z).
+3. Depth sort — sắp 6 mặt theo z trung bình, vẽ xa trước gần sau.
+4. Shading — nhân màu mỗi mặt với hệ số sáng theo z.
+5. Alpha-focus — mặt không phải chủ thể giảm alpha khi zoom.
+6. Vòng lặp + FSM — postInvalidateOnAnimation gọi lại onDraw, FSM 5 pha điều khiển.
+
+Các bước chính
+
+```
+1. Khởi tạo: 8 đỉnh, 6 mặt, 6 màu, dữ liệu nội dung
+2. Mỗi frame onDraw:
+   a. Chạy FSM → cập nhật phase, góc, zoomAmount
+   b. Lerp góc: rx += (targetRx − rx)·L
+   c. Tính ma trận R = Rx·Ry
+   d. Chiếu 8 đỉnh → toạ độ 2D + z
+   e. Tính z trung bình 6 mặt → sort
+   f. canvas.scale theo zoomAmount
+   g. Vẽ 6 mặt: setAlpha, drawPath, drawText
+3. postInvalidateOnAnimation → frame kế
+4. onTouchEvent: chỉ nhận kéo khi phase = ROTATE
+```
+
+FSM 5 pha
+
+Pha Điều kiện vào Việc làm Điều kiện ra
+ROTATE mặc định auto xoay, nhận touch idle đủ lâu
+ZOOM_PREP idle đủ lâu snap ry về bội 90° góc chạm đích
+ZOOM_IN prep xong zoomAmount 0→1 trong T ms hết T
+HOLD zoom in xong giữ zoomAmount = 1 hết 3s
+ZOOM_OUT hết 3s zoomAmount 1→0, đổi bài, ry += 90 hết T
+
+Code chung (Java, Android — skeleton)
+
+```java
+public class CubeView extends View {
+
+    // ---- dữ liệu ----
+    float[][] vertices = new float[8][3];
+    int[][]   faces    = new int[6][4];
+    int[]     colors   = new int[6];
+    String[][] contents;              // nội dung mỗi mặt
+
+    // ---- trạng thái xoay ----
+    float rx, ry;                     // góc hiện tại
+    float targetRx, targetRy;         // góc đích
+    float LERP = 0.10f;
+
+    // ---- trạng thái zoom ----
+    enum Phase { ROTATE, PREP, IN, HOLD, OUT }
+    Phase phase = Phase.ROTATE;
+    long  phaseStart;
+    float zoomAmount;                 // 0..1
+    int   frontFace;
+
+    // ---- thời gian ----
+    long lastInteract;
+    long IDLE_MS, HOLD_MS, IN_MS, OUT_MS;
+
+    // ---- tương tác ----
+    boolean dragging;
+    float lastX, lastY;
+
+    // ---- vẽ ----
+    Paint facePaint, edgePaint, textPaint;
+    Path  facePath;
+
+    void init() {
+        buildVertices();
+        buildFaces();
+        buildColors();
+    }
+
+    @Override
+    protected void onDraw(Canvas c) {
+        int w = getWidth(), h = getHeight();
+        if (w == 0 || h == 0) return;
+        float cx = w / 2f, cy = h / 2f;
+
+        // 1) FSM
+        updatePhases(System.currentTimeMillis());
+
+        // 2) Lerp góc
+        rx += (targetRx - rx) * LERP;
+        ry += (targetRy - ry) * LERP;
+
+        // 3) Ma trận R = Rx·Ry
+        float[][] m = buildRotationMatrix(rx, ry);
+
+        // 4) Chiếu 8 đỉnh
+        float[][] proj = new float[8][2];
+        float[]   zs   = new float[8];
+        for (int i = 0; i < 8; i++) {
+            project(vertices[i], m, proj[i], zs, i, cx, cy);
+        }
+
+        // 5) Sort mặt theo z trung bình
+        int[] order = sortFacesByDepth(faces, zs);
+
+        // 6) Canvas scale theo zoom
+        float targetScale = computeTargetScale(w, h);
+        float s = 1f + (targetScale - 1f) * zoomAmount;
+        c.save();
+        c.scale(s, s, cx, cy);
+
+        // 7) Vẽ 6 mặt
+        for (int i = 0; i < 6; i++) {
+            int f = order[i];
+            int alpha = alphaForFace(f, frontFace, zoomAmount);
+            if (alpha == 0) continue;
+
+            buildPath(facePath, proj, faces[f]);
+            facePaint.setColor(shade(colors[f], zs, f));
+            facePaint.setAlpha(alpha);
+            c.drawPath(facePath, facePaint);
+            c.drawPath(facePath, edgePaint);
+
+            if (isFrontFacing(f, zs)) {
+                textPaint.setAlpha(alpha);
+                drawContent(c, proj, faces[f], f);
+            }
+        }
+        c.restore();
+
+        postInvalidateOnAnimation();     // vòng lặp
+    }
+
+    // ---- FSM ----
+    void updatePhases(long now) {
+        switch (phase) {
+            case ROTATE:
+                if (!dragging && now - lastInteract > IDLE_MS) {
+                    targetRy += AUTO_SPEED;
+                }
+                if (!dragging && now - lastInteract > IDLE_MS + EXTRA) {
+                    targetRy = snap90(ry);
+                    targetRx = 0;
+                    phase = Phase.PREP;
+                    phaseStart = now;
+                }
+                break;
+
+            case PREP:
+                if (reachedTarget()) {
+                    frontFace = pickFrontFace();
+                    phase = Phase.IN;
+                    phaseStart = now;
+                }
+                break;
+
+            case IN:
+                zoomAmount = easeOut(elapsed(now) / IN_MS);
+                if (elapsed(now) >= IN_MS) {
+                    zoomAmount = 1f;
+                    phase = Phase.HOLD;
+                    phaseStart = now;
+                }
+                break;
+
+            case HOLD:
+                if (elapsed(now) >= HOLD_MS) {
+                    phase = Phase.OUT;
+                    phaseStart = now;
+                }
+                break;
+
+            case OUT:
+                zoomAmount = 1f - easeOut(elapsed(now) / OUT_MS);
+                if (elapsed(now) >= OUT_MS) {
+                    zoomAmount = 0f;
+                    advanceContent(frontFace);
+                    targetRy += 90f;
+                    phase = Phase.ROTATE;
+                    lastInteract = now;
+                }
+                break;
+        }
+    }
+
+    // ---- touch ----
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        if (phase != Phase.ROTATE) return true;   // chỉ nhận khi ROTATE
+        switch (e.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                dragging = true;
+                lastX = e.getX(); lastY = e.getY();
+                lastInteract = System.currentTimeMillis();
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                if (!dragging) return true;
+                targetRy += (e.getX() - lastX) * 0.5f;
+                targetRx -= (e.getY() - lastY) * 0.5f;
+                lastX = e.getX(); lastY = e.getY();
+                lastInteract = System.currentTimeMillis();
+                return true;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                dragging = false;
+                lastInteract = System.currentTimeMillis();
+                return true;
+        }
+        return true;
+    }
+
+    // ---- helper chưa cài ở đây ----
+    // buildVertices, buildFaces, buildColors
+    // buildRotationMatrix, project, sortFacesByDepth
+    // buildPath, shade, alphaForFace, isFrontFacing
+    // drawContent, snap90, pickFrontFace, easeOut
+    // computeTargetScale, advanceContent
+}
+```
+
+Những điểm cần lưu ý (tôi không chắc)
+
+· Các hằng số LERP, IDLE_MS, HOLD_MS, IN_MS, OUT_MS, hệ số snap 90° — tùy thiết kế, không có giá trị "chuẩn".
+· Cách chọn frontFace (theo z trung bình lớn nhất) có thể sai nếu cube ở góc xoay bất kỳ — cần test.
+· Nếu muốn mặt zoom chiếm gần full màn hình, phải tính targetScale theo cạnh ngắn màn hình chia cạnh cube, không theo cạnh dài.
+· Đây là skeleton, không phải code chạy được — thiếu phần cài đặt của ~15 hàm helper.
+
+---
+
+🎯 Tóm 1 câu
+
+3D focus carousel = 6 nhóm thành phần (hình học cube, ma trận quay + phối cảnh, depth sort, shading, alpha-focus, vòng lặp invalidate) điều khiển bởi FSM 5 pha (ROTATE → PREP → IN → HOLD → OUT), mỗi pha cập nhật góc/zoom rồi vẽ lại qua onDraw — skeleton Java ở trên là khung tối thiểu, còn lại là các hàm helper tự cài.

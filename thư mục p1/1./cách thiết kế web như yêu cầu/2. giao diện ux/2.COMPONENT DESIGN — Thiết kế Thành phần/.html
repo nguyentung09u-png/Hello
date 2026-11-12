@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bài 9 — Component Design</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:        #0b0f14;
+    --surface:   #131a22;
+    --surface-2: #1a2330;
+    --border:    #1f2a36;
+    --text:      #e6edf3;
+    --muted:     #8b98a5;
+    --accent:    #4ea1ff;
+    --accent-2:  #7b6cff;
+    --success:   #3ddc97;
+    --warning:   #f5b942;
+    --danger:    #ff5c5c;
+    --radius:    10px;
+    --focus-ring: 0 0 0 3px rgba(78,161,255,0.35);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 32px 16px;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  h1 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin-bottom: 8px; letter-spacing: -0.02em; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .section h2 {
+    font-size: 14px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  /* ============ 1. BUTTON ============ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.08s, box-shadow 0.15s;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Variants */
+  .btn-primary   { background: var(--accent); color: #06101e; }
+  .btn-primary:hover:not(:disabled)   { background: #6cb2ff; }
+
+  .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover:not(:disabled) { background: var(--border); }
+
+  .btn-ghost     { background: transparent; color: var(--text); }
+  .btn-ghost:hover:not(:disabled)     { background: var(--surface-2); }
+
+  .btn-danger    { background: var(--danger); color: #1a0505; }
+  .btn-danger:hover:not(:disabled)    { background: #ff7c7c; }
+
+  /* Loading spinner */
+  .btn .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============ 2. INPUT ============ */
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 220px; flex: 1; }
+  .field label { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  .input {
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .input::placeholder { color: #4b5563; }
+  .input:hover:not(:disabled) { border-color: #2d3a4a; }
+  .input:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+  .input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .input.error { border-color: var(--danger); }
+  .input.error:focus { box-shadow: 0 0 0 3px rgba(255,92,92,0.25); }
+  .field-hint { font-size: 12px; color: var(--muted); }
+  .field-error { font-size: 12px; color: var(--danger); }
+
+  /* ============ 3. BADGE ============ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    line-height: 1;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge-success { background: rgba(61,220,151,0.12); color: var(--success); }
+  .badge-warning { background: rgba(245,185,66,0.12); color: var(--warning); }
+  .badge-danger  { background: rgba(255,92,92,0.12);  color: var(--danger); }
+  .badge-info    { background: rgba(78,161,255,0.12); color: var(--accent); }
+  .badge-neutral { background: var(--surface-2);      color: var(--muted); }
+  .badge-neutral::before { display: none; }
+
+  /* ============ 4. TOGGLE ============ */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .toggle-track {
+    width: 42px; height: 24px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    position: relative;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
+  .toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(18px); background: white; }
+  .toggle input:focus-visible + .toggle-track { box-shadow: var(--focus-ring); }
+  .toggle-label { font-size: 14px; }
+
+  /* ============ 5. CARD ============ */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card-clickable { cursor: pointer; }
+  .card-clickable:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card-clickable:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .card h3 { font-size: 15px; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--muted); }
+
+  /* ============ 6. ICON BUTTON ============ */
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 38px; height: 38px;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .icon-btn:hover { background: var(--border); border-color: #2d3a4a; }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn:active { transform: translateY(1px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Component Design — 6 khối cơ bản</h1>
+  <p class="subtitle">Mỗi component có đủ variants + states. Bấm Tab để test focus, bấm chuột để test hover/active.</p>
+
+  <!-- 1. BUTTON -->
+  <div class="section">
+    <h2>1. Button — variants & states</h2>
+    <div class="row">
+      <button class="btn btn-primary">Primary</button>
+      <button class="btn btn-secondary">Secondary</button>
+      <button class="btn btn-ghost">Ghost</button>
+      <button class="btn btn-danger">Xóa</button>
+      <button class="btn btn-primary" disabled>Disabled</button>
+      <button class="btn btn-primary" id="loadingBtn">
+        <span class="spinner" hidden></span>
+        <span class="btn-text">Bấm để loading</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. INPUT -->
+  <div class="section">
+    <h2>2. Input — states</h2>
+    <div class="row">
+      <div class="field">
+        <label for="i1">Bình thường</label>
+        <input class="input" id="i1" placeholder="Gõ gì đó..." />
+        <span class="field-hint">Có thể gõ tiếng Việt</span>
+      </div>
+      <div class="field">
+        <label for="i2">Lỗi</label>
+        <input class="input error" id="i2" value="abc@" aria-invalid="true" />
+        <span class="field-error">Email không hợp lệ</span>
+      </div>
+      <div class="field">
+        <label for="i3">Disabled</label>
+        <input class="input" id="i3" value="Không sửa được" disabled />
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. BADGE -->
+  <div class="section">
+    <h2>3. Badge — trạng thái</h2>
+    <div class="row">
+      <span class="badge badge-success">Thành công</span>
+      <span class="badge badge-warning">Cảnh báo</span>
+      <span class="badge badge-danger">Lỗi</span>
+      <span class="badge badge-info">Thông tin</span>
+      <span class="badge badge-neutral">Nháp</span>
+    </div>
+  </div>
+
+  <!-- 4. TOGGLE -->
+  <div class="section">
+    <h2>4. Toggle — bật/tắt</h2>
+    <div class="row">
+      <label class="toggle">
+        <input type="checkbox" checked />
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Thông báo email</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" />
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Dark mode</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- 5. CARD -->
+  <div class="section">
+    <h2>5. Card — clickable</h2>
+    <div class="row">
+      <div class="card card-clickable" tabindex="0" role="button">
+        <h3>Đơn hàng #1234</h3>
+        <p>Nguyễn Văn A · 500.000đ</p>
+      </div>
+      <div class="card card-clickable" tabindex="0" role="button">
+        <h3>Đơn hàng #1235</h3>
+        <p>Trần Thị B · 1.200.000đ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ICON BUTTON -->
+  <div class="section">
+    <h2>6. Icon Button — có aria-label</h2>
+    <div class="row">
+      <button class="icon-btn" aria-label="Chỉnh sửa">✏️</button>
+      <button class="icon-btn" aria-label="Xóa">🗑️</button>
+      <button class="icon-btn" aria-label="Chia sẻ">🔗</button>
+      <button class="icon-btn" aria-label="Tải xuống">⬇️</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* Loading button demo */
+  const loadingBtn = document.getElementById('loadingBtn');
+  loadingBtn.addEventListener('click', () => {
+    if (loadingBtn.disabled) return;
+    const spinner = loadingBtn.querySelector('.spinner');
+    const text = loadingBtn.querySelector('.btn-text');
+    spinner.hidden = false;
+    text.textContent = 'Đang xử lý...';
+    loadingBtn.disabled = true;
+    setTimeout(() => {
+      spinner.hidden = true;
+      text.textContent = 'Bấm để loading';
+      loadingBtn.disabled = false;
+    }, 1800);
+  });
+
+  /* Card keyboard support (Enter/Space kích hoạt) */
+  document.querySelectorAll('.card-clickable').forEach(card => {
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

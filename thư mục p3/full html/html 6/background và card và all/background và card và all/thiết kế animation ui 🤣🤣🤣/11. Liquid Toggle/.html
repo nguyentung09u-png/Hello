@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Liquid Toggle</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #05070f;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* ===== 1. KHUNG + INPUT ẨN ===== */
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 36px;
+  }
+
+  .toggle input {
+    opacity: 0;                /* ẩn nhưng vẫn click được */
+    width: 0;
+    height: 0;
+  }
+
+  /* ===== 2. NỀN BO TRÒN ===== */
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #1e293b;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.4s ease;
+    overflow: hidden;
+  }
+
+  /* ===== 3. NÚT TRƯỢT ===== */
+  .toggle-track::before {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    top: 4px;
+    left: 4px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 2;
+  }
+
+  /* ===== 4. ĐỔI MÀU KHI BẬT ===== */
+  .toggle input:checked + .toggle-track {
+    background: linear-gradient(90deg, #a855f7, #ec4899);
+  }
+
+  .toggle input:checked + .toggle-track::before {
+    transform: translateX(34px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toggle-track,
+    .toggle-track::before {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <label class="toggle">
+    <input type="checkbox">
+    <span class="toggle-track"></span>
+  </label>
+
+</body>
+</html>

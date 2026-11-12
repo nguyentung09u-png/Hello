@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fireflies</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 50%, #0a1810 0%, #06100a 60%, #02060a 100%);
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif;
+    color: #f0f4e8;
+    overflow: hidden;
+  }
+
+  .grove {
+    position: fixed; inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 70%, rgba(60,120,60,.18), transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 30%, rgba(30,90,60,.15), transparent 70%);
+    filter: blur(50px);
+    animation: groveDrift 20s ease-in-out infinite;
+  }
+  @keyframes groveDrift {
+    0%,100% { transform: translate(0,0); }
+    50%     { transform: translate(20px,-15px); }
+  }
+
+  canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block; }
+
+  .content { text-align: center; position: relative; z-index: 1; }
+  .content h1 {
+    font-size: 42px; letter-spacing: -.02em; margin: 0 0 12px;
+    background: linear-gradient(135deg, #f8ffa0, #a8f0c0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p { color: #a8c0a0; font-size: 15px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="grove" aria-hidden="true"></div>
+  <canvas id="c" aria-hidden="true"></canvas>
+
+  <div class="content">
+    <h1>Fireflies</h1>
+    <p>Đốm vàng-xanh lang thang như đom đóm trong đêm rừng.</p>
+  </div>
+
+<script>
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let flies = [];
+
+  const COLORS = ['#ffe066','#f0ff80','#c8f08a','#a8e8a0','#f8e878'];
+
+  function count() { return Math.min(70, Math.max(25, Math.floor(W / 22))); }
+
+  function make() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 1.2 + Math.random() * 1.6,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      // mỗi con có vận tốc riêng + dao động sin
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      sinPhase: Math.random() * Math.PI * 2,
+      sinSpeed: 0.3 + Math.random() * 0.6,
+      sinAmp: 0.4 + Math.random() * 0.8,
+      blinkPhase: Math.random() * Math.PI * 2,
+      blinkSpeed: 0.5 + Math.random() * 1.5,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (flies.length < need) flies.push(make());
+    if (flies.length > need) flies.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (const f of flies) {
+      // di chuyển: vận tốc cơ bản + dao động sin vuông góc
+      f.sinPhase += 0.02 * f.sinSpeed;
+      f.x += f.vx + Math.cos(f.sinPhase) * f.sinAmp * 0.3;
+      f.y += f.vy + Math.sin(f.sinPhase) * f.sinAmp * 0.3;
+
+      // bounce nhẹ ở biên — đom đóm quay lại, không teleport
+      if (f.x < 20)  { f.x = 20;  f.vx = Math.abs(f.vx); }
+      if (f.x > W-20){ f.x = W-20; f.vx = -Math.abs(f.vx); }
+      if (f.y < 20)  { f.y = 20;  f.vy = Math.abs(f.vy); }
+      if (f.y > H-20){ f.y = H-20; f.vy = -Math.abs(f.vy); }
+
+      // nhấp nháy chậm, có lúc tắt gần hết
+      const blink = 0.15 + 0.85 * Math.pow(Math.abs(Math.sin(t * 0.001 * f.blinkSpeed + f.blinkPhase)), 1.8);
+
+      // halo mờ
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 10);
+      g.addColorStop(0, f.color + 'cc');
+      g.addColorStop(0.3, f.color + '66');
+      g.addColorStop(1, f.color + '00');
+      ctx.fillStyle = g;
+      ctx.globalAlpha = blink;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r * 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // lõi
+      ctx.beginPath();
+      ctx.fillStyle = f.color;
+      ctx.globalAlpha = blink * 0.95;
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  resize();
+  start();
+})();
+</script>
+</body>
+</html>

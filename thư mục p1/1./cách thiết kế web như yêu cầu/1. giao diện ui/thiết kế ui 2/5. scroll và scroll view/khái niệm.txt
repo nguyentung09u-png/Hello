@@ -1,0 +1,18 @@
+1. scroll
+là lướt lên lướt xuống toàn trang web
+
+
+
+
+2. scroll view
+là lướt lên lướt xuống 1 cái card mình muốn
+
+
+
+
+tóm gọn :
+Trường hợp Gọi là gì
+Cả trang lướt lên/xuống Scroll (toàn trang) — mặc định, không cần làm gì
+
+----
+1 khung card / box có nội dung dài bên trong, tự cuộn riêng Scroll view — cần overflow: auto + chiều cao giới hạn

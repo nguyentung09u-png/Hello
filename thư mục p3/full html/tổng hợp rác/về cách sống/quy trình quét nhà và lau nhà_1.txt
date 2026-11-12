@@ -1,0 +1,14 @@
+1. quét nhà
+quét theo đường dọc xuống hết
+|
+|
+
+rồi dồn rác vào ở giữa như chiều ngang
+
+-----rác-------
+
+
+2. lau nhà
+
+lau theo chiều dọc 1 đường
+mỗi ô lau 3 lần mới sạch

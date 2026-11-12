@@ -1,0 +1,49 @@
+1. overflow-y: auto; giúp cuộn xuống đọc nốt phần còn lại , không bị dư chữ
+
+
+ví dụ : khi không có
+┌──────────────────────────────┐  ← khung cao 400px
+│  Item 01                     │
+│  Item 02                     │
+│  Item 03                     │
+│  Item 04                     │
+│  Item 05                     │
+└──────────────────────────────┘  ← hết khung, CẮT
+   Item 06  ← bị CẮT MẤT
+   Item 07  ← bị CẮT MẤT
+   Item 08  ← bị CẮT MẤT
+   Item 09  ← bị CẮT MẤT
+   Item 10  ← bị CẮT MẤT
+        ↑
+   KHÔNG CUỘN ĐƯỢC → không đọc được phần dưới ❌
+   
+   
+   
+   
+   
+   
+  ví dụ : khi có
+  ┌──────────────────────────────┐ ▲
+│  Item 01                     │ │
+│  Item 02                     │ │
+│  Item 03                     │ │  cuộn
+│  Item 04                     │ │  được
+│  Item 05                     │ ▼
+└──────────────────────────────┘
+        ↑
+   Thanh cuộn xuất hiện bên phải
+   Kéo xuống → thấy item 06 → 10 ✅
+   
+   
+   
+   
+   ┌──────────────────────────────┐ ▲
+│  Item 05                     │ │
+│  Item 06                     │ │
+│  Item 07                     │ │  cuộn
+│  Item 08                     │ │  tiếp
+│  Item 09                     │ │
+│  Item 10                     │ ▼
+└──────────────────────────────┘
+        ↑
+   Đọc được HẾT nội dung ✅

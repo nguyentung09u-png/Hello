@@ -1,0 +1,131 @@
+Cách làm Tiêu đề Glitch + Shine Sweep
+
+Tổng quan các bước
+
+1. Khung bao — .title-wrap với position:relative + overflow:hidden để làm nền cho các lớp phủ.
+2. Thẻ chữ — .title với data-text, JS đọc để tách.
+3. Tách chữ — JS chia mỗi ký tự vào <span> riêng, xếp hàng ngang bằng flex.
+4. Màu & glow chữ — màu trắng ngà + text-shadow xanh loe nhẹ.
+5. Glitch — mỗi <span> chạy keyframe translate() nhảy vị trí ngẫu nhiên + steps(1) để giật cục.
+6. Stagger — JS gắn animation-delay lệch pha theo vị trí ký tự.
+7. Lớp vân xước — ::before phủ repeating-linear-gradient 2 hướng, blend vào chữ.
+8. Lớp vệt sáng — ::after chạy ngang bằng translateX + keyframe shine.
+9. Hòa trộn — cả 2 lớp phủ dùng mix-blend-mode: overlay.
+10. A11y — tắt animation nếu người dùng bật giảm chuyển động.
+
+Code chung chung
+
+```html
+<div class="title-wrap">
+  <p class="title" data-text="tiktok"></p>
+</div>
+```
+
+```css
+/* ===== KHUNG BAO ===== */
+.title-wrap{
+  position:relative;
+  overflow:hidden;
+  display:inline-block;
+  padding:.1em .2em;
+}
+
+/* ===== LỚP VÂN XƯỚC ===== */
+.title-wrap::before{
+  content:"";
+  position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(45deg,
+      rgba(255,255,255,.03) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg,
+      rgba(0,0,0,.05) 0 1px, transparent 1px 3px);
+  mix-blend-mode:overlay;
+  pointer-events:none;
+  z-index:2;
+}
+
+/* ===== LỚP VỆT SÁNG CHẠY NGANG ===== */
+.title-wrap::after{
+  content:"";
+  position:absolute;
+  inset:-20% -10%;
+  background:
+    linear-gradient(115deg,
+      transparent 35%,
+      rgba(255,255,255,.9) 48%,
+      #fff 50%,
+      rgba(255,255,255,.9) 52%,
+      transparent 65%),
+    repeating-linear-gradient(115deg,
+      rgba(255,255,255,.15) 0 2px, transparent 2px 6px);
+  background-blend-mode:overlay;
+  transform:translateX(-120%);
+  animation:shine 3s ease-in-out infinite;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+  z-index:3;
+}
+
+@keyframes shine{
+  0%, 60% { transform:translateX(-120%); }
+  85%     { transform:translateX( 120%); }
+  100%    { transform:translateX( 120%); }
+}
+
+/* ===== CHỮ ===== */
+.title{
+  display:flex;
+  gap:.03em;
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:#eaeaf4;
+  text-shadow:
+    0 0 8px rgba(56,189,248,.6),
+    0 0 20px rgba(56,189,248,.3);
+}
+
+.title span{
+  display:inline-block;
+  animation:glitchShift 3s infinite steps(1);
+}
+
+@keyframes glitchShift{
+  0%, 85%, 100% { transform:translate(0,0); }
+  87%  { transform:translate(-3px, 1px); }
+  89%  { transform:translate( 3px,-1px); }
+  91%  { transform:translate(-2px, 2px); }
+  93%  { transform:translate( 2px,-2px); }
+  95%  { transform:translate(-1px,-1px); }
+}
+
+/* ===== A11Y ===== */
+@media (prefers-reduced-motion: reduce){
+  .title span{ animation:none; }
+  .title-wrap::after{ animation:none; }
+}
+```
+
+```js
+/* Tách chữ + gắn delay lệch pha */
+document.querySelectorAll('.title').forEach(el => {
+  const text = el.dataset.text || el.textContent || '';
+  el.textContent = '';
+  [...text].forEach((c, i) => {
+    const span = document.createElement('span');
+    span.textContent = c === ' ' ? '\u00A0' : c;
+    span.style.animationDelay = (0.3 * i) + 's';
+    el.appendChild(span);
+  });
+});
+```
+
+Lưu ý
+
+· Không chắc hiệu ứng hiển thị giống hệt nhau trên mọi trình duyệt — mix-blend-mode, background-blend-mode, steps(1) hỗ trợ tốt trên trình duyệt hiện đại, nhưng render có thể khác chút ít.
+· Nếu tiêu đề có glow neon xanh, vệt sáng trắng overlay có thể hơi lệch tông — có thể thử đổi mix-blend-mode sang screen.
+· .title-wrap cần padding nhỏ để vệt sáng không bị cắt sát chữ.
+
+---
+
+Tóm 1 câu: Bọc chữ trong .title-wrap relative + overflow hidden; JS tách mỗi ký tự vào <span> chạy glitch translate + steps(1) + delay lệch pha; phủ ::before vân xước và ::after vệt sáng chạy ngang bằng translateX + @keyframes shine, hòa trộn bằng mix-blend-mode: overlay.

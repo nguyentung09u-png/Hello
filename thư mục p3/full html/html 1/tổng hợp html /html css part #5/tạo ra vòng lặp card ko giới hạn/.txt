@@ -1,0 +1,80 @@
+Render card là vòng lặp card
+chỉ cần thêm code nó sẽ tự tạo card
+
+Render card là gì
+
+Render card = tạo HTML card từ dữ liệu và gắn vào trang để hiển thị.
+
+Gồm 3 bước cơ bản:
+
+1. Có dữ liệu — mảng chứa thông tin từng card
+2. Duyệt dữ liệu — thường dùng vòng lặp (forEach, map)
+3. Tạo + gắn thẻ — createElement / innerHTML rồi appendChild
+
+Vòng lặp chỉ là 1 phần; thiếu bước 3 thì không có gì hiện ra.
+
+---
+
+Code chung chung
+
+HTML
+
+```html
+<div id="container"></div>
+```
+
+JS
+
+```js
+// 1. Dữ liệu
+const data = [
+  { title: 'Card 1', img: 'url1.jpg' },
+  { title: 'Card 2', img: 'url2.jpg' }
+];
+
+// 2. Chọn nơi chứa
+const container = document.getElementById('container');
+
+// 3. Render
+function renderCards() {
+  container.innerHTML = '';        // xoá cũ (nếu cần)
+
+  data.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${item.img}" alt="">
+      <h3>${item.title}</h3>
+    `;
+    container.appendChild(card);   // gắn vào trang
+  });
+}
+
+// 4. Gọi 1 lần khi load
+renderCards();
+```
+
+CSS (tuỳ chọn)
+
+```css
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+}
+```
+
+---
+
+Khi nào render lại?
+
+· Thêm/xoá item trong data → gọi renderCards() lại
+· Hoặc render từng card mới riêng lẻ (không cần xoá hết)
+
+---
+
+Lưu ý
+
+· innerHTML = '' chỉ dùng khi muốn xoá hết rồi render lại. Nếu chỉ thêm card mới, bỏ dòng này.
+· Tôi không chắc bạn cần render theo kiểu nào (1 lần, mỗi lần thêm, hay tự động theo dữ liệu) — nếu nói rõ mình viết đúng hơn.

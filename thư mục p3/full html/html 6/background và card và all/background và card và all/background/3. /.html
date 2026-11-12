@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05030a">
+<title>Dark Tech Background — Neon Circuit Flow</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05030a;}
+
+  .stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 100% at 15% 0%, #0d0718 0%, #07040f 45%, #040208 100%);
+    transform:translateZ(0);
+  }
+
+  /* ---------- Circuit board pattern (static, painted once) ---------- */
+  .circuit{
+    position:absolute;
+    inset:-6%;
+    opacity:.55;
+    background-image:
+      linear-gradient(to right, rgba(0,255,213,.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,0,200,.09) 1px, transparent 1px);
+    background-size:120px 120px, 120px 120px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 85%);
+            mask-image:radial-gradient(120% 100% at 50% 50%, #000 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,0) 85%);
+    transform:translateZ(0);
+  }
+  .circuit::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(0,255,213,.05) 0 2px, transparent 2px 40px);
+    mix-blend-mode:screen;
+  }
+  .circuit::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(0,255,213,.06), transparent 40%),
+      radial-gradient(circle at 78% 68%, rgba(255,0,200,.06), transparent 45%);
+  }
+
+  /* ---------- Neon flowing lines (transform-only, GPU) ---------- */
+  .flow{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    contain:strict;
+  }
+  .flow span{
+    position:absolute;
+    display:block;
+    height:2px;
+    border-radius:2px;
+    background:linear-gradient(90deg,
+      rgba(0,255,213,0) 0%,
+      rgba(0,255,213,.85) 35%,
+      rgba(255,0,200,.85) 65%,
+      rgba(255,0,200,0) 100%);
+    animation:flowX linear infinite;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  .flow span.v{
+    width:2px;
+    height:auto;
+    background:linear-gradient(180deg,
+      rgba(255,0,200,0) 0%,
+      rgba(255,0,200,.85) 35%,
+      rgba(0,255,213,.85) 65%,
+      rgba(0,255,213,0) 100%);
+    animation:flowY linear infinite;
+  }
+
+  @keyframes flowX{
+    0%{transform:translate3d(-30vw,0,0);opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{transform:translate3d(130vw,0,0);opacity:0;}
+  }
+  @keyframes flowY{
+    0%{transform:translate3d(0,-30vh,0);opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{transform:translate3d(0,130vh,0);opacity:0;}
+  }
+
+  /* ---------- Soft color wash (transform-only, GPU) ---------- */
+  .wash{
+    position:absolute;
+    inset:-10%;
+    pointer-events:none;
+    background:
+      radial-gradient(60% 45% at 22% 28%, rgba(0,255,213,.10), transparent 70%),
+      radial-gradient(60% 50% at 80% 74%, rgba(255,0,200,.10), transparent 70%);
+    animation:washDrift 22s ease-in-out infinite alternate;
+    will-change:transform;
+    transform:translate3d(0,0,0);
+    backface-visibility:hidden;
+  }
+  @keyframes washDrift{
+    from{transform:translate3d(-3%, -2%, 0) scale(1);}
+    to{transform:translate3d(3%, 2%, 0) scale(1.08);}
+  }
+
+  /* ---------- Vignette + grain ---------- */
+  .vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 110% at 50% 50%,
+      rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 80%, rgba(0,0,0,.72) 100%);
+  }
+  .noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .flow span,.wash{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="circuit"></div>
+  <div class="flow" id="flow"></div>
+  <div class="wash"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+</div>
+
+<script>
+(function () {
+  const flow = document.getElementById('flow');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const frag = document.createDocumentFragment();
+  const H_COUNT = 7;
+  const V_COUNT = 6;
+
+  for (let i = 0; i < H_COUNT; i++) {
+    const s = document.createElement('span');
+    const top = 8 + Math.random() * 84;
+    const dur = 7 + Math.random() * 9;
+    const delay = Math.random() * dur;
+    const w = 18 + Math.random() * 32;
+    s.style.top = top + 'vh';
+    s.style.width = w + 'vw';
+    s.style.left = '0';
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + delay + 's';
+    s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  for (let i = 0; i < V_COUNT; i++) {
+    const s = document.createElement('span');
+    s.className = 'v';
+    const left = 6 + Math.random() * 88;
+    const dur = 9 + Math.random() * 10;
+    const delay = Math.random() * dur;
+    const h = 20 + Math.random() * 30;
+    s.style.left = left + 'vw';
+    s.style.height = h + 'vh';
+    s.style.top = '0';
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = '-' + delay + 's';
+    s.style.opacity = (0.35 + Math.random() * 0.45).toFixed(2);
+    frag.appendChild(s);
+  }
+
+  flow.appendChild(frag);
+})();
+</script>
+</body>
+</html>

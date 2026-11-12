@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>So sánh Action Menu - Đã fix Tap Highlight</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #38bdf8;
+      --danger: #f43f5e;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      /* FIX TAP HIGHLIGHT TOÀN CỤC */
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 { text-align: center; margin-bottom: 40px; font-weight: 500; }
+    .container { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+    .column { flex: 1; min-width: 300px; }
+    
+    .column-title {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .column-title.no-menu { color: var(--text-sub); }
+    .column-title.has-menu { color: var(--accent); }
+
+    /* --- CARD STYLES --- */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      /* FIX TAP HIGHLIGHT CHO CARD */
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .card-icon {
+      width: 40px; height: 40px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+      pointer-events: none; /* Tránh bắt sự kiện click */
+    }
+
+    .card h3 { margin: 0 0 8px 0; font-size: 1.1rem; pointer-events: none; }
+    .card p { margin: 0 0 16px 0; color: var(--text-sub); font-size: 0.9rem; line-height: 1.5; pointer-events: none; }
+    
+    .card-btn {
+      display: inline-block;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .card-btn:hover { text-decoration: underline; }
+
+    /* --- ACTION MENU STYLES --- */
+    .action-trigger {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 32px; height: 32px; /* Tăng nhẹ kích thước cho dễ chạm trên mobile */
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: grid; place-items: center;
+      opacity: 0; 
+      transition: opacity 0.2s, background 0.2s, color 0.2s;
+      /* FIX TAP HIGHLIGHT CHO NÚT 3 CHẤM */
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    /* Trên thiết bị cảm ứng (Mobile/Tablet), luôn hiện nút 3 chấm */
+    @media (hover: none) {
+      .action-trigger { opacity: 1; }
+    }
+
+    .card:hover .action-trigger,
+    .action-trigger[aria-expanded="true"] {
+      opacity: 1;
+    }
+
+    .action-trigger:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-main);
+    }
+    
+    .action-trigger:active {
+      transform: scale(0.9); /* Hiệu ứng nhấn nhẹ thay cho tap highlight */
+    }
+
+    .action-menu {
+      position: absolute;
+      top: 52px; right: 16px;
+      width: 170px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.8);
+      z-index: 10;
+      
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px) scale(0.95);
+      transform-origin: top right;
+      transition: all 0.15s ease;
+    }
+
+    .action-menu.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .action-item {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 10px 12px; /* Tăng padding cho dễ chạm */
+      background: transparent; border: none;
+      color: var(--text-main); font-family: inherit; font-size: 0.9rem;
+      border-radius: 6px; cursor: pointer; text-align: left;
+      /* FIX TAP HIGHLIGHT CHO ITEM TRONG MENU */
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    
+    .action-item:active {
+      background: var(--border); /* Hiệu ứng nhấn thay thế */
+    }
+
+    .action-item.danger { color: var(--danger); }
+    .action-item.danger:hover, .action-item.danger:active { background: rgba(244, 63, 94, 0.1); }
+  </style>
+</head>
+<body>
+
+  <h2>So sánh: Có và Không có Action Menu</h2>
+
+  <div class="container">
+    
+    <!-- CỘT 1: KHÔNG CÓ ACTION MENU -->
+    <div class="column">
+      <div class="column-title no-menu">❌ Không có Action Menu</div>
+      
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Phân tích dữ liệu</h3>
+        <p>Xem báo cáo chi tiết về hiệu suất làm việc của bạn trong tháng này.</p>
+        <a href="#" class="card-btn">Xem báo cáo &rarr;</a>
+      </div>
+    </div>
+
+    <!-- CỘT 2: CÓ ACTION MENU -->
+    <div class="column">
+      <div class="column-title has-menu">✅ Có Action Menu (Chạm thử trên mobile)</div>
+      
+      <!-- Card -->
+      <div class="card">
+        <button class="action-trigger" aria-label="Menu" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle></svg>
+        </button>
+        
+        <div class="action-menu">
+          <button class="action-item">✏️ Chỉnh sửa</button>
+          <button class="action-item">📋 Nhân bản</button>
+          <button class="action-item">🔗 Chia sẻ</button>
+          <button class="action-item danger">🗑️ Xóa</button>
+        </div>
+
+        <div class="card-icon">📊</div>
+        <h3>Phân tích dữ liệu</h3>
+        <p>Xem báo cáo chi tiết về hiệu suất làm việc của bạn trong tháng này.</p>
+        <a href="#" class="card-btn">Xem báo cáo &rarr;</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const triggers = document.querySelectorAll('.action-trigger');
+    const menus = document.querySelectorAll('.action-menu');
+
+    function closeAll() {
+      menus.forEach(m => m.classList.remove('is-open'));
+      triggers.forEach(t => t.setAttribute('aria-expanded', 'false'));
+    }
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        const isOpen = menu.classList.contains('is-open');
+        
+        closeAll(); 
+        if (!isOpen) {
+          menu.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.action-trigger') && !e.target.closest('.action-menu')) {
+        closeAll();
+      }
+    });
+  </script>
+</body>
+</html>

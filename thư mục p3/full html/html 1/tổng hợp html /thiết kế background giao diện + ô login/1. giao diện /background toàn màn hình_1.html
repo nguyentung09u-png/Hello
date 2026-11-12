@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Nền Hạt Xanh Dương & Blur</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #000000;
+      width: 100vw;
+      height: 100vh;
+      overflow: autu;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ---- LỚP BACKGROUND MỜ + MÀU XANH NAVY / XANH DƯƠNG ---- */
+    .blur-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(100px);
+      mix-blend-mode: screen;
+      overflow: autu;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Hiệu ứng chuyển động màu động (Dynamic Color Shifting) */
+    .blur-background.dynamic-color {
+      animation: colorShift 20s infinite alternate ease-in-out;
+    }
+
+    @keyframes colorShift {
+      0% { filter: blur(100px) hue-rotate(0deg); }
+      50% { filter: blur(110px) hue-rotate(35deg); }
+      100% { filter: blur(90px) hue-rotate(-25deg); }
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      will-change: transform, opacity;
+      animation: floatBlob 20s infinite alternate ease-in-out;
+    }
+
+    .blob--navy {
+      background: #0f1a3a;
+      width: 50vw;
+      height: 50vw;
+      min-width: 300px;
+      min-height: 300px;
+      top: -10%;
+      left: -5%;
+      opacity: 0.7;
+      animation-duration: 24s;
+    }
+
+    .blob--blue {
+      background: #1a4a8a;
+      width: 65vw;
+      height: 65vw;
+      min-width: 400px;
+      min-height: 400px;
+      bottom: -20%;
+      right: -10%;
+      opacity: 0.6;
+      animation-duration: 28s;
+      animation-delay: -5s;
+    }
+
+    .blob--navy2 {
+      background: #0f1a3a;
+      width: 45vw;
+      height: 45vw;
+      min-width: 250px;
+      min-height: 250px;
+      top: 40%;
+      left: 40%;
+      opacity: 0.45;
+      animation-duration: 32s;
+      animation-delay: -12s;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      25% { transform: translate(40px, -30px) scale(1.1) rotate(10deg); }
+      50% { transform: translate(-30px, 50px) scale(0.9) rotate(-5deg); }
+      75% { transform: translate(20px, 20px) scale(1.05) rotate(5deg); }
+      100% { transform: translate(-20px, -40px) scale(1) rotate(-2deg); }
+    }
+
+    /* ---- CANVAS PARTICLES ---- */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      display: block;
+      transition: opacity 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Nền blur mạnh + 3 khối màu xanh -->
+  <div class="blur-background dynamic-color" id="blurBg">
+    <div class="blob blob--navy"></div>
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--navy2"></div>
+  </div>
+
+  <!-- Canvas cho particles -->
+  <canvas id="particle-canvas"></canvas>
+
+  <script>
+    // Xử lý hệ thống hạt Particles
+    (function() {
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let particles = [];
+      let animationFrame = null;
+      
+      const baseParticleCount = () => {
+        const area = width * height;
+        return Math.min(120, Math.max(50, Math.floor(area / 14000)));
+      };
+
+      const blueTones = [
+        '#4a8ec2', '#2a6ba8', '#7ab8e0', '#1a4a8a', '#5aa0d8',
+        '#3f7eb6', '#9fd0f0', '#0f3a6e', '#6bb0e8', '#2c5f9a'
+      ];
+
+      function createParticle(randomY = false) {
+        const x = Math.random() * width;
+        const y = randomY ? Math.random() * height : (Math.random() < 0.3 ? -10 : height + 10);
+        const baseSize = Math.random() * 3.2 + 0.8;
+        const isLarge = baseSize > 2.8;
+        return {
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() * 0.8 + 0.2) * (Math.random() < 0.5 ? -1 : 1),
+          size: baseSize,
+          baseSize: baseSize,
+          pulsePhase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.02 + Math.random() * 0.05,
+          color: blueTones[Math.floor(Math.random() * blueTones.length)],
+          glow: isLarge,
+          alpha: 0.6 + Math.random() * 0.4,
+        };
+      }
+
+      function initParticles(count) {
+        particles = [];
+        for (let i = 0; i < count; i++) {
+          particles.push(createParticle(true));
+        }
+      }
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        
+        const targetCount = baseParticleCount();
+        if (particles.length < targetCount) {
+          for (let i = particles.length; i < targetCount; i++) {
+            particles.push(createParticle(true));
+          }
+        } else if (particles.length > targetCount) {
+          particles = particles.slice(0, targetCount);
+        }
+      }
+
+      function drawConnections(particleList, maxDistance = 120) {
+        for (let i = 0; i < particleList.length; i++) {
+          const p1 = particleList[i];
+          for (let j = i + 1; j < particleList.length; j++) {
+            const p2 = particleList[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const distSq = dx * dx + dy * dy;
+            
+            if (distSq < maxDistance * maxDistance) {
+              const dist = Math.sqrt(distSq);
+              const opacity = 0.18 * (1 - dist / maxDistance);
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(80, 150, 220, ${opacity})`;
+              ctx.lineWidth = 0.7;
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      function drawParticles(timestamp) {
+        ctx.clearRect(0, 0, width, height);
+
+        drawConnections(particles, 120);
+
+        for (let p of particles) {
+          const pulseFactor = 0.8 + 0.4 * Math.sin(p.pulsePhase + timestamp * 0.001 * p.pulseSpeed);
+          const drawSize = p.baseSize * pulseFactor;
+          p.pulsePhase += 0.03;
+
+          if (p.glow) {
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, drawSize * 4);
+            gradient.addColorStop(0, p.color + 'aa');
+            gradient.addColorStop(0.6, p.color + '55');
+            gradient.addColorStop(1, p.color + '00');
+            ctx.beginPath();
+            ctx.fillStyle = gradient;
+            ctx.arc(p.x, p.y, drawSize * 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha * (0.9 + 0.2 * Math.sin(p.pulsePhase));
+          ctx.arc(p.x, p.y, drawSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+      }
+
+      function updateParticles() {
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < -20) p.x = width + 15;
+          else if (p.x > width + 20) p.x = -15;
+          if (p.y < -20) p.y = height + 15;
+          else if (p.y > height + 20) p.y = -15;
+        }
+      }
+
+      function animate(timestamp) {
+        updateParticles();
+        drawParticles(timestamp);
+        animationFrame = requestAnimationFrame(animate);
+      }
+
+      function handleResize() {
+        resizeCanvas();
+      }
+
+      window.addEventListener('resize', handleResize);
+      resizeCanvas();
+      animationFrame = requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>

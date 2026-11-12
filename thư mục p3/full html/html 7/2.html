@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tải video TikTok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    background: linear-gradient(180deg, #0a0a1a 0%, #0c1530 50%, #050810 100%);
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #f0ecfa;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ====================================================
+     MUSIC OVERLAY (Kính mờ + Staggered Text + Neon)
+     ==================================================== */
+  .music-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 6, 16, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  .music-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .music-overlay .icon {
+    font-size: 64px;
+    animation: bounce 1.5s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* Staggered Text Reveal */
+  .reveal-text {
+    display: flex;
+    gap: 0.05em;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 4px;
+  }
+  .reveal-text span {
+    opacity: 0;
+    animation: reveal 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.4) forwards;
+  }
+  .reveal-text span:nth-child(1) { animation-delay: 0.1s; }
+  .reveal-text span:nth-child(2) { animation-delay: 0.2s; }
+  .reveal-text span:nth-child(3) { animation-delay: 0.3s; }
+  .reveal-text span:nth-child(4) { animation-delay: 0.4s; }
+  .reveal-text span:nth-child(5) { animation-delay: 0.5s; }
+  .reveal-text span:nth-child(6) { animation-delay: 0.6s; }
+  .reveal-text span:nth-child(7) { animation-delay: 0.7s; }
+
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hiệu ứng chữ Neon */
+  .neon-title {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow:
+      0 0 10px  #fff,
+      0 0 25px  #38bdf8,
+      0 0 50px  #38bdf8,
+      0 0 100px #0ea5e9,
+      0 0 150px #0284c7;
+    animation: flicker 2s infinite alternate;
+    margin: 0;
+    letter-spacing: 3px;
+  }
+  @keyframes flicker {
+    0%, 18%, 22%, 100% {
+      text-shadow:
+        0 0 10px  #fff,
+        0 0 25px  #38bdf8,
+        0 0 50px  #38bdf8,
+        0 0 100px #0ea5e9,
+        0 0 150px #0284c7;
+    }
+    20% {
+      text-shadow: none;
+    }
+  }
+
+  .music-overlay button {
+    padding: 16px 40px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(168,85,247,0.4);
+    transition: filter .2s, transform .2s;
+  }
+  .music-overlay button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  /* ====================================================
+     GLOW NỀN
+     ==================================================== */
+  .glow-base {
+    position: fixed; inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(80,140,255,.18), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 0%,   rgba(160,100,255,.14), transparent 70%);
+    filter: blur(40px);
+  }
+
+  /* ====================================================
+     CANVAS HẠT
+     ==================================================== */
+  #c {
+    position: fixed; inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* ====================================================
+     KHUNG DỌC AURORA GLASS — CÓ VIỀN SÁNG XOAY + HÀO QUANG
+     ==================================================== */
+  .stage {
+    perspective: 1300px;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 13;
+    border-radius: 28px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .12s linear;
+
+    /* ===== Viền sáng xoay ===== */
+    padding: 3px;                        /* độ dày viền */
+    overflow: hidden;                    /* cắt ::before theo bo góc */
+
+    /* ===== Hào quang ===== */
+    animation: glow 4s linear infinite;
+  }
+
+  /* Dải sáng xoay quanh viền */
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: -50%;                         /* phóng to để không hở góc */
+    background: conic-gradient(from 0deg,
+        #00ffff, transparent 25%,
+        #7a6eff, transparent 60%,
+        #ff00e5, transparent 85%,
+        #00ffff);
+    animation: spin 4s linear infinite;
+    z-index: -1;
+  }
+
+  /* Lớp che ruột — inset = padding */
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 3px;                          /* = padding của .card */
+    background: #0a0a1a;                 /* màu ruột — khớp nền glass */
+    border-radius: 25px;                 /* = 28 - 3 */
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .glass {
+    position: relative;                  /* ← đổi từ absolute sang relative */
+    inset: 0;
+    border-radius: 25px;                 /* = 28 - 3 (khớp ::after) */
+    overflow: hidden;
+    background: linear-gradient(160deg,
+      rgba(20, 22, 40, .75),
+      rgba(8, 10, 20, .88));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.08);
+    z-index: 1;                          /* nổi trên ::after */
+    width: 100%;
+    height: 100%;
+  }
+
+  .aurora { position: absolute; inset: -30%; filter: blur(60px); opacity: .75; pointer-events: none; }
+  .blob-inner { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+  .bi-1 { width: 200px; height: 200px; top: 5%; left: 0;
+          background: radial-gradient(circle, #7c3aed, transparent 70%);
+          animation: drift 12s ease-in-out infinite; }
+  .bi-2 { width: 220px; height: 220px; bottom: 0; right: 0;
+          background: radial-gradient(circle, #06b6d4, transparent 70%);
+          animation: drift 15s ease-in-out infinite reverse; }
+  .bi-3 { width: 170px; height: 170px; top: 40%; left: 40%;
+          background: radial-gradient(circle, #ec4899, transparent 70%);
+          animation: drift 18s ease-in-out infinite; }
+  @keyframes drift {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50%     { transform: translate(40px,-40px) scale(1.2); }
+  }
+
+  .particles-inner { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .particles-inner span {
+    position: absolute; bottom: -10px;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 8px #fff; opacity: 0;
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(20px);   opacity: 0; }
+    20%  { opacity: .9; }
+    100% { transform: translateY(-460px); opacity: 0; }
+  }
+
+  .glare {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at var(--gx,50%) var(--gy,50%),
+      rgba(255,255,255,.25), transparent 55%);
+    opacity: 0; transition: opacity .35s ease;
+    pointer-events: none; mix-blend-mode: overlay;
+  }
+  .card:hover .glare { opacity: 1; }
+
+  .content {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    padding: 24px 18px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+    transform: translateZ(30px);
+  }
+  .content h1 {
+    font-size: 19px; margin: 0; text-align: center;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff, #67e8f9);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .content p.sub {
+    font-size: 12px; color: #94a3b8;
+    text-align: center; margin: 0 0 4px; line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .row { display: flex; gap: 8px; flex-direction: column; }
+  input[type=text] {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(10, 12, 24, .65);
+    color: #f0ecfa;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input[type=text]:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168,85,247,.2);
+  }
+  #go {
+    padding: 11px 18px;
+    border: 0; border-radius: 12px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 700; font-size: 13px;
+    letter-spacing: .01em;
+    cursor: pointer;
+    transition: filter .2s, transform .2s;
+  }
+  #go:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  #go:disabled { opacity: .5; cursor: default; transform: none; }
+
+  #result { margin-top: 4px; overflow-y: auto; }
+
+  .card-info {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .card-info img {
+    width: 54px; height: 54px; border-radius: 8px;
+    object-fit: cover; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,.1);
+  }
+  .card-info .title {
+    font-size: 11.5px; color: #c8c1de; margin: 0; line-height: 1.4;
+    font-weight: 500;
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+  .dl-list { display: flex; flex-direction: column; gap: 6px; }
+  .dl-list button {
+    width: 100%; padding: 10px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 600; font-size: 12.5px;
+    letter-spacing: .01em;
+    border: 0; cursor: pointer;
+    transition: filter .2s, transform .2s;
+  }
+  .dl-list button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .dl-list button.alt {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+  }
+
+  .status {
+    text-align: center; color: #9992b3; font-size: 12.5px;
+    padding: 16px 0;
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(255,255,255,.1);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    animation: sp .8s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  .err {
+    color: #ff8f8f; font-size: 12.5px; text-align: center;
+    padding: 10px; background: rgba(255,100,100,.08);
+    border-radius: 8px;
+  }
+
+  /* ====================================================
+     WAVE TEXT FOOTER (Hiệu ứng sóng cho mô tả TikTok)
+     ==================================================== */
+  .wave-footer {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a855f7;
+    margin-top: auto;
+    padding-top: 6px;
+    letter-spacing: 0.5px;
+  }
+  .wave-footer span {
+    display: inline-block;
+    animation: waveUp 1.2s ease-in-out infinite;
+  }
+  .wave-footer span:nth-child(1)  { animation-delay: 0s; }
+  .wave-footer span:nth-child(2)  { animation-delay: 0.05s; }
+  .wave-footer span:nth-child(3)  { animation-delay: 0.1s; }
+  .wave-footer span:nth-child(4)  { animation-delay: 0.15s; }
+  .wave-footer span:nth-child(5)  { animation-delay: 0.2s; }
+  .wave-footer span:nth-child(6)  { animation-delay: 0.25s; }
+  .wave-footer span:nth-child(7)  { animation-delay: 0.3s; }
+  .wave-footer span:nth-child(8)  { animation-delay: 0.35s; }
+  .wave-footer span:nth-child(9)  { animation-delay: 0.4s; }
+  .wave-footer span:nth-child(10) { animation-delay: 0.45s; }
+  .wave-footer span:nth-child(11) { animation-delay: 0.5s; }
+  .wave-footer span:nth-child(12) { animation-delay: 0.55s; }
+  .wave-footer span:nth-child(13) { animation-delay: 0.6s; }
+  .wave-footer span:nth-child(14) { animation-delay: 0.65s; }
+  .wave-footer span:nth-child(15) { animation-delay: 0.7s; }
+  .wave-footer span:nth-child(16) { animation-delay: 0.75s; }
+  .wave-footer span:nth-child(17) { animation-delay: 0.8s; }
+  .wave-footer span:nth-child(18) { animation-delay: 0.85s; }
+  .wave-footer span:nth-child(19) { animation-delay: 0.9s; }
+  .wave-footer span:nth-child(20) { animation-delay: 0.95s; }
+  .wave-footer span:nth-child(21) { animation-delay: 1.0s; }
+  .wave-footer span:nth-child(22) { animation-delay: 1.05s; }
+
+  @keyframes waveUp {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+  }
+
+  /* ===== Keyframes viền sáng + hào quang ===== */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes glow {
+    0%, 100% {
+      box-shadow:
+        0 0 18px rgba(0,204,238,.7),
+        0 0 36px rgba(0,204,238,.4);
+    }
+    33% {
+      box-shadow:
+        0 0 18px rgba(122,110,255,.7),
+        0 0 36px rgba(122,110,255,.4);
+    }
+    66% {
+      box-shadow:
+        0 0 18px rgba(255,68,238,.7),
+        0 0 36px rgba(255,68,238,.4);
+    }
+  }
+
+  /* ====================================================
+     MODAL TIẾN TRÌNH TẢI VIDEO
+     ==================================================== */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(8,6,16,.78);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 998;
+    padding: 20px;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #1a1630;
+    border: 1px solid #2e2a45;
+    border-radius: 16px;
+    padding: 24px 22px 20px;
+    width: 100%; max-width: 320px;
+    text-align: center; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    font-family: inherit;
+  }
+  .modal h3 {
+    margin: 0 0 14px; font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .bar-track {
+    height: 20px;
+    background: #131020;
+    border: 1px solid #2e2a45;
+    border-radius: 999px;
+    overflow: hidden; position: relative;
+  }
+  .bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    border-radius: 999px;
+    transition: width .15s linear;
+  }
+  .bar-fill.indet {
+    width: 40%;
+    animation: indet 1.1s ease-in-out infinite;
+  }
+  @keyframes indet {
+    0%   { margin-left: -40%; }
+    100% { margin-left: 100%; }
+  }
+  .pct {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 11px; font-weight: 700; color: #fff;
+    text-shadow: 0 0 6px rgba(0,0,0,.6);
+    font-variant-numeric: tabular-nums;
+  }
+  .done { color: #7ee787; font-size: 12.5px; margin-top: 12px; }
+  .close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: 0;
+    color: #9992b3; font-size: 18px;
+    cursor: pointer; width: 30px; height: 30px;
+    border-radius: 50%;
+    font-family: inherit;
+  }
+  .close:hover { color: #f0ecfa; background: rgba(255,255,255,.06); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====================================================
+     MUSIC OVERLAY
+     ==================================================== -->
+<div class="music-overlay" id="musicOverlay">
+  <div class="icon">🎵</div>
+  
+  <div class="reveal-text">
+    <span>W</span><span>E</span><span>L</span><span>C</span><span>O</span><span>M</span><span>E</span>
+  </div>
+
+  <h1 class="neon-title">MUSIC</h1>
+  <button id="startBtn">Bắt đầu</button>
+</div>
+
+<!-- Thẻ âm nhạc -->
+<audio id="bgMusic" loop>
+  <source src="https://raw.githubusercontent.com/tung010171/tunghaha/main/nhac.mp3" type="audio/mpeg">
+</audio>
+
+<div class="glow-base" aria-hidden="true"></div>
+<canvas id="c" aria-hidden="true"></canvas>
+
+<!-- ====================================================
+     CARD TIKTOK — có viền sáng xoay + hào quang
+     ==================================================== -->
+<div class="stage">
+  <div class="card" id="card">
+    <div class="glass">
+      <div class="aurora">
+        <div class="blob-inner bi-1"></div>
+        <div class="blob-inner bi-2"></div>
+        <div class="blob-inner bi-3"></div>
+      </div>
+      <div class="particles-inner" id="particles"></div>
+      <div class="glare" id="glare"></div>
+
+      <div class="content">
+        <h1>Tải video TikTok</h1>
+        <p class="sub">Dán link → bấm Tải → tự lưu về máy</p>
+
+        <div class="row">
+          <input type="text" id="url" placeholder="https://www.tiktok.com/@user/video/..." />
+          <button id="go">Tải xuống</button>
+        </div>
+
+        <div id="result"></div>
+
+        <!-- Mô tả sóng TikTok -->
+        <div class="wave-footer">
+          <span>T</span><span>i</span><span>k</span><span>t</span><span>o</span><span>k</span>&nbsp;<span>:</span>&nbsp;<span>@</span><span>t</span><span>n</span><span>g</span><span>n</span><span>g</span><span>u</span><span>y</span><span>n</span><span>3</span><span>5</span><span>7</span><span>6</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     MODAL TIẾN TRÌNH TẢI VIDEO
+     ==================================================== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close" id="close" aria-label="Đóng">✕</button>
+    <h3 id="modal-title">Đang tải…</h3>
+    <div class="bar-track">
+      <div class="bar-fill indet" id="bar"></div>
+      <span class="pct" id="pct">0%</span>
+    </div>
+    <div class="done" id="done-msg" style="display:none">✅ Đã lưu file về máy!</div>
+  </div>
+</div>
+
+<script>
+/* ====================================================
+   XỬ LÝ NHẠC NỀN & OVERLAY
+   ==================================================== */
+const musicOverlay = document.getElementById('musicOverlay');
+const bgMusic = document.getElementById('bgMusic');
+const startBtn = document.getElementById('startBtn');
+
+function enterSite() {
+  bgMusic.volume = 0.7;
+  bgMusic.play().catch(err => console.warn('Lỗi phát nhạc:', err));
+  musicOverlay.classList.add('hidden');
+}
+
+startBtn.addEventListener('click', enterSite);
+musicOverlay.addEventListener('click', enterSite);
+
+/* ====================================================
+   FLOATING EMBERS — canvas hạt bay lên
+   ==================================================== */
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let parts = [];
+
+  const COLORS = ['#7ab8ff','#a8c8ff','#c8a0ff','#8fd8ff','#b0c0ff','#e0b8ff'];
+
+  function count() { return Math.min(140, Math.max(50, Math.floor(W / 12))); }
+
+  function make(anywhere) {
+    const r = Math.random() * 2.2 + 0.6;
+    return {
+      x: Math.random() * W,
+      y: anywhere ? Math.random() * H : H + 20,
+      r,
+      vy: -(0.3 + Math.random() * 0.9),
+      vx: (Math.random() - 0.5) * 0.4,
+      sway: Math.random() * Math.PI * 2,
+      swaySpeed: 0.4 + Math.random() * 0.8,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      glow: r > 1.6,
+      life: 0,
+      maxLife: 6 + Math.random() * 6,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width  = W * dpr;
+    c.height = H * dpr;
+    c.style.width  = W + 'px';
+    c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (parts.length < need) parts.push(make(true));
+    if (parts.length > need) parts.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      p.life += 1 / 60;
+      p.sway += 0.03 * p.swaySpeed;
+      p.x += p.vx + Math.sin(p.sway) * 0.4;
+      p.y += p.vy;
+
+      const fade = Math.max(0, 1 - p.life / p.maxLife);
+      const alpha = 0.7 * fade;
+
+      if (p.life > p.maxLife || p.y < -20) {
+        parts[i] = make(false);
+        continue;
+      }
+
+      if (p.glow) {
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 8);
+        g.addColorStop(0,   p.color + 'cc');
+        g.addColorStop(0.4, p.color + '44');
+        g.addColorStop(1,   p.color + '00');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
+
+/* ====================================================
+   TẢI TIKTOK
+   ==================================================== */
+const FORMATS = [
+  { key: 'play',  label: 'MP4 không logo', ext: 'mp4' },
+  { key: 'music', label: 'Nhạc MP3',        ext: 'mp3' },
+];
+
+function extractUrl(text) {
+  if (!text) return null;
+  const re = /(https?:\/\/)?((vm|vt)\.tiktok\.com\/\w+|((www|m)\.)?tiktok\.com\/@[^\s\/]+\/(video|photo)\/\d+|((www|m)\.)?tiktok\.com\/v\/\d+(\.html)?)/;
+  const m = text.match(re);
+  return m ? m[0] : null;
+}
+
+async function fetchInfo(link) {
+  const url = 'https://tikwm.com/api/?url=' + encodeURIComponent(link) + '&hd=1';
+  const res = await fetch(url);
+  return res.json();
+}
+
+const $overlay = document.getElementById('overlay');
+const $title   = document.getElementById('modal-title');
+const $bar     = document.getElementById('bar');
+const $pct     = document.getElementById('pct');
+const $done    = document.getElementById('done-msg');
+
+function openModal(label) {
+  $title.textContent = 'Đang tải: ' + label;
+  $bar.classList.add('indet');
+  $bar.style.width = '40%';$pct.textContent = '0%';
+  $done.style.display = 'none';$overlay.classList.add('open');
+}
+function closeModal() { $overlay.classList.remove('open'); }
+function setProgress(p) {
+  if (p == null || p < 0) {
+    $bar.classList.add('indet');
+    $bar.style.width = '40%';$pct.textContent = '...';
+  } else {
+    $bar.classList.remove('indet');
+    $bar.style.width = p + '%';$pct.textContent = p + '%';
+  }
+}
+function markDone() {
+  $bar.classList.remove('indet');
+  $bar.style.width = '100%';$pct.textContent = '100%';
+  $done.style.display = 'block';$title.textContent = 'Hoàn tất';
+}
+
+async function download(url, name, label) {
+  openModal(label);
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const total = parseInt(res.headers.get('content-length') || '0', 10);
+    const reader = res.body.getReader();
+    const chunks = [];
+    let received = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+      if (total) setProgress(Math.round(received / total * 100));
+    }
+
+    const blob = new Blob(chunks, {
+      type: res.headers.get('content-type') || 'application/octet-stream'
+    });
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 4000);
+
+    markDone();
+    setTimeout(closeModal, 1200);
+  } catch (err) {
+    console.warn('Blob fail, fallback:', err);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    markDone();
+    setTimeout(closeModal, 1200);
+  }
+}
+
+function render(data) {
+  const cover = data.cover
+    ? (data.cover.startsWith('http') ? data.cover : 'https://tikwm.com' + data.cover)
+    : '';
+  const title = (data.title || 'Video TikTok').replace(/</g, '&lt;');
+  const id = data.id || 'video';
+
+  const items = FORMATS
+    .filter(f => data[f.key])
+    .map(f => ({ label: f.label, url: data[f.key], name: `tiktok_${id}.${f.ext}` }));
+
+  if (!items.length) {
+    document.getElementById('result').innerHTML =
+      '<div class="err">Không có định dạng tải được.</div>';
+    return;
+  }
+
+  const html = `
+    <div class="card-info">
+      ${cover ? `<img src="${cover}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
+      <p class="title">${title}</p>
+    </div>
+    <div class="dl-list">
+      ${items.map(x =>
+        `<button data-url="${x.url}" data-name="${x.name}" data-label="${x.label}">${x.label}</button>`
+      ).join('')}
+    </div>
+  `;
+
+  const box = document.getElementById('result');
+  box.innerHTML = html;
+
+  box.querySelectorAll('.dl-list button').forEach(btn => {
+    btn.onclick = () => download(btn.dataset.url, btn.dataset.name, btn.dataset.label);
+  });
+}
+
+document.getElementById('go').onclick = async () => {
+  const link = extractUrl(document.getElementById('url').value.trim());
+  const $result = document.getElementById('result');
+  const $go = document.getElementById('go');
+
+  if (!link) {
+    $result.innerHTML = '<div class="err">Link không hợp lệ.</div>';
+    return;
+  }
+
+  $go.disabled = true;
+  $result.innerHTML = '<div class="status"><div class="spinner"></div>Đang lấy thông tin…</div>';
+
+  try {
+    const full = link.startsWith('http') ? link : 'https://' + link;
+    const json = await fetchInfo(full);
+    if (!json || json.code !== 0 || !json.data) {
+      $result.innerHTML = '<div class="err">Không lấy được video. ' + (json?.msg || 'Thử lại sau.') + '</div>';
+    } else {
+      render(json.data);
+    }
+  } catch (err) {
+    console.error(err);
+    $result.innerHTML = '<div class="err">Lỗi kết nối.</div>';
+  } finally {
+    $go.disabled = false;
+  }
+};
+
+document.getElementById('url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('go').click();
+});
+document.getElementById('close').onclick = closeModal;
+$overlay.addEventListener('click', e => { if (e.target ===$overlay) closeModal(); });
+
+/* ====================================================
+   HIỆU ỨNG CARD
+   ==================================================== */
+const card = document.getElementById('card');
+const glare = document.getElementById('glare');
+const box = document.getElementById('particles');
+
+for (let i = 0; i < 20; i++) {
+  const s = document.createElement('span');
+  s.style.left = Math.random() * 100 + '%';
+  s.style.animationDuration = (5 + Math.random() * 5) + 's';
+  s.style.animationDelay = (Math.random() * 6) + 's';
+  box.appendChild(s);
+}
+
+let rx = 0, ry = 0, trx = 0, try_ = 0;
+let lastMove = 0, idleStart = 0;
+
+window.addEventListener('pointermove', e => {
+  const r = card.getBoundingClientRect();
+  const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+  const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2)));
+
+  try_ = nx * 12;
+  trx = -ny * 12;
+
+  glare.style.setProperty('--gx', ((e.clientX - r.left) / r.width) * 100 + '%');
+  glare.style.setProperty('--gy', ((e.clientY - r.top) / r.height) * 100 + '%');
+
+  lastMove = performance.now();
+  idleStart = 0;
+}, { passive: true });
+
+function loop(now) {
+  if (now - lastMove > 1000) {
+    if (!idleStart) idleStart = now;
+    const t = (now - idleStart) / 1000;
+    const A = 12, speed = 0.9;
+    try_ = A * Math.cos(t * speed);
+    trx = -A * Math.sin(t * speed);
+  }
+  ry += (try_ - ry) * 0.08;
+  rx += (trx - rx) * 0.08;
+  card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+  card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

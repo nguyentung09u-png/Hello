@@ -1,0 +1,218 @@
+🪟 DIALOG BẮT ĐẦU & THUA — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Dialog = HTML/CSS thuần, đè lên canvas, gồm 3 lớp:
+
+```
+LỚP 1: #overlay  → nền phủ toàn màn hình
+LỚP 2: .card     → khung hộp thoại
+LỚP 3: <button>  → nút bấm
+```
+
+Ẩn/hiện bằng toggle class .hide (không xoá DOM) — chỉ đổi opacity + pointer-events.
+
+---
+
+🔍 Cách làm từng lớp
+
+LỚP 1 — #overlay (nền phủ)
+
+· position: absolute; inset: 0 → phủ toàn màn hình
+· display: flex + align/justify: center → căn giữa khung con
+· background: radial-gradient(...) → tối giữa, tối hơn rìa
+· backdrop-filter: blur() → làm mờ canvas phía sau
+· z-index: 20 → nằm trên canvas + HUD
+· transition: opacity .45s → ẩn/hiện mượt
+
+LỚP 2 — .card (khung)
+
+· max-width, padding, border-radius
+· Nền gradient tím + viền vàng mờ
+· box-shadow 2 lớp (bóng ngoài + sáng trong)
+· animation: pop → khung bật lên khi hiện
+
+LỚP 3 — <button>
+
+· Nền gradient vàng, chữ đậm
+· transition: transform → co lại khi bấm (:active { transform: scale(.95) })
+
+---
+
+🔄 Ẩn/hiện bằng class .hide
+
+```css
+#overlay.hide { opacity: 0; pointer-events: none; }
+```
+
+Việc Cách làm
+Hiện overlay.classList.remove('hide')
+Ẩn overlay.classList.add('hide')
+
+→ Không xoá DOM, chỉ ẩn bằng opacity. pointer-events: none để click không lọt qua.
+
+---
+
+🔍 Hai dialog khác nhau ở đâu?
+
+ Bắt đầu Thua
+Cách tạo HTML cứng JS: card.innerHTML = ...
+Thời điểm Ngay khi load Sau setTimeout(900ms)
+Listener Gắn 1 lần trong HTML/JS Gắn lại sau khi ghi đè
+
+Lý do gắn lại listener: khi card.innerHTML = ..., nút cũ bị xoá khỏi DOM → listener cũ mất → phải gắn lại cho nút mới.
+
+Lý do setTimeout(900ms): để người chơi thấy hiệu ứng vua gục + hạt bay trước khi dialog hiện. Tôi cho là vậy, nhưng không chắc con số cụ thể.
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```html
+<!-- ============================ -->
+<!-- LỚP 1: OVERLAY + LỚP 2: CARD -->
+<!-- ============================ -->
+<div id="overlay">
+  <div class="card" id="card">
+    <button id="startBtn">BẮT ĐẦU</button>
+  </div>
+</div>
+```
+
+```css
+/* ============================ */
+/* LỚP 1: NỀN PHỦ                */
+/* ============================ */
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center,
+              rgba(12,8,24,.72),
+              rgba(4,3,10,.94));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 20;
+  transition: opacity .45s ease;
+}
+#overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================ */
+/* LỚP 2: KHUNG                  */
+/* ============================ */
+.card {
+  max-width: 520px;
+  width: 100%;
+  background: linear-gradient(180deg,
+              rgba(28,18,44,.9),
+              rgba(12,8,20,.95));
+  border: 1px solid rgba(255,206,110,.4);
+  border-radius: 16px;
+  padding: 30px 26px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.8),
+              inset 0 1px 0 rgba(255,220,150,.16);
+  animation: pop .5s cubic-bezier(.2,1.3,.5,1);
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(24px) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================ */
+/* LỚP 3: NÚT                    */
+/* ============================ */
+.card button {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .16em;
+  padding: 14px 40px;
+  border-radius: 11px;
+  cursor: pointer;
+  color: #2a1a05;
+  background: linear-gradient(180deg, #ffe89a, #ffc93c 50%, #e0a01c);
+  border: 1px solid #ffeaa0;
+  box-shadow: 0 6px 26px rgba(255,190,60,.45),
+              inset 0 1px 0 rgba(255,255,255,.6);
+  transition: transform .12s, box-shadow .2s;
+}
+.card button:active {
+  transform: scale(.95);
+}
+```
+
+```js
+// ============================ //
+// THAM CHIẾU DOM               //
+// ============================ //
+const overlay = document.getElementById('overlay');
+const card    = document.getElementById('card');
+
+// ============================ //
+// GẮN LISTENER CHO NÚT BAN ĐẦU //
+// ============================ //
+document.getElementById('startBtn')
+  .addEventListener('click', startGame);
+
+// ============================ //
+// HÀM BẮT ĐẦU GAME             //
+// ============================ //
+function startGame() {
+  // ... khởi tạo state ...
+  overlay.classList.add('hide');   // ← ẩn dialog
+}
+
+// ============================ //
+// HÀM KẾT THÚC GAME            //
+// ============================ //
+function gameOver() {
+  // ... hiệu ứng vua gục ...
+
+  setTimeout(() => {
+    // Ghi đè nội dung → nút cũ mất, phải gắn lại listener
+    card.innerHTML = `<button id="startBtn">KẾT THÚC</button>`;
+
+    // Hiện lại overlay
+    overlay.classList.remove('hide');
+
+    // Gắn listener mới cho nút vừa tạo
+    document.getElementById('startBtn')
+      .addEventListener('click', startGame);
+  }, 900);
+}
+```
+
+---
+
+🎨 Bảng tham số có thể chỉnh
+
+Tham số Mặc định Đổi để làm gì
+opacity nền .72 → .94 Tối hơn/nhạt hơn
+blur(4px) 4px Mờ nhiều/ít
+z-index: 20 20 Trên/dưới HUD
+transition: .45s 0.45s Ẩn/hiện nhanh/chậm
+max-width: 520px 520 Khung rộng/hẹp
+padding: 30px 26px — Khung to/nhỏ
+setTimeout(900) 900ms Trễ hiện dialog thua
+
+---
+
+⚠️ Điều tôi không chắc
+
+· setTimeout(900ms) có khớp chính xác với animation vua gục không — tôi cho là vậy nhưng không có căn cứ.
+· Dùng innerHTML để thay nội dung có phải cách tốt nhất không — nó đơn giản nhưng mất listener cũ. Cách khác: tạo 2 card riêng, ẩn/hiện. Tôi không chắc cách nào tối ưu hơn.
+· backdrop-filter: blur() có chậm trên mobile yếu không — tôi không có dữ liệu.
+· cubic-bezier(.2, 1.3, .5, 1) có overshoot (1.3 > 1) — tôi cho là chủ ý, không chắc.
+· Có nên dùng <dialog> HTML5 thay vì tự làm overlay không — tôi không rõ ưu/nhược.
+· -webkit-backdrop-filter có cần cho Safari cũ không — tôi nghĩ là có cho iOS cũ, nhưng không chắc ngưỡng phiên bản.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: tạo 3 lớp HTML + CSS — #overlay (absolute + inset:0 + radial-gradient + backdrop-blur + z-index 20), .card (khung tím viền vàng + animation: pop), <button> (vàng gradient) — dialog bắt đầu viết cứng HTML, dialog thua sinh bằng card.innerHTML trong gameOver() sau setTimeout(900ms) rồi gắn lại listener, ẩn/hiện bằng toggle class .hide (opacity + pointer-events).

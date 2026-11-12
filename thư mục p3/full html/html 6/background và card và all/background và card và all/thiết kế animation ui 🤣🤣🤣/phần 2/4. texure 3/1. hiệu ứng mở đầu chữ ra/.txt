@@ -1,0 +1,79 @@
+Tổng quan cách làm
+
+Staggered Scale Blur Reveal gồm 4 bước:
+
+1. Tách chữ — mỗi chữ cái trong 1 <span>, xếp hàng ngang bằng flex.
+2. Ẩn ban đầu — opacity: 0.
+3. Keyframe appear — gộp 4 hiệu ứng: scale (to→nhỏ), skewX (nghiêng→thẳng), blur (mờ→rõ), opacity (ẩn→hiện).
+4. Stagger delay — mỗi chữ lệch nhau 0.12s bằng nth-child.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05050a;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    overflow: hidden;
+  }
+
+  .text {
+    display: flex;
+    gap: 0.03em;
+    font-size: 8rem;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .text span {
+    display: inline-block;
+    opacity: 0;
+    animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.4) forwards;
+  }
+
+  @keyframes appear {
+    0%   { opacity: 0; transform: scale(2) skewX(30deg); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) skewX(0);      filter: blur(0); }
+  }
+
+  /* Stagger — mỗi chữ lệch 0.12s */
+  .text span:nth-child(1) { animation-delay: 0.1s; }
+  .text span:nth-child(2) { animation-delay: 0.22s; }
+  .text span:nth-child(3) { animation-delay: 0.34s; }
+  .text span:nth-child(4) { animation-delay: 0.46s; }
+  .text span:nth-child(5) { animation-delay: 0.58s; }
+</style>
+</head>
+<body>
+
+  <div class="text">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </div>
+
+</body>
+</html>
+```
+
+Biến thể:
+
+· Nhanh hơn → animation-delay 0.12s → 0.06s.
+· Mờ hơn lúc đầu → blur(10px) → blur(20px).
+· Không nghiêng → xóa skewX(30deg) và skewX(0).
+· Không bounce → đổi cubic-bezier(...) thành ease-out.
+
+---
+
+🎯 Tóm 1 câu: Mỗi chữ trong <span> chạy keyframe gộp scale + skewX + blur + opacity, animation-delay lệch 0.12s mỗi chữ để bung so le từ trái sang phải.

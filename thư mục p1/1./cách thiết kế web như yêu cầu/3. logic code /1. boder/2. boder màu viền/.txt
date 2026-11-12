@@ -1,0 +1,25 @@
+1. boder có màu viền đỏ hoặc màu gì đoa tùy
+border: 1px solid var(--border);
+/*      ↑    ↑         ↑
+        │    │         └── ③ MÀU viền
+        │    └──────────── ② KIỂU viền
+        └───────────────── ① ĐỘ DÀY viền */
+        
+        
+        
+  ----nó có 2 dạng ---
+1. khóa ẩn để tìm đổi
+  border: 1px solid var(--border);
+
+
+
+cách xử lí : đổi màu tìm
+--border   
+nó có dấu #
+là đúng rồi kaka
+  
+2. khóa cứng
+border: 1px solid #26364c;
+
+cách xử lí : đổi màu trực tiếp lum
+thay #26364c thành gì đó tùy

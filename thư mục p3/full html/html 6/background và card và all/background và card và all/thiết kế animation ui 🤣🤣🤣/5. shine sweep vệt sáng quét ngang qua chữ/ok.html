@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>HELLO — Shine Sweep + Texture</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 30% 30%, #1a1030, #0a0e1a 60%);
+  }
+
+  /* Khung chứa chữ */
+  .hello-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 0.2em;
+  }
+
+  /* Chữ HELLO có texture kim loại */
+  .hello {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(3rem, 14vw, 9rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: transparent;
+    background:
+      /* Lớp 1: gradient kim loại dọc */
+      linear-gradient(
+        180deg,
+        #f5d0fe 0%,
+        #a855f7 40%,
+        #6b21a8 60%,
+        #c084fc 100%
+      );
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+  }
+
+  /* Texture nhiễu (noise) phủ lên chữ */
+  .hello-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.03) 0px,
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px,
+        transparent 3px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(0, 0, 0, 0.05) 0px,
+        rgba(0, 0, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Vệt sáng lướt qua — có texture bên trong */
+  .hello-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -20% -10%;
+    background:
+      /* Vệt sáng chính */
+      linear-gradient(
+        115deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.9) 48%,
+        rgba(255, 255, 255, 1)   50%,
+        rgba(255, 255, 255, 0.9) 52%,
+        transparent 65%
+      ),
+      /* Texture vân chéo bên trong vệt sáng */
+      repeating-linear-gradient(
+        115deg,
+        rgba(255, 255, 255, 0.15) 0px,
+        rgba(255, 255, 255, 0.15) 2px,
+        transparent 2px,
+        transparent 6px
+      );
+    background-blend-mode: overlay;
+    transform: translateX(-120%);
+    animation: shine 3s ease-in-out infinite;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  @keyframes shine {
+    0%, 60% { transform: translateX(-120%); }
+    85%     { transform: translateX(120%);  }
+    100%    { transform: translateX(120%);  }
+  }
+</style>
+</head>
+<body>
+
+  <div class="hello-wrap">
+    <div class="hello">HELLO</div>
+  </div>
+
+</body>
+</html>

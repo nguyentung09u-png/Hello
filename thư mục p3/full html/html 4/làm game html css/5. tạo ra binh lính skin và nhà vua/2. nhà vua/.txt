@@ -1,0 +1,332 @@
+👑 VẼ NHÀ VUA — CÁCH LÀM (TỔNG QUAN)
+
+🎯 Nguyên tắc cốt lõi
+
+Vẽ Nhà Vua = 1 hàm duy nhất, gồm 4 bước:
+
+```
+BƯỚC 1: AURA    vẽ quầng sáng vàng (ở hệ toạ độ màn hình)
+BƯỚC 2: SETUP   save() + translate + scale(1.36) + translate(bob)
+BƯỚC 3: VẼ      ~15 bộ phận vector, từ sau ra trước
+BƯỚC 4: CLEANUP restore() + HP bar tím (hệ toạ độ màn hình)
+```
+
+Điểm khác biệt với lính:
+
+· Vua đứng yên → không có face, không có legSwing
+· Scale 1.36 → to hơn lính
+· Có aura vàng vẽ trước save() (không bị scale)
+· Có crown glow vẽ trong save() (bị scale theo)
+· HP bar màu tím thay vì xanh
+
+---
+
+🔍 Bốn bước chi tiết
+
+BƯỚC 1 — AURA (vẽ trước save)
+
+Vẽ ở hệ toạ độ màn hình, không bị scale:
+
+```js
+const ag = ctx.createRadialGradient(k.x, k.y - 18, 4, k.x, k.y - 18, 68);
+ag.addColorStop(0, 'rgba(255,215,120,0.20)');
+ag.addColorStop(1, 'rgba(255,215,120,0)');
+ctx.fillStyle = ag;
+ctx.beginPath();
+ctx.arc(k.x, k.y - 18, 68, 0, Math.PI * 2);
+ctx.fill();
+```
+
+→ Radial gradient vàng mờ toả ra từ thân Vua.
+
+BƯỚC 2 — SETUP
+
+```js
+ctx.save();
+ctx.translate(k.x, k.y);
+ctx.scale(sc, sc);              // sc = scaleAt(k.y) * 1.36
+const bob = Math.sin(t * 0.0017) * 0.9;
+ctx.translate(0, -bob);
+```
+
+→ Nhân 1.36 vào scale → Vua to hơn lính.
+
+BƯỚC 3 — VẼ 15 BỘ PHẬN (thứ tự sau → trước)
+
+```
+1.  Bóng (ellipse đen)
+2.  Áo choàng đỏ (path cong — SAU cùng)
+3.  Áo vàng (hình thang + gradient)
+4.  Sọc giữa áo (hình thang hẹp trắng mờ)
+5.  Cổ lông (hình thang ngược trắng)
+6.  Tay × 2 (2 đường vàng)
+7.  Quyền trượng: cán + ngọc + highlight
+8.  Đầu (hình tròn)
+9.  Râu (path cong quadraticCurveTo)
+10. Mắt × 2 (2 chấm nâu)
+11. Vương miện (đa giác 6 đỉnh)
+12. Ngọc giữa (đỏ) + 2 ngọc bên (xanh)
+13. Crown glow (radial gradient với 'lighter')
+14. Hit flash (nếu bị đánh)
+```
+
+BƯỚC 4 — CLEANUP
+
+```js
+ctx.restore();
+drawBar(k.x, k.y - 62 * sc, 62 * sc * 0.8, 5, k.hp / k.maxHp, '#c061e0', '#f0a6ff');
+```
+
+→ HP bar tím, dài hơn lính (62 vs 26).
+
+---
+
+🔑 Kỹ thuật đặc biệt
+
+Kỹ thuật Dùng ở đâu Tác dụng
+quadraticCurveTo Áo choàng đỏ + râu Đường cong mềm
+createRadialGradient Aura + crown glow Phát sáng
+'lighter' Crown glow + hit flash Cộng sáng
+Scale × 1.36 Toàn thân Vua to hơn lính
+Không có face Vua Đứng yên, không lật
+3 gradient Aura, áo, glow Khối 3D + sáng
+
+---
+
+💻 CODE KHUNG (chung chung)
+
+```js
+// ============================
+// HÀM CHÍNH: VẼ NHÀ VUA
+// ============================
+function drawKing(k, t) {
+  const sc = scaleAt(k.y) * 1.36;
+
+  // --- BƯỚC 1: AURA (hệ toạ độ màn hình) ---
+  const auraR = 68;
+  const ag = ctx.createRadialGradient(k.x, k.y - 18, 4, k.x, k.y - 18, auraR);
+  ag.addColorStop(0, 'rgba(255,215,120,0.20)');
+  ag.addColorStop(1, 'rgba(255,215,120,0)');
+  ctx.fillStyle = ag;
+  ctx.beginPath();
+  ctx.arc(k.x, k.y - 18, auraR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // --- BƯỚC 2: SETUP ---
+  ctx.save();
+  ctx.translate(k.x, k.y);
+  ctx.scale(sc, sc);
+
+  const bob = Math.sin(t * 0.0017) * 0.9;
+  ctx.translate(0, -bob);
+
+  // --- BƯỚC 3: VẼ 15 BỘ PHẬN ---
+
+  // 1. Bóng
+  ctx.fillStyle = 'rgba(0,0,0,0.34)';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 15, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Áo choàng đỏ (vẽ TRƯỚC áo vàng — nằm sau)
+  ctx.fillStyle = '#6d1b36';
+  ctx.beginPath();
+  ctx.moveTo(-11, -30);
+  ctx.quadraticCurveTo(-17, -13, -13, 0);
+  ctx.lineTo(13, 0);
+  ctx.quadraticCurveTo(17, -13, 11, -30);
+  ctx.closePath();
+  ctx.fill();
+
+  // 3. Áo vàng (gradient + hình thang)
+  const rg = ctx.createLinearGradient(-10, -32, 10, 0);
+  rg.addColorStop(0, '#f0d074');
+  rg.addColorStop(0.5, '#d8ab3c');
+  rg.addColorStop(1, '#a3791d');
+  ctx.fillStyle = rg;
+  ctx.beginPath();
+  ctx.moveTo(-8.5, -31);
+  ctx.lineTo(8.5, -31);
+  ctx.lineTo(12, -1);
+  ctx.lineTo(-12, -1);
+  ctx.closePath();
+  ctx.fill();
+
+  // 4. Sọc giữa áo
+  ctx.fillStyle = 'rgba(255,240,190,0.55)';
+  ctx.beginPath();
+  ctx.moveTo(-2, -31);
+  ctx.lineTo(2, -31);
+  ctx.lineTo(2.6, -1);
+  ctx.lineTo(-2.6, -1);
+  ctx.closePath();
+  ctx.fill();
+
+  // 5. Cổ lông trắng
+  ctx.fillStyle = '#fff6e2';
+  ctx.beginPath();
+  ctx.moveTo(-9, -31);
+  ctx.lineTo(9, -31);
+  ctx.lineTo(7.6, -25.5);
+  ctx.lineTo(-7.6, -25.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // 6. Tay × 2
+  ctx.strokeStyle = '#d8ab3c';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-8, -27); ctx.lineTo(-13, -17);
+  ctx.moveTo(8, -27);  ctx.lineTo(13, -17);
+  ctx.stroke();
+
+  // 7. Quyền trượng
+  ctx.save();
+  ctx.translate(13, -17);
+  ctx.rotate(-0.12);
+
+  // 7a. Cán
+  ctx.strokeStyle = '#8a6b2a';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(0, 4); ctx.lineTo(0, -22);
+  ctx.stroke();
+
+  // 7b. Ngọc vàng trên đỉnh
+  ctx.fillStyle = '#ffe27a';
+  ctx.beginPath();
+  ctx.arc(0, -25, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 7c. Highlight nhỏ trên ngọc
+  ctx.fillStyle = 'rgba(255,240,180,0.55)';
+  ctx.beginPath();
+  ctx.arc(-1.2, -26.2, 1.6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  // 8. Đầu
+  ctx.fillStyle = '#e9bb8d';
+  ctx.beginPath();
+  ctx.arc(0, -37, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 9. Râu (path cong)
+  ctx.fillStyle = '#ded7cc';
+  ctx.beginPath();
+  ctx.moveTo(-5.2, -35.5);
+  ctx.quadraticCurveTo(0, -23, 5.2, -35.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // 10. Mắt × 2
+  ctx.fillStyle = '#3a2a1a';
+  ctx.beginPath();
+  ctx.arc(-2.6, -38.2, 0.9, 0, Math.PI * 2);
+  ctx.arc( 2.6, -38.2, 0.9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 11. Vương miện (đa giác 6 đỉnh)
+  ctx.fillStyle = '#ffd447';
+  ctx.beginPath();
+  ctx.moveTo(-8.5, -43);
+  ctx.lineTo(-8.5, -48.5);
+  ctx.lineTo(-4.2, -45);
+  ctx.lineTo(0, -51);
+  ctx.lineTo(4.2, -45);
+  ctx.lineTo(8.5, -48.5);
+  ctx.lineTo(8.5, -43);
+  ctx.closePath();
+  ctx.fill();
+
+  // 12. 3 viên ngọc
+  ctx.fillStyle = '#e8455a';
+  ctx.beginPath(); ctx.arc(0, -45.6, 1.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#4fc3f7';
+  ctx.beginPath(); ctx.arc(-5.6, -45.4, 1.0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 5.6, -45.4, 1.0, 0, Math.PI * 2); ctx.fill();
+
+  // 13. Crown glow
+  ctx.globalCompositeOperation = 'lighter';
+  const gl = ctx.createRadialGradient(0, -47, 0, 0, -47, 22);
+  gl.addColorStop(0, 'rgba(255,220,110,0.42)');
+  gl.addColorStop(1, 'rgba(255,220,110,0)');
+  ctx.fillStyle = gl;
+  ctx.beginPath();
+  ctx.arc(0, -47, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // 14. Hit flash (nếu bị đánh)
+  if (k.flash > 0) {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(255,80,80,${k.flash * 0.55})`;
+    ctx.beginPath();
+    ctx.ellipse(0, -26, 20, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // --- BƯỚC 4: CLEANUP ---
+  ctx.restore();
+
+  // 15. HP bar tím
+  drawBar(k.x, k.y - 62 * sc, 62 * sc * 0.8, 5,
+          k.hp / k.maxHp, '#c061e0', '#f0a6ff');
+}
+
+// ============================
+// HÀM PHỤ: PHỐI CẢNH
+// ============================
+function scaleAt(y) {
+  const t = (y - G_TOP) / (G_BOT - G_TOP);
+  return 0.70 + Math.max(0, Math.min(1, t)) * 0.52;
+}
+```
+
+---
+
+🎨 Bảng tham số có thể chỉnh
+
+Yếu tố Mặc định Đổi để làm gì
+Scale 1.36 1.36 Vua to/nhỏ hơn lính
+Aura bán kính 68 Quầng sáng to/nhỏ
+Aura alpha 0.20 Sáng mờ/nhạt
+Crown glow alpha 0.42 Vương miện sáng mạnh/yếu
+quadraticCurveTo Điểm cong Độ cong áo/râu
+HP bar màu #c061e0 Phân biệt với lính/quái
+
+---
+
+🔄 Vòng đời 1 frame
+
+```
+1. drawEntities() → sort theo y
+2. drawKing(k, t):
+   - Vẽ aura (hệ toạ độ màn hình)
+   - save() → translate → scale(1.36) → translate(bob)
+   - Vẽ 15 bộ phận từ sau ra trước
+   - restore() → về hệ toạ độ gốc
+3. drawBar() → HP bar tím trên đầu
+```
+
+---
+
+⚠️ Điều tôi không chắc
+
+· Toạ độ âm -37 = đầu, -30 = vai... — đây là quy ước nội bộ tác giả, tôi đọc được từ code nhưng không chắc có hệ thống chung nào.
+· Con số 1.36 cho scale Vua — tôi cho là để Vua nổi bật, nhưng không có căn cứ tác giả chọn số này.
+· Tại sao Vua có 3 viên ngọc (1 đỏ + 2 xanh) — tôi không rõ có ý nghĩa gì không.
+· crown glow dùng 'lighter' có tốn GPU không — tôi cho là có (vì 'lighter' thường tốn hơn), nhưng không có dữ liệu.
+· Việc tạo 3 gradient mỗi frame cho Vua (aura, áo, crown glow) có phải tối ưu không — tôi nghĩ là không nếu hiệu năng quan trọng, nhưng không chắc mức độ ảnh hưởng.
+· Vua không có buffed — chỉ lính đổi màu khi có buff, Vua giữ nguyên. Tôi cho là chủ ý, không chắc.
+· bob = sin(t * 0.0017) * 0.9 — tôi không rõ tác giả chọn 0.0017 và 0.9 dựa trên cơ sở nào.
+
+---
+
+🎯 TÓM 1 CÂU
+
+Cách làm: 1 hàm drawKing(k, t) — vẽ aura vàng ở hệ toạ độ màn hình → save() → translate(k.x, k.y) → scale(sc * 1.36) → translate(0, -bob) → vẽ 15 bộ phận từ sau-ra-trước (bóng → áo choàng đỏ quadraticCurveTo → áo vàng gradient → sọc → cổ lông → tay → quyền trượng → đầu → râu quadraticCurveTo → mắt → vương miện → 3 ngọc → crown glow 'lighter' → hit flash) → restore() → drawBar() màu tím — dùng quadraticCurveTo cho áo và râu, createRadialGradient cho aura và glow, 'lighter' để phát sáng, Vua to hơn lính 1.36 lần và không có face.

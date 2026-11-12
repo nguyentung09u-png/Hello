@@ -1,0 +1,210 @@
+Tổng quan cách làm
+
+3 lớp chồng nhau:
+
+1. Nền — body với radial-gradient lệch tâm, hồng đêm → đỏ tía → đen.
+2. Glow — <div class="bloom"> chứa 2 radial-gradient hồng + filter: blur(60px) + animation drift.
+3. Canvas hạt — <canvas> chạy requestAnimationFrame, mỗi frame: cập nhật vị trí + xoay → tái sinh nếu rơi khỏi màn → vẽ ellipse.
+
+Nguyên lý cánh hoa:
+
+· Mỗi cánh có x, y, w, h, vx, vy, sway, swaySpeed, rot, vr, color, alpha.
+· h = w * (0.55–0.85) → hình ellipse bầu dục (không phải tròn).
+· Mỗi frame:
+  · sway += 0.02 * swaySpeed
+  · x += vx + cos(sway) * 0.5 — trôi ngang có dao động
+  · y += vy — rơi đều
+  · rot += vr — tự xoay
+· Khi y > H + 40 → tái sinh ở đỉnh (y = -30 - random * 60).
+
+Vẽ 1 cánh = 4 lớp:
+
+1. Thân: ctx.ellipse(0, 0, w/2, h/2, 0, 0, 2π).
+2. Gradient ngang: linearGradient(-w/2 → w/2) với 3 stop — cc → đặc → cc.
+3. Viền trắng mờ: strokeStyle alpha 0.35, lineWidth 0.5.
+4. Gân giữa: đoạn thẳng ngang (-w/2+1 → w/2-1), alpha 0.25, lineWidth 0.4.
+
+Bọc trong save/restore: cô lập translate + rotate, không rò rỉ state.
+
+Tối ưu (suy luận có căn cứ):
+
+· DPR cap 2 → nét trên retina.
+· visibilitychange → dừng khi tab ẩn.
+· prefers-reduced-motion → không chạy vòng lặp.
+· Số cánh cap 45 (vì mỗi cánh vẽ 4 lớp → nặng hơn các bản khác).
+· Tái sinh bằng cách thay phần tử trong mảng — không tạo mảng mới.
+
+Tôi không chắc:
+
+· Tốc độ xoay vr = ±0.01 rad/frame có tự nhiên trên mọi kích thước màn.
+· Viền + gân trắng (0.35 / 0.25) có hiển thị rõ trên nền sáng hay không.
+
+---
+
+Code chung chung
+
+```html
+<div class="bloom" aria-hidden="true"></div>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="content">Nội dung</div>
+```
+
+```css
+html, body { height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 40%, #2a1020 0%, #14060f 60%, #08020a 100%);
+  margin: 0; min-height: 100vh;
+  display: grid; place-items: center;
+  color: #fff0f6; overflow: hidden;
+}
+
+.bloom {
+  position: fixed; inset: 0;
+  z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 25% 25%, rgba(255,140,180,.18), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 75% 70%, rgba(220,100,160,.14), transparent 70%);
+  filter: blur(60px);
+  animation: drift 24s ease-in-out infinite;
+}
+@keyframes drift {
+  0%,100% { transform: translate(0, 0); }
+  50%     { transform: translate(-20px, 15px); }
+}
+
+canvas {
+  position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  display: block;
+}
+
+.content { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bloom { animation: none !important; }
+}
+```
+
+```js
+(function () {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W = 0, H = 0, dpr = 1, rafId = 0;
+  let petals = [];
+
+  const COLORS = ['#ffd8ea','#ffb8d8','#ffe0ec','#ffc8dc','#f5b8d0','#ffffff'];
+
+  function count() { return Math.min(45, Math.max(18, Math.floor(W / 30))); }
+
+  function make(anywhere) {
+    const w = 6 + Math.random() * 12;
+    return {
+      x: Math.random() * W,
+      y: anywhere ? Math.random() * H : -30 - Math.random() * 60,
+      w,
+      h: w * (0.55 + Math.random() * 0.3),
+      vy: 0.3 + Math.random() * 0.7,
+      vx: (Math.random() - 0.5) * 0.3,
+      sway: Math.random() * Math.PI * 2,
+      swaySpeed: 0.4 + Math.random() * 0.6,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.02,
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      alpha: 0.55 + Math.random() * 0.4,
+    };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width  = W * dpr;
+    c.height = H * dpr;
+    c.style.width  = W + 'px';
+    c.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const need = count();
+    while (petals.length < need) petals.push(make(true));
+    if (petals.length > need) petals.length = need;
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < petals.length; i++) {
+      const p = petals[i];
+      p.sway += 0.02 * p.swaySpeed;
+      p.x += p.vx + Math.cos(p.sway) * 0.5;
+      p.y += p.vy;
+      p.rot += p.vr;
+
+      if (p.y > H + 40) {
+        petals[i] = make(false);
+        continue;
+      }
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+
+      // 1. thân ellipse
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
+
+      // 2. gradient ngang
+      const g = ctx.createLinearGradient(-p.w / 2, 0, p.w / 2, 0);
+      g.addColorStop(0,   p.color + 'cc');
+      g.addColorStop(0.5, p.color);
+      g.addColorStop(1,   p.color + 'cc');
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // 3. viền sáng
+      ctx.strokeStyle = 'rgba(255,255,255,.35)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // 4. gân giữa
+      ctx.beginPath();
+      ctx.moveTo(-p.w / 2 + 1, 0);
+      ctx.lineTo( p.w / 2 - 1, 0);
+      ctx.strokeStyle = 'rgba(255,255,255,.25)';
+      ctx.lineWidth = 0.4;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+
+    rafId = requestAnimationFrame(draw);
+  }
+
+  function start() { if (!rafId && !reduceMotion) rafId = requestAnimationFrame(draw); }
+  function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  resize();
+  start();
+})();
+```
+
+---
+
+Lưu ý (phân biệt rõ):
+
+· Suy luận có căn cứ: dùng Canvas 2D + requestAnimationFrame tiêu chuẩn, chạy trên trình duyệt hiện đại.
+· Tôi không chắc vr = ±0.01 rad/frame là tối ưu — thử tăng/giảm để xem.
+· Tôi không chắc viền + gân alpha 0.35 / 0.25 đủ rõ trên mọi màn — phụ thuộc profile màu thiết bị.
+
+🎯 Tóm 1 câu: Nền radial-gradient hồng đêm + glow blur drift + canvas cánh hoa ellipse (rơi + trôi ngang + xoay) vẽ bằng ellipse + gradient ngang + viền + gân, tái sinh ở đỉnh — chạy requestAnimationFrame với DPR cap, visibility, reduced-motion.

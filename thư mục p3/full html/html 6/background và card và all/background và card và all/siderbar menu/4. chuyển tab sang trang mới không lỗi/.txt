@@ -1,0 +1,93 @@
+🎯 Tổng quan cơ chế SPA
+
+SPA hoạt động theo 4 lớp:
+
+Lớp Vai trò Công cụ
+HTML Chứa sẵn tất cả panel <div data-route="...">
+CSS Ẩn/hiện panel display:none + class .active
+JS Bắt click, đổi class, đổi URL addEventListener + history.pushState
+Router Map URL ↔ panel Hàm tự viết hoặc thư viện
+
+Luồng: Click → JS đọc data-route → ẩn panel cũ, hiện panel mới → pushState đổi URL → khi F5, JS đọc URL để hiện đúng panel.
+
+---
+
+📄 Code chung chung (khung tối thiểu)
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>SPA cơ bản</title>
+<style>
+  /* CSS: mặc định ẩn hết panel */
+  .view { display: none; padding: 20px; }
+  .view.active { display: block; }
+
+  nav a { margin-right: 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- NAV: mỗi link trỏ tới 1 route -->
+<nav>
+  <a data-route="/">Trang chủ</a>
+  <a data-route="/gioi-thieu">Giới thiệu</a>
+  <a data-route="/lien-he">Liên hệ</a>
+</nav>
+
+<!-- CÁC PANEL: nằm sẵn trong DOM, ẩn bằng CSS -->
+<div class="view" data-view="/">Nội dung trang chủ</div>
+<div class="view" data-view="/gioi-thieu">Nội dung giới thiệu</div>
+<div class="view" data-view="/lien-he">Nội dung liên hệ</div>
+
+<script>
+  // JS: 3 nhiệm vụ chính
+  const views = document.querySelectorAll('.view');
+  const links = document.querySelectorAll('nav a');
+
+  // 1. Hiện panel theo route
+  function render(route) {
+    views.forEach(v => {
+      v.classList.toggle('active', v.dataset.view === route);
+    });
+  }
+
+  // 2. Bắt click → đổi URL + render
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      const route = link.dataset.route;
+      history.pushState({ route }, '', route); // đổi URL, không load lại
+      render(route);
+    });
+  });
+
+  // 3. Xử lý nút Back/Forward của trình duyệt
+  window.addEventListener('popstate', e => {
+    const route = e.state?.route || location.pathname;
+    render(route);
+  });
+
+  // 4. Khi tải trang lần đầu → render theo URL hiện tại
+  render(location.pathname);
+</script>
+
+</body>
+</html>
+```
+
+---
+
+⚠️ Lưu ý (thực tế)
+
+· Cần server: pushState không chạy với file://. Phải dùng python -m http.server hoặc tương tự.
+· F5 ở URL con (ví dụ /gioi-thieu) sẽ 404 nếu server không cấu hình fallback về index.html. Đây là hạn chế cố hữu của SPA.
+· Router tự viết chỉ phù hợp demo nhỏ. Dự án thật thường dùng React Router, Vue Router...
+· Code trên là khung tối thiểu — thiếu xử lý lỗi, loading, nested route, query param.
+
+---
+
+🎯 Tóm 1 câu
+
+SPA = HTML chứa sẵn panel + CSS ẩn/hiện + JS bắt click đổi class và gọi history.pushState để đổi URL, kèm popstate để xử lý nút Back — tất cả trong 1 file, không load lại trang.

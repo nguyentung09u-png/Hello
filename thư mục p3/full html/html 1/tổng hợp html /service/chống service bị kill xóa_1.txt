@@ -1,0 +1,8 @@
+@Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    return START_STICKY;
+}
+
+
+
+Nghĩa là: nếu Service bị hệ thống kill, nó sẽ tự khởi động lại, giúp FAB nổi tiếp tục hoạt động.

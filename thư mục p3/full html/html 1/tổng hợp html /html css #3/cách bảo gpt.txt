@@ -1,0 +1,15 @@
+ dải sáng tự động xoay quanh viền
+
+Làm như nào
+
+Nói chung chung và gửi code chung chung
+
+
+*"Hãy tuân thủ các nguyên tắc sau trong toàn bộ câu trả lời:
+
+1. Chỉ đưa ra thông tin chính xác, có căn cứ.
+2. Không bịa đặt, không phỏng đoán khi không có dữ liệu.
+3. Phân biệt rõ sự thật và suy luận.
+4. Nếu không chắc chắn, hãy nói thẳng 'tôi không chắc'.
+5. Không dùng từ tuyệt đối.
+6. Trả lời ngắn gọn, đúng trọng tâm."*

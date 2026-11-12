@@ -1,0 +1,55 @@
+Tổng quan cách làm
+
+Staggered Text Reveal gồm 4 bước:
+
+1. Tách chữ — mỗi chữ cái nằm trong 1 <span> riêng.
+2. Ẩn ban đầu — CSS đặt opacity: 0 + dịch chuyển vị trí (thường translateY).
+3. Tạo keyframe — định nghĩa trạng thái ẩn → hiện.
+4. Gắn delay tăng dần — dùng animation-delay hoặc nth-child để mỗi chữ xuất hiện lệch nhau.
+
+---
+
+Code chung chung
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .text { display: flex; gap: 0.05em; font-size: 6rem; }
+
+  .text span {
+    opacity: 0;
+    animation: reveal 0.8s ease-out forwards;
+  }
+
+  /* Delay tăng dần từng chữ */
+  .text span:nth-child(1) { animation-delay: 0.1s; }
+  .text span:nth-child(2) { animation-delay: 0.2s; }
+  .text span:nth-child(3) { animation-delay: 0.3s; }
+  .text span:nth-child(4) { animation-delay: 0.4s; }
+  .text span:nth-child(5) { animation-delay: 0.5s; }
+
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(80px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+  <div class="text">
+    <span>H</span>
+    <span>E</span>
+    <span>L</span>
+    <span>L</span>
+    <span>O</span>
+  </div>
+</body>
+</html>
+```
+
+Muốn bounce → đổi ease-out thành cubic-bezier(0.2, 0.9, 0.3, 1.4).
+
+---
+
+🎯 Tóm 1 câu: Chia chữ vào <span>, ẩn bằng opacity: 0, cho chạy keyframe hiện ra, rồi gắn animation-delay lệch nhau cho từng chữ.

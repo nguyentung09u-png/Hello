@@ -1,0 +1,147 @@
+Tổng quan cách làm (ngắn)
+
+Theo code chúng ta đã viết, để làm trạng thái "đã gửi / đã xem" cần 5 bước:
+
+1. HTML — JS tạo động <div class="seen"><span class="tick">✓</span></div> dưới bong bóng của mình.
+2. CSS — .seen xám mặc định, .seen.read .tick đổi sang xanh.
+3. Firebase — mỗi client ghi seen/{userId} = Date.now() khi vào phòng và khi có tin mới.
+4. Hàm computeSeenText() — đếm số người có lastSeen >= msg.timestamp để quyết định ✓ hay ✓✓.
+5. Listener onValue(seen) — khi node seen đổi, cập nhật lại tick của các tin cũ mà không vẽ lại chat.
+
+Lưu ý: tôi không chắc bạn muốn đếm theo kiểu "ai xem" (per-user) hay "đã có người xem" (any) — code dưới theo hướng per-user. Cách làm "2 phút trước" thì dạng text tôi để riêng, cần thêm hàm timeAgo().
+
+---
+
+Code chung chung (minimal demo)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  body{ margin:0; padding:40px; background:#02030a; color:#fff;
+        font-family:system-ui,sans-serif; }
+  #chat{ max-width:420px; display:flex; flex-direction:column; gap:10px; }
+
+  .row{ display:flex; flex-direction:column; max-width:80%; }
+  .row.mine{ align-self:flex-end; align-items:flex-end; }
+  .row.theirs{ align-self:flex-start; }
+
+  .bubble{ padding:10px 14px; border-radius:14px; font-size:.9rem; }
+  .bubble.mine{ background:#4F46E5; color:#fff; }
+  .bubble.theirs{ background:#F3F4F6; color:#111; }
+
+  .seen{ font-size:.7rem; color:#9CA3AF; padding-right:4px; margin-top:2px; }
+  .seen.read .tick{ color:#3B82F6; }
+</style>
+</head>
+<body>
+
+  <button id="btn-send">Gửi tin demo</button>
+  <div id="chat"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import {
+      getDatabase, ref, push, onValue, set, query, limitToLast, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+    // ⚠️ thay config của bạn
+    const firebaseConfig = {
+      databaseURL: "https://chat-d878c-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    // demo
+    const userId = 'user_' + Math.random().toString(36).substring(2, 9);
+    const chat   = document.getElementById('chat');
+
+    // 3. Ghi seen khi vào phòng
+    set(ref(db, `seen/${userId}`), Date.now());
+
+    // 4. Hàm tính trạng thái
+    function computeSeenText(ts, seenMap){
+      const others = Object.entries(seenMap || {}).filter(([id]) => id !== userId);
+      if (!others.length) return { read:false, text:'✓' };
+      const viewed = others.filter(([, v]) => v >= ts);
+      if (!viewed.length) return { read:false, text:'✓' };
+      if (viewed.length === 1) return { read:true, text:'✓✓' };
+      return { read:true, text:`✓✓ ${viewed.length}` };
+    }
+
+    // 2. CSS đã có sẵn ở trên
+
+    // 5. Listener seen → cập nhật tick realtime
+    let seenCache = {};
+    onValue(ref(db, 'seen'), snap => {
+      seenCache = snap.val() || {};
+      document.querySelectorAll('.row.mine').forEach(row => {
+        const ts = parseInt(row.dataset.ts || '0', 10);
+        if (!ts) return;
+        const info = computeSeenText(ts, seenCache);
+        const seenEl = row.querySelector('.seen');
+        if (!seenEl) return;
+        seenEl.classList.toggle('read', info.read);
+        seenEl.querySelector('.tick').textContent = info.text;
+      });
+    });
+
+    // Gửi tin demo
+    document.getElementById('btn-send').onclick = () => {
+      push(ref(db, 'messages'), {
+        userId, text:'Xin chào', timestamp: serverTimestamp()
+      });
+    };
+
+    // Render messages + tự cập nhật seen của mình
+    onValue(query(ref(db, 'messages'), limitToLast(50)), snapshot => {
+      chat.innerHTML = '';
+      snapshot.forEach(child => {
+        const m = child.val();
+        const isMine = m.userId === userId;
+
+        const row = document.createElement('div');
+        row.className = 'row ' + (isMine ? 'mine' : 'theirs');
+        row.dataset.ts = m.timestamp || 0;
+
+        const bub = document.createElement('div');
+        bub.className = 'bubble ' + (isMine ? 'mine' : 'theirs');
+        bub.textContent = m.text;
+        row.appendChild(bub);
+
+        if (isMine){
+          const info = computeSeenText(m.timestamp || 0, seenCache);
+          const seen = document.createElement('div');
+          seen.className = 'seen' + (info.read ? ' read' : '');
+          seen.innerHTML = `<span class="tick">${info.text}</span>`;
+          row.appendChild(seen);
+        }
+        chat.appendChild(row);
+      });
+
+      // Đánh dấu đã xem = thời điểm hiện tại
+      set(ref(db, `seen/${userId}`), Date.now());
+    });
+  </script>
+</body>
+</html>
+```
+
+Giải thích ngắn:
+
+· Ghi seen/{userId} = Date.now() khi vào phòng và mỗi lần có tin mới.
+· computeSeenText(ts, seenMap) — đếm người có lastSeen ≥ ts → trả {read, text}.
+· onValue(seen) — khi bất kỳ ai cập nhật seen → duyệt các .row.mine, cập nhật tick.
+· dataset.ts — lưu timestamp của tin để so sánh.
+
+Lưu ý:
+
+· Code cần chạy qua Live Server (ES Modules) và Rules Firebase phải cho phép đọc/ghi node seen và messages.
+· Cách tính "đã xem" ở đây mang tính xấp xỉ — dựa trên lastSeen của client, không phải xác nhận từng tin cụ thể. Tôi không chắc bạn muốn độ chính xác tuyệt đối (phải lưu readBy cho từng tin) hay chấp nhận xấp xỉ.
+· Muốn "2 phút trước" thì cần thêm hàm timeAgo(ts) và lưu thời điểm xem của người khác, code trên chưa có.
+
+---
+
+🎯 Tóm 1 câu: Ghi seen/{userId} = Date.now() khi vào phòng + khi có tin mới, dùng computeSeenText() đếm số người có lastSeen ≥ timestamp tin để ra ✓/✓✓, và listener onValue(seen) cập nhật tick realtime — code trên là demo tối thiểu, chưa có dạng "2 phút trước".
