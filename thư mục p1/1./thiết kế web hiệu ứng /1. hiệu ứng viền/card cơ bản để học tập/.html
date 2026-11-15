@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card helli</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 20px;
+    background: #f0f2f5;
+    font-family: Arial, sans-serif;
+  }
+
+  .card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 300px;
+    padding: 30px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  .card h1 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 10vw, 42px);
+    color: #4f46e5;
+    letter-spacing: 2px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .card p {
+    margin: 0;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+
+  @media (max-width: 374px) {
+    .card {
+      padding: 24px 18px;
+      border-radius: 14px;
+    }
+
+    .card h1 {
+      letter-spacing: 1px;
+    }
+
+    .card p {
+      font-size: 14px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .card {
+      max-width: 340px;
+      padding: 36px 28px;
+    }
+
+    .card p {
+      font-size: 16px;
+    }
+  }
+
+  @media (hover: none) {
+    .card:hover {
+      transform: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>helli</h1>
+    <p>Đây là một card cơ bản chứa chữ "helli".</p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Helix Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #02060f;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "HELIX CAPSULE" ===== */
+        /* Ý tưởng: capsule tròn dài, bên trong có 2 sợi xoắn ốc (helix) đối xứng
+           chạy dọc. Khi hover, chúng tách ra và xoay đối nghịch, tạo cảm giác
+           DNA. Khi active, cả capsule "nén" lại và helix bùng sáng. */
+        .helix-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.8rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.14em;
+            color: #f0f7ff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Nền capsule: gradient dọc + viền sáng + bóng sâu */
+        .helix-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                radial-gradient(ellipse 70% 160% at 50% -20%, rgba(150, 210, 255, 0.4), transparent 55%),
+                radial-gradient(ellipse 120% 200% at 50% 120%, rgba(0, 20, 80, 0.9), transparent 60%),
+                linear-gradient(180deg,
+                    #14336e 0%,
+                    #0d2456 35%,
+                    #081a44 65%,
+                    #040f2c 100%);
+            box-shadow:
+                0 0 0 1px rgba(140, 190, 255, 0.25) inset,
+                0 1px 0 rgba(200, 230, 255, 0.25) inset,
+                0 -1px 0 rgba(0, 0, 30, 0.6) inset,
+                0 20px 45px -14px rgba(0, 40, 140, 0.95),
+                0 0 50px -10px rgba(60, 140, 255, 0.4);
+            z-index: -2;
+            transition: box-shadow 0.5s ease, filter 0.5s ease;
+        }
+
+        /* Lớp sheen mỏng phía trên để tạo cảm giác tráng men */
+        .helix-btn::after {
+            content: '';
+            position: absolute;
+            inset: 2px 6px auto 6px;
+            height: 42%;
+            border-radius: 999px 999px 40% 40% / 999px 999px 100% 100%;
+            background: linear-gradient(180deg, rgba(180, 220, 255, 0.28), transparent);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.85;
+            transition: opacity 0.4s ease, transform 0.5s ease;
+        }
+
+        /* SVG helix – 2 sợi xoắn chạy dọc capsule */
+        .helix-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            pointer-events: none;
+            overflow: visible;
+            border-radius: inherit;
+        }
+        .helix-svg svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* Sợi helix: dịch chuyển dọc + xoay nhẹ đối nghịch */
+        .strand-a {
+            transform-origin: center;
+            animation: strandRotateA 6s linear infinite;
+            transition: opacity 0.4s ease, transform 0.6s ease;
+        }
+        .strand-b {
+            transform-origin: center;
+            animation: strandRotateB 6s linear infinite;
+            transition: opacity 0.4s ease, transform 0.6s ease;
+        }
+
+        @keyframes strandRotateA {
+            0%   { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+        @keyframes strandRotateB {
+            0%   { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(0) rotate(-360deg); }
+        }
+
+        /* Bong bóng sáng nhỏ chạy trong helix */
+        .nucleus {
+            animation: nucleusPulse 2.6s ease-in-out infinite;
+            transform-origin: center;
+        }
+        @keyframes nucleusPulse {
+            0%, 100% { opacity: 0.55; transform: scale(0.85); }
+            50%      { opacity: 1;    transform: scale(1.15); }
+        }
+
+        /* ===== LABEL ===== */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-shadow:
+                0 1px 3px rgba(0, 10, 40, 0.9),
+                0 0 16px rgba(90, 170, 255, 0.45);
+        }
+
+        /* Dot nhỏ trước chữ - tín hiệu "active pipeline" */
+        .signal {
+            position: relative;
+            display: inline-block;
+            width: 0.55em;
+            height: 0.55em;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffffff, #6db4ff 55%, #2b6ae0 100%);
+            box-shadow:
+                0 0 0 1px rgba(180, 220, 255, 0.5),
+                0 0 10px rgba(110, 180, 255, 0.9);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .signal::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(160, 210, 255, 0.5);
+            animation: signalRing 2s ease-out infinite;
+        }
+        @keyframes signalRing {
+            0%   { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .helix-btn:hover {
+                transform: translateY(-1px);
+            }
+            .helix-btn:hover::before {
+                box-shadow:
+                    0 0 0 1px rgba(180, 220, 255, 0.45) inset,
+                    0 1px 0 rgba(220, 240, 255, 0.35) inset,
+                    0 -1px 0 rgba(0, 0, 40, 0.7) inset,
+                    0 24px 55px -14px rgba(40, 110, 255, 1),
+                    0 0 70px -10px rgba(90, 160, 255, 0.6);
+                filter: brightness(1.07);
+            }
+            .helix-btn:hover::after {
+                opacity: 1;
+                transform: translateY(-1px) scaleX(0.94);
+            }
+            .helix-btn:hover .strand-a {
+                animation-duration: 1.6s;
+                opacity: 1;
+            }
+            .helix-btn:hover .strand-b {
+                animation-duration: 1.6s;
+                opacity: 1;
+            }
+            .helix-btn:hover .signal {
+                transform: scale(1.25);
+                box-shadow:
+                    0 0 0 1px rgba(220, 240, 255, 0.7),
+                    0 0 16px rgba(140, 200, 255, 1);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .helix-btn:active {
+            transform: scale(0.96) translateY(0);
+            transition: transform 0.08s ease;
+        }
+        .helix-btn:active::before {
+            filter: brightness(0.8);
+            box-shadow:
+                0 0 0 1px rgba(180, 220, 255, 0.3) inset,
+                0 1px 0 rgba(200, 230, 255, 0.2) inset,
+                0 8px 20px -8px rgba(20, 60, 180, 0.9);
+        }
+        .helix-btn:active .signal {
+            transform: scale(0.9);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .strand-a, .strand-b, .nucleus, .signal::after {
+                animation: none !important;
+                opacity: 0.7;
+            }
+            .helix-btn, .helix-btn::before, .helix-btn::after, .signal {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .helix-btn {
+                padding: 0.85rem 2.2rem;
+                font-size: 0.88rem;
+                letter-spacing: 0.1em;
+            }
+        }
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .helix-btn {
+                padding: 1.05rem 3rem;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: bầu trời đêm sâu, 1 tâm sáng, các vòng xoáy mềm mại -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <!-- Nền đa stop -->
+            <radialGradient id="sky" cx="50%" cy="35%" r="110%">
+                <stop offset="0%"   stop-color="#0a1f4a"/>
+                <stop offset="40%"  stop-color="#061530"/>
+                <stop offset="75%"  stop-color="#020a1c"/>
+                <stop offset="100%" stop-color="#01030a"/>
+            </radialGradient>
+
+            <!-- 1 tâm sáng duy nhất: phía trên, hơi lệch phải -->
+            <radialGradient id="lamp" cx="62%" cy="18%" r="55%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.14"/>
+                <stop offset="40%"  stop-color="#9ecaff" stop-opacity="0.07"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Gradient cho các vòng xoáy -->
+            <linearGradient id="vortex1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#3a7aff" stop-opacity="0.35"/>
+                <stop offset="55%"  stop-color="#1a4dbf" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#041034" stop-opacity="0.02"/>
+            </linearGradient>
+            <linearGradient id="vortex2" x1="100%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%"   stop-color="#6aa8ff" stop-opacity="0.30"/>
+                <stop offset="50%"  stop-color="#1f5ad8" stop-opacity="0.14"/>
+                <stop offset="100%" stop-color="#030a24" stop-opacity="0.02"/>
+            </linearGradient>
+            <linearGradient id="vortex3" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#b8d8ff" stop-opacity="0.22"/>
+                <stop offset="60%"  stop-color="#2a68e0" stop-opacity="0.10"/>
+                <stop offset="100%" stop-color="#02060f" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Blur theo khoảng cách -->
+            <filter id="blurFar" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8"/>
+            </filter>
+            <filter id="blurMid" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="3.5"/>
+            </filter>
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- Nền + lamp highlight -->
+        <rect width="1440" height="900" fill="url(#sky)"/>
+        <rect width="1440" height="900" fill="url(#lamp)"/>
+
+        <!-- FAR: vòng xoáy lớn, mờ -->
+        <g opacity="0.7" filter="url(#blurFar)">
+            <path d="M -100 500 Q 300 200 720 480 T 1600 400"
+                  fill="none" stroke="url(#vortex1)" stroke-width="2"/>
+            <path d="M -100 620 Q 400 320 820 560 T 1600 500"
+                  fill="none" stroke="url(#vortex1)" stroke-width="1.4"/>
+        </g>
+
+        <!-- MID: vòng xoay trung -->
+        <g opacity="0.85" filter="url(#blurMid)">
+            <circle cx="1180" cy="200" r="380" fill="none" stroke="url(#vortex2)" stroke-width="1.2" stroke-dasharray="2 26">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="0 1180 200" to="360 1180 200" dur="80s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="280" cy="760" r="340" fill="none" stroke="url(#vortex2)" stroke-width="1" stroke-dasharray="3 30">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="360 280 760" to="0 280 760" dur="65s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- NEAR: vòng nhỏ sắc nét -->
+        <g opacity="0.9">
+            <circle cx="720" cy="450" r="260" fill="none" stroke="url(#vortex3)" stroke-width="0.9" stroke-dasharray="1 40"
+                    filter="url(#glowSoft)">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="0 720 450" to="360 720 450" dur="45s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="720" cy="450" r="180" fill="none" stroke="url(#vortex3)" stroke-width="0.7" stroke-dasharray="1 30"
+                    filter="url(#glowSoft)">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="360 720 450" to="0 720 450" dur="32s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- FORE: chấm sáng lệch pha -->
+        <g>
+            <circle cx="1080" cy="140" r="2.6" fill="#dbeaff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="4.5s" repeatCount="indefinite"/>
+                <animate attributeName="r" values="1.8;3;1.8" dur="4.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="400" cy="180" r="2.2" fill="#a8ccff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="6.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="960" cy="780" r="2.4" fill="#e0f0ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="8.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="220" cy="520" r="1.8" fill="#9ac4ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="10s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="1320" cy="520" r="2.0" fill="#c8e0ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="7.4s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- Lưới tinh tế -->
+        <g opacity="0.07" stroke="#7fb4ff" stroke-width="0.5">
+            <line x1="0" y1="225" x2="1440" y2="225"/>
+            <line x1="0" y1="450" x2="1440" y2="450"/>
+            <line x1="0" y1="675" x2="1440" y2="675"/>
+            <line x1="360" y1="0" x2="360" y2="900"/>
+            <line x1="720" y1="0" x2="720" y2="900"/>
+            <line x1="1080" y1="0" x2="1080" y2="900"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="helix-btn" aria-label="Khám phá">
+            <!-- SVG helix bên trong capsule -->
+            <span class="helix-svg" aria-hidden="true">
+                <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                    <defs>
+                        <!-- Gradient cho sợi helix A -->
+                        <linearGradient id="strandA" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%"   stop-color="#d8ecff" stop-opacity="0.9"/>
+                            <stop offset="30%"  stop-color="#6aa8ff" stop-opacity="0.85"/>
+                            <stop offset="60%"  stop-color="#2a68e0" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#143880" stop-opacity="0.5"/>
+                        </linearGradient>
+                        <!-- Gradient cho sợi helix B (ngược) -->
+                        <linearGradient id="strandB" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%"   stop-color="#d8ecff" stop-opacity="0.9"/>
+                            <stop offset="30%"  stop-color="#7ab8ff" stop-opacity="0.85"/>
+                            <stop offset="60%"  stop-color="#3070e8" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#143880" stop-opacity="0.5"/>
+                        </linearGradient>
+                        <!-- Gradient cho nucleus -->
+                        <radialGradient id="nucleusGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="1"/>
+                            <stop offset="40%"  stop-color="#a8d8ff" stop-opacity="0.9"/>
+                            <stop offset="100%" stop-color="#2a68e0" stop-opacity="0"/>
+                        </radialGradient>
+                        <!-- Glow cho helix -->
+                        <filter id="helixGlow" x="-40%" y="-40%" width="180%" height="180%">
+                            <feGaussianBlur stdDeviation="1.6" result="b"/>
+                            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                        <filter id="helixStrongGlow" x="-100%" y="-100%" width="300%" height="300%">
+                            <feGaussianBlur stdDeviation="4"/>
+                        </filter>
+                    </defs>
+
+                    <!-- Sợi A: sin wave chạy dọc từ trái sang phải -->
+                    <g class="strand-a" filter="url(#helixGlow)">
+                        <path d="M 20 30
+                                 Q 50 8 80 30
+                                 T 140 30
+                                 T 200 30
+                                 T 260 30
+                                 T 320 30"
+                              fill="none" stroke="url(#strandA)" stroke-width="1.6"
+                              stroke-linecap="round" opacity="0.85"/>
+                        <!-- Sợi A phụ mảnh hơn -->
+                        <path d="M 20 30
+                                 Q 50 12 80 30
+                                 T 140 30
+                                 T 200 30
+                                 T 260 30
+                                 T 320 30"
+                              fill="none" stroke="url(#strandA)" stroke-width="0.6"
+                              stroke-linecap="round" opacity="0.5"/>
+                    </g>
+
+                    <!-- Sợi B: sin wave đối nghịch -->
+                    <g class="strand-b" filter="url(#helixGlow)">
+                        <path d="M 20 30
+                                 Q 50 52 80 30
+                                 T 140 30
+                                 T 200 30
+                                 T 260 30
+                                 T 320 30"
+                              fill="none" stroke="url(#strandB)" stroke-width="1.6"
+                              stroke-linecap="round" opacity="0.85"/>
+                        <path d="M 20 30
+                                 Q 50 48 80 30
+                                 T 140 30
+                                 T 200 30
+                                 T 260 30
+                                 T 320 30"
+                              fill="none" stroke="url(#strandB)" stroke-width="0.6"
+                              stroke-linecap="round" opacity="0.5"/>
+                    </g>
+
+                    <!-- Nucleus: các điểm sáng nhỏ dọc helix -->
+                    <g filter="url(#helixStrongGlow)" opacity="0.6">
+                        <circle class="nucleus" cx="80"  cy="30" r="3" fill="url(#nucleusGrad)"/>
+                        <circle class="nucleus" cx="140" cy="30" r="2.6" fill="url(#nucleusGrad)" style="animation-delay: 0.4s"/>
+                        <circle class="nucleus" cx="200" cy="30" r="2.4" fill="url(#nucleusGrad)" style="animation-delay: 0.8s"/>
+                        <circle class="nucleus" cx="260" cy="30" r="2.2" fill="url(#nucleusGrad)" style="animation-delay: 1.2s"/>
+                    </g>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                <span class="signal" aria-hidden="true"></span>
+                Khám phá
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

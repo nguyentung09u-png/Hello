@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Arc Shard Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #020814;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND SVG – layered depth, one light source ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "ARC SHARD" ===== */
+        .arc-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 1rem 2.4rem 1rem 1.8rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 3vw, 1.2rem);
+            letter-spacing: 0.08em;
+            color: #eaf4ff;
+            text-transform: uppercase;
+            isolation: isolate;
+            -webkit-tap-highlight-color: transparent;
+            /* hình dạng: lưỡi liềm bất đối xứng */
+            border-radius: 2.6rem 0.6rem 2.6rem 0.6rem;
+            transition: border-radius 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+                        transform 0.2s ease;
+        }
+
+        /* Nền chính – gradient đa stop, một nguồn sáng từ trái-trên */
+        .arc-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                radial-gradient(ellipse 120% 130% at 18% 12%, rgba(140, 200, 255, 0.55) 0%, transparent 42%),
+                linear-gradient(118deg,
+                    #0a2260 0%,
+                    #103880 22%,
+                    #1a52c0 48%,
+                    #0e2c78 78%,
+                    #051440 100%);
+            box-shadow:
+                0 0 0 1px rgba(150, 200, 255, 0.22) inset,
+                0 0 1px 1px rgba(120, 180, 255, 0.08) inset,
+                0 18px 38px -12px rgba(0, 40, 140, 0.9),
+                0 6px 18px -6px rgba(0, 30, 100, 0.8);
+            z-index: -2;
+            transition: box-shadow 0.45s ease, filter 0.45s ease;
+        }
+
+        /* Lớp highlight mảnh, dạng vệt sáng chéo */
+        .arc-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                linear-gradient(115deg, transparent 32%, rgba(200, 230, 255, 0.22) 46%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.85;
+            transition: opacity 0.4s ease;
+        }
+
+        /* SVG "shard" – viền đồ họa bất đối xứng, chạy quanh mép button */
+        .shard-svg {
+            position: absolute;
+            inset: -6px;
+            width: calc(100% + 12px);
+            height: calc(100% + 12px);
+            z-index: -3;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .shard-svg svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* vệt sáng chạy dọc theo viền – giống vệt sao băng */
+        .streak {
+            stroke-dasharray: 30 180;
+            animation: streakSlide 3.6s linear infinite;
+        }
+
+        .streak-2 {
+            stroke-dasharray: 18 240;
+            animation: streakSlide 5.2s linear infinite reverse;
+        }
+
+        @keyframes streakSlide {
+            0%   { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -320; }
+        }
+
+        /* ===== LABEL & ICON ===== */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-shadow: 0 1px 6px rgba(0, 20, 60, 0.9), 0 0 14px rgba(80, 160, 255, 0.35);
+        }
+
+        /* Icon: tam giác xoay nhẹ khi hover – thay cho mũi tên thường */
+        .glyph {
+            display: inline-flex;
+            width: 1.05em;
+            height: 1.05em;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .glyph svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .arc-btn:hover {
+                border-radius: 0.6rem 2.6rem 0.6rem 2.6rem;
+                transform: translateY(-1px);
+            }
+            .arc-btn:hover::before {
+                box-shadow:
+                    0 0 0 1px rgba(180, 220, 255, 0.4) inset,
+                    0 0 1px 1px rgba(140, 200, 255, 0.15) inset,
+                    0 22px 48px -10px rgba(30, 100, 255, 0.95),
+                    0 8px 24px -6px rgba(20, 70, 200, 0.85);
+                filter: brightness(1.08);
+            }
+            .arc-btn:hover::after {
+                opacity: 1;
+            }
+            .arc-btn:hover .glyph {
+                transform: rotate(90deg) scale(1.12);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .arc-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.08s ease, border-radius 0.4s ease;
+        }
+        .arc-btn:active::before {
+            filter: brightness(0.85);
+            box-shadow:
+                0 0 0 1px rgba(180, 220, 255, 0.3) inset,
+                0 6px 16px -6px rgba(20, 60, 160, 0.9);
+        }
+        .arc-btn:active .glyph {
+            transform: rotate(90deg) scale(0.94);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .streak, .streak-2 { animation: none; opacity: 0.35; }
+            .arc-btn, .arc-btn::before, .arc-btn::after, .glyph {
+                transition-duration: 0.01ms !important;
+            }
+            .arc-btn:hover .glyph { transform: none; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .arc-btn {
+                padding: 0.8rem 2rem 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                border-radius: 2.2rem 0.5rem 2.2rem 0.5rem;
+            }
+            .shard-svg { inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Nguyên tắc: phân lớp xa→gần, gradient nhiều stop, 1 tâm sáng, blur theo khoảng cách -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <!-- Tâm sáng duy nhất: lệch trái-trên -->
+            <radialGradient id="bgBase" cx="28%" cy="22%" r="95%" fx="28%" fy="22%">
+                <stop offset="0%"   stop-color="#0d2c5e"/>
+                <stop offset="35%"  stop-color="#081c3c"/>
+                <stop offset="70%"  stop-color="#030c1e"/>
+                <stop offset="100%" stop-color="#01040a"/>
+            </radialGradient>
+
+            <!-- Gradient nhiều stop cho các hình học -->
+            <linearGradient id="gArcFar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#2a6fff" stop-opacity="0.30"/>
+                <stop offset="40%"  stop-color="#1a4fbf" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#061a40" stop-opacity="0.04"/>
+            </linearGradient>
+
+            <linearGradient id="gArcMid" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#5c9aff" stop-opacity="0.45"/>
+                <stop offset="55%"  stop-color="#2660d8" stop-opacity="0.20"/>
+                <stop offset="100%" stop-color="#0a1c48" stop-opacity="0.06"/>
+            </linearGradient>
+
+            <linearGradient id="gArcNear" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#a8d0ff" stop-opacity="0.35"/>
+                <stop offset="60%"  stop-color="#3a7aff" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#0a2a6a" stop-opacity="0.05"/>
+            </linearGradient>
+
+            <!-- 1 tâm sáng chung cho highlight -->
+            <radialGradient id="lampGlow" cx="28%" cy="22%" r="55%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.16"/>
+                <stop offset="45%"  stop-color="#a8d0ff" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Blur theo khoảng cách -->
+            <filter id="blurFar" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="6"/>
+            </filter>
+            <filter id="blurMid" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3"/>
+            </filter>
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- Nền -->
+        <rect width="1440" height="900" fill="url(#bgBase)"/>
+        <!-- Lamp highlight (1 nguồn sáng) -->
+        <rect width="1440" height="900" fill="url(#lampGlow)"/>
+
+        <!-- LAYER FAR: cung lớn, mờ, chậm -->
+        <g opacity="0.75" filter="url(#blurFar)">
+            <circle cx="180" cy="160" r="520" fill="none" stroke="url(#gArcFar)" stroke-width="1.1"/>
+            <circle cx="180" cy="160" r="380" fill="none" stroke="url(#gArcFar)" stroke-width="0.9" stroke-dasharray="4 22">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="0 180 160" to="360 180 160" dur="72s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- LAYER MID: cung trung, motion lệch pha -->
+        <g opacity="0.9" filter="url(#blurMid)">
+            <circle cx="1240" cy="740" r="440" fill="none" stroke="url(#gArcMid)" stroke-width="1.4">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="360 1240 740" to="0 1240 740" dur="58s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="1240" cy="740" r="300" fill="none" stroke="url(#gArcMid)" stroke-width="0.8" stroke-dasharray="8 30">
+                <animateTransform attributeName="transform" type="rotate"
+                    from="0 1240 740" to="360 1240 740" dur="40s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- LAYER NEAR: đường cong Bezier bay lượn nhẹ -->
+        <g opacity="0.85">
+            <path d="M-40 640 C 260 480 500 760 780 600 S 1200 460 1480 620"
+                  fill="none" stroke="url(#gArcNear)" stroke-width="1.6" filter="url(#glowSoft)">
+                <animate attributeName="d" dur="22s" repeatCount="indefinite"
+                    values="
+                        M-40 640 C 260 480 500 760 780 600 S 1200 460 1480 620;
+                        M-40 660 C 280 510 520 780 800 620 S 1180 480 1480 640;
+                        M-40 640 C 260 480 500 760 780 600 S 1200 460 1480 620"/>
+            </path>
+        </g>
+
+        <!-- LAYER FORE: chấm sáng lệch pha, biên độ nhỏ, values 0;1;0 -->
+        <g>
+            <circle cx="1180" cy="180" r="3.2" fill="#b8d8ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="5s" repeatCount="indefinite"/>
+                <animate attributeName="r" values="2.4;3.6;2.4" dur="5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="340" cy="720" r="2.6" fill="#8ac4ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="7.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="860" cy="240" r="2.2" fill="#e0f0ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="9s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="620" cy="800" r="2.8" fill="#a8d4ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="11s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- Lưới mảnh, tạo chiều sâu -->
+        <g opacity="0.08" stroke="#7fb4ff" stroke-width="0.6">
+            <line x1="0" y1="150" x2="1440" y2="150"/>
+            <line x1="0" y1="450" x2="1440" y2="450"/>
+            <line x1="0" y1="750" x2="1440" y2="750"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="arc-btn" aria-label="Khám phá">
+            <!-- SVG shard: viền bất đối xứng + vệt sáng chạy -->
+            <span class="shard-svg" aria-hidden="true">
+                <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="shardEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#bcdcff" stop-opacity="0.9"/>
+                            <stop offset="50%"  stop-color="#4d8eff" stop-opacity="0.6"/>
+                            <stop offset="100%" stop-color="#bcdcff" stop-opacity="0.9"/>
+                        </linearGradient>
+                        <linearGradient id="streakGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
+                            <stop offset="50%"  stop-color="#ffffff" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Viền chính bất đối xứng: góc trên phải và dưới trái nhọn -->
+                    <path d="M 22 8
+                             L 272 4
+                             Q 296 6 292 30
+                             Q 288 54 260 58
+                             L 30 86
+                             Q 8 88 8 64
+                             Q 8 42 22 8 Z"
+                          fill="none" stroke="url(#shardEdge)" stroke-width="1.2"
+                          vector-effect="non-scaling-stroke" opacity="0.85"/>
+
+                    <!-- Vệt sáng chạy dọc viền -->
+                    <path class="streak"
+                          d="M 22 8
+                             L 272 4
+                             Q 296 6 292 30
+                             Q 288 54 260 58
+                             L 30 86
+                             Q 8 88 8 64
+                             Q 8 42 22 8 Z"
+                          fill="none" stroke="url(#streakGrad)" stroke-width="1.6"
+                          stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+
+                    <path class="streak-2"
+                          d="M 22 8
+                             L 272 4
+                             Q 296 6 292 30
+                             Q 288 54 260 58
+                             L 30 86
+                             Q 8 88 8 64
+                             Q 8 42 22 8 Z"
+                          fill="none" stroke="url(#streakGrad)" stroke-width="0.9"
+                          stroke-linecap="round" opacity="0.6"
+                          vector-effect="non-scaling-stroke"/>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="glyph" aria-hidden="true">
+                    <!-- Icon: tam giác nhọn xoay – "shard" thay vì mũi tên -->
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M6 4 L20 12 L6 20 Z"
+                              stroke="#eaf4ff" stroke-width="1.8"
+                              stroke-linejoin="round" fill="none"/>
+                        <path d="M6 4 L20 12 L6 20 Z" fill="#8ec4ff" opacity="0.25"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

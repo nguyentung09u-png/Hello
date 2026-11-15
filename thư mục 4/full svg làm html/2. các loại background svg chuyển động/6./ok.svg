@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1e4a"/>
+      <stop offset="30%" stop-color="#6a3a6a"/>
+      <stop offset="55%" stop-color="#c86a5a"/>
+      <stop offset="75%" stop-color="#f0a868"/>
+      <stop offset="100%" stop-color="#f8d8a8"/>
+    </linearGradient>
+    <radialGradient id="sun5" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff6d0" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#ffd88a" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffb070" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cloudFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8c8a0" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#e8a880" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="cloudMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0b090" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c88070" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="islandRock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a4a6a"/>
+      <stop offset="60%" stop-color="#3a2e48"/>
+      <stop offset="100%" stop-color="#1e1828"/>
+    </linearGradient>
+    <linearGradient id="islandTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a8a5a"/>
+      <stop offset="100%" stop-color="#3a5040"/>
+    </linearGradient>
+    <linearGradient id="waterfall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8f4ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#a8c8e0" stop-opacity="0.2"/>
+    </linearGradient>
+    <filter id="cloudBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="glow5" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="600" height="800" fill="url(#sky5)"/>
+
+  <!-- SUN GLOW -->
+  <circle cx="300" cy="480" r="220" fill="url(#sun5)"/>
+  <circle cx="300" cy="480" r="40" fill="#fff2c8" opacity="0.9"/>
+
+  <!-- DISTANT CLOUDS -->
+  <g filter="url(#cloudBlur)" opacity="0.6">
+    <ellipse cx="100" cy="520" rx="120" ry="20" fill="url(#cloudFar)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="80s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="500" cy="500" rx="140" ry="22" fill="url(#cloudFar)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="90s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- DISTANT BIRDS -->
+  <g stroke="#2a1e3a" stroke-width="1.3" fill="none" opacity="0.5">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 200,15" dur="35s" repeatCount="indefinite"/>
+      <path d="M380,300 Q384,296 388,300"/>
+      <path d="M395,295 Q399,291 403,295"/>
+      <path d="M405,302 Q409,298 413,302"/>
+    </g>
+  </g>
+
+  <!-- BIG CENTRAL FLOATING ISLAND -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-6; 0,0" dur="12s" repeatCount="indefinite"/>
+    <!-- Island rock body -->
+    <path d="M180,400 L200,440 L220,500 L260,560 L300,610 L340,560 L380,500 L400,440 L420,400 Z" fill="url(#islandRock)"/>
+    <!-- Rock texture lines -->
+    <path d="M220,460 L240,490 M260,510 L280,530 M320,510 L340,490 M300,560 L300,580" stroke="#1a1424" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <!-- Island top surface -->
+    <ellipse cx="300" cy="400" rx="120" ry="18" fill="url(#islandTop)"/>
+    <!-- Grass highlights -->
+    <ellipse cx="280" cy="396" rx="60" ry="6" fill="#7a9a6a" opacity="0.5"/>
+  </g>
+
+  <!-- TREES ON CENTRAL ISLAND -->
+  <g fill="#1e2e20">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 3,0; 0,0" dur="4.5s" repeatCount="indefinite"/>
+      <line x1="240" y1="400" x2="240" y2="360" stroke="#1e2e20" stroke-width="4"/>
+      <circle cx="240" cy="350" r="22" fill="#2e4a30"/>
+      <circle cx="228" cy="358" r="14" fill="#2e4a30"/>
+      <circle cx="252" cy="358" r="14" fill="#2e4a30"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; -2,0; 0,0" dur="5.5s" repeatCount="indefinite"/>
+      <line x1="340" y1="400" x2="340" y2="355" stroke="#1e2e20" stroke-width="4"/>
+      <circle cx="340" cy="345" r="26" fill="#2e4a30"/>
+      <circle cx="324" cy="354" r="16" fill="#2e4a30"/>
+      <circle cx="356" cy="354" r="16" fill="#2e4a30"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 2,0; 0,0" dur="6s" repeatCount="indefinite"/>
+      <line x1="290" y1="400" x2="290" y2="375" stroke="#1e2e20" stroke-width="3"/>
+      <circle cx="290" cy="368" r="18" fill="#3a5a3a"/>
+    </g>
+  </g>
+
+  <!-- WATERFALL FROM CENTRAL ISLAND -->
+  <g>
+    <path d="M290,410 L298,410 L304,520 L296,540 L288,520 Z" fill="url(#waterfall)" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.7;0.9" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M296,540 L290,600 L302,600 L300,540 Z" fill="url(#waterfall)" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.4;0.7" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+    <!-- Waterfall drops -->
+    <g fill="#e8f4ff" opacity="0.85">
+      <circle cx="294" cy="450" r="2">
+        <animate attributeName="cy" values="430;560;430" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="300" cy="470" r="1.5">
+        <animate attributeName="cy" values="450;580;450" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.85;0.15;0.85" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="296" cy="490" r="1.8">
+        <animate attributeName="cy" values="470;590;470" dur="2.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;0.15;0.8" dur="2.8s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- SMALLER FLOATING ISLAND (LEFT) -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,5; 0,0" dur="15s" repeatCount="indefinite"/>
+    <path d="M90,360 L100,385 L115,420 L140,450 L170,420 L185,385 L195,360 Z" fill="url(#islandRock)"/>
+    <ellipse cx="140" cy="358" rx="55" ry="10" fill="url(#islandTop)"/>
+    <!-- Tree -->
+    <line x1="140" y1="358" x2="140" y2="330" stroke="#1e2e20" stroke-width="3"/>
+    <circle cx="140" cy="322" r="16" fill="#2e4a30"/>
+    <circle cx="128" cy="328" r="10" fill="#2e4a30"/>
+    <circle cx="152" cy="328" r="10" fill="#2e4a30"/>
+    <!-- Small waterfall -->
+    <path d="M155,365 L160,365 L162,410 L158,420 L154,410 Z" fill="url(#waterfall)" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2.2s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- SMALL FLOATING ISLAND (RIGHT) -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-4; 0,0" dur="18s" repeatCount="indefinite"/>
+    <path d="M440,340 L450,365 L465,395 L490,420 L515,395 L530,365 L540,340 Z" fill="url(#islandRock)"/>
+    <ellipse cx="490" cy="338" rx="55" ry="10" fill="url(#islandTop)"/>
+    <!-- Small trees -->
+    <line x1="475" y1="338" x2="475" y2="315" stroke="#1e2e20" stroke-width="2.5"/>
+    <circle cx="475" cy="308" r="13" fill="#3a5a3a"/>
+    <line x1="505" y1="338" x2="505" y2="312" stroke="#1e2e20" stroke-width="2.5"/>
+    <circle cx="505" cy="305" r="14" fill="#2e4a30"/>
+  </g>
+
+  <!-- CLOUDS AROUND ISLANDS -->
+  <g filter="url(#cloudBlur)" opacity="0.85">
+    <ellipse cx="300" cy="620" rx="180" ry="25" fill="url(#cloudMid)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 30,0; 0,0" dur="60s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="150" cy="650" rx="150" ry="22" fill="url(#cloudMid)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -40,0; 0,0" dur="70s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="470" cy="670" rx="160" ry="24" fill="url(#cloudMid)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="65s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- CLOUDS BELOW - SEA OF CLOUDS -->
+  <g filter="url(#cloudBlur)" opacity="0.9">
+    <ellipse cx="100" cy="720" rx="200" ry="35" fill="#f0a878">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="55s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="350" cy="740" rx="220" ry="38" fill="#e89070">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="65s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="550" cy="760" rx="180" ry="40" fill="#d88060">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 45,0; 0,0" dur="60s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="200" cy="790" rx="250" ry="45" fill="#c87050">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -35,0; 0,0" dur="75s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- FOREGROUND CLOUD WISPS -->
+  <g filter="url(#cloudBlur)" opacity="0.6">
+    <ellipse cx="80" cy="600" rx="90" ry="12" fill="#ffd8b0">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,0; 0,0" dur="40s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="520" cy="640" rx="100" ry="14" fill="#ffc8a0">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="45s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- LIGHT SPECKS / SPARKLES -->
+  <g fill="#fff6d0" filter="url(#glow5)">
+    <circle cx="200" cy="450" r="1.5" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="420" cy="430" r="1.5" opacity="0.75">
+      <animate attributeName="opacity" values="0.75;0.15;0.75" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="520" r="1.2" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.1;0.7" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="360" cy="500" r="1.3" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="480" cy="550" r="1.5" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.1;0.7" dur="5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- BIRDS CIRCLING -->
+  <g stroke="#2a1e3a" stroke-width="1.5" fill="none" opacity="0.7">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 15,-10; 30,-5; 20,10; 0,0" dur="20s" repeatCount="indefinite"/>
+      <path d="M260,300 Q265,295 270,300"/>
+      <path d="M275,295 Q280,290 285,295"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; -10,8; -20,12; -10,-5; 0,0" dur="24s" repeatCount="indefinite"/>
+      <path d="M340,280 Q345,275 350,280"/>
+    </g>
+  </g>
+</svg>

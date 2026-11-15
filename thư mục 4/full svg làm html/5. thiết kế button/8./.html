@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Aurora Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #01040a;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "AURORA CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ dạng viên nang).
+           Ý tưởng mới: Cực quang (Aurora) phương Bắc. Nền button là bầu trời đêm
+           tối, nhưng bên trong có các dải sáng cực quang (xanh, tím, lục) uốn lượn.
+           Hover: Dải sáng mở rộng, chảy nhanh và rực rỡ hơn.
+           Active: Một luồng sáng trắng xé ngang (solar flare) + co giật nhẹ. */
+        .aurora-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.1rem 3.2rem 1.1rem 2.6rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.14em;
+            color: #ffffff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+            box-shadow: 0 10px 30px -10px rgba(0, 50, 150, 0.6);
+        }
+
+        /* Nền tối cơ bản + Viền mỏng */
+        .aurora-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: #030816;
+            box-shadow:
+                0 0 0 1px rgba(100, 160, 255, 0.25) inset,
+                0 1px 0 rgba(255, 255, 255, 0.1) inset;
+            z-index: -3;
+            transition: box-shadow 0.4s ease;
+        }
+
+        /* Lớp Cực quang (Aurora Layer) uốn lượn bên trong */
+        .aurora-layer {
+            position: absolute;
+            inset: 1px; /* Nằm trong viền */
+            border-radius: inherit;
+            overflow: hidden;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.75;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Dùng filter blur để làm mềm các dải màu */
+        .aurora-layer::before {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: 
+                radial-gradient(ellipse 40% 100% at 20% 50%, rgba(0, 255, 180, 0.6) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 120% at 50% 50%, rgba(80, 120, 255, 0.7) 0%, transparent 65%),
+                radial-gradient(ellipse 45% 100% at 80% 50%, rgba(180, 80, 255, 0.6) 0%, transparent 60%);
+            filter: blur(8px);
+            animation: auroraFlow 8s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        @keyframes auroraFlow {
+            0%   { transform: translateX(-10%) scaleY(1) rotate(-5deg); }
+            50%  { transform: translateX(10%) scaleY(1.2) rotate(5deg); }
+            100% { transform: translateX(-10%) scaleY(1) rotate(-5deg); }
+        }
+
+        /* Lớp phủ tối ở mép để tạo hiệu ứng vignette (tăng độ sâu) */
+        .aurora-layer::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 30%, #030816 90%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        /* Hiệu ứng Solar Flare (Khi Active) */
+        .solar-flare {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+            transform: skewX(-20deg);
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow: 0 2px 8px rgba(0, 10, 30, 0.9);
+            transition: text-shadow 0.4s ease;
+        }
+
+        /* Icon: Ngôi sao / Tia sáng */
+        .star-icon {
+            display: inline-flex;
+            width: 0.9em;
+            height: 0.9em;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+        .star-icon svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .aurora-btn:hover {
+                transform: translateY(-2px) scale(1.02);
+            }
+            .aurora-btn:hover::before {
+                box-shadow:
+                    0 0 0 1px rgba(150, 200, 255, 0.5) inset,
+                    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+                    0 0 25px rgba(100, 180, 255, 0.4);
+            }
+            .aurora-btn:hover .aurora-layer {
+                opacity: 1;
+            }
+            .aurora-btn:hover .aurora-layer::before {
+                animation-duration: 4s;
+                filter: blur(6px) brightness(1.3);
+            }
+            .aurora-btn:hover .star-icon {
+                transform: rotate(180deg) scale(1.15);
+                filter: drop-shadow(0 0 8px #ffffff);
+            }
+            .aurora-btn:hover .btn-label {
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 1);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .aurora-btn:active {
+            transform: scale(0.96);
+            transition: transform 0.08s ease;
+        }
+        .aurora-btn:active::before {
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+                0 0 20px rgba(255, 255, 255, 0.4) inset;
+        }
+        /* Kích hoạt Solar Flare chạy xé ngang */
+        .aurora-btn:active .solar-flare {
+            animation: flareSweep 0.4s ease-out forwards;
+        }
+        @keyframes flareSweep {
+            0%   { left: -100%; opacity: 0; }
+            20%  { opacity: 1; }
+            100% { left: 150%; opacity: 0; }
+        }
+        .aurora-btn:active .star-icon {
+            transform: scale(0.8) rotate(-45deg);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .aurora-layer::before { animation: none; }
+            .aurora-btn, .aurora-btn::before, .star-icon, .solar-flare {
+                transition-duration: 0.01ms !important;
+            }
+            .aurora-btn:active .solar-flare { animation: none; opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .aurora-btn {
+                padding: 0.9rem 2.4rem 0.9rem 2rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: Bắc cực quang, núi tuyết silhouettes, trời đêm sao -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <linearGradient id="skyBg" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#020b18"/>
+                <stop offset="40%"  stop-color="#041224"/>
+                <stop offset="100%" stop-color="#010308"/>
+            </linearGradient>
+
+            <!-- Dải cực quang nền -->
+            <linearGradient id="auroraBg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#00ffcc" stop-opacity="0.25"/>
+                <stop offset="50%"  stop-color="#3366ff" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#cc33ff" stop-opacity="0.1"/>
+            </linearGradient>
+
+            <filter id="auroraBlur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="30"/>
+            </filter>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#skyBg)"/>
+
+        <!-- Cực quang trên trời (Aurora curtains) -->
+        <g filter="url(#auroraBlur)" opacity="0.6">
+            <path d="M -100 200 Q 400 100 800 250 T 1600 150 L 1600 400 Q 1000 300 400 400 T -100 300 Z" fill="url(#auroraBg1)">
+                <animate attributeName="d" dur="15s" repeatCount="indefinite"
+                    values="
+                        M -100 200 Q 400 100 800 250 T 1600 150 L 1600 400 Q 1000 300 400 400 T -100 300 Z;
+                        M -100 250 Q 400 150 800 200 T 1600 200 L 1600 450 Q 1000 350 400 450 T -100 350 Z;
+                        M -100 200 Q 400 100 800 250 T 1600 150 L 1600 400 Q 1000 300 400 400 T -100 300 Z"/>
+            </path>
+            <path d="M -100 350 Q 600 150 1200 300 T 1600 250 L 1600 500 Q 1200 400 600 500 T -100 450 Z" fill="url(#auroraBg1)" opacity="0.7">
+                <animate attributeName="d" dur="18s" repeatCount="indefinite"
+                    values="
+                        M -100 350 Q 600 150 1200 300 T 1600 250 L 1600 500 Q 1200 400 600 500 T -100 450 Z;
+                        M -100 400 Q 600 200 1200 350 T 1600 300 L 1600 550 Q 1200 450 600 550 T -100 500 Z;
+                        M -100 350 Q 600 150 1200 300 T 1600 250 L 1600 500 Q 1200 400 600 500 T -100 450 Z"/>
+            </path>
+        </g>
+
+        <!-- Sao lấp lánh -->
+        <g fill="#ffffff" opacity="0.6">
+            <circle cx="200" cy="100" r="1.5"><animate attributeName="opacity" values="0.2;1;0.2" dur="3s" repeatCount="indefinite"/></circle>
+            <circle cx="1200" cy="80" r="1"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite"/></circle>
+            <circle cx="800" cy="50" r="2"><animate attributeName="opacity" values="0.1;0.8;0.1" dur="5s" repeatCount="indefinite"/></circle>
+            <circle cx="500" cy="150" r="1.2"/>
+            <circle cx="1000" cy="120" r="1.5"/>
+        </g>
+
+        <!-- Núi tuyết (Silhouette) -->
+        <path d="M 0 900 L 0 700 L 200 550 L 450 750 L 700 500 L 950 720 L 1200 550 L 1440 750 L 1440 900 Z" fill="#02060c"/>
+        <path d="M 0 900 L 0 800 L 300 650 L 600 850 L 900 600 L 1200 820 L 1440 680 L 1440 900 Z" fill="#010308"/>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="aurora-btn" aria-label="Khám phá">
+            
+            <!-- Cực quang bên trong button -->
+            <span class="aurora-layer" aria-hidden="true"></span>
+            
+            <!-- Solar flare (Tia sáng xé ngang) -->
+            <span class="solar-flare" aria-hidden="true"></span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="star-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Ngôi sao 4 cánh -->
+                        <path d="M 12 2 C 12 2 14 9 22 12 C 14 15 12 22 12 22 C 12 22 10 15 2 12 C 10 9 12 2 12 2 Z" 
+                              fill="#ffffff" opacity="0.9"/>
+                        <path d="M 12 6 C 12 6 13 10 18 12 C 13 14 12 18 12 18 C 12 18 11 14 6 12 C 11 10 12 6 12 6 Z" 
+                              fill="#a8d4ff" filter="url(#glowSoft)"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

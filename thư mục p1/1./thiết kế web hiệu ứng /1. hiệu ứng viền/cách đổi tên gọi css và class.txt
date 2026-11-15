@@ -1,0 +1,83 @@
+gốc :
+
+/* ============================================================
+   BO1 — Viền chạy vòng, 2 màu: Xanh dương → Xanh lá
+   Cách dùng: <div class="bo1">...</div>
+   Điều kiện: element có background + nội dung bọc <span>
+   ============================================================ */
+
+.bo1 {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --rb-width: 2px;
+  --rb-speed: 2.5s;
+  --rb-angle: 40deg;
+  --rb-current: #2196f3;
+}
+
+.bo1::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--rb-current) var(--rb-angle),
+    transparent calc(var(--rb-angle) * 2)
+  );
+
+  animation:
+    xoayVien var(--rb-speed) linear infinite,
+    doiMau calc(var(--rb-speed) * 2) linear infinite;
+
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.bo1::after {
+  content: "";
+  position: absolute;
+  inset: var(--rb-width);
+  background: inherit;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bo1 > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes xoayVien {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes doiMau {
+  0%,   50%   { --rb-current: #2196f3; }   /* XANH DƯƠNG */
+  50.1%, 100% { --rb-current: #4caf50; }   /* XANH LÁ */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bo1::before { animation: none; }
+}
+
+
+
+
+----- những chỗ cần đổi ---
+không được cách nhé
+
+tìm : bo1
+thay : bo2
+
+rename all rồi dán vào như bth
+
+gọi 
+<div class="bo2"> 

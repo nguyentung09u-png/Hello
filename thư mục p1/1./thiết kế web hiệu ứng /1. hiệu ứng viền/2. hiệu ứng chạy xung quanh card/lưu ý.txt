@@ -1,0 +1,21 @@
+1. phải có
+
+  background: #1a2940;
+  border-radius: 12px;
+  
+  
+  khi add vào css đó thì lưu ý cái đó phải có background 
+  
+  
+ 
+2. nếu chữ bị che
+đây là bị che ko hiện chữ :
+<div class="card running-border">
+  Nội dung trực tiếp    ← text, không bọc
+</div>
+
+
+đây là cách fix khai báo span bọc :
+<div class="card running-border">
+  <span>Nội dung trực tiếp</span>
+</div>

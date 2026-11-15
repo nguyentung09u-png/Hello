@@ -1,0 +1,81 @@
+
+
+
+
+
+
+--- đây là thêm vào cuối phần  </style> gần kết thúc là được ----
+
+
+
+ 
+.running-border {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  /* KHÔNG set border-radius — để element tự lo */
+  --rb-width: 2px;             /* độ dày viền */
+  --rb-color: #3ddc97;         /* màu vệt sáng */
+  --rb-speed: 2.5s;            /* tốc độ chạy */
+  --rb-angle: 40deg;           /* độ dài vệt sáng */
+}
+
+.running-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--rb-color) var(--rb-angle),
+    transparent calc(var(--rb-angle) * 2)
+  );
+  animation: xoayVien var(--rb-speed) linear infinite;
+  z-index: 0;
+  pointer-events: none;
+  /* Bo góc của vệt sáng = theo element */
+  border-radius: inherit;
+}
+
+.running-border::after {
+  content: "";
+  position: absolute;
+  inset: var(--rb-width);
+  background: inherit;
+  border-radius: inherit;       /* ← kế thừa từ element cha (qua ::after) */
+  z-index: 1;
+  pointer-events: none;
+}
+
+.running-border > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes xoayVien {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .running-border::before { animation: none; }
+}
+
+
+
+---- cách gọi ----
+<div class="running-border">
+
+
+
+hoặc cách gọi nâng cao giữ nguyên
+công thức : card + card
+nhớ cách ra nhé
+---
+card1
+và 
+running-border
+-
+<div class="card1 running-border">

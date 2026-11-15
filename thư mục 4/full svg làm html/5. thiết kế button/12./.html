@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Oceanic Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #01060e;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "OCEANIC CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ dạng viên nang).
+           Ý tưởng mới: Đại dương sâu thẳm (Deep Ocean). Nền xanh thẳm với 
+           một tia sáng mặt trời chiếu xuyên qua từ trên xuống (God Rays).
+           Bọt khí (bubbles) li ti bên trong. 
+           Hover: Tia sáng mở rộng, bọt khí nổi lên nhanh hơn.
+           Active: Nước "dâng trào" (nền sáng lên) và bọt khí bắn mạnh. */
+        .ocean-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.15rem 3.2rem 1.15rem 2.6rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.12em;
+            color: #ffffff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+            box-shadow: 0 15px 35px -10px rgba(0, 40, 100, 0.8);
+        }
+
+        /* Nền đại dương */
+        .ocean-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: 
+                radial-gradient(ellipse 120% 150% at 50% -20%, rgba(100, 200, 255, 0.5) 0%, transparent 60%),
+                linear-gradient(180deg, #0a3050 0%, #041a30 40%, #010812 100%);
+            box-shadow:
+                0 0 0 1px rgba(100, 180, 255, 0.3) inset,
+                0 1px 0 rgba(180, 230, 255, 0.2) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.6) inset;
+            z-index: -2;
+            transition: box-shadow 0.4s ease;
+        }
+
+        /* Tia sáng (God Rays) */
+        .god-rays {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+        .god-rays svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .ray {
+            fill: url(#rayGrad);
+            transform-origin: top center;
+            animation: rayPulse 4s ease-in-out infinite alternate;
+        }
+        .ray:nth-child(2) { animation-duration: 5s; animation-delay: 1s; }
+        .ray:nth-child(3) { animation-duration: 3.5s; animation-delay: 2s; }
+
+        @keyframes rayPulse {
+            0% { transform: scaleY(0.9) scaleX(0.9); opacity: 0.5; }
+            100% { transform: scaleY(1.1) scaleX(1.1); opacity: 0.9; }
+        }
+
+        /* Bọt khí (Bubbles) */
+        .bubbles-layer {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .bubbles-layer svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .bubble {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.6);
+            stroke-width: 1;
+            animation: bubbleFloat 4s ease-in infinite;
+        }
+        .bubble:nth-child(even) { animation-duration: 5.5s; animation-delay: 1.5s; }
+        .bubble:nth-child(3n) { animation-duration: 3s; animation-delay: 0.5s; }
+
+        @keyframes bubbleFloat {
+            0% { transform: translateY(80px) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-60px) scale(1.2); opacity: 0; }
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow: 0 2px 8px rgba(0, 20, 50, 0.9);
+            transition: transform 0.3s ease;
+        }
+
+        /* Icon: Sóng nước */
+        .wave-icon {
+            display: inline-flex;
+            width: 1em;
+            height: 0.9em;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+        .wave-icon svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .ocean-btn:hover {
+                transform: translateY(-2px) scale(1.02);
+            }
+            .ocean-btn:hover::before {
+                box-shadow:
+                    0 0 0 1px rgba(150, 220, 255, 0.5) inset,
+                    0 1px 0 rgba(220, 245, 255, 0.3) inset,
+                    0 -1px 0 rgba(0, 0, 0, 0.6) inset,
+                    0 0 30px rgba(60, 180, 255, 0.4);
+            }
+            .ocean-btn:hover .god-rays {
+                opacity: 1;
+            }
+            .ocean-btn:hover .ray {
+                animation-duration: 1.5s; /* Tia sáng chuyển động nhanh hơn */
+            }
+            .ocean-btn:hover .bubble {
+                animation-duration: 2s; /* Bọt khí nổi nhanh hơn */
+            }
+            .ocean-btn:hover .wave-icon {
+                transform: translateX(4px) scaleY(1.1);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .ocean-btn:active {
+            transform: scale(0.96) translateY(1px);
+            transition: transform 0.08s ease;
+        }
+        /* Nước dâng trào (Nền sáng bừng) */
+        .ocean-btn:active::before {
+            background: 
+                radial-gradient(ellipse 120% 150% at 50% -20%, rgba(200, 240, 255, 0.9) 0%, transparent 70%),
+                linear-gradient(180deg, #2a70a0 0%, #0a4060 40%, #021020 100%);
+            box-shadow: 
+                0 0 0 2px rgba(255, 255, 255, 0.6) inset,
+                0 0 30px rgba(150, 230, 255, 0.8);
+        }
+        /* Bọt khí bắn mạnh */
+        .ocean-btn:active .bubble {
+            animation-duration: 0.8s;
+        }
+        .ocean-btn:active .wave-icon {
+            transform: translateX(0) scaleY(0.8);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .ray, .bubble { animation: none; opacity: 0.4; }
+            .ocean-btn, .ocean-btn::before, .wave-icon {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .ocean-btn {
+                padding: 0.95rem 2.4rem 0.95rem 2rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: Đại dương sâu, ánh sáng mặt trời xuyên qua mặt nước, san hô mờ -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <linearGradient id="oceanBg" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#031e3a"/>
+                <stop offset="40%"  stop-color="#010e20"/>
+                <stop offset="100%" stop-color="#00040a"/>
+            </linearGradient>
+
+            <linearGradient id="sunRays" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#a8d4ff" stop-opacity="0"/>
+            </linearGradient>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#oceanBg)"/>
+
+        <!-- Tia sáng mặt trời xuyên qua mặt nước -->
+        <g opacity="0.5">
+            <polygon points="600,0 800,0 900,900 500,900" fill="url(#sunRays)" filter="url(#glowSoft)"/>
+            <polygon points="300,0 400,0 500,900 200,900" fill="url(#sunRays)" opacity="0.6"/>
+            <polygon points="1000,0 1100,0 1200,900 900,900" fill="url(#sunRays)" opacity="0.7"/>
+        </g>
+
+        <!-- Bọt khí nền lớn -->
+        <g stroke="#a8d4ff" stroke-width="1" fill="none" opacity="0.2">
+            <circle cx="200" cy="700" r="15"><animate attributeName="cy" values="900;100;900" dur="20s" repeatCount="indefinite"/></circle>
+            <circle cx="1200" cy="500" r="20"><animate attributeName="cy" values="800;0;800" dur="25s" repeatCount="indefinite"/></circle>
+            <circle cx="800" cy="300" r="10"><animate attributeName="cy" values="600;0;600" dur="15s" repeatCount="indefinite"/></circle>
+        </g>
+
+        <!-- Đường chân trời / San hô mờ -->
+        <path d="M 0 850 Q 200 800 400 850 T 800 850 T 1440 850 L 1440 900 L 0 900 Z" fill="#01050c" />
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="ocean-btn" aria-label="Khám phá">
+            
+            <!-- Tia sáng bên trong -->
+            <span class="god-rays" aria-hidden="true">
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="rayGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#4aa8ff" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <polygon class="ray" points="140,0 160,0 170,80 130,80" />
+                    <polygon class="ray" points="100,0 110,0 120,80 90,80" opacity="0.6"/>
+                    <polygon class="ray" points="190,0 200,0 210,80 180,80" opacity="0.7"/>
+                </svg>
+            </span>
+
+            <!-- Bọt khí bên trong -->
+            <span class="bubbles-layer" aria-hidden="true">
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+                    <circle class="bubble" cx="50" cy="70" r="3" />
+                    <circle class="bubble" cx="120" cy="70" r="4" />
+                    <circle class="bubble" cx="200" cy="70" r="2.5" />
+                    <circle class="bubble" cx="260" cy="70" r="3.5" />
+                    <circle class="bubble" cx="80" cy="70" r="2" />
+                    <circle class="bubble" cx="160" cy="70" r="3" />
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="wave-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M 2 12 Q 6 6 12 12 T 22 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M 2 17 Q 6 11 12 17 T 22 17" stroke="#a8d4ff" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

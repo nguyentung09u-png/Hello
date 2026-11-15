@@ -1,0 +1,27 @@
+1.grid-template-columns: 1fr 1fr là số cột , để nó chia cột
+
+----
+Số giá trị trong grid-template-columns = SỐ CỘT
+
+1fr                → 1 cột
+1fr 1fr            → 2 cột
+1fr 1fr 1fr        → 3 cột
+1fr 1fr 1fr 1fr    → 4 cột
+...
+
+----
+
+
+đây cột đây nó tự xuống dòng khi hết cột
+
+┌───────┬───────┬───────┬───────┐
+│   1   │   2   │   3   │   4   │
+├───────┼───────┼───────┼───────┤
+│   5   │   6   │       │       │
+└───────┴───────┴───────┴───────┘
+
+
+
+
+---- tóm gọn --
+fr vừa là size vừa là cột

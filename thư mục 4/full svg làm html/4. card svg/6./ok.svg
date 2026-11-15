@@ -1,0 +1,335 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="cardClip7">
+      <rect x="0" y="0" width="600" height="800" rx="42" ry="42"/>
+    </clipPath>
+
+    <linearGradient id="skySakura" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8e0e8"/>
+      <stop offset="30%" stop-color="#fce8ee"/>
+      <stop offset="55%" stop-color="#fdf0f0"/>
+      <stop offset="80%" stop-color="#e8f0e8"/>
+      <stop offset="100%" stop-color="#c8dcd0"/>
+    </linearGradient>
+
+    <radialGradient id="moonSakura" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#fdf0f0" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#fdf0f0" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="branchGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5a3a2a"/>
+      <stop offset="100%" stop-color="#3a2218"/>
+    </linearGradient>
+
+    <linearGradient id="petalGradS" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe0ec"/>
+      <stop offset="60%" stop-color="#ffc0d8"/>
+      <stop offset="100%" stop-color="#f0a0c0"/>
+    </linearGradient>
+
+    <linearGradient id="petalGradS2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff0f4"/>
+      <stop offset="100%" stop-color="#ffb8d0"/>
+    </linearGradient>
+
+    <linearGradient id="lakeSakura" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8dcd0"/>
+      <stop offset="40%" stop-color="#a8c8b8"/>
+      <stop offset="100%" stop-color="#789888"/>
+    </linearGradient>
+
+    <linearGradient id="lakeReflectS" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffc0d8" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#fdf0f0" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#fdf0f0" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="lotusGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd0e0"/>
+      <stop offset="100%" stop-color="#e890b0"/>
+    </linearGradient>
+
+    <linearGradient id="lotusLeaf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a9a78"/>
+      <stop offset="100%" stop-color="#3a6a4a"/>
+    </linearGradient>
+
+    <linearGradient id="borderSakura" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffc0d8" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#fdf0f0" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#a8c8b8" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <filter id="glowSakura" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="blurSakura">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+
+    <filter id="mistSakura">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+
+    <!-- Reusable sakura flower -->
+    <g id="sakuraFlower">
+      <g fill="url(#petalGradS)">
+        <ellipse cx="0" cy="-9" rx="4.5" ry="7"/>
+        <ellipse cx="0" cy="-9" rx="4.5" ry="7" transform="rotate(72)"/>
+        <ellipse cx="0" cy="-9" rx="4.5" ry="7" transform="rotate(144)"/>
+        <ellipse cx="0" cy="-9" rx="4.5" ry="7" transform="rotate(216)"/>
+        <ellipse cx="0" cy="-9" rx="4.5" ry="7" transform="rotate(288)"/>
+      </g>
+      <g fill="#ffe8f0" opacity="0.7">
+        <ellipse cx="0" cy="-6" rx="2" ry="3"/>
+        <ellipse cx="0" cy="-6" rx="2" ry="3" transform="rotate(72)"/>
+        <ellipse cx="0" cy="-6" rx="2" ry="3" transform="rotate(144)"/>
+        <ellipse cx="0" cy="-6" rx="2" ry="3" transform="rotate(216)"/>
+        <ellipse cx="0" cy="-6" rx="2" ry="3" transform="rotate(288)"/>
+      </g>
+      <circle cx="0" cy="0" r="2" fill="#e8a0b8"/>
+      <g fill="#f0c040">
+        <circle cx="0" cy="0" r="0.6"/>
+        <circle cx="1" cy="0" r="0.5"/>
+        <circle cx="-1" cy="0" r="0.5"/>
+        <circle cx="0" cy="1" r="0.5"/>
+        <circle cx="0" cy="-1" r="0.5"/>
+      </g>
+    </g>
+
+    <g id="sakuraFlowerSmall">
+      <g fill="url(#petalGradS2)">
+        <ellipse cx="0" cy="-5" rx="2.5" ry="4"/>
+        <ellipse cx="0" cy="-5" rx="2.5" ry="4" transform="rotate(72)"/>
+        <ellipse cx="0" cy="-5" rx="2.5" ry="4" transform="rotate(144)"/>
+        <ellipse cx="0" cy="-5" rx="2.5" ry="4" transform="rotate(216)"/>
+        <ellipse cx="0" cy="-5" rx="2.5" ry="4" transform="rotate(288)"/>
+      </g>
+      <circle cx="0" cy="0" r="1.2" fill="#e8a0b8"/>
+    </g>
+  </defs>
+
+  <g clip-path="url(#cardClip7)">
+    <!-- SKY -->
+    <rect x="0" y="0" width="600" height="800" fill="url(#skySakura)"/>
+
+    <!-- MOON -->
+    <g>
+      <circle cx="140" cy="150" r="70" fill="url(#moonSakura)" opacity="0.8">
+        <animate attributeName="opacity" values="0.5;0.85;0.5" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="140" cy="150" r="26" fill="#ffffff" opacity="0.85"/>
+    </g>
+
+    <!-- SOFT CLOUDS -->
+    <g opacity="0.5" filter="url(#blurSakura)">
+      <ellipse cx="400" cy="120" rx="100" ry="10" fill="#ffffff" opacity="0.6">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 35,0; 0,0" dur="26s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="200" cy="220" rx="120" ry="12" fill="#f8e0e8" opacity="0.5">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -45,0; 0,0" dur="30s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- DISTANT MOUNTAINS -->
+    <path d="M-20,420 C 120,390 220,435 320,405 C 420,375 520,420 620,395 L 620,460 L -20,460 Z"
+          fill="#c8dcd0" opacity="0.7"/>
+
+    <path d="M-20,455 C 100,435 200,465 320,445 C 440,425 540,455 620,440 L 620,490 L -20,490 Z"
+          fill="#a8c8b8" opacity="0.8"/>
+
+    <!-- LAKE -->
+    <rect x="0" y="485" width="600" height="315" fill="url(#lakeSakura)"/>
+
+    <!-- LAKE REFLECTION -->
+    <g opacity="0.7">
+      <path d="M0,500 C 120,490 220,510 340,500 C 440,490 520,510 600,500 L 600,620 C 520,635 440,615 340,625 C 220,635 120,615 0,625 Z"
+            fill="url(#lakeReflectS)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 10,0; 0,0; -10,0; 0,0" dur="12s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- WATER RIPPLE LINES -->
+    <g stroke="#fdf0f0" stroke-width="1" opacity="0.4" fill="none">
+      <path d="M60,550 Q 120,548 180,550">
+        <animate attributeName="opacity" values="0.2;0.6;0.2" dur="5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M240,580 Q 300,578 360,580">
+        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M420,560 Q 480,558 540,560">
+        <animate attributeName="opacity" values="0.15;0.55;0.15" dur="4.5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M120,650 Q 180,648 240,650">
+        <animate attributeName="opacity" values="0.3;0.1;0.3" dur="7s" repeatCount="indefinite"/>
+      </path>
+      <path d="M380,680 Q 440,678 500,680">
+        <animate attributeName="opacity" values="0.2;0.6;0.2" dur="5.5s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- LOTUS LEAVES -->
+    <g>
+      <ellipse cx="120" cy="620" rx="38" ry="12" fill="url(#lotusLeaf)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 8,0; 0,0; -8,0; 0,0" dur="14s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="120" cy="618" rx="38" ry="12" fill="#4a7a58" opacity="0.4"/>
+
+      <ellipse cx="450" cy="660" rx="42" ry="13" fill="url(#lotusLeaf)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -10,0; 0,0; 10,0; 0,0" dur="16s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="450" cy="658" rx="42" ry="13" fill="#4a7a58" opacity="0.4"/>
+
+      <ellipse cx="280" cy="700" rx="34" ry="10" fill="url(#lotusLeaf)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 6,0; 0,0" dur="12s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- LOTUS FLOWERS -->
+    <g transform="translate(450 645)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="-3 0 0; 3 0 0; -3 0 0" dur="7s" repeatCount="indefinite"/>
+        <g fill="url(#lotusGrad)">
+          <ellipse cx="0" cy="-12" rx="5" ry="12"/>
+          <ellipse cx="0" cy="-12" rx="5" ry="12" transform="rotate(40)"/>
+          <ellipse cx="0" cy="-12" rx="5" ry="12" transform="rotate(-40)"/>
+          <ellipse cx="0" cy="-10" rx="4" ry="10" transform="rotate(80)"/>
+          <ellipse cx="0" cy="-10" rx="4" ry="10" transform="rotate(-80)"/>
+        </g>
+        <g fill="#ffe8f0" opacity="0.6">
+          <ellipse cx="0" cy="-6" rx="2.5" ry="6"/>
+          <ellipse cx="0" cy="-6" rx="2.5" ry="6" transform="rotate(40)"/>
+          <ellipse cx="0" cy="-6" rx="2.5" ry="6" transform="rotate(-40)"/>
+        </g>
+        <circle cx="0" cy="-2" r="3" fill="#f0c040"/>
+      </g>
+    </g>
+
+    <g transform="translate(120 605)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="2 0 0; -2 0 0; 2 0 0" dur="8s" repeatCount="indefinite"/>
+        <g fill="url(#lotusGrad)">
+          <ellipse cx="0" cy="-9" rx="4" ry="9"/>
+          <ellipse cx="0" cy="-9" rx="4" ry="9" transform="rotate(40)"/>
+          <ellipse cx="0" cy="-9" rx="4" ry="9" transform="rotate(-40)"/>
+          <ellipse cx="0" cy="-7" rx="3" ry="7" transform="rotate(80)"/>
+          <ellipse cx="0" cy="-7" rx="3" ry="7" transform="rotate(-80)"/>
+        </g>
+        <circle cx="0" cy="-2" r="2.2" fill="#f0c040"/>
+      </g>
+    </g>
+
+    <!-- CHERRY BLOSSOM BRANCH (top right) -->
+    <g>
+      <path d="M620,60 C 540,90 480,130 420,160 C 380,180 340,200 300,210"
+            stroke="url(#branchGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M480,130 C 450,160 420,175 390,185"
+            stroke="url(#branchGrad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M540,95 C 520,120 500,135 470,145"
+            stroke="url(#branchGrad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M420,160 C 400,185 380,200 355,210"
+            stroke="url(#branchGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M360,195 C 345,215 330,228 310,235"
+            stroke="url(#branchGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="-1.5 480 130; 1.5 480 130; -1.5 480 130" dur="7s" repeatCount="indefinite"/>
+
+        <!-- Flowers along main branch -->
+        <use href="#sakuraFlower" transform="translate(560 80) scale(1.2)"/>
+        <use href="#sakuraFlower" transform="translate(530 100) scale(1)"/>
+        <use href="#sakuraFlower" transform="translate(505 120) scale(1.1)"/>
+        <use href="#sakuraFlower" transform="translate(480 140) scale(0.9)"/>
+        <use href="#sakuraFlower" transform="translate(455 155) scale(1.15)"/>
+        <use href="#sakuraFlower" transform="translate(430 170) scale(0.95)"/>
+        <use href="#sakuraFlower" transform="translate(405 185) scale(1.05)"/>
+        <use href="#sakuraFlower" transform="translate(380 195) scale(1)"/>
+        <use href="#sakuraFlower" transform="translate(350 205) scale(0.85)"/>
+        <use href="#sakuraFlower" transform="translate(320 215) scale(0.9)"/>
+
+        <!-- Side branch flowers -->
+        <use href="#sakuraFlowerSmall" transform="translate(465 145) scale(1.1)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(440 160) scale(0.9)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(410 175) scale(1)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(385 185) scale(0.85)"/>
+
+        <!-- More side flowers -->
+        <use href="#sakuraFlowerSmall" transform="translate(510 130) scale(1)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(490 145) scale(0.8)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(380 205) scale(0.9)"/>
+        <use href="#sakuraFlowerSmall" transform="translate(355 218) scale(0.85)"/>
+
+        <!-- Buds -->
+        <circle cx="590" cy="70" r="3" fill="#f0a0c0"/>
+        <circle cx="575" cy="88" r="2.5" fill="#ffc0d8"/>
+        <circle cx="340" cy="230" r="2.5" fill="#f0a0c0"/>
+        <circle cx="300" cy="240" r="2" fill="#ffc0d8"/>
+      </g>
+    </g>
+
+    <!-- FALLING PETALS -->
+    <g>
+      <ellipse rx="4" ry="2.5" fill="#ffc0d8" opacity="0.9">
+        <animateMotion dur="10s" repeatCount="indefinite"
+          path="M500,200 C 450,300 380,400 320,500"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3.5" ry="2.2" fill="#ffd8e4" opacity="0.85">
+        <animateMotion dur="12s" repeatCount="indefinite"
+          path="M400,220 C 350,320 300,420 250,520"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;-360" dur="5s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3" ry="2" fill="#f0a0c0" opacity="0.8">
+        <animateMotion dur="14s" repeatCount="indefinite"
+          path="M550,150 C 500,270 440,380 380,490"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="3.5s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="4" ry="2.5" fill="#ffc0d8" opacity="0.85">
+        <animateMotion dur="11s" repeatCount="indefinite"
+          path="M320,250 C 280,350 240,450 180,550"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;-360" dur="4.5s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3.2" ry="2" fill="#ffd8e4" opacity="0.8">
+        <animateMotion dur="13s" repeatCount="indefinite"
+          path="M460,180 C 420,300 360,420 300,530"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="5.5s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3.5" ry="2.2" fill="#f0a0c0" opacity="0.75">
+        <animateMotion dur="15s" repeatCount="indefinite"
+          path="M580,120 C 540,260 480,400 420,520"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;-360" dur="4s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+    </g>
+
+    <!-- MIST -->
+    <ellipse cx="200" cy="480" rx="160" ry="14" fill="#ffffff" opacity="0.25" filter="url(#mistSakura)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,0; 0,0" dur="30s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="440" cy="520" rx="140" ry="12" fill="#fdf0f0" opacity="0.2" filter="url(#mistSakura)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="34s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- BORDER -->
+    <rect x="6" y="6" width="588" height="788" rx="38" ry="38" fill="none" stroke="url(#borderSakura)" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <path d="M42,10 Q 300,2 558,10" stroke="#ffffff" stroke-width="1" opacity="0.45" fill="none"/>
+
+    <!-- TYPOGRAPHY -->
+    <g opacity="0.9">
+      <text x="300" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="10" fill="#5a3a4a" opacity="0.9">SAKURA</text>
+      <text x="300" y="768" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="9" letter-spacing="6" fill="#8a5a6a" opacity="0.85">P E T A L   D R I F T</text>
+    </g>
+
+    <!-- VIGNETTE -->
+    <radialGradient id="vignette7" cx="0.5" cy="0.45" r="0.78">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.28"/>
+    </radialGradient>
+    <rect x="0" y="0" width="600" height="800" fill="url(#vignette7)" pointer-events="none"/>
+  </g>
+</svg>

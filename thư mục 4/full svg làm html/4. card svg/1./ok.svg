@@ -1,0 +1,282 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="cardClip">
+      <rect x="0" y="0" width="600" height="800" rx="42" ry="42"/>
+    </clipPath>
+
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e2a"/>
+      <stop offset="35%" stop-color="#141a3d"/>
+      <stop offset="65%" stop-color="#1c2a52"/>
+      <stop offset="100%" stop-color="#0f1e3a"/>
+    </linearGradient>
+
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fdf6e3" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#f0e6c8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#f0e6c8" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="auroraA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3fe0c5" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#3fe0c5" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#7af5c0" stop-opacity="0.9"/>
+      <stop offset="80%" stop-color="#5ee6b8" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#3fe0c5" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="auroraB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a06bff" stop-opacity="0"/>
+      <stop offset="25%" stop-color="#a06bff" stop-opacity="0.7"/>
+      <stop offset="55%" stop-color="#d47bff" stop-opacity="0.85"/>
+      <stop offset="85%" stop-color="#ff8fd1" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff8fd1" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="auroraC" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4db8ff" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#4db8ff" stop-opacity="0.65"/>
+      <stop offset="70%" stop-color="#6ee7ff" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#4db8ff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="mountainFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2547"/>
+      <stop offset="100%" stop-color="#0d1530"/>
+    </linearGradient>
+
+    <linearGradient id="mountainMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#101a38"/>
+      <stop offset="100%" stop-color="#070c1f"/>
+    </linearGradient>
+
+    <linearGradient id="mountainNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#060a18"/>
+      <stop offset="100%" stop-color="#02040c"/>
+    </linearGradient>
+
+    <linearGradient id="lakeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e1c33"/>
+      <stop offset="45%" stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#050a18"/>
+    </linearGradient>
+
+    <linearGradient id="lakeReflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3fe0c5" stop-opacity="0.35"/>
+      <stop offset="45%" stop-color="#a06bff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#a06bff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="borderGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3fe0c5" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#a06bff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ff8fd1" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <radialGradient id="ambientTop" cx="0.5" cy="0.2" r="0.6">
+      <stop offset="0%" stop-color="#3fe0c5" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#3fe0c5" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="ambientMid" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#a06bff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#a06bff" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+
+    <filter id="moonBlur">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#cardClip)">
+    <!-- SKY -->
+    <rect x="0" y="0" width="600" height="800" fill="url(#skyGrad)"/>
+
+    <!-- ambient glows -->
+    <ellipse cx="300" cy="140" rx="320" ry="200" fill="url(#ambientTop)"/>
+    <ellipse cx="300" cy="380" rx="300" ry="180" fill="url(#ambientMid)"/>
+
+    <!-- STARS -->
+    <g filter="url(#starGlow)">
+      <g>
+        <circle cx="80" cy="70" r="1.4" fill="#ffffff">
+          <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="140" cy="120" r="1" fill="#dfe9ff">
+          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="5.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="220" cy="60" r="1.6" fill="#ffffff">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="3.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="320" cy="95" r="1.1" fill="#e8f0ff">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="410" cy="55" r="1.3" fill="#ffffff">
+          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="4.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="500" cy="110" r="1" fill="#dfe9ff">
+          <animate attributeName="opacity" values="0.7;0.2;0.7" dur="5.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="550" cy="65" r="1.5" fill="#ffffff">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="3.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="60" cy="180" r="0.9" fill="#e8f0ff">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="170" cy="200" r="1.2" fill="#ffffff">
+          <animate attributeName="opacity" values="0.6;0.1;0.6" dur="5.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="470" cy="180" r="0.9" fill="#dfe9ff">
+          <animate attributeName="opacity" values="0.3;0.9;0.3" dur="4.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="380" cy="220" r="1.1" fill="#ffffff">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="6.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="270" cy="170" r="0.8" fill="#e8f0ff">
+          <animate attributeName="opacity" values="0.2;1;0.2" dur="3.9s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="530" cy="240" r="1.2" fill="#ffffff">
+          <animate attributeName="opacity" values="0.4;0.9;0.4" dur="5.1s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+
+    <!-- MOON -->
+    <g>
+      <circle cx="450" cy="150" r="42" fill="url(#moonGlow)" filter="url(#moonBlur)">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="450" cy="150" r="22" fill="#f6efd9" opacity="0.9"/>
+      <circle cx="452" cy="147" r="22" fill="#fff8e6" opacity="0.7" filter="url(#softBlur)"/>
+    </g>
+
+    <!-- AURORA LAYERS (back to front) -->
+    <g opacity="0.85">
+      <path d="M-40,260 C 120,180 220,300 340,220 C 440,160 520,260 640,200 L 640,320 C 520,360 440,290 340,340 C 220,400 120,300 -40,360 Z"
+            fill="url(#auroraC)" filter="url(#softGlow)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 18,-10; 0,0; -18,10; 0,0" dur="14s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <g opacity="0.9">
+      <path d="M-40,220 C 100,150 200,260 320,190 C 430,130 520,220 640,170 L 640,260 C 520,300 430,240 320,290 C 200,340 100,250 -40,300 Z"
+            fill="url(#auroraA)" filter="url(#softGlow)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -14,8; 0,0; 14,-8; 0,0" dur="12s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <g opacity="0.8">
+      <path d="M-40,300 C 130,240 230,340 350,270 C 460,210 540,300 640,250 L 640,320 C 540,360 460,300 350,340 C 230,400 130,330 -40,380 Z"
+            fill="url(#auroraB)" filter="url(#softGlow)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 10,6; 0,0; -10,-6; 0,0" dur="16s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- AURORA STREAKS (vertical soft rays) -->
+    <g opacity="0.5" filter="url(#softGlow)">
+      <path d="M180,200 C 190,260 175,320 185,380" stroke="#7af5c0" stroke-width="3" fill="none" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.2;0.6;0.2" dur="7s" repeatCount="indefinite"/>
+      </path>
+      <path d="M300,210 C 310,270 295,330 305,390" stroke="#d47bff" stroke-width="2.5" fill="none" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.5;0.1;0.5" dur="9s" repeatCount="indefinite"/>
+      </path>
+      <path d="M400,190 C 410,250 395,310 405,370" stroke="#6ee7ff" stroke-width="2.5" fill="none" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.15;0.55;0.15" dur="8s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- MOUNTAINS FAR -->
+    <path d="M-20,470 L 60,400 L 140,455 L 220,390 L 300,460 L 380,405 L 460,465 L 540,410 L 620,470 L 620,520 L -20,520 Z"
+          fill="url(#mountainFar)" opacity="0.95"/>
+
+    <!-- MOUNTAINS MID -->
+    <path d="M-20,510 L 90,440 L 170,500 L 260,430 L 340,505 L 430,445 L 520,510 L 620,460 L 620,560 L -20,560 Z"
+          fill="url(#mountainMid)"/>
+
+    <!-- MOUNTAINS NEAR -->
+    <path d="M-20,555 L 80,505 L 180,560 L 280,500 L 380,565 L 470,515 L 560,565 L 620,530 L 620,600 L -20,600 Z"
+          fill="url(#mountainNear)"/>
+
+    <!-- LAKE -->
+    <rect x="0" y="595" width="600" height="205" fill="url(#lakeGrad)"/>
+
+    <!-- LAKE REFLECTION AURORA -->
+    <g opacity="0.7">
+      <path d="M0,610 C 120,590 220,640 340,620 C 440,605 520,640 600,625 L 600,720 C 520,740 440,700 340,720 C 220,740 120,700 0,720 Z"
+            fill="url(#lakeReflect)">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 8,2; 0,0; -8,-2; 0,0" dur="10s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- LAKE MOUNTAIN REFLECTION (silhouette) -->
+    <path d="M-20,600 L 80,640 L 180,605 L 280,650 L 380,610 L 470,645 L 560,610 L 620,635 L 620,660 L -20,660 Z"
+          fill="#03060f" opacity="0.55"/>
+
+    <!-- WATER RIPPLE HIGHLIGHTS -->
+    <g stroke="#4db8ff" stroke-width="1" opacity="0.35" stroke-linecap="round" filter="url(#softBlur)">
+      <line x1="80" y1="700" x2="160" y2="700">
+        <animate attributeName="opacity" values="0.1;0.5;0.1" dur="5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="220" y1="720" x2="320" y2="720">
+        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="6.5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="380" y1="690" x2="470" y2="690">
+        <animate attributeName="opacity" values="0.15;0.45;0.15" dur="4.4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="440" y1="740" x2="540" y2="740">
+        <animate attributeName="opacity" values="0.35;0.1;0.35" dur="7s" repeatCount="indefinite"/>
+      </line>
+      <line x1="120" y1="755" x2="220" y2="755">
+        <animate attributeName="opacity" values="0.1;0.4;0.1" dur="5.7s" repeatCount="indefinite"/>
+      </line>
+    </g>
+
+    <!-- SOFT MIST drifting -->
+    <ellipse cx="150" cy="590" rx="140" ry="18" fill="#7af5c0" opacity="0.06" filter="url(#softBlur)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,0; 0,0" dur="22s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="450" cy="580" rx="160" ry="16" fill="#a06bff" opacity="0.06" filter="url(#softBlur)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="26s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- FOREGROUND ROCKS / BANK -->
+    <path d="M-20,790 L 40,760 L 110,780 L 190,755 L 270,785 L 350,760 L 430,788 L 520,765 L 620,790 L 620,820 L -20,820 Z"
+          fill="#02040a"/>
+
+    <!-- BORDER GLASS EDGE -->
+    <rect x="6" y="6" width="588" height="788" rx="38" ry="38" fill="none" stroke="url(#borderGrad)" stroke-width="1.5" opacity="0.55">
+      <animate attributeName="opacity" values="0.4;0.75;0.4" dur="6s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Inner top highlight -->
+    <path d="M42,10 Q 300,2 558,10" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none"/>
+
+    <!-- TYPOGRAPHY -->
+    <g opacity="0.85">
+      <text x="300" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="10" fill="#e8f0ff" opacity="0.9">AURORA</text>
+      <text x="300" y="768" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="9" letter-spacing="6" fill="#7af5c0" opacity="0.7">N O R T H E R N   L I G H T</text>
+    </g>
+
+    <!-- Subtle vignette -->
+    <rect x="0" y="0" width="600" height="800" fill="none"/>
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </radialGradient>
+    <rect x="0" y="0" width="600" height="800" fill="url(#vignette)" pointer-events="none"/>
+  </g>
+</svg>

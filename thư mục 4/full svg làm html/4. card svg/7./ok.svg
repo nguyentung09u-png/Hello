@@ -1,0 +1,337 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="cardClip8">
+      <rect x="0" y="0" width="600" height="800" rx="42" ry="42"/>
+    </clipPath>
+
+    <linearGradient id="skyBamboo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8dcc8"/>
+      <stop offset="30%" stop-color="#dce8d8"/>
+      <stop offset="55%" stop-color="#eef0e0"/>
+      <stop offset="80%" stop-color="#f4eccb"/>
+      <stop offset="100%" stop-color="#f0ddb0"/>
+    </linearGradient>
+
+    <radialGradient id="sunBamboo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff8d8" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#f8e8a0" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#f8e8a0" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="bambooFar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a8c4a0"/>
+      <stop offset="50%" stop-color="#b8d0b0"/>
+      <stop offset="100%" stop-color="#98b490"/>
+    </linearGradient>
+
+    <linearGradient id="bambooMid" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6a9060"/>
+      <stop offset="40%" stop-color="#88ac78"/>
+      <stop offset="100%" stop-color="#5a8050"/>
+    </linearGradient>
+
+    <linearGradient id="bambooNear" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3a5a34"/>
+      <stop offset="40%" stop-color="#5a7a4a"/>
+      <stop offset="100%" stop-color="#2a4a28"/>
+    </linearGradient>
+
+    <linearGradient id="bambooNode" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2a4a28"/>
+      <stop offset="50%" stop-color="#4a6a40"/>
+      <stop offset="100%" stop-color="#1e3a1c"/>
+    </linearGradient>
+
+    <linearGradient id="leafGrad1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7aa868"/>
+      <stop offset="100%" stop-color="#3e6438"/>
+    </linearGradient>
+
+    <linearGradient id="leafGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a8c898"/>
+      <stop offset="100%" stop-color="#6a9060"/>
+    </linearGradient>
+
+    <linearGradient id="groundMoss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a5a3a"/>
+      <stop offset="100%" stop-color="#2a3a20"/>
+    </linearGradient>
+
+    <linearGradient id="borderBamboo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a8c898" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#eef0e0" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#f0ddb0" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <filter id="glowBamboo" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="blurBambooFar">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+
+    <filter id="blurBambooMid">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+
+    <filter id="mistBamboo">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+
+    <filter id="dewGlow">
+      <feGaussianBlur stdDeviation="1" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Reusable bamboo stalk -->
+    <g id="bambooStalk">
+      <rect x="-4" y="0" width="8" height="200" fill="url(#bambooNear)"/>
+      <rect x="-4" y="0" width="3" height="200" fill="#ffffff" opacity="0.15"/>
+      <rect x="-6" y="40" width="12" height="3" rx="1.5" fill="url(#bambooNode)"/>
+      <rect x="-6" y="90" width="12" height="3" rx="1.5" fill="url(#bambooNode)"/>
+      <rect x="-6" y="140" width="12" height="3" rx="1.5" fill="url(#bambooNode)"/>
+      <rect x="-6" y="190" width="12" height="3" rx="1.5" fill="url(#bambooNode)"/>
+    </g>
+
+    <!-- Reusable leaf -->
+    <g id="bambooLeaf">
+      <path d="M0,0 Q 15,-8 40,-4 Q 20,6 0,0 Z" fill="url(#leafGrad1)"/>
+      <path d="M0,0 Q 15,-3 40,-4" stroke="#2a4a28" stroke-width="0.6" fill="none" opacity="0.6"/>
+    </g>
+  </defs>
+
+  <g clip-path="url(#cardClip8)">
+    <!-- SKY -->
+    <rect x="0" y="0" width="600" height="800" fill="url(#skyBamboo)"/>
+
+    <!-- SUN GLOW -->
+    <circle cx="300" cy="420" r="200" fill="url(#sunBamboo)" opacity="0.85">
+      <animate attributeName="opacity" values="0.6;0.95;0.6" dur="10s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- SOFT CLOUD BANDS -->
+    <g opacity="0.55" filter="url(#blurBambooMid)">
+      <ellipse cx="150" cy="180" rx="130" ry="12" fill="#ffffff" opacity="0.6">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 45,0; 0,0" dur="28s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="430" cy="220" rx="140" ry="14" fill="#f4eccb" opacity="0.5">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -55,0; 0,0" dur="32s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="280" cy="280" rx="100" ry="10" fill="#ffffff" opacity="0.4">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 35,0; 0,0" dur="26s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- DISTANT BIRDS -->
+    <g stroke="#5a7a4a" stroke-width="1.3" fill="none" opacity="0.5" stroke-linecap="round">
+      <path d="M200,150 q 4,-4 8,0 q 4,-4 8,0">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 40,-6; 80,0" dur="20s" repeatCount="indefinite"/>
+      </path>
+      <path d="M420,180 q 3,-3 6,0 q 3,-3 6,0">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -30,4; -60,0" dur="17s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- FAR BAMBOO LAYER -->
+    <g opacity="0.55" filter="url(#blurBambooFar)">
+      <g fill="url(#bambooFar)">
+        <rect x="60" y="280" width="5" height="400"/>
+        <rect x="90" y="300" width="4" height="380"/>
+        <rect x="150" y="270" width="6" height="410"/>
+        <rect x="200" y="310" width="4" height="370"/>
+        <rect x="260" y="290" width="5" height="390"/>
+        <rect x="330" y="275" width="6" height="405"/>
+        <rect x="390" y="305" width="4" height="375"/>
+        <rect x="450" y="285" width="5" height="395"/>
+        <rect x="510" y="300" width="5" height="380"/>
+        <rect x="550" y="280" width="4" height="400"/>
+      </g>
+    </g>
+
+    <!-- MID BAMBOO LAYER -->
+    <g filter="url(#blurBambooMid)">
+      <g fill="url(#bambooMid)">
+        <rect x="100" y="240" width="7" height="450"/>
+        <rect x="220" y="260" width="8" height="430"/>
+        <rect x="360" y="250" width="7" height="440"/>
+        <rect x="480" y="270" width="8" height="420"/>
+      </g>
+      <!-- Node rings -->
+      <g fill="url(#bambooNode)" opacity="0.8">
+        <rect x="97" y="330" width="13" height="3" rx="1.5"/>
+        <rect x="97" y="430" width="13" height="3" rx="1.5"/>
+        <rect x="97" y="530" width="13" height="3" rx="1.5"/>
+        <rect x="217" y="350" width="14" height="3" rx="1.5"/>
+        <rect x="217" y="450" width="14" height="3" rx="1.5"/>
+        <rect x="217" y="550" width="14" height="3" rx="1.5"/>
+        <rect x="357" y="340" width="13" height="3" rx="1.5"/>
+        <rect x="357" y="440" width="13" height="3" rx="1.5"/>
+        <rect x="357" y="540" width="13" height="3" rx="1.5"/>
+        <rect x="477" y="360" width="14" height="3" rx="1.5"/>
+        <rect x="477" y="460" width="14" height="3" rx="1.5"/>
+        <rect x="477" y="560" width="14" height="3" rx="1.5"/>
+      </g>
+      <!-- Mid leaves -->
+      <g>
+        <g transform="translate(107 300)">
+          <animateTransform attributeName="transform" type="rotate" values="-3 0 0; 3 0 0; -3 0 0" dur="7s" repeatCount="indefinite"/>
+          <use href="#bambooLeaf" transform="scale(0.9)" fill="url(#leafGrad2)"/>
+        </g>
+        <g transform="translate(107 380)">
+          <animateTransform attributeName="transform" type="rotate" values="2 0 0; -3 0 0; 2 0 0" dur="8s" repeatCount="indefinite"/>
+          <use href="#bambooLeaf" transform="scale(-0.85 0.85)" fill="url(#leafGrad2)"/>
+        </g>
+        <g transform="translate(224 320)">
+          <animateTransform attributeName="transform" type="rotate" values="3 0 0; -3 0 0; 3 0 0" dur="9s" repeatCount="indefinite"/>
+          <use href="#bambooLeaf" transform="scale(1)" fill="url(#leafGrad2)"/>
+        </g>
+        <g transform="translate(367 310)">
+          <animateTransform attributeName="transform" type="rotate" values="-2 0 0; 3 0 0; -2 0 0" dur="6.5s" repeatCount="indefinite"/>
+          <use href="#bambooLeaf" transform="scale(0.95)" fill="url(#leafGrad2)"/>
+        </g>
+        <g transform="translate(487 330)">
+          <animateTransform attributeName="transform" type="rotate" values="2 0 0; -2 0 0; 2 0 0" dur="7.5s" repeatCount="indefinite"/>
+          <use href="#bambooLeaf" transform="scale(-0.9 0.9)" fill="url(#leafGrad2)"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- NEAR BAMBOO (foreground, detailed) -->
+    <g>
+      <!-- Left cluster -->
+      <g transform="translate(50 200)">
+        <use href="#bambooStalk" transform="scale(1.4)"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-2 0 100; 2 0 100; -2 0 100" dur="6s" repeatCount="indefinite"/>
+          <g transform="translate(0 90)">
+            <use href="#bambooLeaf" transform="scale(1.4)" fill="url(#leafGrad1)"/>
+          </g>
+          <g transform="translate(0 130)">
+            <use href="#bambooLeaf" transform="scale(-1.3 1.3)" fill="url(#leafGrad1)"/>
+          </g>
+          <g transform="translate(0 170)">
+            <use href="#bambooLeaf" transform="scale(1.5)" fill="url(#leafGrad1)"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- Right cluster -->
+      <g transform="translate(560 180)">
+        <use href="#bambooStalk" transform="scale(1.5)"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="2 0 100; -2 0 100; 2 0 100" dur="7s" repeatCount="indefinite"/>
+          <g transform="translate(0 80)">
+            <use href="#bambooLeaf" transform="scale(-1.5 1.5)" fill="url(#leafGrad1)"/>
+          </g>
+          <g transform="translate(0 120)">
+            <use href="#bambooLeaf" transform="scale(1.4)" fill="url(#leafGrad1)"/>
+          </g>
+          <g transform="translate(0 160)">
+            <use href="#bambooLeaf" transform="scale(-1.3 1.3)" fill="url(#leafGrad1)"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- Center foreground stalk -->
+      <g transform="translate(300 100)">
+        <use href="#bambooStalk" transform="scale(1.6)"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-1.5 0 160; 1.5 0 160; -1.5 0 160" dur="8s" repeatCount="indefinite"/>
+          <g transform="translate(0 140)">
+            <use href="#bambooLeaf" transform="scale(1.6)" fill="url(#leafGrad1)"/>
+          </g>
+          <g transform="translate(0 190)">
+            <use href="#bambooLeaf" transform="scale(-1.5 1.5)" fill="url(#leafGrad1)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- DEW DROPS -->
+    <g filter="url(#dewGlow)">
+      <ellipse cx="120" cy="320" rx="2.5" ry="3.5" fill="#ffffff" opacity="0.85">
+        <animate attributeName="cy" values="320;322;320" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0.95;0.6" dur="4s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="480" cy="310" rx="2" ry="3" fill="#ffffff" opacity="0.8">
+        <animate attributeName="cy" values="310;312;310" dur="5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="5s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="300" cy="280" rx="2.2" ry="3.2" fill="#ffffff" opacity="0.85">
+        <animate attributeName="cy" values="280;282;280" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- FALLING DEW DROP -->
+    <ellipse cx="120" cy="330" rx="1.5" ry="2.2" fill="#e8f4ff" opacity="0.9">
+      <animate attributeName="cy" values="325;400;500" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.6;0" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- MIST LAYERS -->
+    <ellipse cx="180" cy="480" rx="180" ry="18" fill="#ffffff" opacity="0.28" filter="url(#mistBamboo)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 70,0; 0,0" dur="30s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="420" cy="520" rx="160" ry="16" fill="#eef0e0" opacity="0.22" filter="url(#mistBamboo)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -60,0; 0,0" dur="34s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="300" cy="600" rx="200" ry="20" fill="#ffffff" opacity="0.25" filter="url(#mistBamboo)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 80,0; 0,0" dur="40s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- GROUND MOSS & STONES -->
+    <path d="M-20,680 C 100,670 200,690 320,675 C 440,660 540,685 620,670 L 620,820 L -20,820 Z"
+          fill="url(#groundMoss)"/>
+
+    <g fill="#3a4a2a" opacity="0.7">
+      <ellipse cx="120" cy="710" rx="40" ry="12"/>
+      <ellipse cx="300" cy="730" rx="55" ry="14"/>
+      <ellipse cx="480" cy="715" rx="45" ry="13"/>
+    </g>
+    <g fill="#5a6a4a" opacity="0.5">
+      <ellipse cx="120" cy="705" rx="30" ry="8"/>
+      <ellipse cx="300" cy="725" rx="40" ry="10"/>
+      <ellipse cx="480" cy="710" rx="32" ry="9"/>
+    </g>
+
+    <!-- STONES -->
+    <g fill="#4a5a40">
+      <ellipse cx="80" cy="740" rx="22" ry="10"/>
+      <ellipse cx="80" cy="738" rx="22" ry="10" fill="#6a7a5a" opacity="0.5"/>
+      <ellipse cx="520" cy="750" rx="28" ry="12"/>
+      <ellipse cx="520" cy="748" rx="28" ry="12" fill="#6a7a5a" opacity="0.5"/>
+    </g>
+
+    <!-- FRONT MOSS DETAIL -->
+    <g fill="#5a7a4a" opacity="0.6">
+      <circle cx="200" cy="770" r="3"/>
+      <circle cx="240" cy="780" r="2.5"/>
+      <circle cx="380" cy="775" r="3"/>
+      <circle cx="420" cy="785" r="2"/>
+      <circle cx="150" cy="785" r="2.5"/>
+      <circle cx="450" cy="790" r="2.5"/>
+    </g>
+
+    <!-- BORDER -->
+    <rect x="6" y="6" width="588" height="788" rx="38" ry="38" fill="none" stroke="url(#borderBamboo)" stroke-width="1.5" opacity="0.65">
+      <animate attributeName="opacity" values="0.45;0.85;0.45" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <path d="M42,10 Q 300,2 558,10" stroke="#ffffff" stroke-width="1" opacity="0.5" fill="none"/>
+
+    <!-- TYPOGRAPHY -->
+    <g opacity="0.9">
+      <text x="300" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="10" fill="#2a4a28" opacity="0.9">BAMBOO</text>
+      <text x="300" y="768" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="9" letter-spacing="6" fill="#5a7a4a" opacity="0.85">M I S T Y   D A W N</text>
+    </g>
+
+    <!-- VIGNETTE -->
+    <radialGradient id="vignette8" cx="0.5" cy="0.45" r="0.78">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.3"/>
+    </radialGradient>
+    <rect x="0" y="0" width="600" height="800" fill="url(#vignette8)" pointer-events="none"/>
+  </g>
+</svg>

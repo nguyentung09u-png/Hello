@@ -1,0 +1,21 @@
+dán đầu style
+<style>
+* { -webkit-tap-highlight-color: transparent; }
+
+
+
+tóm gọn :
+* { }
+là áp dụng cho all
+
+
+
+hoặc 
+nếu mà 1 cái có sẵn thì nên làm như này cho gọn và sài dc nhiều
+ 
+
+/* Reset CSS */
+* { 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent; 
+}

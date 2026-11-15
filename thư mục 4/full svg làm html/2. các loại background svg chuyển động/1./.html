@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đêm Trăng SVG</title>
+  <style>
+    /* Xóa viền mặc định của trình duyệt */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0f172a; /* Màu nền tối phòng hờ */
+      overflow: hidden; /* Không cho cuộn trang */
+    }
+
+    /* CSS cho khung chứa SVG */
+    .svg-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center; /* Canh giữa ngang */
+      align-items: center;     /* Canh giữa dọc */
+    }
+
+    /* Ép SVG tự động co giãn theo màn hình mà không bị méo */
+    .svg-container svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Giữ nguyên tỉ lệ, không bị cắt */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="svg-container">
+    <!-- DÁN NGUYÊN KHỐI SVG CỦA BẠN VÀO ĐÂY -->
+    <svg width="100%" height="100%" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" style="background:#0f172a;">
+      <defs>
+        <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff6d5"/>
+          <stop offset="70%" stop-color="#fde68a"/>
+          <stop offset="100%" stop-color="#fde68a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1e293b"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+        <filter id="blurReflect"><feGaussianBlur stdDeviation="2"/></filter>
+      </defs>
+
+      <!-- Bầu trời sao -->
+      <g fill="#fff" opacity="0.7">
+        <circle cx="50" cy="100" r="1.5"/><circle cx="150" cy="50" r="1"/>
+        <circle cx="550" cy="80" r="2"/><circle cx="450" cy="150" r="1"/>
+        <circle cx="80" cy="250" r="1"/><circle cx="520" cy="220" r="1.5"/>
+      </g>
+
+      <!-- Mặt trăng & Hào quang -->
+      <circle cx="300" cy="220" r="120" fill="url(#moonGlow)"/>
+      <circle cx="300" cy="220" r="70" fill="#fff6d5"/>
+      <circle cx="280" cy="200" r="15" fill="#fde68a" opacity="0.6"/>
+      <circle cx="320" cy="240" r="20" fill="#fde68a" opacity="0.6"/>
+
+      <!-- Núi xa -->
+      <path d="M0,400 Q100,300 200,400 T400,400 T600,400 L600,450 L0,450 Z" fill="#1e293b"/>
+      
+      <!-- Ngôi đền -->
+      <g id="temple">
+        <path d="M200,350 Q300,300 400,350 L380,370 L220,370 Z" fill="#334155"/>
+        <path d="M180,350 Q300,290 420,350" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+        <rect x="220" y="370" width="160" height="80" fill="#0f172a" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="230" y="380" width="140" height="60" fill="#fcd34d" opacity="0.9"/>
+        <line x1="300" y1="380" x2="300" y2="440" stroke="#0f172a" stroke-width="4"/>
+        <line x1="230" y1="410" x2="370" y2="410" stroke="#0f172a" stroke-width="4"/>
+        <path d="M150,450 Q300,380 450,450 L420,470 L180,470 Z" fill="#334155"/>
+        <path d="M130,450 Q300,370 470,450" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+        <rect x="250" y="470" width="100" height="20" fill="#64748b"/>
+        <rect x="240" y="490" width="120" height="20" fill="#475569"/>
+      </g>
+
+      <!-- Đèn lồng -->
+      <g id="lanterns">
+        <ellipse cx="200" cy="380" rx="8" ry="12" fill="#ef4444"/>
+        <line x1="200" y1="368" x2="200" y2="360" stroke="#cbd5e1"/>
+        <ellipse cx="400" cy="380" rx="8" ry="12" fill="#ef4444"/>
+        <line x1="400" y1="368" x2="400" y2="360" stroke="#cbd5e1"/>
+      </g>
+
+      <!-- Mặt nước -->
+      <rect x="0" y="510" width="600" height="290" fill="url(#waterGrad)"/>
+      <line x1="0" y1="510" x2="600" y2="510" stroke="#334155" stroke-width="2"/>
+
+      <!-- Bóng phản chiếu -->
+      <g transform="translate(0, 1020) scale(1, -1)" filter="url(#blurReflect)" opacity="0.3">
+        <use href="#temple"/>
+      </g>
+
+      <!-- Hoa sen -->
+      <g fill="#f472b6">
+        <path d="M100,700 Q110,680 120,700 Q110,710 100,700 Z"/>
+        <path d="M120,700 Q130,680 140,700 Q130,710 120,700 Z"/>
+        <ellipse cx="120" cy="710" rx="20" ry="5" fill="#22c55e"/>
+        <path d="M480,720 Q490,700 500,720 Q490,730 480,720 Z"/>
+        <path d="M500,720 Q510,700 520,720 Q510,730 500,720 Z"/>
+        <ellipse cx="500" cy="730" rx="20" ry="5" fill="#22c55e"/>
+      </g>
+
+      <!-- Cá chép -->
+      <g>
+        <path d="M300,600 Q320,590 340,600 Q320,610 300,600 Z" fill="#f97316" stroke="#fff" stroke-width="1"/>
+        <circle cx="335" cy="598" r="1.5" fill="#000"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0; 100,-20; 0,0" dur="6s" repeatCount="indefinite"/>
+      </g>
+    </svg>
+  </div>
+
+</body>
+</html>

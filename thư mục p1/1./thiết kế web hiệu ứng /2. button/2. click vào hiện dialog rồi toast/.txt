@@ -1,0 +1,19 @@
+thêm ngay ở class button cần thêm
+    <button class="btn">🚀 Bắt đầu ngay</button>
+
+
+------
+<div class="dialog-overlay" id="dialogOverlay">
+  <div class="dialog">
+    <h2 class="dialog-title" id="dialogTitle">Xác nhận</h2>
+    <p class="dialog-message" id="dialogMessage">Bạn có chắc muốn thực hiện?</p>
+    <div class="dialog-actions">
+      <button type="button" class="dialog-btn dialog-btn-cancel" id="dialogCancelBtn">
+        Hủy
+      </button>
+      <button type="button" class="dialog-btn dialog-btn-confirm" id="dialogConfirmBtn">
+        Đồng ý
+      </button>
+    </div>
+  </div>
+</div>

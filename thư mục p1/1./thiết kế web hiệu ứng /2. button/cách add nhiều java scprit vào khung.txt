@@ -1,0 +1,19 @@
+<body> 
+xong body là bắt đầu mở scprit java
+  <!-- Script 1: Toast -->
+  <script>
+  (dán code java scprit)
+    function showToast(...) { ... }
+  </script>
+
+  <!-- Script 2: Xử lý button -->
+  <script>
+    document.querySelector('button').addEventListener('click', ...);
+  </script>
+
+  <!-- Script 3: Analytics -->
+  <script>
+    console.log('Page loaded');
+  </script>
+</body>
+</html>

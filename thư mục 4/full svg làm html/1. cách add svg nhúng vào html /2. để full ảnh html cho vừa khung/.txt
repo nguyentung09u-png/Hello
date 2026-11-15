@@ -1,0 +1,56 @@
+Tổng quan cách làm: Khai báo thẻ meta viewport trong <head>, tạo một thẻ div bao ngoài có kích thước bằng toàn màn hình (100vw, 100vh), đặt thẻ <svg> bên trong với kích thước 100% kèm thuộc tính object-fit. Cuối cùng, đặt các phần tử cần nổi lên trên (như nút bấm) bên trong div bao ngoài và dùng position: absolute cho chúng.
+
+Code mẫu chung chung:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 1. Viewport Meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    body { margin: 0; overflow: hidden; }
+
+    /* 2. Khung chứa full màn hình */
+    .full-screen-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* 3. SVG ép giãn */
+    .full-screen-container svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Hoặc fill, tùy nhu cầu */
+      display: block;
+    }
+
+    /* 4. Phần tử đè lên bằng position: absolute */
+    .overlay-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="full-screen-container">
+    <!-- SVG mẫu -->
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#333" />
+    </svg>
+    
+    <!-- Nút bấm đè lên -->
+    <button class="overlay-btn">Nhấn</button>
+  </div>
+
+</body>
+</html>
+```
+
+Lưu ý: Code trên chỉ là khung mẫu tổng quan, chưa bao gồm nội dung SVG chi tiết.

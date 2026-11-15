@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neon Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #020812;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "NEON CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ nguyên dạng viên nang tròn 2 đầu).
+           Ý tưởng mới: Viền neon chạy 360 độ, bên trong có lớp "glass" 
+           phản chiếu. Hover: viền neon tăng tốc, bung sáng (glow bloom).
+           Active: đèn neon "chập chờn" (flicker) nhẹ rồi sáng ổn định. */
+        .neon-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.05rem 3rem 1.05rem 2.4rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.12em;
+            color: #eef6ff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+            /* Giữ logic nền tối để viền neon nổi bật */
+            background: #050b18; 
+        }
+
+        /* Viền neon chạy 360 độ (conic-gradient xoay) */
+        .neon-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            background: conic-gradient(
+                from var(--angle),
+                transparent 0%,
+                #4a8fff 15%,
+                #8ec4ff 25%,
+                #ffffff 30%,
+                #8ec4ff 35%,
+                #4a8fff 45%,
+                transparent 60%,
+                transparent 100%
+            );
+            z-index: -3;
+            animation: spinBorder 4s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.8));
+            transition: filter 0.4s ease;
+        }
+
+        /* Lớp nền trong suốt che bớt viền, chừa lại 2px làm viền */
+        .neon-btn::after {
+            content: '';
+            position: absolute;
+            inset: 1px; /* Độ dày viền 2px */
+            border-radius: inherit;
+            background:
+                radial-gradient(ellipse 80% 120% at 50% -20%, rgba(120, 180, 255, 0.15), transparent 60%),
+                linear-gradient(180deg, #0a1a38 0%, #040a18 100%);
+            z-index: -2;
+            box-shadow: 
+                0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.5) inset;
+            transition: box-shadow 0.4s ease;
+        }
+
+        /* Tâm sáng bên trong (glass reflection) */
+        .neon-btn .glass-highlight {
+            position: absolute;
+            inset: 4px 12px auto 12px;
+            height: 38%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(200, 230, 255, 0.2) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Định nghĩa biến --angle cho conic-gradient */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @keyframes spinBorder {
+            to { --angle: 360deg; }
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow:
+                0 1px 4px rgba(0, 10, 40, 0.85),
+                0 0 12px rgba(120, 190, 255, 0.4);
+            transition: text-shadow 0.4s ease;
+        }
+
+        /* Icon: tia chớp nhỏ (bolt) - tượng trưng cho neon năng lượng */
+        .bolt {
+            display: inline-flex;
+            width: 0.95em;
+            height: 0.95em;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bolt svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .neon-btn:hover {
+                transform: scale(1.02);
+            }
+            .neon-btn:hover::before {
+                animation-duration: 1.5s;
+                filter: drop-shadow(0 0 15px rgba(140, 210, 255, 1));
+            }
+            .neon-btn:hover::after {
+                box-shadow: 
+                    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+                    0 -1px 0 rgba(0, 0, 0, 0.5) inset,
+                    0 0 20px rgba(80, 160, 255, 0.3) inset;
+            }
+            .neon-btn:hover .bolt {
+                transform: scale(1.15) rotate(15deg);
+            }
+            .neon-btn:hover .btn-label {
+                text-shadow:
+                    0 1px 4px rgba(0, 10, 40, 0.9),
+                    0 0 20px rgba(160, 220, 255, 0.8);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .neon-btn:active {
+            transform: scale(0.96);
+            transition: transform 0.08s ease;
+        }
+        /* Hiệu ứng chập chờn (flicker) khi click */
+        .neon-btn:active::before {
+            animation: flicker 0.4s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 20px #fff);
+        }
+        @keyframes flicker {
+            0% { opacity: 0.6; --angle: 45deg; }
+            50% { opacity: 1; --angle: 180deg; }
+            100% { opacity: 0.8; --angle: 270deg; }
+        }
+        .neon-btn:active .bolt {
+            transform: scale(0.9);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .neon-btn::before {
+                animation: none;
+                background: linear-gradient(90deg, #4a8fff, #8ec4ff, #4a8fff);
+                filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.8));
+            }
+            .neon-btn, .neon-btn::before, .neon-btn::after, .bolt {
+                transition-duration: 0.01ms !important;
+            }
+            .neon-btn:active::before {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .neon-btn {
+                padding: 0.9rem 2.4rem 0.9rem 1.9rem;
+                font-size: 0.86rem;
+                letter-spacing: 0.1em;
+            }
+        }
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .neon-btn {
+                padding: 1.15rem 3.4rem 1.15rem 2.8rem;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <radialGradient id="bgBase" cx="50%" cy="20%" r="110%">
+                <stop offset="0%"   stop-color="#0a1e40"/>
+                <stop offset="40%"  stop-color="#041228"/>
+                <stop offset="80%"  stop-color="#020814"/>
+                <stop offset="100%" stop-color="#01030a"/>
+            </radialGradient>
+
+            <!-- Neon glow lines -->
+            <linearGradient id="neonLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#1a4bb8" stop-opacity="0"/>
+                <stop offset="50%"  stop-color="#6aa8ff" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#1a4bb8" stop-opacity="0"/>
+            </linearGradient>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            
+            <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="8"/>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#bgBase)"/>
+
+        <!-- Các đường kẻ neon mờ (phong cách grid tech) -->
+        <g opacity="0.3" filter="url(#glowStrong)">
+            <path d="M -100 200 Q 400 100 720 300 T 1600 250" fill="none" stroke="url(#neonLine)" stroke-width="2"/>
+            <path d="M -100 750 Q 600 900 1000 600 T 1600 800" fill="none" stroke="url(#neonLine)" stroke-width="1.5"/>
+        </g>
+
+        <!-- Tâm sáng góc trên -->
+        <circle cx="1200" cy="150" r="2.5" fill="#dbeaff" filter="url(#glowSoft)">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="200" cy="700" r="2" fill="#a8ccff" filter="url(#glowSoft)">
+            <animate attributeName="opacity" values="0.2;0.8;0.2" dur="6s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Lưới nền (tạo cảm giác depth) -->
+        <g opacity="0.04" stroke="#6aa8ff" stroke-width="0.5">
+            <line x1="0" y1="300" x2="1440" y2="300"/>
+            <line x1="0" y1="600" x2="1440" y2="600"/>
+            <line x1="360" y1="0" x2="360" y2="900"/>
+            <line x1="1080" y1="0" x2="1080" y2="900"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="neon-btn" aria-label="Khám phá">
+            <span class="glass-highlight" aria-hidden="true"></span>
+            <span class="btn-label">
+                Khám phá
+                <span class="bolt" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M13 2 L 3 14 L 12 14 L 11 22 L 21 10 L 12 10 Z" 
+                              fill="#ffffff" opacity="0.9" stroke="#ffffff" stroke-width="0.5"/>
+                        <path d="M13 2 L 3 14 L 12 14 L 11 22 L 21 10 L 12 10 Z" 
+                              filter="url(#glowSoft)" fill="#8ec4ff" opacity="0.5"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

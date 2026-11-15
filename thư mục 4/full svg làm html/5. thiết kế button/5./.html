@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Chrome Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #020812;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "CHROME CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ dạng viên nang).
+           Ý tưởng mới: Bề mặt kim loại Chrome (kim loại lỏng), phản chiếu môi trường.
+           Bao quanh có lớp "orbital ring" dạng ellipse mảnh. 
+           Hover: Ánh kim loại lướt qua (sweep) + vòng quỹ đạo sáng lên.
+           Active: Bề mặt bị "nén" nhẹ và tối đi như bị ấn lún. */
+        .chrome-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.05rem 2.8rem 1.05rem 2.2rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.14em;
+            color: #0b1424; /* Chữ tối để nổi bật trên nền kim loại sáng */
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+            /* Đổ bóng đổ bên ngoài */
+            filter: drop-shadow(0 12px 24px rgba(0, 20, 60, 0.8));
+        }
+
+        /* Bề mặt Chrome (Kim loại) */
+        .chrome-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: 
+                /* Highlight viền trên */
+                linear-gradient(180deg, rgba(255,255,255,0.9) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.3) 100%),
+                /* Dải màu kim loại chrome */
+                linear-gradient(110deg, 
+                    #a4b8cc 0%, 
+                    #e8f0f8 15%, 
+                    #849ab0 30%, 
+                    #ffffff 45%, 
+                    #b0c4d8 55%, 
+                    #6c8098 75%, 
+                    #d8e4f0 90%, 
+                    #9db0c4 100%);
+            box-shadow:
+                0 1px 1px rgba(255, 255, 255, 0.8) inset,
+                0 -1px 1px rgba(0, 0, 0, 0.4) inset,
+                0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+            z-index: -2;
+            transition: filter 0.4s ease;
+        }
+
+        /* Lớp phủ vệt sáng lướt (Sweep) */
+        .chrome-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(105deg,
+                transparent 20%,
+                rgba(255, 255, 255, 0.8) 45%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.8) 55%,
+                transparent 80%);
+            transform: translateX(-120%) skewX(-15deg);
+            z-index: -1;
+            pointer-events: none;
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+
+        /* SVG Vòng quỹ đạo (Orbital Ring) bao quanh */
+        .orbit-ring {
+            position: absolute;
+            inset: -24px;
+            z-index: -3;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.6s ease;
+            opacity: 0.6;
+            will-change: transform, opacity;
+        }
+        .orbit-ring svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* Vòng quỹ đạo xoay */
+        .orbit-path {
+            animation: spinOrbit 15s linear infinite;
+            transform-origin: center;
+        }
+        .orbit-path-rev {
+            animation: spinOrbitRev 20s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes spinOrbit {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes spinOrbitRev {
+            0%   { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            /* Đổ bóng chữ để tách khỏi nền kim loại sáng */
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        /* Icon: mũi tên chéo (lướt) */
+        .sweep-icon {
+            display: inline-flex;
+            width: 0.85em;
+            height: 0.85em;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+        .sweep-icon svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .chrome-btn:hover {
+                transform: translateY(-2px) scale(1.01);
+            }
+            /* Vệt sáng lướt qua */
+            .chrome-btn:hover::after {
+                transform: translateX(120%) skewX(-15deg);
+            }
+            /* Quỹ đạo sáng lên và phình ra */
+            .chrome-btn:hover .orbit-ring {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            /* Tăng tốc quỹ đạo */
+            .chrome-btn:hover .orbit-path { animation-duration: 4s; }
+            .chrome-btn:hover .orbit-path-rev { animation-duration: 6s; }
+            
+            .chrome-btn:hover .sweep-icon {
+                transform: translateX(4px) translateY(-4px);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .chrome-btn:active {
+            transform: translateY(1px) scale(0.97);
+            transition: transform 0.08s ease;
+            filter: drop-shadow(0 4px 8px rgba(0, 20, 60, 0.6));
+        }
+        .chrome-btn:active::before {
+            filter: brightness(0.8); /* Bề mặt tối đi khi ấn */
+        }
+        /* Vệt sáng chạy ngược lại khi click */
+        .chrome-btn:active::after {
+            transform: translateX(-120%) skewX(-15deg);
+            transition: transform 0s; /* Reset tức thì */
+        }
+        .chrome-btn:active .orbit-ring {
+            opacity: 0.8;
+            transform: scale(0.95); /* Vòng co lại */
+        }
+        .chrome-btn:active .sweep-icon {
+            transform: translateX(0) translateY(0) scale(0.9);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .orbit-path, .orbit-path-rev { animation: none; }
+            .chrome-btn, .chrome-btn::before, .chrome-btn::after, .orbit-ring, .sweep-icon {
+                transition-duration: 0.01ms !important;
+            }
+            .chrome-btn:hover::after { transform: translateX(0) skewX(-15deg); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .chrome-btn {
+                padding: 0.85rem 2.2rem 0.85rem 1.8rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.1em;
+            }
+            .orbit-ring { inset: -15px; }
+        }
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .chrome-btn {
+                padding: 1.15rem 3.2rem 1.15rem 2.6rem;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: Studio sang trọng, tâm sáng trên cao, vòng tròn đồng tâm -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <radialGradient id="bgBase" cx="50%" cy="25%" r="100%">
+                <stop offset="0%"   stop-color="#12223c"/>
+                <stop offset="40%"  stop-color="#081020"/>
+                <stop offset="80%"  stop-color="#03060c"/>
+                <stop offset="100%" stop-color="#010204"/>
+            </radialGradient>
+
+            <radialGradient id="lamp" cx="50%" cy="20%" r="60%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.12"/>
+                <stop offset="50%"  stop-color="#7ab4ff" stop-opacity="0.04"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+
+            <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#4a8fff" stop-opacity="0.2"/>
+                <stop offset="50%"  stop-color="#a8d0ff" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#1a4bb8" stop-opacity="0.1"/>
+            </linearGradient>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#bgBase)"/>
+        <rect width="1440" height="900" fill="url(#lamp)"/>
+
+        <!-- Vòng đồng tâm (Studio setup) -->
+        <g opacity="0.5" fill="none" stroke="url(#circleGrad)" stroke-width="1">
+            <circle cx="720" cy="450" r="300" />
+            <circle cx="720" cy="450" r="450" stroke-dasharray="10 20" opacity="0.6"/>
+            <circle cx="720" cy="450" r="600" stroke-dasharray="2 12" opacity="0.3"/>
+        </g>
+
+        <!-- Tia sáng chéo mờ (Studio light rays) -->
+        <g opacity="0.1" filter="url(#glowSoft)">
+            <polygon points="720,0 900,900 540,900" fill="#ffffff" />
+            <polygon points="720,0 1200,900 240,900" fill="#4a8fff" opacity="0.5"/>
+        </g>
+
+        <!-- Lưới nền tinh tế -->
+        <g opacity="0.04" stroke="#a8d0ff" stroke-width="0.5">
+            <line x1="0" y1="225" x2="1440" y2="225"/>
+            <line x1="0" y1="450" x2="1440" y2="450"/>
+            <line x1="0" y1="675" x2="1440" y2="675"/>
+            <line x1="360" y1="0" x2="360" y2="900"/>
+            <line x1="1080" y1="0" x2="1080" y2="900"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="chrome-btn" aria-label="Khám phá">
+            <!-- SVG Orbital Ring -->
+            <span class="orbit-ring" aria-hidden="true">
+                <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="orbitStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.8"/>
+                            <stop offset="50%"  stop-color="#4a8fff" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.8"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Vòng xoay thuận -->
+                    <ellipse class="orbit-path" cx="150" cy="50" rx="140" ry="35" 
+                             fill="none" stroke="url(#orbitStroke)" stroke-width="1.2" 
+                             stroke-dasharray="100 200" stroke-linecap="round"/>
+                    <!-- Vòng xoay nghịch, to hơn -->
+                    <ellipse class="orbit-path-rev" cx="150" cy="50" rx="148" ry="42" 
+                             fill="none" stroke="#a8d0ff" stroke-width="0.8" opacity="0.6" 
+                             stroke-dasharray="40 250" stroke-linecap="round"/>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="sweep-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Mũi tên chéo -->
+                        <path d="M7 17 L 17 7 M 9 7 L 17 7 L 17 15" 
+                              stroke="#0b1424" stroke-width="2.2" 
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

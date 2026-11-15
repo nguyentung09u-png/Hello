@@ -1,0 +1,329 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="cardClip2">
+      <rect x="0" y="0" width="600" height="800" rx="42" ry="42"/>
+    </clipPath>
+
+    <linearGradient id="skyWarm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7c873"/>
+      <stop offset="30%" stop-color="#f6a86a"/>
+      <stop offset="60%" stop-color="#ef8a6b"/>
+      <stop offset="85%" stop-color="#e2707a"/>
+      <stop offset="100%" stop-color="#c85d78"/>
+    </linearGradient>
+
+    <radialGradient id="sunDisc" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff6d8"/>
+      <stop offset="45%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#ffb85c"/>
+    </radialGradient>
+
+    <radialGradient id="sunHalo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff0b8" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#ffcf7a" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffcf7a" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e9a35b"/>
+      <stop offset="100%" stop-color="#c97d4f"/>
+    </linearGradient>
+
+    <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b96b46"/>
+      <stop offset="100%" stop-color="#8a4a35"/>
+    </linearGradient>
+
+    <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5f3327"/>
+      <stop offset="100%" stop-color="#3a1e17"/>
+    </linearGradient>
+
+    <linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd95e"/>
+      <stop offset="100%" stop-color="#f09a2c"/>
+    </linearGradient>
+
+    <radialGradient id="centerGrad" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#5a2c14"/>
+      <stop offset="60%" stop-color="#7a3c1a"/>
+      <stop offset="100%" stop-color="#3e1c0c"/>
+    </radialGradient>
+
+    <linearGradient id="stemGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5c8a3a"/>
+      <stop offset="100%" stop-color="#2f4a1e"/>
+    </linearGradient>
+
+    <linearGradient id="borderAmber" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe08a" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#f09a2c" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#c85d78" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <filter id="glowWarm" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="softBlur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <filter id="pollenBlur">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#cardClip2)">
+    <!-- SKY -->
+    <rect x="0" y="0" width="600" height="800" fill="url(#skyWarm)"/>
+
+    <!-- SUN HALO -->
+    <circle cx="300" cy="330" r="180" fill="url(#sunHalo)" opacity="0.9">
+      <animate attributeName="opacity" values="0.6;0.95;0.6" dur="7s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- SUN DISC -->
+    <circle cx="300" cy="330" r="62" fill="url(#sunDisc)" filter="url(#glowWarm)">
+      <animate attributeName="r" values="62;65;62" dur="9s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- SOFT CLOUD BANDS -->
+    <g opacity="0.5" filter="url(#softBlur2)">
+      <ellipse cx="160" cy="160" rx="90" ry="12" fill="#fff0c8" opacity="0.5">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="20s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="430" cy="200" rx="110" ry="14" fill="#ffd8a8" opacity="0.4">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -50,0; 0,0" dur="24s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="250" cy="240" rx="80" ry="9" fill="#fff5d0" opacity="0.35">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 30,0; 0,0" dur="28s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- BIRDS -->
+    <g stroke="#5a2c14" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.55">
+      <path d="M120,120 q 6,-6 12,0 q 6,-6 12,0">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 60,-10; 120,0" dur="16s" repeatCount="indefinite"/>
+      </path>
+      <path d="M400,90 q 5,-5 10,0 q 5,-5 10,0">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -40,6; -80,0" dur="14s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- HILL FAR -->
+    <path d="M-20,500 C 120,460 220,520 320,480 C 420,450 520,500 620,470 L 620,560 L -20,560 Z"
+          fill="url(#hillFar)" opacity="0.9"/>
+
+    <!-- HILL MID -->
+    <path d="M-20,560 C 100,530 200,580 320,545 C 440,515 540,565 620,540 L 620,620 L -20,620 Z"
+          fill="url(#hillMid)"/>
+
+    <!-- HILL NEAR -->
+    <path d="M-20,620 C 130,595 230,640 340,610 C 450,585 550,625 620,600 L 620,720 L -20,720 Z"
+          fill="url(#hillNear)"/>
+
+    <!-- DISTANT SUNFLOWERS (small, blurred) -->
+    <g opacity="0.6" filter="url(#softBlur2)">
+      <g fill="url(#petalGrad)">
+        <circle cx="80" cy="545" r="6"/>
+        <circle cx="140" cy="555" r="5"/>
+        <circle cx="200" cy="548" r="6.5"/>
+        <circle cx="260" cy="558" r="5.5"/>
+        <circle cx="330" cy="550" r="6"/>
+        <circle cx="400" cy="556" r="5.5"/>
+        <circle cx="470" cy="548" r="6"/>
+        <circle cx="540" cy="557" r="5"/>
+      </g>
+      <g fill="#3e1c0c">
+        <circle cx="80" cy="545" r="2"/>
+        <circle cx="140" cy="555" r="1.8"/>
+        <circle cx="200" cy="548" r="2.2"/>
+        <circle cx="260" cy="558" r="2"/>
+        <circle cx="330" cy="550" r="2"/>
+        <circle cx="400" cy="556" r="2"/>
+        <circle cx="470" cy="548" r="2"/>
+        <circle cx="540" cy="557" r="1.8"/>
+      </g>
+    </g>
+
+    <!-- MID SUNFLOWERS -->
+    <g>
+      <g transform="translate(100 640)">
+        <path d="M0,80 Q -4,40 0,0" stroke="url(#stemGrad)" stroke-width="3" fill="none"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-3 0 0; 3 0 0; -3 0 0" dur="6s" repeatCount="indefinite"/>
+          <g fill="url(#petalGrad)">
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(315)"/>
+          </g>
+          <circle cx="0" cy="0" r="6" fill="url(#centerGrad)"/>
+        </g>
+      </g>
+
+      <g transform="translate(230 630)">
+        <path d="M0,90 Q 3,45 0,0" stroke="url(#stemGrad)" stroke-width="3.5" fill="none"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="4 0 0; -4 0 0; 4 0 0" dur="7s" repeatCount="indefinite"/>
+          <g fill="url(#petalGrad)">
+            <ellipse cx="0" cy="-14" rx="4" ry="10"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-14" rx="4" ry="10" transform="rotate(315)"/>
+          </g>
+          <circle cx="0" cy="0" r="7" fill="url(#centerGrad)"/>
+        </g>
+      </g>
+
+      <g transform="translate(370 645)">
+        <path d="M0,80 Q -3,40 0,0" stroke="url(#stemGrad)" stroke-width="3" fill="none"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-5 0 0; 3 0 0; -5 0 0" dur="5.5s" repeatCount="indefinite"/>
+          <g fill="url(#petalGrad)">
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-12" rx="3.5" ry="9" transform="rotate(315)"/>
+          </g>
+          <circle cx="0" cy="0" r="6" fill="url(#centerGrad)"/>
+        </g>
+      </g>
+
+      <g transform="translate(500 638)">
+        <path d="M0,85 Q 4,42 0,0" stroke="url(#stemGrad)" stroke-width="3" fill="none"/>
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="3 0 0; -4 0 0; 3 0 0" dur="6.8s" repeatCount="indefinite"/>
+          <g fill="url(#petalGrad)">
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-13" rx="3.8" ry="9.5" transform="rotate(315)"/>
+          </g>
+          <circle cx="0" cy="0" r="6.5" fill="url(#centerGrad)"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- FOREGROUND SUNFLOWER (large, detail) -->
+    <g transform="translate(300 760)">
+      <path d="M0,40 Q -8,-20 4,-90" stroke="url(#stemGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M4,-30 Q 30,-40 42,-20 Q 24,-14 4,-30 Z" fill="#3d5c28"/>
+      <path d="M0,-60 Q -30,-70 -40,-48 Q -20,-44 0,-60 Z" fill="#3d5c28"/>
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="-2 0 -90; 2 0 -90; -2 0 -90" dur="5s" repeatCount="indefinite"/>
+        <g transform="translate(4 -90)">
+          <g fill="url(#petalGrad)" filter="url(#softBlur2)" opacity="0.55">
+            <ellipse cx="0" cy="-24" rx="8" ry="18"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-24" rx="8" ry="18" transform="rotate(315)"/>
+          </g>
+          <g fill="url(#petalGrad)">
+            <ellipse cx="0" cy="-20" rx="6" ry="14"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(40)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(80)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(120)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(160)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(200)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(240)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(280)"/>
+            <ellipse cx="0" cy="-20" rx="6" ry="14" transform="rotate(320)"/>
+          </g>
+          <circle cx="0" cy="0" r="14" fill="url(#centerGrad)"/>
+          <circle cx="0" cy="0" r="14" fill="none" stroke="#2a1208" stroke-width="1.2" opacity="0.6"/>
+          <g fill="#2a1208" opacity="0.55">
+            <circle cx="-4" cy="-3" r="1"/>
+            <circle cx="3" cy="-4" r="1"/>
+            <circle cx="5" cy="3" r="1"/>
+            <circle cx="-3" cy="5" r="1"/>
+            <circle cx="0" cy="0" r="1"/>
+            <circle cx="-6" cy="1" r="0.9"/>
+            <circle cx="2" cy="7" r="0.9"/>
+            <circle cx="7" cy="-1" r="0.9"/>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- FLOATING PETALS -->
+    <g>
+      <ellipse rx="4" ry="2.4" fill="#ffd95e" opacity="0.9">
+        <animateMotion dur="12s" repeatCount="indefinite"
+          path="M120,300 C 200,260 260,340 340,300 C 420,260 480,330 540,290"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="6s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3.5" ry="2" fill="#f09a2c" opacity="0.85">
+        <animateMotion dur="15s" repeatCount="indefinite"
+          path="M500,250 C 420,300 360,230 280,290 C 200,340 140,270 80,320"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;-360" dur="7s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+      <ellipse rx="3" ry="1.8" fill="#ffcf7a" opacity="0.8">
+        <animateMotion dur="10s" repeatCount="indefinite"
+          path="M60,400 C 160,360 240,440 340,390 C 440,340 520,420 600,380"/>
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="5s" repeatCount="indefinite" additive="sum"/>
+      </ellipse>
+    </g>
+
+    <!-- POLLEN DUST -->
+    <g filter="url(#pollenBlur)">
+      <circle cx="200" cy="480" r="1.6" fill="#fff5d0">
+        <animate attributeName="cy" values="500;420;500" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="340" cy="470" r="1.4" fill="#fff5d0">
+        <animate attributeName="cy" values="490;400;490" dur="11s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="11s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="450" cy="500" r="1.3" fill="#ffe08a">
+        <animate attributeName="cy" values="520;440;520" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.2;0.8;0.2" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="120" cy="510" r="1.2" fill="#fff5d0">
+        <animate attributeName="cy" values="530;450;530" dur="10s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="10s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- BORDER -->
+    <rect x="6" y="6" width="588" height="788" rx="38" ry="38" fill="none" stroke="url(#borderAmber)" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <path d="M42,10 Q 300,2 558,10" stroke="#fff5d0" stroke-width="1" opacity="0.35" fill="none"/>
+
+    <!-- TYPOGRAPHY -->
+    <g opacity="0.9">
+      <text x="300" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="10" fill="#3a1e17" opacity="0.9">SOLSTICE</text>
+      <text x="300" y="768" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="9" letter-spacing="6" fill="#7a3c1a" opacity="0.8">G O L D E N   H O U R</text>
+    </g>
+
+    <!-- VIGNETTE -->
+    <radialGradient id="vignette2" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+    </radialGradient>
+    <rect x="0" y="0" width="600" height="800" fill="url(#vignette2)" pointer-events="none"/>
+  </g>
+</svg>

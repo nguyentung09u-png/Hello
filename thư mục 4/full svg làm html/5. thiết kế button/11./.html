@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Prism Core Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #020408;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "PRISM CORE CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ dạng viên nang).
+           Ý tưởng mới: Lăng kính (Prism). Bề mặt là khối pha lê trong suốt, 
+           bên trong có một lõi năng lượng phát sáng. 
+           Hover: Ánh sáng trắng chiếu vào, bị khúc xạ thành các dải màu cầu vồng.
+           Active: Lõi năng lượng "nổ" (flash trắng) và rung lắc nhẹ. */
+        .prism-core-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.1rem 3.2rem 1.1rem 2.6rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.15em;
+            color: #ffffff;
+            text-transform: uppercase;
+            border-radius: 999px; /* Capsule */
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+
+        /* Nền pha lê (Glass/Crystal) */
+        .prism-core-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(15, 25, 45, 0.4);
+            box-shadow:
+                0 0 0 1px rgba(150, 200, 255, 0.3) inset,
+                0 1px 0 rgba(255, 255, 255, 0.2) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.5) inset,
+                0 10px 30px -10px rgba(0, 50, 150, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: -2;
+            transition: box-shadow 0.4s ease, background 0.4s ease;
+        }
+
+        /* Lõi năng lượng (Bên trong) */
+        .core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            height: 50%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #a8d4ff 20%, #4a8fff 50%, transparent 80%);
+            filter: blur(4px);
+            z-index: -1;
+            opacity: 0.7;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: width, height, opacity, filter;
+        }
+
+        /* SVG Tia sáng khúc xạ (Refraction Rays) */
+        .refraction-rays {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            mix-blend-mode: screen;
+        }
+        .refraction-rays svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Các tia sáng cầu vồng */
+        .ray-path {
+            stroke-width: 2;
+            stroke-linecap: round;
+            fill: none;
+            transform-origin: 50% 50%;
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+            transition: transform 0.3s ease;
+        }
+
+        /* Icon: Lăng kính (Tam giác) */
+        .prism-icon {
+            display: inline-flex;
+            width: 0.9em;
+            height: 0.9em;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+        .prism-icon svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .prism-core-btn:hover {
+                transform: translateY(-2px) scale(1.02);
+            }
+            .prism-core-btn:hover::before {
+                background: rgba(20, 40, 80, 0.5);
+                box-shadow:
+                    0 0 0 1.5px rgba(200, 230, 255, 0.6) inset,
+                    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+                    0 -1px 0 rgba(0, 0, 0, 0.5) inset,
+                    0 15px 40px -10px rgba(80, 150, 255, 0.8);
+            }
+            /* Lõi phình to và sáng */
+            .prism-core-btn:hover .core {
+                width: 70%;
+                height: 70%;
+                opacity: 1;
+                filter: blur(6px);
+            }
+            /* Tia khúc xạ bung ra */
+            .prism-core-btn:hover .refraction-rays {
+                opacity: 1;
+            }
+            .prism-core-btn:hover .ray-path {
+                animation: rayBurst 2s ease-out infinite alternate;
+            }
+            .prism-core-btn:hover .prism-icon {
+                transform: rotate(-15deg) scale(1.1);
+                filter: drop-shadow(0 0 5px #ffffff);
+            }
+        }
+
+        @keyframes rayBurst {
+            0% { transform: scale(0.8) rotate(0deg); opacity: 0.3; }
+            100% { transform: scale(1.2) rotate(5deg); opacity: 0.8; }
+        }
+
+        /* ===== ACTIVE ===== */
+        .prism-core-btn:active {
+            transform: scale(0.96);
+            transition: transform 0.08s ease;
+        }
+        /* Flash trắng */
+        .prism-core-btn:active::before {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px #ffffff, 0 0 50px #a8d4ff;
+        }
+        .prism-core-btn:active .core {
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            filter: blur(2px);
+            background: #ffffff;
+        }
+        /* Rung lắc (Shake) */
+        .prism-core-btn:active .btn-label {
+            animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .ray-path { animation: none; opacity: 0.5; }
+            .prism-core-btn, .prism-core-btn::before, .core, .prism-icon {
+                transition-duration: 0.01ms !important;
+            }
+            .prism-core-btn:active .btn-label { animation: none; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .prism-core-btn {
+                padding: 0.9rem 2.4rem 0.9rem 2rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: Băng pha lê (Crystal Cave), ánh sáng lạnh -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <radialGradient id="bgBase" cx="50%" cy="30%" r="100%">
+                <stop offset="0%"   stop-color="#0a1a38"/>
+                <stop offset="40%"  stop-color="#030a18"/>
+                <stop offset="100%" stop-color="#010204"/>
+            </radialGradient>
+
+            <!-- Gradient pha lê -->
+            <linearGradient id="crystal1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+                <stop offset="50%"  stop-color="#6ab0ff" stop-opacity="0.05"/>
+                <stop offset="100%" stop-color="#1a4bb8" stop-opacity="0.01"/>
+            </linearGradient>
+            
+            <linearGradient id="crystal2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#a8d4ff" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="#4a8fff" stop-opacity="0.02"/>
+            </linearGradient>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="8" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#bgBase)"/>
+
+        <!-- Các khối pha lê (Low-poly crystals) -->
+        <g stroke="#a8d4ff" stroke-width="1" stroke-linejoin="round">
+            <!-- Trái dưới -->
+            <path d="M -50 900 L 150 600 L 300 750 L 200 900 Z" fill="url(#crystal1)" />
+            <path d="M 150 600 L 250 500 L 300 750 Z" fill="url(#crystal2)" />
+            <!-- Phải trên -->
+            <path d="M 1200 0 L 1400 200 L 1300 350 L 1100 150 Z" fill="url(#crystal1)" />
+            <path d="M 1200 0 L 1350 -50 L 1400 200 Z" fill="url(#crystal2)" />
+            <!-- Giữa xa -->
+            <path d="M 600 900 L 750 700 L 900 850 L 800 900 Z" fill="url(#crystal1)" opacity="0.5"/>
+        </g>
+
+        <!-- Tinh thể băng nhỏ lơ lửng -->
+        <g fill="#ffffff" opacity="0.4" filter="url(#glowSoft)">
+            <circle cx="400" cy="300" r="1.5" />
+            <circle cx="1000" cy="200" r="2" />
+            <circle cx="300" cy="500" r="1" />
+            <circle cx="1100" cy="600" r="1.5" />
+            <circle cx="800" cy="150" r="2" />
+        </g>
+
+        <!-- Ánh sáng trung tâm mờ (Phát ra từ button) -->
+        <circle cx="720" cy="450" r="300" fill="url(#crystal2)" opacity="0.3" filter="url(#glowSoft)"/>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="prism-core-btn" aria-label="Khám phá">
+            
+            <!-- Lõi năng lượng -->
+            <span class="core" aria-hidden="true"></span>
+
+            <!-- SVG Tia khúc xạ -->
+            <span class="refraction-rays" aria-hidden="true">
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="spectrum1" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ff4a4a" stop-opacity="0"/>
+                            <stop offset="50%" stop-color="#ff4a4a" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#ff4a4a" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="spectrum2" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4aff4a" stop-opacity="0"/>
+                            <stop offset="50%" stop-color="#4aff4a" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#4aff4a" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="spectrum3" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4a8fff" stop-opacity="0"/>
+                            <stop offset="50%" stop-color="#4a8fff" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#4a8fff" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Các tia cầu vồng bắn ra từ tâm -->
+                    <path class="ray-path" d="M 150 40 L 20 10" stroke="url(#spectrum1)" />
+                    <path class="ray-path" d="M 150 40 L 50 70" stroke="url(#spectrum2)" />
+                    <path class="ray-path" d="M 150 40 L 280 20" stroke="url(#spectrum3)" />
+                    <path class="ray-path" d="M 150 40 L 250 70" stroke="url(#spectrum1)" style="animation-delay: 0.2s"/>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="prism-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <!-- Tam giác lăng kính -->
+                        <path d="M 12 3 L 22 21 L 2 21 Z" 
+                              fill="rgba(255,255,255,0.2)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
+                        <!-- Tia sáng bên trong -->
+                        <path d="M 12 10 L 17 17" stroke="#a8d4ff" stroke-width="1.5" opacity="0.6"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

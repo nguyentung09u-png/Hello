@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apollo — Mission Log 13</title>
+<style>
+  :root{
+    --bg-deep:#050a18;
+    --bg-mid:#0a1430;
+    --space-blue:#142a54;
+    --cream:#f4ecd8;
+    --cream-dim:#c7bd9f;
+    --orange:#ff6b2c;
+    --orange-glow:#ff8f55;
+    --cyan:#4ad5e8;
+    --rule:rgba(244,236,216,.18);
+    --rule-strong:rgba(244,236,216,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    min-height:100dvh;
+    display:grid;place-items:center;
+    padding:40px 16px;
+    font-family:"Futura","Century Gothic","Trebuchet MS",sans-serif;
+    color:var(--cream);
+    background:var(--bg-mid);
+    overflow-x:hidden;
+  }
+
+  /* ---------- BACKGROUND ---------- */
+  .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bg svg{width:100%;height:100%;display:block}
+  .bg .twinkle{
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+  .bg .twinkle.t2{animation-delay:-1.2s}
+  .bg .twinkle.t3{animation-delay:-2.4s}
+  @keyframes twinkle{
+    0%,100%{opacity:.3}
+    50%{opacity:1}
+  }
+
+  /* ---------- STAGE / CARD ---------- */
+  .stage{position:relative;z-index:2;perspective:1400px}
+
+  .card{
+    position:relative;
+    width:min(350px,90vw);
+    aspect-ratio:9/15;
+    border-radius:24px; /* ROUNDED RECTANGLE */
+    padding:0;
+    display:flex;flex-direction:column;
+    isolation:isolate;
+    background:
+      radial-gradient(140% 80% at 50% 0%, #142a54 0%, #0a1430 55%, #04091a 100%);
+    border:1px solid var(--rule);
+    box-shadow:
+      0 50px 100px -30px rgba(0,0,0,.95),
+      0 0 0 1px rgba(244,236,216,.06) inset,
+      0 0 80px -30px rgba(255,107,44,.25);
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s ease;
+    overflow:hidden;
+    animation:cardIn 1.05s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(26px) scale(.96);filter:blur(6px)}
+    to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+  }
+  .card:hover{
+    box-shadow:
+      0 60px 120px -30px rgba(0,0,0,1),
+      0 0 0 1px rgba(244,236,216,.1) inset,
+      0 0 110px -25px rgba(255,107,44,.45);
+  }
+
+  /* top "cut-out" arc — old poster feel */
+  .card::before{
+    content:"";
+    position:absolute;
+    top:-40px;left:50%;
+    transform:translateX(-50%);
+    width:calc(100% + 40px);height:60px;
+    border-bottom:1px solid var(--rule);
+    border-radius:0 0 50% 50%;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  /* corner ticks (registration marks) */
+  .tick-mark{
+    position:absolute;
+    z-index:5;
+    width:10px;height:10px;
+    border-top:1.2px solid var(--orange);
+    border-left:1.2px solid var(--orange);
+    opacity:.9;
+    pointer-events:none;
+  }
+  .tick-mark.tl{top:14px;left:14px}
+  .tick-mark.tr{top:14px;right:14px;border-left:none;border-right:1.2px solid var(--orange);transform:rotate(90deg)}
+  .tick-mark.bl{bottom:14px;left:14px;border-top:none;border-bottom:1.2px solid var(--orange);transform:rotate(-90deg)}
+  .tick-mark.br{bottom:14px;right:14px;border-top:none;border-left:none;border-bottom:1.2px solid var(--orange);border-right:1.2px solid var(--orange);transform:rotate(180deg)}
+
+  /* ---------- HEADER ---------- */
+  .head{
+    position:relative;z-index:4;
+    padding:26px 24px 0;
+    display:flex;align-items:flex-start;justify-content:space-between;
+    transform:translateZ(20px);
+  }
+  .agency{
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .agency .n{
+    font-size:11px;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--cream);
+    text-indent:.34em;
+  }
+  .agency .s{
+    font-size:8px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    text-indent:.28em;
+  }
+  .mission-no{
+    text-align:right;
+    font-size:9px;
+    letter-spacing:.14em;
+    color:var(--cream-dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .mission-no b{
+    display:block;
+    color:var(--orange);
+    font-size:13px;
+    letter-spacing:.08em;
+    margin-bottom:3px;
+  }
+
+  /* ---------- ORBIT HERO ---------- */
+  .hero{
+    position:relative;z-index:4;
+    margin-top:6px;
+    padding:0 24px;
+    display:flex;justify-content:center;
+    transform:translateZ(36px);
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .card:hover .hero{transform:translateZ(50px) translateY(-2px)}
+
+  .orbit{
+    width:200px;height:200px;
+    position:relative;
+    cursor:grab;
+    user-select:none;
+    touch-action:pan-y;
+  }
+  .orbit.dragging{cursor:grabbing}
+  .orbit svg{
+    width:100%;height:100%;
+    overflow:visible;
+    display:block;
+  }
+  .orbit .star-small{
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  .orbit .planet{
+    transform-origin:center;
+    filter:drop-shadow(0 0 8px rgba(255,143,85,.5));
+  }
+  .orbit .ring-planet{
+    animation:ringSpin 30s linear infinite;
+  }
+  @keyframes ringSpin{to{transform:rotate(360deg)}}
+
+  .hint-drag{
+    position:absolute;
+    bottom:-16px;left:50%;
+    transform:translateX(-50%);
+    font-size:8px;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--orange);
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .4s ease;
+    text-indent:.34em;
+  }
+  .card:hover .hint-drag{opacity:.85}
+
+  /* ---------- TITLES ---------- */
+  .titles{
+    position:relative;z-index:4;
+    margin-top:18px;
+    padding:0 24px;
+    text-align:center;
+    transform:translateZ(24px);
+  }
+  .overline{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:8.5px;
+    letter-spacing:.4em;
+    text-transform:uppercase;
+    color:var(--orange);
+    font-weight:700;
+    text-indent:.4em;
+  }
+  .overline::before,
+  .overline::after{
+    content:"";
+    width:16px;height:1px;
+    background:var(--orange);
+  }
+  .title{
+    margin-top:12px;
+    font-family:"Futura","Century Gothic",sans-serif;
+    font-size:clamp(26px,7.2vw,32px);
+    font-weight:900;
+    letter-spacing:.02em;
+    line-height:1.05;
+    color:var(--cream);
+    text-transform:uppercase;
+  }
+  .title em{
+    display:block;
+    font-style:normal;
+    color:var(--orange);
+    letter-spacing:.04em;
+    margin-top:2px;
+  }
+  .deck{
+    margin-top:12px;
+    font-size:11px;
+    line-height:1.7;
+    color:var(--cream-dim);
+    max-width:30ch;
+    margin-left:auto;margin-right:auto;
+    letter-spacing:.02em;
+  }
+  .deck b{color:var(--cream);font-weight:600}
+
+  /* ---------- TELEMETRY PANEL ---------- */
+  .telemetry{
+    position:relative;z-index:4;
+    margin:16px 22px 0;
+    padding:12px 14px;
+    background:rgba(10,20,48,.6);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    transform:translateZ(18px);
+    font-size:10px;
+  }
+  .telemetry .hd{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:8px;
+    padding-bottom:6px;
+    border-bottom:1px dashed var(--rule);
+    font-size:8px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+  .telemetry .hd .live{
+    color:var(--orange);
+    display:flex;align-items:center;gap:5px;
+  }
+  .telemetry .hd .live::before{
+    content:"";
+    width:5px;height:5px;
+    background:var(--orange);
+    border-radius:50%;
+    box-shadow:0 0 8px var(--orange);
+    animation:blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink{50%{opacity:.3}}
+
+  .telemetry .row{
+    display:flex;justify-content:space-between;
+    padding:4px 0;
+    font-family:"Courier New",monospace;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    color:var(--cream-dim);
+  }
+  .telemetry .row .k{color:var(--cream-dim)}
+  .telemetry .row .v{
+    color:var(--cream);
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .telemetry .row .v.orange{color:var(--orange)}
+  .telemetry .row .v.cyan{color:var(--cyan)}
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    position:relative;z-index:4;
+    margin-top:auto;
+    padding:18px 22px 22px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    transform:translateZ(22px);
+  }
+  .stamp{
+    display:flex;flex-direction:column;gap:4px;
+    line-height:1;
+  }
+  .stamp .k{
+    font-size:8px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    text-indent:.28em;
+  }
+  .stamp .v{
+    font-family:"Courier New",monospace;
+    font-size:12px;
+    font-weight:700;
+    color:var(--cream);
+    letter-spacing:.12em;
+  }
+  .stamp .v .dot{
+    display:inline-block;
+    width:4px;height:4px;
+    background:var(--orange);
+    border-radius:50%;
+    margin:0 4px;
+    vertical-align:middle;
+  }
+
+  .btn-launch{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:12px 18px;
+    font-family:"Futura","Century Gothic",sans-serif;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    text-indent:.24em;
+    color:var(--bg-deep);
+    background:linear-gradient(135deg, #ffb37d 0%, var(--orange) 55%, #d94e18 100%);
+    border:none;
+    border-radius:100px;
+    cursor:pointer;
+    box-shadow:
+      0 8px 24px -8px rgba(255,107,44,.75),
+      0 1px 0 rgba(255,255,255,.35) inset;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, filter .3s;
+  }
+  .btn-launch:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.05);
+    box-shadow:0 14px 32px -8px rgba(255,107,44,.95);
+  }
+  .btn-launch:active{transform:translateY(0) scale(.97)}
+  .btn-launch svg{
+    width:11px;height:11px;
+    transition:transform .3s ease;
+  }
+  .btn-launch:hover svg{transform:translateX(2px)}
+
+  @media (max-width:420px){
+    .head{padding:22px 20px 0}
+    .hero{padding:0 20px}
+    .orbit{width:170px;height:170px}
+    .titles{padding:0 20px}
+    .telemetry{margin:14px 18px 0;font-size:9.5px}
+    .footer{padding:16px 18px 18px}
+    .btn-launch{padding:10px 14px;font-size:9px;letter-spacing:.22em}
+    .stamp .v{font-size:11px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ BACKGROUND ============ -->
+<div class="bg" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="bgBase" cx="50%" cy="35%" r="95%">
+        <stop offset="0%" stop-color="#142a54"/>
+        <stop offset="45%" stop-color="#0a1430"/>
+        <stop offset="100%" stop-color="#04091a"/>
+      </radialGradient>
+      <radialGradient id="orangeHalo" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff6b2c" stop-opacity=".3"/>
+        <stop offset="100%" stop-color="#ff6b2c" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#bgBase)"/>
+
+    <!-- starfield -->
+    <g fill="#f4ecd8">
+      <circle class="twinkle" cx="120" cy="140" r="1.2"/>
+      <circle class="twinkle t2" cx="320" cy="80" r="1"/>
+      <circle class="twinkle t3" cx="540" cy="180" r="1.4"/>
+      <circle class="twinkle" cx="820" cy="120" r="1"/>
+      <circle class="twinkle t2" cx="1020" cy="220" r="1.3"/>
+      <circle class="twinkle t3" cx="1280" cy="160" r="1.1"/>
+      <circle class="twinkle" cx="200" cy="380" r=".9"/>
+      <circle class="twinkle t3" cx="680" cy="340" r="1.2"/>
+      <circle class="twinkle t2" cx="1100" cy="420" r="1"/>
+      <circle class="twinkle" cx="380" cy="600" r="1.3"/>
+      <circle class="twinkle t2" cx="940" cy="700" r="1"/>
+      <circle class="twinkle t3" cx="1320" cy="820" r="1.2"/>
+      <circle class="twinkle" cx="80" cy="820" r="1"/>
+    </g>
+
+    <circle cx="1100" cy="180" r="340" fill="url(#orangeHalo)"/>
+
+    <!-- distant planet silhouette -->
+    <g opacity=".55" transform="translate(1220 740)">
+      <circle r="120" fill="#1a2a52" stroke="rgba(244,236,216,.1)" stroke-width="1"/>
+      <ellipse cy="0" rx="170" ry="28" fill="none" stroke="rgba(244,236,216,.18)" stroke-width="1.4" transform="rotate(-18)"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ============ CARD ============ -->
+<div class="stage">
+  <article class="card" id="card">
+    <span class="tick-mark tl" aria-hidden="true"></span>
+    <span class="tick-mark tr" aria-hidden="true"></span>
+    <span class="tick-mark bl" aria-hidden="true"></span>
+    <span class="tick-mark br" aria-hidden="true"></span>
+
+    <!-- HEADER -->
+    <header class="head">
+      <div class="agency">
+        <span class="n">Apollo Program</span>
+        <span class="s">Space &amp; Exploration</span>
+      </div>
+      <div class="mission-no">
+        <b>M—13</b>
+        Log · 1969
+      </div>
+    </header>
+
+    <!-- ORBIT HERO -->
+    <div class="hero">
+      <div class="orbit" id="orbit" aria-label="Drag to rotate orbit">
+        <svg id="orbitSvg" viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="sunG" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff3d9"/>
+              <stop offset="40%" stop-color="#ffb37d"/>
+              <stop offset="80%" stop-color="#ff6b2c"/>
+              <stop offset="100%" stop-color="#c14b12"/>
+            </radialGradient>
+            <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ff8f55" stop-opacity=".55"/>
+              <stop offset="100%" stop-color="#ff8f55" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="planetG" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#7fb6ff"/>
+              <stop offset="60%" stop-color="#2a5ba8"/>
+              <stop offset="100%" stop-color="#102648"/>
+            </radialGradient>
+            <radialGradient id="planetG2" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#f4a98a"/>
+              <stop offset="55%" stop-color="#b0523a"/>
+              <stop offset="100%" stop-color="#4a1f17"/>
+            </radialGradient>
+          </defs>
+
+          <!-- sun glow (static) -->
+          <circle cx="100" cy="100" r="70" fill="url(#sunGlow)"/>
+
+          <!-- orbit paths (static ellipses) -->
+          <ellipse cx="100" cy="100" rx="82" ry="30"
+                   fill="none" stroke="rgba(244,236,216,.22)" stroke-width=".8"
+                   stroke-dasharray="2 4"/>
+          <ellipse cx="100" cy="100" rx="66" ry="66"
+                   fill="none" stroke="rgba(244,236,216,.16)" stroke-width=".8"/>
+
+          <!-- rotating group: planets revolve -->
+          <g id="orbitGroup">
+            <!-- planet 1 on ellipse at angle 0 -->
+            <g transform="translate(182 100)">
+              <circle class="planet" r="7" fill="url(#planetG)"/>
+            </g>
+            <!-- planet 2 on ellipse at angle 180 -->
+            <g transform="translate(18 100)">
+              <circle class="planet" r="4.5" fill="url(#planetG2)"/>
+            </g>
+            <!-- planet 3 on circular orbit at top -->
+            <g transform="translate(100 34)">
+              <circle class="ring-planet" r="5" fill="none" stroke="#4ad5e8" stroke-width="1"
+                      transform="translate(-5 -5) translate(5 5)"/>
+              <circle r="4" fill="#4ad5e8"/>
+            </g>
+          </g>
+
+          <!-- sun/center (static, on top) -->
+          <circle cx="100" cy="100" r="22" fill="url(#sunG)"/>
+          <circle cx="100" cy="100" r="26" fill="none" stroke="rgba(255,143,85,.4)" stroke-width=".8"/>
+          <circle class="star-small" cx="88" cy="92" r="1" fill="#ffffff" opacity=".7"/>
+
+          <!-- corner star sparks -->
+          <g fill="#f4ecd8">
+            <circle class="star-small" cx="20" cy="20" r=".8"/>
+            <circle class="star-small" cx="180" cy="30" r=".7" style="animation-delay:-1.4s"/>
+            <circle class="star-small" cx="30" cy="170" r=".9" style="animation-delay:-2s"/>
+            <circle class="star-small" cx="170" cy="170" r=".8" style="animation-delay:-.6s"/>
+          </g>
+        </svg>
+        <span class="hint-drag">↔ drag to rotate</span>
+      </div>
+    </div>
+
+    <!-- TITLES -->
+    <div class="titles">
+      <div class="overline">Mission Log</div>
+      <h2 class="title">
+        Beyond
+        <em>the Horizon</em>
+      </h2>
+      <p class="deck">
+        Hành trình thứ mười ba — <b>một bước nhỏ cho con người</b>, một bước lớn cho nhân loại.
+      </p>
+    </div>
+
+    <!-- TELEMETRY -->
+    <div class="telemetry">
+      <div class="hd">
+        <span>Telemetry · Live</span>
+        <span class="live">downlink</span>
+      </div>
+      <div class="row">
+        <span class="k">&gt; ALTITUDE</span>
+        <span class="v" id="tAlt">384,400 km</span>
+      </div>
+      <div class="row">
+        <span class="k">&gt; VELOCITY</span>
+        <span class="v cyan" id="tVel">1.02 km/s</span>
+      </div>
+      <div class="row">
+        <span class="k">&gt; DISTANCE</span>
+        <span class="v orange" id="tDist">000,013 A.U.</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="stamp">
+        <span class="k">Launch</span>
+        <span class="v">07<span class="dot"></span>16<span class="dot"></span>69</span>
+      </div>
+      <button class="btn-launch" type="button">
+        Launch
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </footer>
+  </article>
+</div>
+
+<script>
+  (function(){
+    const card = document.getElementById('card');
+    const orbit = document.getElementById('orbit');
+    const orbitGroup = document.getElementById('orbitGroup');
+    const tAlt = document.getElementById('tAlt');
+    const tVel = document.getElementById('tVel');
+    const tDist = document.getElementById('tDist');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // --- orbit rotation controlled by drag ---
+    let angle = 0;
+    let targetAngle = 0;
+    let dragging = false;
+    let startX = 0;
+    let startAngle = 0;
+    let rafOrbit = null;
+
+    function applyOrbit(){
+      angle += (targetAngle - angle) * 0.18;
+      orbitGroup.setAttribute('transform', `rotate(${angle} 100 100)`);
+      if (Math.abs(targetAngle - angle) > 0.05){
+        rafOrbit = requestAnimationFrame(applyOrbit);
+      } else {
+        rafOrbit = null;
+      }
+    }
+    function nudgeOrbit(delta){
+      targetAngle += delta;
+      if (!rafOrbit) rafOrbit = requestAnimationFrame(applyOrbit);
+    }
+
+    if (!reduce){
+      orbit.addEventListener('pointerdown', (e)=>{
+        dragging = true;
+        startX = e.clientX;
+        startAngle = targetAngle;
+        orbit.classList.add('dragging');
+        orbit.setPointerCapture(e.pointerId);
+      });
+      orbit.addEventListener('pointermove', (e)=>{
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        targetAngle = startAngle + dx * 1.2;
+        if (!rafOrbit) rafOrbit = requestAnimationFrame(applyOrbit);
+      });
+      const endDrag = (e)=>{
+        if (!dragging) return;
+        dragging = false;
+        orbit.classList.remove('dragging');
+      };
+      orbit.addEventListener('pointerup', endDrag);
+      orbit.addEventListener('pointercancel', endDrag);
+      orbit.addEventListener('pointerleave', endDrag);
+
+      // automatic slow drift when idle
+      setInterval(()=>{
+        if (!dragging && Math.abs(targetAngle - angle) < 0.5){
+          targetAngle += 0.6;
+          if (!rafOrbit) rafOrbit = requestAnimationFrame(applyOrbit);
+        }
+      }, 60);
+    }
+
+    // --- live telemetry flicker ---
+    if (!reduce){
+      setInterval(()=>{
+        const alt = 384400 + Math.floor((Math.random() - 0.5) * 800);
+        const vel = (1.02 + (Math.random() - 0.5) * 0.02).toFixed(3);
+        tAlt.textContent = alt.toLocaleString('en-US') + ' km';
+        tVel.textContent = vel + ' km/s';
+      }, 2400);
+    }
+
+    // --- subtle tilt ---
+    const isFine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!isFine || reduce) return;
+    let raf = null, tx = 0, ty = 0, cx = 0, cy = 0;
+    function loop(){
+      cx += (tx - cx) * 0.12;
+      cy += (ty - cy) * 0.12;
+      card.style.transform =
+        `rotateX(${(-cy * 4).toFixed(2)}deg) rotateY(${(cx * 5).toFixed(2)}deg)`;
+      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001){
+        raf = requestAnimationFrame(loop);
+      } else { raf = null; }
+    }
+    card.addEventListener('pointermove', (e)=>{
+      if (dragging) return;
+      const r = card.getBoundingClientRect();
+      tx = ((e.clientX - r.left) / r.width  - 0.5) * 2;
+      ty = ((e.clientY - r.top ) / r.height - 0.5) * 2;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    card.addEventListener('pointerleave', ()=>{
+      tx = 0; ty = 0;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+  })();
+</script>
+</body>
+</html>

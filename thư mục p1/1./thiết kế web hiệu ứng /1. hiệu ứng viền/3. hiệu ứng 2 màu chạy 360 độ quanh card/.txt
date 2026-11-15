@@ -1,0 +1,70 @@
+
+.running-border {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --rb-width: 2px;              /* độ dày viền */
+  --rb-speed: 2.5s;             /* tốc độ 1 vòng */
+  --rb-angle: 40deg;            /* độ dài vệt sáng */
+  --rb-current: #2196f3;        /* màu hiện tại (xanh dương) */
+}
+
+.running-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--rb-current) var(--rb-angle),
+    transparent calc(var(--rb-angle) * 2)
+  );
+
+  animation:
+    xoayVien var(--rb-speed) linear infinite,
+    doiMau calc(var(--rb-speed) * 2) linear infinite;
+
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.running-border::after {
+  content: "";
+  position: absolute;
+  inset: var(--rb-width);
+  background: inherit;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.running-border > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes xoayVien {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes doiMau {
+  0%,   50%   { --rb-current: #2196f3; }   /* XANH DƯƠNG */
+  50.1%, 100% { --rb-current: #4caf50; }   /* XANH LÁ */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .running-border::before { animation: none; }
+}
+
+
+
+
+----cách thêm class ---
+<div class="my-card running-border">
+  <span>Nội dung</span>
+</div>

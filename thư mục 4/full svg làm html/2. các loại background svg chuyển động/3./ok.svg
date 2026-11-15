@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ddd0"/>
+      <stop offset="35%" stop-color="#d4cfc4"/>
+      <stop offset="65%" stop-color="#b8c0bc"/>
+      <stop offset="100%" stop-color="#8fa3a0"/>
+    </linearGradient>
+    <linearGradient id="mtnFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a8a92"/>
+      <stop offset="100%" stop-color="#5a6a72"/>
+    </linearGradient>
+    <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a5a62"/>
+      <stop offset="100%" stop-color="#2e3e48"/>
+    </linearGradient>
+    <linearGradient id="mtnNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243038"/>
+      <stop offset="100%" stop-color="#10181e"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a7a82"/>
+      <stop offset="50%" stop-color="#3e5a62"/>
+      <stop offset="100%" stop-color="#1e2e36"/>
+    </linearGradient>
+    <linearGradient id="falls" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8f2f5" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#c8dde5" stop-opacity="0.3"/>
+    </linearGradient>
+    <radialGradient id="sun2" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff6e0" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#f5e0c0" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f5e0c0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="fogBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="fogBlur2" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="softEdge" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="600" height="800" fill="url(#sky2)"/>
+
+  <!-- SUN -->
+  <circle cx="380" cy="180" r="90" fill="url(#sun2)"/>
+  <circle cx="380" cy="180" r="26" fill="#fff4dc" opacity="0.9"/>
+
+  <!-- FAR MOUNTAINS -->
+  <path d="M0,340 L50,290 L110,320 L170,265 L230,305 L290,250 L350,290 L420,255 L480,300 L540,270 L600,310 L600,420 L0,420 Z" fill="url(#mtnFar)" opacity="0.55"/>
+
+  <!-- FOG LAYER 1 -->
+  <ellipse cx="300" cy="380" rx="380" ry="22" fill="#e8eae6" opacity="0.7" filter="url(#fogBlur2)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 70,0; 0,0" dur="55s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- MID MOUNTAINS -->
+  <path d="M0,430 L70,370 L140,405 L210,350 L280,395 L350,340 L430,385 L500,345 L570,395 L600,370 L600,520 L0,520 Z" fill="url(#mtnMid)"/>
+
+  <!-- WATERFALL -->
+  <path d="M350,340 L362,340 L368,395 L358,398 L352,395 Z" fill="url(#falls)">
+    <animate attributeName="opacity" values="0.9;0.7;0.9" dur="1.5s" repeatCount="indefinite"/>
+  </path>
+  <path d="M354,398 L362,396 L364,450 L356,452 Z" fill="url(#falls)" opacity="0.75">
+    <animate attributeName="opacity" values="0.75;0.5;0.75" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+  <g fill="#e8f2f5" opacity="0.85">
+    <circle cx="358" cy="410" r="1.6">
+      <animate attributeName="cy" values="400;470;400" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.2;0.9" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="362" cy="420" r="1.3">
+      <animate attributeName="cy" values="410;480;410" dur="2.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.85;0.15;0.85" dur="2.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="355" cy="415" r="1.4">
+      <animate attributeName="cy" values="405;475;405" dur="3.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.15;0.8" dur="3.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- FOG LAYER 2 -->
+  <ellipse cx="200" cy="470" rx="340" ry="18" fill="#dce4e2" opacity="0.6" filter="url(#fogBlur2)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; -60,0; 0,0" dur="70s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="450" cy="500" rx="280" ry="15" fill="#e0e6e2" opacity="0.5" filter="url(#fogBlur2)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="65s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- NEAR MOUNTAINS / CLIFFS -->
+  <path d="M0,560 L80,480 L160,540 L240,470 L330,530 L400,465 L470,520 L540,470 L600,510 L600,650 L0,650 Z" fill="url(#mtnNear)"/>
+
+  <!-- PINE TREES ON CLIFF -->
+  <g fill="#0a1418">
+    <!-- Tree 1 -->
+    <g transform="translate(80,490)">
+      <animateTransform attributeName="transform" type="translate" values="80,490;84,490;80,490" dur="5s" repeatCount="indefinite" additive="replace"/>
+      <polygon points="0,0 -12,28 -6,28 -16,52 -8,52 -20,80 20,80 8,52 16,52 6,28 12,28" opacity="0.95"/>
+    </g>
+    <!-- Tree 2 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;3,0;0,0" dur="6s" repeatCount="indefinite"/>
+      <polygon points="160,470 146,505 154,505 142,540 152,540 138,585 182,585 168,540 178,540 166,505 174,505" fill="#0a1418" opacity="0.95"/>
+    </g>
+    <!-- Tree 3 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0" dur="5.5s" repeatCount="indefinite"/>
+      <polygon points="400,465 388,495 395,495 385,525 393,525 382,562 418,562 407,525 415,525 405,495 412,495" fill="#0a1418" opacity="0.95"/>
+    </g>
+    <!-- Tree 4 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0" dur="7s" repeatCount="indefinite"/>
+      <polygon points="540,470 530,495 536,495 528,522 534,522 524,555 556,555 546,522 552,522 544,495 550,495" fill="#0a1418" opacity="0.95"/>
+    </g>
+  </g>
+
+  <!-- LAKE / RIVER -->
+  <path d="M0,650 C100,635 200,660 300,645 C400,630 500,660 600,645 L600,800 L0,800 Z" fill="url(#water)"/>
+
+  <!-- RIPPLE LINES -->
+  <g stroke="#a8c5cc" stroke-width="0.8" fill="none" opacity="0.4">
+    <path d="M60,690 Q160,684 260,690 T460,688">
+      <animate attributeName="opacity" values="0.4;0.1;0.4" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M100,720 Q200,714 320,720 T540,716">
+      <animate attributeName="opacity" values="0.3;0.08;0.3" dur="5.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M40,750 Q160,744 280,750 T520,746">
+      <animate attributeName="opacity" values="0.25;0.06;0.25" dur="6.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M120,775 Q220,770 340,775 T560,772">
+      <animate attributeName="opacity" values="0.2;0.04;0.2" dur="7.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- REFLECTION OF TREES -->
+  <g opacity="0.25">
+    <polygon points="160,660 154,680 158,680 150,700 158,700 148,730 180,730 170,700 176,700 168,680 174,680" fill="#0a1418"/>
+    <polygon points="400,655 392,675 398,675 388,698 396,698 385,730 418,730 406,698 414,698 404,675 410,675" fill="#0a1418"/>
+  </g>
+
+  <!-- FOREGROUND ROCKS -->
+  <ellipse cx="70" cy="770" rx="60" ry="25" fill="#0a1218"/>
+  <ellipse cx="530" cy="775" rx="70" ry="22" fill="#0a1218"/>
+  <ellipse cx="480" cy="782" rx="40" ry="15" fill="#101c22"/>
+
+  <!-- BIRDS -->
+  <g stroke="#2e3e48" stroke-width="1.5" fill="none" opacity="0.7">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 400,-30" dur="25s" repeatCount="indefinite"/>
+      <path d="M100,220 Q105,215 110,220"/>
+      <path d="M120,215 Q125,210 130,215"/>
+      <path d="M115,230 Q120,225 125,230"/>
+    </g>
+  </g>
+  <g stroke="#2e3e48" stroke-width="1.2" fill="none" opacity="0.55">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 380,-20" dur="30s" repeatCount="indefinite"/>
+      <path d="M180,255 Q184,251 188,255"/>
+      <path d="M195,250 Q199,246 203,250"/>
+    </g>
+  </g>
+
+  <!-- FALLING LEAVES -->
+  <g fill="#8a9a6a" opacity="0.7">
+    <ellipse cx="150" cy="560" rx="3" ry="1.5">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 40,180" dur="12s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.7;0" dur="12s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="420" cy="550" rx="3" ry="1.5">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -30,190" dur="14s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.7;0" dur="14s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="300" cy="540" rx="2.5" ry="1.2">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 25,210" dur="16s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.6;0" dur="16s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- MIST OVER WATER -->
+  <ellipse cx="300" cy="660" rx="320" ry="12" fill="#c8d8d8" opacity="0.35" filter="url(#fogBlur)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="45s" repeatCount="indefinite"/>
+  </ellipse>
+</svg>

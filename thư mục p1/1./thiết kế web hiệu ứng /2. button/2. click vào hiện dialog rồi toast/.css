@@ -1,0 +1,193 @@
+/* ============================================================
+   DIALOG + TOAST SYSTEM — CSS
+   ============================================================ */
+
+/* ---------- DIALOG ---------- */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.dialog-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dialog {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+
+.dialog-overlay.show .dialog {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a2940;
+  margin-bottom: 12px;
+}
+
+.dialog-message {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dialog-btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.dialog-btn:active {
+  transform: scale(0.96);
+}
+
+.dialog-btn-cancel {
+  background: #f0f2f5;
+  color: #555;
+}
+
+.dialog-btn-cancel:hover {
+  background: #e0e4ea;
+}
+
+.dialog-btn-confirm {
+  background: #007bff;
+  color: #ffffff;
+}
+
+.dialog-btn-confirm:hover {
+  background: #0056b3;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ---------- TOAST ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast {
+  background: #1a2940;
+  color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  margin-top: 12px;
+
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.hide {
+  transform: translateX(120%);
+  opacity: 0;
+}
+
+.toast .toast-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.toast.toast-success {
+  border-left: 4px solid #3ddc97;
+}
+.toast.toast-success .toast-icon {
+  color: #3ddc97;
+}
+
+.toast.toast-error {
+  border-left: 4px solid #ff5c5c;
+}
+.toast.toast-error .toast-icon {
+  color: #ff5c5c;
+}
+
+.toast.toast-info {
+  border-left: 4px solid #2196f3;
+}
+.toast.toast-info .toast-icon {
+  color: #2196f3;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 600px) {
+  .toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+  .toast {
+    transform: translateY(120%);
+  }
+  .toast.show {
+    transform: translateY(0);
+  }
+  .toast.hide {
+    transform: translateY(120%);
+  }
+}
+
+/* ---------- ACCESSIBILITY ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .dialog-overlay,
+  .dialog,
+  .toast {
+    transition: none;
+  }
+}

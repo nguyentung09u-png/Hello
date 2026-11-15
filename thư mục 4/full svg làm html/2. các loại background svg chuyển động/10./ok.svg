@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a7ab0"/>
+      <stop offset="40%" stop-color="#8ab8d8"/>
+      <stop offset="70%" stop-color="#d8e4e8"/>
+      <stop offset="100%" stop-color="#f8f0d8"/>
+    </linearGradient>
+    <radialGradient id="sun8" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff8e0" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#ffe8a8" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffe8a8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hillFar8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8b070"/>
+      <stop offset="100%" stop-color="#7a8a50"/>
+    </linearGradient>
+    <linearGradient id="hillMid8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8b860"/>
+      <stop offset="100%" stop-color="#9a8a48"/>
+    </linearGradient>
+    <linearGradient id="hillNear8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0c870"/>
+      <stop offset="100%" stop-color="#a89450"/>
+    </linearGradient>
+    <linearGradient id="grass8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0d888"/>
+      <stop offset="100%" stop-color="#b89850"/>
+    </linearGradient>
+    <filter id="mist8" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="cloudSoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="600" height="800" fill="url(#sky8)"/>
+
+  <!-- SUN -->
+  <circle cx="180" cy="200" r="200" fill="url(#sun8)"/>
+  <circle cx="180" cy="200" r="30" fill="#fffae8" opacity="0.9"/>
+
+  <!-- CLOUDS -->
+  <g filter="url(#cloudSoft)">
+    <!-- Cloud group 1 -->
+    <g opacity="0.85">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,0; 0,0" dur="90s" repeatCount="indefinite"/>
+      <ellipse cx="120" cy="140" rx="70" ry="20" fill="#ffffff"/>
+      <ellipse cx="100" cy="130" rx="45" ry="18" fill="#ffffff"/>
+      <ellipse cx="145" cy="135" rx="50" ry="16" fill="#ffffff"/>
+      <ellipse cx="160" cy="145" rx="40" ry="12" fill="#f8f8f0"/>
+    </g>
+    <!-- Cloud group 2 -->
+    <g opacity="0.75">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -80,0; 0,0" dur="110s" repeatCount="indefinite"/>
+      <ellipse cx="380" cy="100" rx="90" ry="22" fill="#ffffff"/>
+      <ellipse cx="350" cy="90" rx="55" ry="20" fill="#ffffff"/>
+      <ellipse cx="415" cy="95" rx="60" ry="18" fill="#ffffff"/>
+      <ellipse cx="435" cy="105" rx="45" ry="14" fill="#f8f8f0"/>
+    </g>
+    <!-- Cloud group 3 -->
+    <g opacity="0.7">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="100s" repeatCount="indefinite"/>
+      <ellipse cx="520" cy="180" rx="65" ry="16" fill="#ffffff"/>
+      <ellipse cx="500" cy="172" rx="42" ry="14" fill="#ffffff"/>
+      <ellipse cx="540" cy="176" rx="45" ry="12" fill="#f8f8f0"/>
+    </g>
+    <!-- Cloud group 4 -->
+    <g opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -55,0; 0,0" dur="120s" repeatCount="indefinite"/>
+      <ellipse cx="240" cy="220" rx="75" ry="15" fill="#ffffff"/>
+      <ellipse cx="215" cy="213" rx="45" ry="12" fill="#ffffff"/>
+      <ellipse cx="265" cy="217" rx="48" ry="11" fill="#f8f8f0"/>
+    </g>
+  </g>
+
+  <!-- FAR HILLS -->
+  <path d="M0,420 C80,390 160,410 240,395 C320,380 400,405 480,390 C540,378 580,395 600,390 L600,480 L0,480 Z" fill="url(#hillFar8)"/>
+
+  <!-- MIST -->
+  <ellipse cx="300" cy="450" rx="350" ry="20" fill="#e8e8d8" opacity="0.5" filter="url(#mist8)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="60s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- MID HILLS -->
+  <path d="M0,480 C100,450 200,475 300,455 C400,435 500,465 600,450 L600,560 L0,560 Z" fill="url(#hillMid8)"/>
+
+  <!-- MID HILL GRASS TEXTURE -->
+  <g stroke="#b8a858" stroke-width="1" fill="none" opacity="0.5">
+    <path d="M50,490 Q80,485 110,492"/>
+    <path d="M150,495 Q180,490 210,497"/>
+    <path d="M280,485 Q310,480 340,487"/>
+    <path d="M400,480 Q430,475 460,482"/>
+    <path d="M520,485 Q550,480 580,487"/>
+  </g>
+
+  <!-- LONE TREE -->
+  <g>
+    <!-- Trunk -->
+    <path d="M300,530 Q298,490 295,450" stroke="#3a2e1a" stroke-width="6" fill="none"/>
+    <path d="M300,530 Q302,500 305,480" stroke="#3a2e1a" stroke-width="4" fill="none"/>
+    <!-- Branches -->
+    <path d="M297,470 Q280,455 265,440" stroke="#3a2e1a" stroke-width="3" fill="none">
+      <animate attributeName="d" values="M297,470 Q280,455 265,440;M297,470 Q282,453 268,438;M297,470 Q280,455 265,440" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M302,460 Q320,445 335,435" stroke="#3a2e1a" stroke-width="3" fill="none">
+      <animate attributeName="d" values="M302,460 Q320,445 335,435;M302,460 Q318,443 332,433;M302,460 Q320,445 335,435" dur="5.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M299,445 Q290,430 282,420" stroke="#3a2e1a" stroke-width="2.5" fill="none">
+      <animate attributeName="d" values="M299,445 Q290,430 282,420;M299,445 Q292,428 285,418;M299,445 Q290,430 282,420" dur="6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M303,440 Q315,425 322,415" stroke="#3a2e1a" stroke-width="2.5" fill="none">
+      <animate attributeName="d" values="M303,440 Q315,425 322,415;M303,440 Q313,423 320,413;M303,440 Q315,425 322,415" dur="5.2s" repeatCount="indefinite"/>
+    </path>
+    <!-- Foliage -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 4,0; 0,0" dur="4s" repeatCount="indefinite"/>
+      <ellipse cx="290" cy="435" rx="35" ry="25" fill="#7a9a5a" opacity="0.85"/>
+      <ellipse cx="310" cy="428" rx="32" ry="22" fill="#8aaa68" opacity="0.85"/>
+      <ellipse cx="300" cy="418" rx="30" ry="20" fill="#7a9a5a" opacity="0.8"/>
+      <ellipse cx="280" cy="425" rx="25" ry="18" fill="#6a8a4a" opacity="0.75"/>
+      <ellipse cx="320" cy="420" rx="26" ry="18" fill="#8aaa68" opacity="0.75"/>
+    </g>
+  </g>
+
+  <!-- NEAR HILLS -->
+  <path d="M0,560 C80,540 160,570 240,550 C320,530 400,565 480,548 C540,538 580,555 600,548 L600,800 L0,800 Z" fill="url(#hillNear8)"/>
+
+  <!-- FOREGROUND GRASS BLADES -->
+  <g stroke="#a89450" stroke-width="1.5" fill="none" opacity="0.85">
+    <path d="M40,700 Q38,670 45,645">
+      <animate attributeName="d" values="M40,700 Q38,670 45,645;M40,700 Q44,670 50,645;M40,700 Q38,670 45,645" dur="3.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M55,700 Q52,675 58,652">
+      <animate attributeName="d" values="M55,700 Q52,675 58,652;M55,700 Q58,675 63,652;M55,700 Q52,675 58,652" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M70,700 Q68,672 74,648">
+      <animate attributeName="d" values="M70,700 Q68,672 74,648;M70,700 Q73,672 78,648;M70,700 Q68,672 74,648" dur="3.8s" repeatCount="indefinite"/>
+    </path>
+    <path d="M520,700 Q518,670 524,645">
+      <animate attributeName="d" values="M520,700 Q518,670 524,645;M520,700 Q523,670 528,645;M520,700 Q518,670 524,645" dur="4.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M540,700 Q537,675 543,652">
+      <animate attributeName="d" values="M540,700 Q537,675 543,652;M540,700 Q543,675 548,652;M540,700 Q537,675 543,652" dur="3.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M560,700 Q558,672 564,648">
+      <animate attributeName="d" values="M560,700 Q558,672 564,648;M560,700 Q563,672 568,648;M560,700 Q558,672 564,648" dur="4.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M300,720 Q297,690 303,665">
+      <animate attributeName="d" values="M300,720 Q297,690 303,665;M300,720 Q303,690 308,665;M300,720 Q297,690 303,665" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M320,720 Q318,692 324,668">
+      <animate attributeName="d" values="M320,720 Q318,692 324,668;M320,720 Q323,692 328,668;M320,720 Q318,692 324,668" dur="4.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <g stroke="#c8b060" stroke-width="1.2" fill="none" opacity="0.7">
+    <path d="M100,750 Q98,725 105,705">
+      <animate attributeName="d" values="M100,750 Q98,725 105,705;M100,750 Q103,725 108,705;M100,750 Q98,725 105,705" dur="6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M120,750 Q117,728 123,708">
+      <animate attributeName="d" values="M120,750 Q117,728 123,708;M120,750 Q122,728 127,708;M120,750 Q117,728 123,708" dur="5.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M480,750 Q477,725 483,705">
+      <animate attributeName="d" values="M480,750 Q477,725 483,705;M480,750 Q482,725 487,705;M480,750 Q477,725 483,705" dur="6.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M500,750 Q497,728 503,708">
+      <animate attributeName="d" values="M500,750 Q497,728 503,708;M500,750 Q502,728 507,708;M500,750 Q497,728 503,708" dur="5.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- WIND WAVES ON GRASS -->
+  <g stroke="#f0d888" stroke-width="1" fill="none" opacity="0.5">
+    <path d="M80,620 Q140,612 200,620">
+      <animate attributeName="d" values="M80,620 Q140,612 200,620;M80,620 Q140,616 200,620;M80,620 Q140,612 200,620" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M250,610 Q310,602 370,610">
+      <animate attributeName="d" values="M250,610 Q310,602 370,610;M250,610 Q310,606 370,610;M250,610 Q310,602 370,610" dur="3.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M400,625 Q460,617 520,625">
+      <animate attributeName="d" values="M400,625 Q460,617 520,625;M400,625 Q460,621 520,625;M400,625 Q460,617 520,625" dur="4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- FLYING BIRDS -->
+  <g stroke="#3a2e1a" stroke-width="1.6" fill="none" opacity="0.75">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 200,30" dur="30s" repeatCount="indefinite"/>
+      <path d="M240,300 Q245,295 250,300"/>
+      <path d="M260,295 Q265,290 270,295"/>
+      <path d="M280,302 Q285,297 290,302"/>
+    </g>
+  </g>
+  <g stroke="#3a2e1a" stroke-width="1.3" fill="none" opacity="0.6">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 180,25" dur="35s" repeatCount="indefinite"/>
+      <path d="M350,340 Q354,336 358,340"/>
+      <path d="M366,336 Q370,332 374,336"/>
+    </g>
+  </g>
+
+  <!-- FLOATING SEEDS / DANDELION -->
+  <g fill="#fffae8" opacity="0.7">
+    <circle cx="150" cy="500" r="1.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 100,-50; 180,-80" dur="14s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.4;0" dur="14s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="480" r="1.5">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 90,-40; 160,-70" dur="16s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.4;0" dur="16s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="420" cy="520" r="1.7">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 80,-45; 150,-75" dur="15s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.4;0" dur="15s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="470" r="1.4">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 70,-35; 130,-65" dur="18s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.4;0" dur="18s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

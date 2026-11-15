@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sumi — Wabi-Sabi No. 9</title>
+<style>
+  :root{
+    --bg-deep:#1a1512;
+    --bg-mid:#2b2420;
+    --washi:#f2ead8;
+    --washi-2:#e8dfc9;
+    --sumi:#1c1a17;
+    --sumi-soft:#3a3631;
+    --shu:#c1301f;     /* 朱色 shu-iro */
+    --muted:#7a6f60;
+    --line:rgba(28,26,23,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    min-height:100dvh;
+    display:grid;place-items:center;
+    padding:40px 16px;
+    font-family:"Georgia","Times New Roman",serif;
+    color:var(--sumi);
+    background:var(--bg-mid);
+    overflow-x:hidden;
+  }
+
+  /* ---------- BACKGROUND ---------- */
+  .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bg svg{width:100%;height:100%;display:block}
+  .bg .enso-bg{
+    animation:breathe 9s ease-in-out infinite alternate;
+    transform-origin:center;
+  }
+  @keyframes breathe{
+    from{opacity:.6;transform:scale(1)}
+    to{opacity:1;transform:scale(1.03)}
+  }
+
+  /* ---------- STAGE / CARD ---------- */
+  .stage{position:relative;z-index:2;perspective:1500px}
+
+  .card{
+    position:relative;
+    width:min(340px,90vw);
+    aspect-ratio:9/15;
+    border-radius:28px; /* ROUNDED RECTANGLE */
+    padding:0;
+    display:flex;flex-direction:column;
+    isolation:isolate;
+    background:
+      radial-gradient(120% 80% at 50% 0%, #f7f1e2 0%, var(--washi) 45%, var(--washi-2) 100%);
+    border:1px solid rgba(28,26,23,.12);
+    box-shadow:
+      0 40px 80px -30px rgba(20,15,10,.7),
+      0 0 0 1px rgba(255,255,255,.35) inset,
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 -1px 0 rgba(120,100,80,.15) inset;
+    transform-style:preserve-3d;
+    transition:transform .7s cubic-bezier(.2,.8,.2,1), box-shadow .7s ease;
+    overflow:hidden;
+    animation:cardIn 1.2s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(30px);filter:blur(8px)}
+    to{opacity:1;transform:translateY(0);filter:blur(0)}
+  }
+  .card:hover{
+    box-shadow:
+      0 55px 100px -30px rgba(20,15,10,.85),
+      0 0 0 1px rgba(255,255,255,.4) inset,
+      0 0 60px -20px rgba(193,48,31,.25);
+  }
+
+  /* washi paper fibre texture (SVG data inline via CSS) */
+  .card::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:
+      repeating-linear-gradient(90deg,
+        rgba(120,100,75,.025) 0px,
+        rgba(120,100,75,.025) 1px,
+        transparent 1px,
+        transparent 3px),
+      repeating-linear-gradient(0deg,
+        rgba(120,100,75,.02) 0px,
+        rgba(120,100,75,.02) 1px,
+        transparent 1px,
+        transparent 4px);
+    pointer-events:none;
+    z-index:1;
+    opacity:.9;
+  }
+
+  /* ink-bleed overlay follows pointer */
+  .ink{
+    position:absolute;inset:0;
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .8s ease;
+    background:radial-gradient(
+      180px circle at var(--ix, 50%) var(--iy, 40%),
+      rgba(28,26,23,.14) 0%,
+      rgba(28,26,23,.06) 35%,
+      transparent 65%
+    );
+    filter:blur(2px);
+    mix-blend-mode:multiply;
+  }
+  .card:hover .ink{opacity:1}
+
+  /* red seal ring top-right */
+  .seal{
+    position:absolute;
+    top:18px;right:18px;
+    width:34px;height:34px;
+    border:1.5px solid var(--shu);
+    border-radius:50%;
+    display:grid;place-items:center;
+    z-index:4;
+    color:var(--shu);
+    font-family:"Georgia",serif;
+    font-size:12px;
+    font-weight:700;
+    transform:rotate(-6deg);
+    opacity:.85;
+    box-shadow:0 0 0 1px rgba(193,48,31,.15);
+    transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s;
+  }
+  .card:hover .seal{transform:rotate(0) scale(1.05);opacity:1}
+  .seal small{
+    font-size:6px;
+    display:block;
+    letter-spacing:.1em;
+    margin-top:-1px;
+    opacity:.7;
+  }
+
+  /* ---------- HEADER ---------- */
+  .head{
+    position:relative;z-index:5;
+    padding:26px 26px 0;
+    display:flex;align-items:center;justify-content:space-between;
+    transform:translateZ(22px);
+  }
+  .brand{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:9px;letter-spacing:.4em;text-transform:uppercase;
+    color:var(--sumi);
+    font-weight:600;
+    text-indent:.4em;
+  }
+  .brand .dot{
+    width:5px;height:5px;
+    background:var(--shu);
+    border-radius:50%;
+    box-shadow:0 0 0 3px rgba(193,48,31,.1);
+  }
+  .kanji{
+    font-family:"Georgia",serif;
+    font-size:11px;
+    letter-spacing:.3em;
+    color:var(--muted);
+    writing-mode:vertical-rl;
+    text-orientation:upright;
+    line-height:1;
+    height:32px;
+    border-left:1px solid var(--line);
+    padding-left:8px;
+  }
+
+  /* ---------- ENSO HERO ---------- */
+  .hero{
+    position:relative;z-index:5;
+    margin-top:8px;
+    padding:0 26px;
+    display:flex;justify-content:center;
+    transform:translateZ(36px);
+    transition:transform .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .card:hover .hero{transform:translateZ(50px) translateY(-2px)}
+  .enso{
+    width:172px;height:172px;
+    position:relative;
+  }
+  .enso svg{width:100%;height:100%;overflow:visible}
+  .enso .brush{
+    stroke-dasharray:500;
+    stroke-dashoffset:500;
+    animation:brushIn 2.2s cubic-bezier(.65,0,.35,1) .2s forwards;
+  }
+  @keyframes brushIn{
+    to{stroke-dashoffset:0}
+  }
+  .enso .drop{
+    animation:inkDrop 4s ease-in-out infinite;
+    transform-origin:center;
+  }
+  .enso .drop.d2{animation-delay:-2s}
+  @keyframes inkDrop{
+    0%,100%{opacity:.4;transform:scale(.9)}
+    50%{opacity:.9;transform:scale(1.1)}
+  }
+
+  /* ---------- TITLE ---------- */
+  .titles{
+    position:relative;z-index:5;
+    margin-top:6px;
+    padding:0 26px;
+    text-align:center;
+    transform:translateZ(26px);
+  }
+  .overline{
+    font-size:8.5px;
+    letter-spacing:.5em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-indent:.5em;
+  }
+  .title{
+    margin-top:12px;
+    font-family:"Georgia",serif;
+    font-size:clamp(28px,7.6vw,36px);
+    line-height:1.02;
+    font-weight:400;
+    letter-spacing:.01em;
+    color:var(--sumi);
+  }
+  .title em{
+    display:block;
+    font-style:italic;
+    color:var(--shu);
+    font-size:.72em;
+    letter-spacing:.06em;
+    margin-top:4px;
+  }
+  .brush-line{
+    margin:14px auto 0;
+    width:60px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--sumi) 20%,var(--sumi) 80%,transparent);
+    opacity:.5;
+    border-radius:1px;
+  }
+  .deck{
+    margin-top:14px;
+    font-size:11.5px;
+    line-height:1.7;
+    color:var(--sumi-soft);
+    font-style:italic;
+    max-width:28ch;
+    margin-left:auto;margin-right:auto;
+  }
+  .deck b{
+    color:var(--sumi);
+    font-style:normal;
+    font-weight:600;
+    border-bottom:1px solid var(--shu);
+    padding-bottom:1px;
+  }
+
+  /* ---------- POETIC DETAIL ---------- */
+  .detail{
+    position:relative;z-index:5;
+    margin:16px 26px 0;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;
+    transform:translateZ(20px);
+  }
+  .detail .item{
+    text-align:center;
+    flex:1;
+    transition:transform .4s ease;
+  }
+  .detail .item:hover{transform:translateY(-2px)}
+  .detail .k{
+    font-size:8px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:block;
+    margin-bottom:5px;
+  }
+  .detail .v{
+    font-family:"Georgia",serif;
+    font-size:14px;
+    font-weight:500;
+    color:var(--sumi);
+    letter-spacing:.01em;
+  }
+  .detail .v em{color:var(--shu);font-style:italic}
+  .detail .sep{
+    width:1px;height:24px;
+    background:var(--line);
+    flex-shrink:0;
+  }
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    position:relative;z-index:5;
+    margin-top:auto;
+    padding:20px 24px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    transform:translateZ(24px);
+  }
+  .stamp-block{
+    line-height:1;
+  }
+  .stamp-block .k{
+    font-size:8px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:block;
+    margin-bottom:7px;
+  }
+  .stamp-block .v{
+    font-family:"Georgia",serif;
+    font-size:20px;
+    font-weight:400;
+    color:var(--sumi);
+    letter-spacing:.01em;
+  }
+  .stamp-block .v em{
+    font-style:italic;
+    color:var(--shu);
+    font-size:.85em;
+  }
+
+  .btn-sumi{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:12px 20px;
+    font-family:"Georgia",serif;
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    text-indent:.28em;
+    color:var(--washi);
+    background:var(--sumi);
+    border:1px solid var(--sumi);
+    border-radius:100px;
+    cursor:pointer;
+    box-shadow:0 8px 22px -10px rgba(28,26,23,.75);
+    transition:transform .35s cubic-bezier(.2,.8,.2,1), background .3s ease, box-shadow .3s;
+  }
+  .btn-sumi:hover{
+    transform:translateY(-2px);
+    background:var(--shu);
+    border-color:var(--shu);
+    box-shadow:0 14px 28px -10px rgba(193,48,31,.65);
+  }
+  .btn-sumi:active{transform:translateY(0) scale(.97)}
+  .btn-sumi svg{
+    width:11px;height:11px;
+    transition:transform .35s ease;
+  }
+  .btn-sumi:hover svg{transform:translateX(2px)}
+
+  @media (max-width:420px){
+    .head{padding:22px 20px 0}
+    .hero{padding:0 20px}
+    .enso{width:144px;height:144px}
+    .titles{padding:0 20px}
+    .detail{margin:14px 20px 0}
+    .footer{padding:16px 18px 20px}
+    .stamp-block .v{font-size:18px}
+    .btn-sumi{padding:10px 16px;font-size:9.5px;letter-spacing:.24em}
+    .seal{width:28px;height:28px;font-size:10px;top:14px;right:14px}
+    .seal small{font-size:5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .enso .brush{stroke-dashoffset:0}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ BACKGROUND ============ -->
+<div class="bg" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="bgBase" cx="50%" cy="50%" r="90%">
+        <stop offset="0%" stop-color="#3a302a"/>
+        <stop offset="55%" stop-color="#2b2420"/>
+        <stop offset="100%" stop-color="#1a1512"/>
+      </radialGradient>
+      <linearGradient id="inkG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#1c1a17" stop-opacity=".28"/>
+        <stop offset="100%" stop-color="#1c1a17" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#bgBase)"/>
+
+    <!-- faint distant ensō -->
+    <g class="enso-bg" transform="translate(720 450)" fill="none">
+      <circle r="380" stroke="#f2ead8" stroke-opacity=".05" stroke-width="24"
+              stroke-dasharray="2000 200" stroke-linecap="round"
+              transform="rotate(-40)"/>
+      <circle r="440" stroke="#f2ead8" stroke-opacity=".025" stroke-width="1"/>
+    </g>
+
+    <!-- distant ink strokes -->
+    <path d="M0,700 Q300,650 500,720 T1000,680 T1440,740" fill="none"
+          stroke="url(#inkG)" stroke-width="30" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<!-- ============ CARD ============ -->
+<div class="stage">
+  <article class="card" id="card">
+    <div class="ink" aria-hidden="true"></div>
+
+    <!-- red seal -->
+    <div class="seal" aria-hidden="true">
+      <span>和</span>
+      <small>WA</small>
+    </div>
+
+    <!-- HEADER -->
+    <header class="head">
+      <span class="brand"><span class="dot"></span>Sumi Studio</span>
+      <span class="kanji">侘寂</span>
+    </header>
+
+    <!-- ENSO HERO -->
+    <div class="hero">
+      <div class="enso" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="ensoG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1c1a17" stop-opacity=".05"/>
+              <stop offset="35%" stop-color="#1c1a17" stop-opacity=".85"/>
+              <stop offset="75%" stop-color="#3a3631" stop-opacity=".95"/>
+              <stop offset="100%" stop-color="#1c1a17" stop-opacity=".35"/>
+            </linearGradient>
+          </defs>
+          <!-- hand-drawn ensō circle (broken at bottom-right) -->
+          <path class="brush"
+                d="M100,22
+                   C155,22 178,60 178,100
+                   C178,142 150,178 100,178
+                   C52,178 22,142 22,100
+                   C22,60 48,26 96,24
+                   C100,24 104,25 108,27"
+                fill="none"
+                stroke="url(#ensoG)"
+                stroke-width="7.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+          <!-- ink texture dots along the stroke -->
+          <circle class="drop" cx="108" cy="27" r="2" fill="#1c1a17" opacity=".6"/>
+          <circle class="drop d2" cx="46" cy="82" r="1.5" fill="#1c1a17" opacity=".4"/>
+          <circle class="drop" cx="80" cy="168" r="1.2" fill="#1c1a17" opacity=".35"/>
+          <!-- small red accent dot (the seal color) -->
+          <circle cx="150" cy="150" r="4" fill="#c1301f" opacity=".85"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="titles">
+      <div class="overline">Wabi · Sabi · No. 9</div>
+      <h2 class="title">
+        The Beauty
+        <em>of Imperfection</em>
+      </h2>
+      <div class="brush-line"></div>
+      <p class="deck">
+        Mỗi vết mực là một <b>khoảnh khắc không thể lặp lại</b> — được vẽ tay trên giấy washi truyền thống.
+      </p>
+    </div>
+
+    <!-- POETIC DETAIL -->
+    <div class="detail">
+      <div class="item">
+        <span class="k">Paper</span>
+        <span class="v">Washi</span>
+      </div>
+      <div class="sep"></div>
+      <div class="item">
+        <span class="k">Ink</span>
+        <span class="v">Sumi</span>
+      </div>
+      <div class="sep"></div>
+      <div class="item">
+        <span class="k">Size</span>
+        <span class="v"><em>24</em>×36</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="stamp-block">
+        <span class="k">Edition</span>
+        <span class="v">No. <em>09</em></span>
+      </div>
+      <button class="btn-sumi" type="button">
+        View
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </footer>
+  </article>
+</div>
+
+<script>
+  (function(){
+    const card = document.getElementById('card');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isFine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (reduce || !isFine) return;
+
+    // ink-bleed tracking
+    let raf = null;
+    let ix = 50, iy = 40, tx = 50, ty = 40;
+
+    function loop(){
+      ix += (tx - ix) * 0.14;
+      iy += (ty - iy) * 0.14;
+      card.style.setProperty('--ix', ix + '%');
+      card.style.setProperty('--iy', iy + '%');
+      if (Math.abs(tx - ix) > 0.05 || Math.abs(ty - iy) > 0.05){
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+      }
+    }
+
+    card.addEventListener('pointermove', (e)=>{
+      const r = card.getBoundingClientRect();
+      tx = ((e.clientX - r.left) / r.width) * 100;
+      ty = ((e.clientY - r.top)  / r.height) * 100;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    card.addEventListener('pointerleave', ()=>{
+      tx = 50; ty = 40;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+  })();
+</script>
+</body>
+</html>

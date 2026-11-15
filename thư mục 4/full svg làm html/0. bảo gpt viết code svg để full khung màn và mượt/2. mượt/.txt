@@ -1,0 +1,58 @@
+Tổng quan cách làm (Sự thật kỹ thuật):
+
+1. Chỉ dùng CSS cho trạng thái tương tác: Thay vì dùng JS bắt sự kiện click/mouseover để thêm/xóa class hoặc tạo DOM (gây reflow), ta dùng các pseudo-class :hover, :active để kích hoạt trực tiếp CSS.
+2. Chỉ animate các thuộc tính GPU-friendly: Sử dụng transform (translate, scale, rotate) và opacity. Đây là các thuộc tính trình duyệt có thể đẩy xuống GPU xử lý (Composite Layer), không cần tính toán lại layout.
+3. Khai báo will-change: Báo trước cho trình duyệt biết phần tử nào sẽ thay đổi để nó chủ động tạo layer riêng, tránh giật lag.
+4. Cô lập không gian vẽ: Dùng isolation: isolate trên button để các hiệu ứng bên trong không ảnh hưởng đến background lớn phía sau.
+
+---
+
+Code chung chung (Minh họa cấu trúc):
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <style>
+        /* 1. Cô lập layer & tối ưu GPU */
+        .smooth-btn {
+            position: relative;
+            isolation: isolate; /* Tách biệt không gian vẽ */
+            will-change: transform, opacity; /* Báo trước cho GPU */
+            
+            /* Hiệu ứng nền giả lập (không dùng filter phức tạp) */
+            background: linear-gradient(135deg, #1a4bb8, #0a1424);
+            border-radius: 99px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* 2. Trạng thái Hover (Chỉ animate transform/opacity) */
+        .smooth-btn:hover {
+            transform: translateY(-2px) scale(1.02); /* GPU xử lý */
+            /* Thay đổi box-shadow tĩnh để giả lập phát sáng */
+            box-shadow: 0 10px 20px rgba(100, 180, 255, 0.5); 
+        }
+
+        /* 3. Trạng thái Active (Không dùng JS) */
+        .smooth-btn:active {
+            transform: scale(0.96) translateY(0); /* Phản hồi tức thì */
+            transition: transform 0.08s ease; /* Tốc độ nhanh hơn khi click */
+        }
+
+        /* 4. Tôn trọng cài đặt hệ thống */
+        @media (prefers-reduced-motion: reduce) {
+            .smooth-btn { transition: none; }
+            .smooth-btn:hover { transform: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Không có thuộc tính onclick hay JS -->
+    <button class="smooth-btn">Khám phá</button>
+</body>
+</html>
+```
+
+Lưu ý: Đây là code minh họa nguyên tắc. Trong thực tế, độ mượt còn phụ thuộc vào thiết bị, trình duyệt và độ phức tạp của SVG background (nên giữ SVG tĩnh hoặc chỉ animate transform). Tôi không chắc chắn 100% mọi thiết bị đều đạt 60fps tuyệt đối, nhưng đây là cách tiếp cận tối ưu nhất hiện nay.

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Bubble Capsule Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #02060f;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "BUBBLE CAPSULE" ===== */
+        /* Logic: Capsule Button (giữ dạng viên nang tròn 2 đầu).
+           Ý tưởng mới: Phong cách "bong bóng nước" (Bubble/Soap bubble). 
+           Bề mặt trong suốt, khúc xạ ánh sáng. Bên trong có các bong bóng 
+           nhỏ (bubbles) bay lên. Hover: căng phồng nhẹ, bong bóng tăng tốc.
+           Active: bề mặt "nổ" (pop) nhẹ, bong bóng bắn ra ngoài. */
+        .bubble-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.1rem 3rem 1.1rem 2.4rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.12em;
+            color: #ffffff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+            filter: drop-shadow(0 8px 20px rgba(0, 100, 255, 0.3));
+        }
+
+        /* Lớp vỏ bong bóng (Glass bubble) */
+        .bubble-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: 
+                radial-gradient(ellipse 120% 150% at 30% 10%, rgba(255, 255, 255, 0.6) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 100% at 80% 90%, rgba(100, 200, 255, 0.4) 0%, transparent 60%),
+                linear-gradient(135deg, rgba(60, 140, 255, 0.85), rgba(10, 40, 120, 0.9));
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+                0 0 20px rgba(120, 200, 255, 0.4) inset,
+                0 0 30px rgba(100, 180, 255, 0.5),
+                0 10px 30px -5px rgba(0, 50, 150, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -2;
+            transition: box-shadow 0.4s ease, background 0.4s ease, transform 0.4s ease;
+        }
+
+        /* Hiệu ứng ánh sáng khúc xạ (Highlight) */
+        .bubble-btn::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 15%;
+            right: 15%;
+            height: 35%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.9;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        /* SVG Bong bóng bên trong */
+        .bubbles-layer {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .bubbles-layer svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Animation bong bóng bay lên */
+        .bubble-anim {
+            animation: floatUp 3s ease-in infinite;
+            transform-origin: center;
+            opacity: 0;
+        }
+        .bubble-anim:nth-child(2) { animation-delay: 1s; animation-duration: 3.5s; }
+        .bubble-anim:nth-child(3) { animation-delay: 2s; animation-duration: 2.8s; }
+        .bubble-anim:nth-child(4) { animation-delay: 0.5s; animation-duration: 4s; }
+        .bubble-anim:nth-child(5) { animation-delay: 1.5s; animation-duration: 3.2s; }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(120%) scale(0.5); opacity: 0; }
+            20%  { opacity: 1; }
+            80%  { opacity: 0.8; }
+            100% { transform: translateY(-100%) scale(1.2); opacity: 0; }
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow: 0 2px 4px rgba(0, 20, 80, 0.6);
+            transition: text-shadow 0.4s ease;
+        }
+
+        /* Icon: bong bóng nhỏ */
+        .bubble-icon {
+            display: inline-flex;
+            width: 0.9em;
+            height: 0.9em;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+        .bubble-icon svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .bubble-btn:hover {
+                transform: scale(1.03) translateY(-2px);
+            }
+            .bubble-btn:hover::before {
+                background: 
+                    radial-gradient(ellipse 120% 150% at 30% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 60%),
+                    radial-gradient(ellipse 100% 100% at 80% 90%, rgba(140, 220, 255, 0.6) 0%, transparent 60%),
+                    linear-gradient(135deg, rgba(80, 160, 255, 0.95), rgba(20, 60, 160, 0.95));
+                box-shadow:
+                    0 0 0 1.5px rgba(255, 255, 255, 0.6) inset,
+                    0 0 30px rgba(160, 220, 255, 0.6) inset,
+                    0 0 50px rgba(120, 200, 255, 0.7),
+                    0 15px 40px -5px rgba(0, 80, 200, 0.9);
+            }
+            .bubble-btn:hover .bubble-anim {
+                animation-duration: 1.8s; /* Bong bóng bay nhanh hơn */
+            }
+            .bubble-btn:hover .bubble-icon {
+                transform: rotate(20deg) scale(1.15);
+            }
+            .bubble-btn:hover .btn-label {
+                text-shadow: 0 2px 8px rgba(0, 30, 100, 0.8);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .bubble-btn:active {
+            transform: scale(0.95);
+            transition: transform 0.08s ease;
+            filter: drop-shadow(0 4px 10px rgba(0, 100, 255, 0.4));
+        }
+        /* Hiệu ứng "nổ" bề mặt */
+        .bubble-btn:active::before {
+            box-shadow:
+                0 0 0 2px rgba(255, 255, 255, 0.7) inset,
+                0 0 15px rgba(255, 255, 255, 0.8) inset,
+                0 0 40px rgba(200, 240, 255, 1),
+                0 5px 15px -5px rgba(0, 80, 200, 0.8);
+            background: 
+                radial-gradient(ellipse 100% 100% at 50% 50%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
+                linear-gradient(135deg, rgba(100, 180, 255, 1), rgba(40, 100, 220, 1));
+        }
+        .bubble-btn:active::after {
+            opacity: 1;
+            transform: scaleY(1.2);
+        }
+        .bubble-btn:active .bubble-anim {
+            animation-duration: 0.6s; /* Bong bóng bắn ra */
+        }
+        .bubble-btn:active .bubble-icon {
+            transform: scale(0.85);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .bubble-anim { animation: none; display: none; }
+            .bubble-btn, .bubble-btn::before, .bubble-btn::after, .bubble-icon {
+                transition-duration: 0.01ms !important;
+            }
+            .bubble-btn:hover { transform: none; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .bubble-btn {
+                padding: 0.9rem 2.4rem 0.9rem 1.9rem;
+                font-size: 0.85rem;
+                letter-spacing: 0.1em;
+            }
+        }
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .bubble-btn {
+                padding: 1.15rem 3.4rem 1.15rem 2.8rem;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: Đại dương sâu, ánh sáng từ trên cao, nhiều bong bóng lớn -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <radialGradient id="oceanBg" cx="50%" cy="0%" r="120%">
+                <stop offset="0%"   stop-color="#0a3a7a"/>
+                <stop offset="30%"  stop-color="#041a40"/>
+                <stop offset="70%"  stop-color="#020a1c"/>
+                <stop offset="100%" stop-color="#010308"/>
+            </radialGradient>
+
+            <radialGradient id="lightRay" cx="50%" cy="0%" r="70%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+                <stop offset="40%"  stop-color="#6ab0ff" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Gradient bong bóng nền -->
+            <radialGradient id="bgBubble" cx="30%" cy="30%" r="70%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.6"/>
+                <stop offset="40%"  stop-color="#a8d4ff" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#2a6fff" stop-opacity="0"/>
+            </radialGradient>
+
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#oceanBg)"/>
+        <rect width="1440" height="900" fill="url(#lightRay)"/>
+
+        <!-- Bong bóng nền lớn lơ lửng -->
+        <g filter="url(#glowSoft)">
+            <circle cx="200" cy="700" r="60" fill="url(#bgBubble)">
+                <animate attributeName="cy" dur="12s" repeatCount="indefinite" values="800;600;800"/>
+            </circle>
+            <circle cx="1200" cy="400" r="90" fill="url(#bgBubble)">
+                <animate attributeName="cy" dur="15s" repeatCount="indefinite" values="500;300;500"/>
+            </circle>
+            <circle cx="800" cy="800" r="40" fill="url(#bgBubble)">
+                <animate attributeName="cy" dur="8s" repeatCount="indefinite" values="900;700;900"/>
+            </circle>
+            <circle cx="400" cy="200" r="30" fill="url(#bgBubble)" opacity="0.5">
+                <animate attributeName="cy" dur="10s" repeatCount="indefinite" values="300;150;300"/>
+            </circle>
+            <circle cx="1100" cy="800" r="50" fill="url(#bgBubble)" opacity="0.6">
+                <animate attributeName="cy" dur="14s" repeatCount="indefinite" values="900;650;900"/>
+            </circle>
+        </g>
+
+        <!-- Tia sáng từ trên chiếu xuống -->
+        <g opacity="0.1" filter="url(#glowSoft)">
+            <polygon points="600,0 800,0 900,900 500,900" fill="#a8d4ff"/>
+            <polygon points="400,0 500,0 600,900 300,900" fill="#ffffff" opacity="0.5"/>
+            <polygon points="900,0 1000,0 1100,900 800,900" fill="#ffffff" opacity="0.3"/>
+        </g>
+
+        <!-- Lưới nền tinh tế -->
+        <g opacity="0.04" stroke="#a8d4ff" stroke-width="0.5">
+            <line x1="0" y1="225" x2="1440" y2="225"/>
+            <line x1="0" y1="450" x2="1440" y2="450"/>
+            <line x1="0" y1="675" x2="1440" y2="675"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="bubble-btn" aria-label="Khám phá">
+            <!-- SVG Bong bóng bên trong button -->
+            <span class="bubbles-layer" aria-hidden="true">
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none">
+                    <defs>
+                        <radialGradient id="innerBubble" cx="30%" cy="30%" r="70%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.9"/>
+                            <stop offset="50%"  stop-color="#a8d4ff" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="#2a6fff" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <!-- Các bong bóng bay lên (nằm trong overflow: hidden của span) -->
+                    <circle class="bubble-anim" cx="40"  cy="60" r="6" fill="url(#innerBubble)" stroke="rgba(255,255,255,0.6)" stroke-width="0.5"/>
+                    <circle class="bubble-anim" cx="90"  cy="60" r="4" fill="url(#innerBubble)" stroke="rgba(255,255,255,0.6)" stroke-width="0.5"/>
+                    <circle class="bubble-anim" cx="150" cy="60" r="8" fill="url(#innerBubble)" stroke="rgba(255,255,255,0.6)" stroke-width="0.5"/>
+                    <circle class="bubble-anim" cx="210" cy="60" r="5" fill="url(#innerBubble)" stroke="rgba(255,255,255,0.6)" stroke-width="0.5"/>
+                    <circle class="bubble-anim" cx="260" cy="60" r="7" fill="url(#innerBubble)" stroke="rgba(255,255,255,0.6)" stroke-width="0.5"/>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="bubble-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="7" fill="rgba(255,255,255,0.4)" stroke="#ffffff" stroke-width="1.5"/>
+                        <ellipse cx="9" cy="9" rx="2" ry="1.5" fill="#ffffff" opacity="0.8" transform="rotate(-30 9 9)"/>
+                        <circle cx="6" cy="18" r="2.5" fill="rgba(255,255,255,0.4)" stroke="#ffffff" stroke-width="1"/>
+                        <circle cx="19" cy="5" r="1.5" fill="rgba(255,255,255,0.4)" stroke="#ffffff" stroke-width="1"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

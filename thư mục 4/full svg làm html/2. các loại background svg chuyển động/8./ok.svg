@@ -1,0 +1,308 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a5a7a"/>
+      <stop offset="30%" stop-color="#8a7a8a"/>
+      <stop offset="55%" stop-color="#e8a878"/>
+      <stop offset="80%" stop-color="#f8d098"/>
+      <stop offset="100%" stop-color="#fae8c8"/>
+    </linearGradient>
+    <radialGradient id="sun6" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff8dc" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#ffd88a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffb070" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a5a7a"/>
+      <stop offset="100%" stop-color="#4a3e5a"/>
+    </linearGradient>
+    <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a4a3a"/>
+      <stop offset="100%" stop-color="#3a2e28"/>
+    </linearGradient>
+    <linearGradient id="lake6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c88a5a"/>
+      <stop offset="40%" stop-color="#8a5a5a"/>
+      <stop offset="100%" stop-color="#3a2a3a"/>
+    </linearGradient>
+    <linearGradient id="house" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a2e28"/>
+      <stop offset="100%" stop-color="#2a1a18"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a3a2a"/>
+      <stop offset="100%" stop-color="#3a1e18"/>
+    </linearGradient>
+    <radialGradient id="windowGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffe8a0" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#ffc860" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffc860" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="mist6" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="glow6" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="600" height="800" fill="url(#sky6)"/>
+
+  <!-- SUN -->
+  <circle cx="420" cy="320" r="180" fill="url(#sun6)"/>
+  <circle cx="420" cy="320" r="32" fill="#fff4d0" opacity="0.9"/>
+
+  <!-- CLOUDS -->
+  <g fill="#8a7a8a" opacity="0.3">
+    <ellipse cx="150" cy="160" rx="80" ry="12">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,0; 0,0" dur="80s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="400" cy="130" rx="100" ry="14">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -70,0; 0,0" dur="90s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="520" cy="200" rx="70" ry="10">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="75s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- FAR HILLS -->
+  <path d="M0,400 L80,350 L160,380 L250,330 L340,375 L430,340 L520,380 L600,350 L600,460 L0,460 Z" fill="url(#hillFar)" opacity="0.7"/>
+
+  <!-- MIST LAYER -->
+  <ellipse cx="300" cy="430" rx="350" ry="20" fill="#f8d0a8" opacity="0.5" filter="url(#mist6)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="70s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- MID HILLS WITH TREES -->
+  <path d="M0,470 L100,430 L200,455 L300,420 L400,450 L500,425 L600,460 L600,540 L0,540 Z" fill="url(#hillMid)"/>
+
+  <!-- AUTUMN TREES ON HILLS -->
+  <g>
+    <circle cx="100" cy="430" r="22" fill="#c86a3a"/>
+    <circle cx="115" cy="438" r="16" fill="#a85a2e"/>
+    <circle cx="220" cy="445" r="20" fill="#d8883a"/>
+    <circle cx="240" cy="450" r="15" fill="#b86a2a"/>
+    <circle cx="360" cy="438" r="24" fill="#c86a3a"/>
+    <circle cx="380" cy="445" r="17" fill="#a85a2e"/>
+    <circle cx="480" cy="440" r="21" fill="#d8883a"/>
+    <circle cx="500" cy="448" r="16" fill="#b86a2a"/>
+    <circle cx="560" cy="450" r="18" fill="#c86a3a"/>
+  </g>
+
+  <!-- VILLAGE ON SHORE -->
+  <!-- House 1 -->
+  <g>
+    <rect x="80" y="490" width="60" height="45" fill="url(#house)"/>
+    <polygon points="75,490 110,465 145,490" fill="url(#roof)"/>
+    <rect x="92" y="505" width="14" height="14" fill="#ffe8a0"/>
+    <circle cx="99" cy="512" r="14" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="118" y="505" width="14" height="14" fill="#ffe8a0"/>
+    <circle cx="125" cy="512" r="14" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="0.8;0.4;0.8" dur="5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- House 2 -->
+  <g>
+    <rect x="160" y="485" width="70" height="50" fill="url(#house)"/>
+    <polygon points="155,485 195,455 235,485" fill="url(#roof)"/>
+    <rect x="175" y="500" width="16" height="16" fill="#ffe8a0"/>
+    <circle cx="183" cy="508" r="16" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="0.9;0.5;0.9" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="205" y="500" width="16" height="16" fill="#ffe8a0"/>
+    <circle cx="213" cy="508" r="16" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="1;0.5;1" dur="3.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- House 3 - small -->
+  <g>
+    <rect x="250" y="495" width="50" height="40" fill="url(#house)"/>
+    <polygon points="245,495 275,472 305,495" fill="url(#roof)"/>
+    <rect x="265" y="508" width="12" height="12" fill="#ffe8a0"/>
+    <circle cx="271" cy="514" r="12" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="0.85;0.4;0.85" dur="5.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- CHIMNEY SMOKE -->
+  <g fill="#c8b8a8" opacity="0.4">
+    <ellipse cx="125" cy="450" rx="8" ry="5">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 15,-40; 30,-70" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.2;0" dur="8s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="215" cy="440" rx="10" ry="6">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -18,-50; -35,-85" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.18;0" dur="10s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="270" cy="460" rx="7" ry="4">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 12,-35; 25,-60" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.35;0.15;0" dur="9s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- LAKE -->
+  <rect x="0" y="540" width="600" height="260" fill="url(#lake6)"/>
+
+  <!-- SUN REFLECTION ON WATER -->
+  <ellipse cx="420" cy="600" rx="40" ry="120" fill="#ffe8a0" opacity="0.35" filter="url(#glow6)">
+    <animate attributeName="opacity" values="0.35;0.2;0.35" dur="5s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- WINDOW REFLECTIONS -->
+  <g opacity="0.4" fill="#ffe8a0">
+    <ellipse cx="99" cy="565" rx="6" ry="18">
+      <animate attributeName="opacity" values="0.4;0.2;0.4" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="125" cy="565" rx="6" ry="18">
+      <animate attributeName="opacity" values="0.3;0.15;0.3" dur="5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="183" cy="565" rx="7" ry="20">
+      <animate attributeName="opacity" values="0.35;0.18;0.35" dur="4.5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="213" cy="565" rx="7" ry="20">
+      <animate attributeName="opacity" values="0.4;0.2;0.4" dur="3.8s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="271" cy="565" rx="6" ry="16">
+      <animate attributeName="opacity" values="0.3;0.15;0.3" dur="5.5s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- WATER RIPPLE LINES -->
+  <g stroke="#d8a878" stroke-width="0.8" fill="none" opacity="0.35">
+    <path d="M60,600 Q160,594 260,600 T460,598">
+      <animate attributeName="opacity" values="0.35;0.1;0.35" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M100,640 Q200,634 320,640 T540,636">
+      <animate attributeName="opacity" values="0.28;0.08;0.28" dur="6.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M40,680 Q160,674 280,680 T520,676">
+      <animate attributeName="opacity" values="0.22;0.05;0.22" dur="7.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M80,720 Q200,714 320,720 T560,716">
+      <animate attributeName="opacity" values="0.18;0.04;0.18" dur="8.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- SMALL BOAT -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 30,-2; 0,0" dur="25s" repeatCount="indefinite"/>
+    <!-- Boat hull -->
+    <path d="M300,640 Q340,650 370,640 L365,648 Q340,656 305,648 Z" fill="#2a1a18"/>
+    <!-- Person -->
+    <circle cx="335" cy="632" r="4" fill="#1a1010"/>
+    <line x1="335" y1="636" x2="335" y2="644" stroke="#1a1010" stroke-width="2"/>
+    <!-- Oar -->
+    <line x1="330" y1="638" x2="315" y2="650" stroke="#3a2a1a" stroke-width="1.5"/>
+    <!-- Ripples around boat -->
+    <ellipse cx="335" cy="648" rx="40" ry="4" fill="none" stroke="#d8a878" stroke-width="0.8" opacity="0.5">
+      <animate attributeName="rx" values="40;48;40" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0.15;0.5" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- DUCKS -->
+  <g fill="#1a1010">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 40,0; 0,0" dur="20s" repeatCount="indefinite"/>
+      <ellipse cx="150" cy="700" rx="8" ry="4"/>
+      <circle cx="158" cy="696" r="3"/>
+      <path d="M155,710 Q150,715 145,710" stroke="#d8a878" stroke-width="0.6" fill="none" opacity="0.5"/>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 38,-2; 0,0" dur="22s" repeatCount="indefinite"/>
+      <ellipse cx="180" cy="708" rx="7" ry="3.5"/>
+      <circle cx="187" cy="704" r="2.5"/>
+    </g>
+  </g>
+
+  <!-- FOREGROUND GRASS / REEDS -->
+  <g stroke="#3a2a1a" stroke-width="2" fill="none" opacity="0.85">
+    <path d="M20,800 Q18,760 25,730">
+      <animate attributeName="d" values="M20,800 Q18,760 25,730;M20,800 Q24,760 30,730;M20,800 Q18,760 25,730" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M35,800 Q32,765 38,740">
+      <animate attributeName="d" values="M35,800 Q32,765 38,740;M35,800 Q40,765 44,740;M35,800 Q32,765 38,740" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M50,800 Q48,770 55,745">
+      <animate attributeName="d" values="M50,800 Q48,770 55,745;M50,800 Q54,770 60,745;M50,800 Q48,770 55,745" dur="4.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M560,800 Q558,760 565,730">
+      <animate attributeName="d" values="M560,800 Q558,760 565,730;M560,800 Q564,760 570,730;M560,800 Q558,760 565,730" dur="5.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M575,800 Q572,765 580,740">
+      <animate attributeName="d" values="M575,800 Q572,765 580,740;M575,800 Q580,765 584,740;M575,800 Q572,765 580,740" dur="6s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- MAPLE LEAVES FALLING -->
+  <g fill="#c86a3a">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 60,300" dur="14s" repeatCount="indefinite"/>
+      <path d="M150,440 Q152,435 158,438 Q155,442 158,446 Q152,446 150,450 Q148,446 142,446 Q145,442 142,438 Q148,435 150,440 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 150 445;360 150 445" dur="6s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; -50,310" dur="16s" repeatCount="indefinite"/>
+      <path d="M350,420 Q352,415 358,418 Q355,422 358,426 Q352,426 350,430 Q348,426 342,426 Q345,422 342,418 Q348,415 350,420 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 350 425;360 350 425" dur="7s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 45,280" dur="12s" repeatCount="indefinite"/>
+      <path d="M480,450 Q482,445 488,448 Q485,452 488,456 Q482,456 480,460 Q478,456 472,456 Q475,452 472,448 Q478,445 480,450 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 480 455;360 480 455" dur="5s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+  <g fill="#d8883a">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; -40,320" dur="15s" repeatCount="indefinite"/>
+      <path d="M250,430 Q252,425 258,428 Q255,432 258,436 Q252,436 250,440 Q248,436 242,436 Q245,432 242,428 Q248,425 250,430 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 250 435;360 250 435" dur="6.5s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 55,290" dur="13s" repeatCount="indefinite"/>
+      <path d="M420,440 Q422,435 428,438 Q425,442 428,446 Q422,446 420,450 Q418,446 412,446 Q415,442 412,438 Q418,435 420,440 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 420 445;360 420 445" dur="5.5s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+
+  <!-- BIRDS FLYING HOME -->
+  <g stroke="#3a2a3a" stroke-width="1.5" fill="none" opacity="0.7">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 200,30" dur="30s" repeatCount="indefinite"/>
+      <path d="M200,200 Q204,195 208,200"/>
+      <path d="M215,195 Q219,190 223,195"/>
+      <path d="M230,200 Q234,195 238,200"/>
+      <path d="M245,193 Q249,188 253,193"/>
+    </g>
+  </g>
+  <g stroke="#3a2a3a" stroke-width="1.2" fill="none" opacity="0.55">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 180,40" dur="35s" repeatCount="indefinite"/>
+      <path d="M320,240 Q323,236 326,240"/>
+      <path d="M332,236 Q335,232 338,236"/>
+      <path d="M344,240 Q347,236 350,240"/>
+    </g>
+  </g>
+
+  <!-- LANTERN ON DOCK -->
+  <g>
+    <circle cx="280" cy="545" r="12" fill="url(#windowGlow)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="278" y="540" width="4" height="10" fill="#ffe8a0"/>
+  </g>
+
+  <!-- DOCK / PIER -->
+  <path d="M260,555 L320,555 L325,560 L255,560 Z" fill="#2a1a18"/>
+  <line x1="265" y1="555" x2="265" y2="555" stroke="#3a2a1a" stroke-width="2"/>
+</svg>

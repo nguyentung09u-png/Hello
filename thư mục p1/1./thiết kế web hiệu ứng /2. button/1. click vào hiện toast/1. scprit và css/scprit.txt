@@ -1,0 +1,74 @@
+/* ============================================================
+   TOAST SYSTEM — JS
+   Gọi: showToast('Nội dung', 'success' | 'error' | 'info', 3000)
+   ============================================================ */
+
+let toastTimer = null;
+
+function showToast(message, type = 'info', duration = 3000) {
+  // Tự tạo container nếu chưa có
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // Reset toast cũ
+  container.innerHTML = '';
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+
+  // Tạo toast mới
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+
+  const icons = {
+    success: '✓',
+    error: '✕',
+    info: 'ℹ'
+  };
+
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || icons.info}</span>
+    <span>${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  // Animation hiện
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // Tự ẩn sau duration
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.remove();
+      toastTimer = null;
+    }, 300);
+  }, duration);
+
+  // Click để đóng ngay
+  toast.addEventListener('click', () => {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 300);
+  });
+}
+    // ============================================================
+    // GẮN SỰ KIỆN CLICK CHO BUTTON
+    // ============================================================
+    const startBtn = document.getElementById('thanhcong');
+
+    startBtn.addEventListener('click', () => {
+      showToast('Có lỗi xảy ra!', 'error');
+
+    });

@@ -1,0 +1,62 @@
+--- dòng đầu khai báo id startBtn 
+
+<div class="button-wrapper">
+  <button class="btn" id="startBtn">🚀 Bắt đầu ngay</button>   ← ① BUTTON
+</div>
+
+
+
+
+
+-- dòng 2 đặt sau cái dòng button đó để nó hiện toast đúng
+
+<div class="toast-container" id="toastContainer"></div>        ← ② TOAST CONTAINER
+
+
+
+
+
+
+
+---- lúc đầu cách add id ---
+đây chưa add id :
+
+<button class="btn">bắt đầu ngay</button>
+
+
+đã add id : 
+id gì đó bất kì tên : hello
+
+<button class="btn" id="hello">bắt đầy ngay</button>
+
+--- lưu ý 2 ---- 
+id class button đó
+  <button class="btn" id="thanhcong">🚀 Bắt đầu 
+  
+  
+  phải giống với cái java scrpit này
+  
+     // ============================================================
+    // GẮN SỰ KIỆN CLICK CHO BUTTON
+    // ============================================================
+    const startBtn = document.getElementById('thanhcong');
+
+    startBtn.addEventListener('click', () => {
+      showToast('Có lỗi xảy ra!', 'error');
+
+    });
+
+
+
+
+-- lưu ý 3 tóm gọn all ---
+css có thể sài chung 
+và
+class css có thể sài chung
+có thể sài chung
+<div class="toast-container" id="toastContainer"></div>        
+
+
+
+-
+nhưng id phải sài riêng

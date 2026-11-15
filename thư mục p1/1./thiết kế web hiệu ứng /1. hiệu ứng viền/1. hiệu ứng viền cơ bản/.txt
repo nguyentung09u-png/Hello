@@ -1,0 +1,110 @@
+1. thêm vào css bất kì
+   animation: borderPulse 1.5s ease-in-out infinite;
+   
+   
+   ví dụ :
+   .cell {
+  background: #1a2940;
+  border: 1px solid #3ddc97;
+  border-radius: 10px;  /* THÊM DÒNG NÀY */
+  animation: borderPulse 1.5s ease-in-out infinite;
+}
+/* VÀ KEYFRAMES NÀY */
+@keyframes borderPulse {
+  0%, 100% { border-color: #3ddc97; }   /* sáng */
+  50%      { border-color: transparent; } /* mờ */
+}
+
+
+2. thêm keyframes sau css đó
+
+/* VÀ KEYFRAMES NÀY */
+@keyframes borderPulse {
+  0%, 100% { border-color: #3ddc97; }   /* sáng */
+  50%      { border-color: transparent; } /* mờ */
+}
+
+
+
+
+--- all các loại keyframes ---
+1.
+🎨 Các biến thể
+
+1️⃣ Nhấp nháy sáng ↔ tắt (như trên)
+
+
+@keyframes borderPulse {
+  0%, 100% { border-color: #3ddc97; }
+  50%      { border-color: transparent; }
+}
+
+------
+
+████████  →  ░░░░░░░░  →  ████████
+ sáng          tắt          sáng
+
+2.
+
+@keyframes borderPulse {
+  0%, 100% { border-color: #3ddc97; }   /* xanh sáng */
+  50%      { border-color: #1a2940; }   /* màu nền */
+}
+
+
+████████  →  ▓▓▓▓▓▓▓▓  →  ████████
+ sáng          mờ           sáng
+ 
+ 
+ 
+ 
+3. nhớ thêm cái animation gì vào css
+.cell {
+  animation: borderFade 1.5s ease-in-out infinite;
+}
+
+@keyframes borderFade {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+████████  →  ▓▓▓▓▓▓▓▓  →  ████████
+ 100%         30%          100%
+ 
+ 
+ 
+4.
+.cell {
+  border: 1px solid #3ddc97;
+  animation: borderGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: #3ddc97;
+    box-shadow: 0 0 0px #3ddc97;
+  }
+  50% {
+    border-color: #3ddc97;
+    box-shadow: 0 0 12px #3ddc97;
+  }
+}
+
+
+──────  →  ▓▓▓▓▓▓  →  ──────
+không glow  sáng rực   không glow
+
+
+
+
+
+
+---- tóm gọn all -
+animation: borderFade chỉ là tên gọi thôi
+có thể đổi thành
+animation: vien1
+
+
+và
+nhớ đổi tên keyframe cho giống vien1 nữa
+@keyframes vien1 {

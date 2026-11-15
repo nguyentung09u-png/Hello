@@ -1,0 +1,18 @@
+Tổng quan cách làm:
+
+1. Mở file SVG.
+2. Tìm thẻ mở <svg ...>.
+3. Xóa bỏ hoàn toàn cụm từ width="..." và height="...".
+4. Đảm bảo thẻ <svg> có viewBox="...".
+5. Thêm thuộc tính preserveAspectRatio="xMidYMid slice" (nếu muốn phủ kín màn hình và cắt phần thừa) hoặc "xMidYMid meet" (nếu muốn hiển thị trọn vẹn, chấp nhận viền trắng).
+
+Code chung chung:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <!-- Nội dung đồ họa của bạn ở đây -->
+  <rect width="600" height="800" fill="#1a2440" />
+</svg>
+```
+
+Lưu ý: Khi mở trực tiếp file .svg trên trình duyệt, việc áp dụng các thuộc tính này sẽ giúp SVG tự động co giãn theo khung cửa sổ. Tôi không chắc chắn về cách hiển thị trên mọi ứng dụng xem ảnh bên thứ ba, nhưng trên các trình duyệt web phổ biến, cách này thường hoạt động đúng.

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Liquid Ripple Button · Premium Animated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #020812;
+            overflow: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-svg {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        /* ===== BUTTON – "LIQUID RIPPLE" ===== */
+        /* Ý tưởng: button capsule dẹt dạng "viên sỏi nước", bề mặt có gradient
+           chất lỏng. Bao quanh là 2 lớp sóng SVG lan tỏa liên tục (pulse rings),
+           cảm giác như giọt nước rơi. Khi hover, sóng dồn lại và bề mặt
+           gradient chuyển động (animated gradient position). Active: nước
+           "bắn" lên — sóng co lại rồi bung. */
+        .liquid-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.05rem 2.9rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            letter-spacing: 0.1em;
+            color: #f2f8ff;
+            text-transform: uppercase;
+            border-radius: 999px;
+            -webkit-tap-highlight-color: transparent;
+            isolation: isolate;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+
+        /* Nền chất lỏng: gradient animated (background-size lớn + position chạy) */
+        .liquid-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                radial-gradient(ellipse 55% 180% at 50% -30%, rgba(180, 225, 255, 0.55), transparent 60%),
+                linear-gradient(115deg,
+                    #2a6fff 0%,
+                    #4d8dff 18%,
+                    #1a4fcf 40%,
+                    #0d2a72 65%,
+                    #061a48 85%,
+                    #143a9c 100%);
+            background-size: 220% 220%;
+            background-position: 0% 50%;
+            animation: liquidFlow 9s ease-in-out infinite;
+            box-shadow:
+                0 0 0 1px rgba(160, 205, 255, 0.35) inset,
+                0 1px 0 rgba(220, 240, 255, 0.35) inset,
+                0 -1px 0 rgba(0, 0, 40, 0.6) inset,
+                0 16px 40px -14px rgba(0, 60, 180, 0.9),
+                0 0 40px -8px rgba(60, 140, 255, 0.35);
+            z-index: -2;
+            transition: box-shadow 0.4s ease, filter 0.4s ease;
+        }
+
+        @keyframes liquidFlow {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Lớp sheen phía trên */
+        .liquid-btn::after {
+            content: '';
+            position: absolute;
+            inset: 3px 8px auto 8px;
+            height: 38%;
+            border-radius: 999px;
+            background: linear-gradient(180deg,
+                rgba(230, 245, 255, 0.45),
+                rgba(180, 220, 255, 0.15) 60%,
+                transparent);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.9;
+            transition: opacity 0.4s ease;
+        }
+
+        /* SVG ripple waves – 2 vòng lan tỏa, lệch pha */
+        .ripple-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: -3;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .ripple-wrap svg {
+            position: absolute;
+            inset: -60%;
+            width: 220%;
+            height: 220%;
+            overflow: visible;
+            display: block;
+        }
+
+        /* Vòng ripple 1 – nhanh */
+        .ring-1 {
+            transform-origin: center;
+            animation: ripplePulse 3.2s ease-out infinite;
+            transform-box: fill-box;
+        }
+        .ring-2 {
+            transform-origin: center;
+            animation: ripplePulse 3.2s ease-out infinite;
+            animation-delay: 1.6s;
+            transform-box: fill-box;
+        }
+
+        @keyframes ripplePulse {
+            0%   { transform: scale(0.55); opacity: 0; }
+            20%  { opacity: 0.85; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+
+        /* Sóng lượn phía dưới (bọt nước) */
+        .wave-line {
+            transform-origin: center;
+            transform-box: fill-box;
+            animation: waveDrift 7s ease-in-out infinite;
+        }
+        @keyframes waveDrift {
+            0%, 100% { transform: translateX(-3px) scaleX(0.98); opacity: 0.6; }
+            50%      { transform: translateX(3px) scaleX(1.02);  opacity: 0.9; }
+        }
+
+        /* LABEL */
+        .btn-label {
+            position: relative;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-shadow:
+                0 1px 4px rgba(0, 15, 50, 0.85),
+                0 0 14px rgba(120, 190, 255, 0.5);
+            transition: text-shadow 0.4s ease;
+        }
+
+        /* Icon: giọt nước nhỏ */
+        .drop {
+            display: inline-flex;
+            width: 0.85em;
+            height: 0.85em;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .drop svg { width: 100%; height: 100%; display: block; }
+
+        /* ===== HOVER ===== */
+        @media (hover: hover) {
+            .liquid-btn:hover {
+                transform: translateY(-2px) scale(1.015);
+            }
+            .liquid-btn:hover::before {
+                animation-duration: 3.5s;
+                box-shadow:
+                    0 0 0 1px rgba(190, 225, 255, 0.55) inset,
+                    0 1px 0 rgba(230, 245, 255, 0.5) inset,
+                    0 -1px 0 rgba(0, 0, 50, 0.7) inset,
+                    0 22px 55px -14px rgba(30, 100, 255, 1),
+                    0 0 80px -10px rgba(90, 170, 255, 0.55);
+                filter: brightness(1.06);
+            }
+            .liquid-btn:hover .ring-1,
+            .liquid-btn:hover .ring-2 {
+                animation-duration: 2.1s;
+            }
+            .liquid-btn:hover .drop {
+                transform: translateY(-2px) rotate(-8deg) scale(1.1);
+            }
+            .liquid-btn:hover .btn-label {
+                text-shadow:
+                    0 1px 4px rgba(0, 15, 50, 0.9),
+                    0 0 22px rgba(150, 210, 255, 0.85);
+            }
+        }
+
+        /* ===== ACTIVE ===== */
+        .liquid-btn:active {
+            transform: scale(0.965);
+            transition: transform 0.08s ease;
+        }
+        .liquid-btn:active::before {
+            filter: brightness(0.82);
+            box-shadow:
+                0 0 0 1px rgba(180, 220, 255, 0.35) inset,
+                0 1px 0 rgba(210, 235, 255, 0.25) inset,
+                0 8px 22px -8px rgba(20, 60, 160, 0.9);
+        }
+        .liquid-btn:active .ring-1,
+        .liquid-btn:active .ring-2 {
+            animation-duration: 1.2s;
+        }
+        .liquid-btn:active .drop {
+            transform: scale(0.9);
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .liquid-btn::before {
+                animation: none;
+                background-position: 30% 50%;
+            }
+            .ring-1, .ring-2, .wave-line {
+                animation: none !important;
+                opacity: 0.4;
+            }
+            .liquid-btn, .liquid-btn::before, .liquid-btn::after, .drop {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .liquid-btn {
+                padding: 0.9rem 2.3rem;
+                font-size: 0.86rem;
+                letter-spacing: 0.08em;
+            }
+        }
+        @media (min-width: 481px) and (max-width: 1024px) {
+            .liquid-btn {
+                padding: 1.1rem 3.2rem;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ BACKGROUND SVG ============ -->
+    <!-- Phong cách: biển sâu, một tâm sáng phía trên, gợn sóng ngang lan tỏa -->
+    <svg class="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <radialGradient id="ocean" cx="50%" cy="10%" r="120%">
+                <stop offset="0%"   stop-color="#0a2a5e"/>
+                <stop offset="35%"  stop-color="#051a3c"/>
+                <stop offset="70%"  stop-color="#020b1e"/>
+                <stop offset="100%" stop-color="#01030a"/>
+            </radialGradient>
+
+            <radialGradient id="sunLamp" cx="50%" cy="8%" r="55%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+                <stop offset="40%"  stop-color="#a8d4ff" stop-opacity="0.07"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Gradient sóng -->
+            <linearGradient id="waveFar" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#2a5cd8" stop-opacity="0.30"/>
+                <stop offset="50%"  stop-color="#4a8fff" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#2a5cd8" stop-opacity="0.30"/>
+            </linearGradient>
+            <linearGradient id="waveMid" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#6aa8ff" stop-opacity="0.35"/>
+                <stop offset="50%"  stop-color="#a8d0ff" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="#6aa8ff" stop-opacity="0.35"/>
+            </linearGradient>
+            <linearGradient id="waveNear" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#b8d8ff" stop-opacity="0.55"/>
+                <stop offset="50%"  stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#b8d8ff" stop-opacity="0.55"/>
+            </linearGradient>
+
+            <filter id="blurFar" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="7"/>
+            </filter>
+            <filter id="blurMid" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2.5"/>
+            </filter>
+            <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <rect width="1440" height="900" fill="url(#ocean)"/>
+        <rect width="1440" height="900" fill="url(#sunLamp)"/>
+
+        <!-- FAR: sóng ngang lớn, mờ -->
+        <g opacity="0.75" filter="url(#blurFar)">
+            <path d="M -80 320 Q 200 260 480 320 T 1040 320 T 1600 320"
+                  fill="none" stroke="url(#waveFar)" stroke-width="2"/>
+            <path d="M -80 400 Q 220 340 520 400 T 1080 400 T 1620 400"
+                  fill="none" stroke="url(#waveFar)" stroke-width="1.4"/>
+            <path d="M -80 480 Q 200 420 480 480 T 1040 480 T 1600 480"
+                  fill="none" stroke="url(#waveFar)" stroke-width="1.2" opacity="0.7"/>
+        </g>
+
+        <!-- MID: sóng trung, animation drift nhẹ -->
+        <g opacity="0.85" filter="url(#blurMid)">
+            <path d="M -80 560 Q 240 500 560 560 T 1120 560 T 1620 560"
+                  fill="none" stroke="url(#waveMid)" stroke-width="1.6">
+                <animate attributeName="d" dur="12s" repeatCount="indefinite"
+                    values="
+                        M -80 560 Q 240 500 560 560 T 1120 560 T 1620 560;
+                        M -80 560 Q 240 520 560 560 T 1120 560 T 1620 560;
+                        M -80 560 Q 240 500 560 560 T 1120 560 T 1620 560"/>
+            </path>
+            <path d="M -80 640 Q 220 580 520 640 T 1080 640 T 1620 640"
+                  fill="none" stroke="url(#waveMid)" stroke-width="1.2">
+                <animate attributeName="d" dur="15s" repeatCount="indefinite"
+                    values="
+                        M -80 640 Q 220 580 520 640 T 1080 640 T 1620 640;
+                        M -80 640 Q 220 600 520 640 T 1080 640 T 1620 640;
+                        M -80 640 Q 220 580 520 640 T 1080 640 T 1620 640"/>
+            </path>
+        </g>
+
+        <!-- NEAR: sóng sắc nét, gần mắt -->
+        <g opacity="0.9">
+            <path d="M -80 760 Q 260 700 600 760 T 1160 760 T 1620 760"
+                  fill="none" stroke="url(#waveNear)" stroke-width="0.9"
+                  filter="url(#glowSoft)">
+                <animate attributeName="d" dur="9s" repeatCount="indefinite"
+                    values="
+                        M -80 760 Q 260 700 600 760 T 1160 760 T 1620 760;
+                        M -80 760 Q 260 720 600 760 T 1160 760 T 1620 760;
+                        M -80 760 Q 260 700 600 760 T 1160 760 T 1620 760"/>
+            </path>
+        </g>
+
+        <!-- Bọt sáng nhỏ lơ lửng -->
+        <g>
+            <circle cx="260" cy="200" r="2.4" fill="#dbeaff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="5.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" dur="6.4s" repeatCount="indefinite" values="200;180;200"/>
+            </circle>
+            <circle cx="1080" cy="260" r="2.0" fill="#a8ccff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="7.3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="720" cy="180" r="2.6" fill="#e0f0ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="8.9s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="1220" cy="420" r="1.8" fill="#9ac4ff" filter="url(#glowSoft)">
+                <animate attributeName="opacity" values="0;1;0" dur="10.2s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+
+        <!-- Lưới mảnh -->
+        <g opacity="0.06" stroke="#7fb4ff" stroke-width="0.5">
+            <line x1="0" y1="225" x2="1440" y2="225"/>
+            <line x1="0" y1="450" x2="1440" y2="450"/>
+            <line x1="0" y1="675" x2="1440" y2="675"/>
+        </g>
+    </svg>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+        <button class="liquid-btn" aria-label="Khám phá">
+            <!-- Ripple waves phía sau -->
+            <span class="ripple-wrap" aria-hidden="true">
+                <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#bce0ff" stop-opacity="0.9"/>
+                            <stop offset="50%"  stop-color="#6aa8ff" stop-opacity="0.5"/>
+                            <stop offset="100%" stop-color="#bce0ff" stop-opacity="0.9"/>
+                        </linearGradient>
+                        <linearGradient id="ringGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.7"/>
+                            <stop offset="50%"  stop-color="#a8d0ff" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.7"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Wave line bên dưới -->
+                    <path class="wave-line"
+                          d="M 40 100 Q 120 88 200 100 T 360 100"
+                          fill="none" stroke="url(#ringGrad)" stroke-width="0.8" opacity="0.7"/>
+
+                    <!-- Ring 1 -->
+                    <ellipse class="ring-1" cx="200" cy="100" rx="140" ry="42"
+                             fill="none" stroke="url(#ringGrad)" stroke-width="1.2"/>
+
+                    <!-- Ring 2 -->
+                    <ellipse class="ring-2" cx="200" cy="100" rx="140" ry="42"
+                             fill="none" stroke="url(#ringGrad2)" stroke-width="0.9"/>
+                </svg>
+            </span>
+
+            <!-- LABEL -->
+            <span class="btn-label">
+                Khám phá
+                <span class="drop" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2 C 8 9 5 13 5 16 A 7 7 0 0 0 19 16 C 19 13 16 9 12 2 Z"
+                              stroke="#eaf4ff" stroke-width="1.6"
+                              stroke-linejoin="round"/>
+                        <path d="M12 2 C 8 9 5 13 5 16 A 7 7 0 0 0 19 16 C 19 13 16 9 12 2 Z"
+                              fill="#a8d4ff" opacity="0.4"/>
+                        <ellipse cx="10" cy="13" rx="1.6" ry="2.4" fill="#ffffff" opacity="0.8"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+    </div>
+
+</body>
+</html>

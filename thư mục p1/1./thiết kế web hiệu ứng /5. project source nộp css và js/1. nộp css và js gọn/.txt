@@ -1,0 +1,30 @@
+1. js
+<script src="dialog/dialog.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/slider.js" defer></script>
+
+
+là ví dụ cái đầu tiên :
+để index ở thư mục đầu tiên
+tạo thư mục dialog rồi tạo file dialog.js để trong thư mục dialog đó
+
+
+
+2.css tương tự
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="dialog/dialog.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+
+
+
+ví dụ : project
+/cc/
+├── index.html
+├── dialog/
+│   ├── dialog.css
+│   └── dialog.js
+└── js/
+    ├── app.js
+    └── slider.js

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Running Border — không đụng border-radius</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #080d16;
+  color: #eaf4ff;
+  font-family: system-ui, sans-serif;
+  padding: 40px 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* Ô số — CÓ border-radius 10px */
+.cell {
+  background: #1a2940;
+  border-radius: 10px;      /* ← radius ở đây, .running-border không ghi đè */
+  padding: 40px 12px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #22d3ee;
+  font-family: ui-monospace, monospace;
+}
+
+/* ============================================================
+   RUNNING BORDER — KHÔNG đụng border-radius
+   ============================================================ */
+.running-border {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --rb-width: 2px;
+  --rb-color: #3ddc97;
+  --rb-speed: 2.5s;
+  --rb-angle: 40deg;
+}
+
+.running-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--rb-color) var(--rb-angle),
+    transparent calc(var(--rb-angle) * 2)
+  );
+  animation: xoayVien var(--rb-speed) linear infinite;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.running-border::after {
+  content: "";
+  position: absolute;
+  inset: var(--rb-width);
+  background: inherit;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.running-border > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes xoayVien {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .running-border::before { animation: none; }
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="color:#22d3ee;">📐 Grid + Running Border</h1>
+<p style="color:#8fa3ba; margin-bottom:24px;">Ô 10: bo góc 10px + viền chạy đúng.</p>
+
+<div class="grid">
+  <div class="cell">1</div>
+  <div class="cell">2</div>
+  <div class="cell">3</div>
+  <div class="cell">4</div>
+  <div class="cell">5</div>
+  <div class="cell">6</div>
+  <div class="cell">7</div>
+  <div class="cell">8</div>
+  <div class="cell">9</div>
+  <div class="cell running-border"><span>10</span></div>
+</div>
+
+</body>
+</html>

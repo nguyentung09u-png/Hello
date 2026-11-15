@@ -1,0 +1,336 @@
+/* ============================================================
+   PREMIUM DIALOG + TOAST — BLUE THEME
+   ============================================================ */
+
+/* ---------- DIALOG OVERLAY ---------- */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 40, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dialog-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ---------- DIALOG BOX ---------- */
+.dialog {
+  position: relative;
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  transform: translateY(30px) scale(0.92);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease;
+}
+
+.dialog-overlay.show .dialog {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* Gradient border */
+.dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #38bdf8, #2563eb, #6366f1);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---------- HEADER ---------- */
+.dialog-header {
+  padding: 32px 28px 20px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dialog-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dialog-header::after {
+  content: "";
+  position: absolute;
+  bottom: -60%;
+  left: -10%;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dialog-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  position: relative;
+  z-index: 1;
+  animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.dialog-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.3px;
+}
+
+/* ---------- BODY ---------- */
+.dialog-body {
+  padding: 24px 28px 8px;
+}
+
+.dialog-message {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* ---------- FOOTER ---------- */
+.dialog-footer {
+  padding: 20px 28px 28px;
+  display: flex;
+  gap: 12px;
+}
+
+.dialog-btn {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease,
+              background 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dialog-btn:active {
+  transform: scale(0.97);
+}
+
+.dialog-btn-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.dialog-btn-cancel:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.dialog-btn-confirm {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+.dialog-btn-confirm:hover {
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.55);
+  transform: translateY(-2px);
+}
+
+/* Shine effect */
+.dialog-btn-confirm::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.dialog-btn-confirm:hover::before {
+  left: 100%;
+}
+
+/* ---------- TOAST ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  cursor: pointer;
+  margin-top: 12px;
+  min-width: 240px;
+  transform: translateX(140%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.hide {
+  transform: translateX(140%);
+  opacity: 0;
+}
+
+.toast .toast-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.toast.toast-success .toast-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.toast.toast-error .toast-icon {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.toast.toast-info .toast-icon {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+}
+
+.toast .toast-message {
+  flex: 1;
+}
+
+/* ---------- BODY LOCK ---------- */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 480px) {
+  .dialog {
+    max-width: 100%;
+    border-radius: 20px;
+  }
+
+  .dialog-header {
+    padding: 28px 20px 16px;
+  }
+
+  .dialog-title {
+    font-size: 19px;
+  }
+
+  .dialog-body {
+    padding: 20px 20px 6px;
+  }
+
+  .dialog-footer {
+    padding: 16px 20px 20px;
+    flex-direction: column-reverse;
+  }
+
+  .toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .toast {
+    transform: translateY(140%);
+    min-width: auto;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+  }
+
+  .toast.hide {
+    transform: translateY(140%);
+  }
+}
+
+/* ---------- ACCESSIBILITY ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .dialog-overlay,
+  .dialog,
+  .toast,
+  .dialog-icon {
+    transition: none;
+    animation: none;
+  }
+}

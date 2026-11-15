@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Điều chỉnh fr trực tiếp</title>
+
+<style>
+:root {
+  --bg: #080d16;
+  --surface: #111b2b;
+  --border: #26364c;
+  --primary: #22d3ee;
+  --text: #eaf4ff;
+  --muted: #8fa3ba;
+  --warning: #f5b942;
+  --success: #3ddc97;
+  --danger: #ff5c5c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  padding: 32px 24px;
+}
+
+h1 { color: var(--primary); font-size: 22px; margin-bottom: 6px; }
+.sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+
+/* Panel chung */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.panel h2 {
+  font-size: 15px;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Điều khiển từng cột */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.control-item {
+  background: #0f1620;
+  border: 1px solid #1f2a36;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.control-item label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-family: monospace;
+}
+
+.control-item label .col-name {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.control-item input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.control-item .value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.control-item .value .num {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.control-item .value .unit {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Preview grid */
+.preview {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  min-height: 120px;
+}
+
+.preview .cell {
+  background: #1a2940;
+  border: 1px solid #30435e;
+  border-radius: 10px;
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 100px;
+}
+
+.preview .cell .fr-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.preview .cell .fr-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: monospace;
+}
+
+/* Màu từng cột */
+.preview .cell:nth-child(1) { border-color: #4ea1ff; background: #1a2940; }
+.preview .cell:nth-child(1) .fr-value { color: #4ea1ff; }
+.preview .cell:nth-child(2) { border-color: #3ddc97; }
+.preview .cell:nth-child(2) .fr-value { color: #3ddc97; }
+.preview .cell:nth-child(3) { border-color: #f5b942; }
+.preview .cell:nth-child(3) .fr-value { color: #f5b942; }
+.preview .cell:nth-child(4) { border-color: #a855f7; }
+.preview .cell:nth-child(4) .fr-value { color: #a855f7; }
+
+/* Code hiển thị */
+.code {
+  background: #0f1620;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  color: #8fa3ba;
+  border: 1px solid #1f2a36;
+  overflow-x: auto;
+  line-height: 1.7;
+  white-space: pre;
+}
+.code .k { color: #4ea1ff; }
+.code .v { color: #3ddc97; }
+.code .c1 { color: #4ea1ff; font-weight: 700; }
+.code .c2 { color: #3ddc97; font-weight: 700; }
+.code .c3 { color: #f5b942; font-weight: 700; }
+.code .c4 { color: #a855f7; font-weight: 700; }
+
+/* Preset buttons */
+.presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.preset-btn {
+  padding: 8px 14px;
+  background: #1a2940;
+  color: var(--text);
+  border: 1px solid #30435e;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: monospace;
+  transition: background .15s, border-color .15s;
+}
+.preset-btn:hover {
+  background: #223550;
+  border-color: var(--primary);
+}
+.preset-btn.active {
+  background: var(--primary);
+  color: #06121a;
+  border-color: var(--primary);
+  font-weight: 700;
+}
+
+/* Width slider */
+.width-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.width-control label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.width-control input[type="range"] {
+  width: 240px;
+  accent-color: var(--primary);
+}
+.width-control output {
+  font-family: monospace;
+  color: var(--primary);
+  font-size: 14px;
+  min-width: 70px;
+}
+
+/* Hint */
+.hint {
+  background: #131a22;
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 14px;
+}
+.hint b { color: var(--text); }
+.hint code {
+  background: #0f1620;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .controls-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎮 Điều chỉnh <code>fr</code> trực tiếp</h1>
+<p class="sub">Kéo thanh trượt để thay đổi số <code>fr</code> từng cột. Thấy ngay kết quả.</p>
+
+<!-- ============================================================
+     PRESETS
+     ============================================================ -->
+<div class="panel">
+  <h2>🎯 Preset nhanh</h2>
+  <div class="presets">
+    <button class="preset-btn active" data-preset="1,1,1,1">Đều: 1-1-1-1</button>
+    <button class="preset-btn" data-preset="2,1,1,1">Cột 1 to gấp đôi: 2-1-1-1</button>
+    <button class="preset-btn" data-preset="1,2,1,1">Cột 2 to gấp đôi: 1-2-1-1</button>
+    <button class="preset-btn" data-preset="1,1,2,1">Cột 3 to gấp đôi: 1-1-2-1</button>
+    <button class="preset-btn" data-preset="1,1,1,2">Cột 4 to gấp đôi: 1-1-1-2</button>
+    <button class="preset-btn" data-preset="1,2,1">3 cột, giữa to: 1-2-1</button>
+    <button class="preset-btn" data-preset="1,3">Sidebar hẹp + main: 1-3</button>
+    <button class="preset-btn" data-preset="3,1">Main + aside nhỏ: 3-1</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ĐIỀU KHIỂN TỪNG CỘT
+     ============================================================ -->
+<div class="panel">
+  <h2>⚙️ Chỉnh số <code>fr</code> từng cột</h2>
+
+  <div class="controls-grid" id="controlsGrid">
+    <!-- JS sinh 4 control -->
+  </div>
+
+  <!-- Điều khiển độ rộng khung -->
+  <div class="width-control">
+    <label>Độ rộng khung:</label>
+    <input type="range" id="widthRange" min="300" max="1000" value="800" step="10">
+    <output id="widthValue">800px</output>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="preview">
+    <!-- JS sinh cell -->
+  </div>
+
+  <!-- Code hiển thị -->
+  <div class="code" id="codeDisplay"></div>
+
+  <div class="hint">
+    <b>💡 Cách đọc:</b> Mỗi cột có 1 thanh trượt từ <b>0.5fr</b> đến <b>5fr</b>.<br>
+    • Kéo lên → cột đó <b>rộng ra</b>.<br>
+    • Kéo xuống → cột đó <b>hẹp lại</b>.<br>
+    • Tổng <code>fr</code> thay đổi → các cột <b>tự chia lại</b> theo tỉ lệ.
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const NUM_COLS = 4;
+  let frValues = [1, 1, 1, 1];   // giá trị fr ban đầu
+
+  const controlsGrid = document.getElementById("controlsGrid");
+  const preview = document.getElementById("preview");
+  const codeDisplay = document.getElementById("codeDisplay");
+  const widthRange = document.getElementById("widthRange");
+  const widthValue = document.getElementById("widthValue");
+  const presetBtns = document.querySelectorAll(".preset-btn");
+
+  /* Tạo control cho từng cột */
+  function buildControls() {
+    controlsGrid.innerHTML = "";
+    for (let i = 0; i < NUM_COLS; i++) {
+      const div = document.createElement("div");
+      div.className = "control-item";
+      div.innerHTML = `
+        <label><span class="col-name">Cột ${i + 1}</span></label>
+        <input type="range" min="0.5" max="5" step="0.5" value="${frValues[i]}" data-col="${i}">
+        <div class="value">
+          <span class="num" id="num-${i}">${frValues[i]}</span>
+          <span class="unit">fr</span>
+        </div>
+      `;
+      controlsGrid.appendChild(div);
+    }
+    // Gắn sự kiện cho slider mới tạo
+    controlsGrid.querySelectorAll("input[type=range]").forEach((slider) => {
+      slider.addEventListener("input", (e) => {
+        const col = Number(e.target.dataset.col);
+        const val = Number(e.target.value);
+        frValues[col] = val;
+        document.getElementById("num-" + col).textContent = val;
+        updatePreview();
+      });
+    });
+  }
+
+  /* Tạo preview */
+  function updatePreview() {
+    // Xóa control nếu số cột thay đổi (preset)
+    if (preview.children.length !== NUM_COLS) {
+      preview.innerHTML = "";
+      for (let i = 0; i < NUM_COLS; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.innerHTML = `
+          <div class="fr-label">Cột ${i + 1}</div>
+          <div class="fr-value">${frValues[i]}fr</div>
+        `;
+        preview.appendChild(cell);
+      }
+    } else {
+      // Cập nhật label
+      for (let i = 0; i < NUM_COLS; i++) {
+        preview.children[i].innerHTML = `
+          <div class="fr-label">Cột ${i + 1}</div>
+          <div class="fr-value">${frValues[i]}fr</div>
+        `;
+      }
+    }
+
+    // Cập nhật grid-template-columns
+    const template = frValues.map(v => v + "fr").join(" ");
+    preview.style.gridTemplateColumns = template;
+
+    // Cập nhật code
+    const coloredValues = frValues.map((v, i) => {
+      const cls = "c" + (i + 1);
+      return `<span class="${cls}">${v}fr</span>`;
+    }).join(" ");
+
+    codeDisplay.innerHTML =
+      `<span class="k">grid-template-columns</span>: ${coloredValues};` +
+      `\n\n<span class="c">/* tỉ lệ: ${frValues.join(" : ")} */</span>`;
+  }
+
+  /* Cập nhật số cột khi preset */
+  function applyPreset(presetStr) {
+    const vals = presetStr.split(",").map(Number);
+    frValues = vals;
+
+    // Rebuild controls nếu số cột đổi
+    buildControls();
+
+    // Cập nhật slider
+    controlsGrid.querySelectorAll("input[type=range]").forEach((slider) => {
+      const col = Number(slider.dataset.col);
+      slider.value = frValues[col];
+      document.getElementById("num-" + col).textContent = frValues[col];
+    });
+
+    // Force rebuild preview
+    preview.innerHTML = "";
+    preview.children.length = 0;
+
+    updatePreview();
+
+    // Highlight preset active
+    presetBtns.forEach(b => b.classList.remove("active"));
+    document.querySelector(`[data-preset="${presetStr}"]`).classList.add("active");
+  }
+
+  /* Điều khiển độ rộng khung */
+  function updateWidth(w) {
+    preview.style.width = w + "px";
+    widthValue.textContent = w + "px";
+  }
+
+  widthRange.addEventListener("input", (e) => {
+    updateWidth(Number(e.target.value));
+  });
+
+  /* Preset click */
+  presetBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Reset presets khác
+      presetBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const presetStr = btn.dataset.preset;
+      const vals = presetStr.split(",").map(Number);
+
+      // Nếu số cột thay đổi, cần reset NUM_COLS
+      if (vals.length !== NUM_COLS) {
+        // Rebuild toàn bộ
+        window.location.hash = "";   // tránh lỗi
+        // Đổi số cột
+        rebuildWithCols(vals);
+      } else {
+        frValues = vals;
+        buildControls();
+        updatePreview();
+      }
+    });
+  });
+
+  /* Rebuild khi đổi số cột */
+  function rebuildWithCols(vals) {
+    frValues = vals;
+    const newNumCols = vals.length;
+
+    // Đổi NUM_COLS tạm
+    // Vì NUM_COLS là const → dùng cách khác
+    // Đơn giản: rebuild control + preview
+    controlsGrid.innerHTML = "";
+    for (let i = 0; i < newNumCols; i++) {
+      const div = document.createElement("div");
+      div.className = "control-item";
+      div.innerHTML = `
+        <label><span class="col-name">Cột ${i + 1}</span></label>
+        <input type="range" min="0.5" max="5" step="0.5" value="${vals[i]}" data-col="${i}">
+        <div class="value">
+          <span class="num" id="num-${i}">${vals[i]}</span>
+          <span class="unit">fr</span>
+        </div>
+      `;
+      controlsGrid.appendChild(div);
+    }
+
+    // Gắn sự kiện
+    controlsGrid.querySelectorAll("input[type=range]").forEach((slider) => {
+      slider.addEventListener("input", (e) => {
+        const col = Number(e.target.dataset.col);
+        const val = Number(e.target.value);
+        vals[col] = val;
+        document.getElementById("num-" + col).textContent = val;
+        preview.style.gridTemplateColumns = vals.map(v => v + "fr").join(" ");
+        // Cập nhật label
+        for (let i = 0; i < vals.length; i++) {
+          preview.children[i].querySelector(".fr-value").textContent = vals[i] + "fr";
+        }
+        // Cập nhật code
+        const coloredValues = vals.map((v, i) => {
+          const cls = "c" + (i + 1);
+          return `<span class="${cls}">${v}fr</span>`;
+        }).join(" ");
+        codeDisplay.innerHTML =
+          `<span class="k">grid-template-columns</span>: ${coloredValues};` +
+          `\n\n<span class="c">/* tỉ lệ: ${vals.join(" : ")} */</span>`;
+      });
+    });
+
+    // Rebuild preview
+    preview.innerHTML = "";
+    for (let i = 0; i < newNumCols; i++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.innerHTML = `
+        <div class="fr-label">Cột ${i + 1}</div>
+        <div class="fr-value">${vals[i]}fr</div>
+      `;
+      preview.appendChild(cell);
+    }
+    preview.style.gridTemplateColumns = vals.map(v => v + "fr").join(" ");
+    codeDisplay.innerHTML =
+      `<span class="k">grid-template-columns</span>: ` +
+      vals.map((v, i) => `<span class="c${i + 1}">${v}fr</span>`).join(" ") + `;` +
+      `\n\n<span class="c">/* tỉ lệ: ${vals.join(" : ")} */</span>`;
+
+    updateWidth(Number(widthRange.value));
+  }
+
+  /* Khởi tạo */
+  buildControls();
+  updatePreview();
+  updateWidth(800);
+})();
+</script>
+
+</body>
+</html>

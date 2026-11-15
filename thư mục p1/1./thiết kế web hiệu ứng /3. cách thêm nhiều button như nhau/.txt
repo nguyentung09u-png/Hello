@@ -1,0 +1,17 @@
+1. button cách thêm
+gốc :
+ <button class="btn">🚀 Bắt đầu 2</button>
+
+
+cách thêm :
+<button class="btn">hello</button>
+<button class="btn">hello1</button>
+
+
+
+
+
+2. lưu ý
+nếu thêm java scprit vào button để click thì phải thêm id
+ví dụ :
+<button class="btn" id="java1">hello1</button>

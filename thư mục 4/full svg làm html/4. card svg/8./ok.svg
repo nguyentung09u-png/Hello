@@ -1,0 +1,253 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="cardClip9">
+      <rect x="0" y="0" width="600" height="800" rx="42" ry="42"/>
+    </clipPath>
+
+    <linearGradient id="skyDesert" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a0e1e"/>
+      <stop offset="25%" stop-color="#3a1428"/>
+      <stop offset="50%" stop-color="#6a2030"/>
+      <stop offset="72%" stop-color="#a84030"/>
+      <stop offset="88%" stop-color="#d87840"/>
+      <stop offset="100%" stop-color="#f0a850"/>
+    </linearGradient>
+
+    <radialGradient id="bloodMoon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ff9060"/>
+      <stop offset="55%" stop-color="#e85030"/>
+      <stop offset="100%" stop-color="#a02018"/>
+    </radialGradient>
+
+    <radialGradient id="moonHalo9" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ff9060" stop-opacity="0.7"/>
+      <stop offset="40%" stop-color="#e85030" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#e85030" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="duneFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a85030"/>
+      <stop offset="100%" stop-color="#7a3820"/>
+    </linearGradient>
+
+    <linearGradient id="duneMid1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a3c22"/>
+      <stop offset="100%" stop-color="#5a2418"/>
+    </linearGradient>
+
+    <linearGradient id="duneMid2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a2a18"/>
+      <stop offset="100%" stop-color="#3a140e"/>
+    </linearGradient>
+
+    <linearGradient id="duneNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a1c10"/>
+      <stop offset="100%" stop-color="#1e0806"/>
+    </linearGradient>
+
+    <linearGradient id="ridgeHighlight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f0a850" stop-opacity="0"/>
+      <stop offset="40%" stop-color="#f0a850" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#ffd080" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f0a850" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="borderDesert" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0a850" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#e85030" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#6a2030" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <filter id="glowDesert" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="blurDesert">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+
+    <filter id="moonBlur9">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+
+    <filter id="sandBlur">
+      <feGaussianBlur stdDeviation="0.8"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#cardClip9)">
+    <!-- SKY -->
+    <rect x="0" y="0" width="600" height="800" fill="url(#skyDesert)"/>
+
+    <!-- STARS -->
+    <g>
+      <circle cx="80" cy="70" r="1.2" fill="#ffd8b0">
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="180" cy="50" r="1" fill="#ffe0c0">
+        <animate attributeName="opacity" values="0.7;0.2;0.7" dur="6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="260" cy="100" r="1.3" fill="#ffd8b0">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="340" cy="60" r="0.9" fill="#ffe0c0">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="7s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="120" cy="150" r="1.1" fill="#ffd8b0">
+        <animate attributeName="opacity" values="0.4;0.9;0.4" dur="5.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="420" cy="90" r="1" fill="#ffe0c0">
+        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="4.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="500" cy="140" r="1.2" fill="#ffd8b0">
+        <animate attributeName="opacity" values="0.2;0.8;0.2" dur="6.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="550" cy="70" r="0.9" fill="#ffe0c0">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="5.2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- BLOOD MOON -->
+    <g>
+      <circle cx="380" cy="220" r="80" fill="url(#moonHalo9)" filter="url(#moonBlur9)">
+        <animate attributeName="opacity" values="0.6;0.9;0.6" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="380" cy="220" r="48" fill="url(#bloodMoon)"/>
+      <circle cx="368" cy="210" r="8" fill="#a02018" opacity="0.35"/>
+      <circle cx="392" cy="232" r="6" fill="#a02018" opacity="0.3"/>
+      <circle cx="385" cy="205" r="4" fill="#a02018" opacity="0.25"/>
+    </g>
+
+    <!-- THIN HAZE -->
+    <g opacity="0.4" filter="url(#blurDesert)">
+      <ellipse cx="180" cy="250" rx="120" ry="10" fill="#d87840" opacity="0.6">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 50,0; 0,0" dur="28s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="430" cy="290" rx="130" ry="12" fill="#a84030" opacity="0.5">
+        <animateTransform attributeName="transform" type="translate" values="0,0; -55,0; 0,0" dur="32s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+
+    <!-- DISTANT CACTI -->
+    <g fill="#2a0e08" opacity="0.75">
+      <path d="M120,450 L 124,450 L 124,420 L 130,420 L 130,410 L 126,410 L 126,415 L 124,415 L 124,400 L 120,400 L 120,450 Z"/>
+      <path d="M118,430 L 112,430 L 112,420 L 118,420 Z"/>
+      <path d="M150,455 L 153,455 L 153,435 L 148,435 L 148,428 L 153,428 L 153,420 L 150,420 L 150,455 Z"/>
+    </g>
+
+    <!-- DUNES -->
+    <!-- Far dune -->
+    <path d="M-20,470 C 120,450 220,490 320,465 C 420,440 520,485 620,460 L 620,520 L -20,520 Z"
+          fill="url(#duneFar)" opacity="0.9"/>
+    <!-- Ridge highlight far -->
+    <path d="M-20,470 C 120,450 220,490 320,465 C 420,440 520,485 620,460"
+          stroke="url(#ridgeHighlight)" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+    <!-- Mid dune 1 -->
+    <path d="M-20,510 C 100,490 200,530 320,505 C 440,480 540,525 620,500 L 620,580 L -20,580 Z"
+          fill="url(#duneMid1)"/>
+    <path d="M-20,510 C 100,490 200,530 320,505 C 440,480 540,525 620,500"
+          stroke="url(#ridgeHighlight)" stroke-width="1.8" fill="none" opacity="0.8"/>
+
+    <!-- Mid dune 2 -->
+    <path d="M-20,565 C 120,545 220,590 340,560 C 460,530 540,575 620,550 L 620,650 L -20,650 Z"
+          fill="url(#duneMid2)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 8,0; 0,0; -8,0; 0,0" dur="16s" repeatCount="indefinite"/>
+    </path>
+    <path d="M-20,565 C 120,545 220,590 340,560 C 460,530 540,575 620,550"
+          stroke="url(#ridgeHighlight)" stroke-width="2" fill="none" opacity="0.85"/>
+
+    <!-- Near dune -->
+    <path d="M-20,640 C 100,615 220,660 340,630 C 460,600 540,650 620,620 L 620,760 L -20,760 Z"
+          fill="url(#duneNear)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -12,0; 0,0; 12,0; 0,0" dur="18s" repeatCount="indefinite"/>
+    </path>
+    <path d="M-20,640 C 100,615 220,660 340,630 C 460,600 540,650 620,620"
+          stroke="url(#ridgeHighlight)" stroke-width="2.5" fill="none" opacity="0.9"/>
+
+    <!-- Sand ripple lines on near dune -->
+    <g stroke="#f0a850" stroke-width="0.8" fill="none" opacity="0.3">
+      <path d="M60,680 Q 120,676 180,680"/>
+      <path d="M240,700 Q 300,696 360,700"/>
+      <path d="M400,690 Q 460,686 520,690"/>
+      <path d="M100,730 Q 160,726 220,730"/>
+      <path d="M340,745 Q 400,741 460,745"/>
+    </g>
+
+    <!-- FOREGROUND DARK SAND -->
+    <path d="M-20,760 C 100,750 220,775 340,765 C 460,755 540,775 620,765 L 620,820 L -20,820 Z"
+          fill="#0e0404"/>
+
+    <!-- BLOWING SAND PARTICLES -->
+    <g fill="#f0a850" filter="url(#sandBlur)">
+      <circle cx="100" cy="560" r="1.2">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 60,-8; 120,0" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.7;0" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="250" cy="580" r="1">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 50,-5; 100,0" dur="10s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.6;0" dur="10s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="400" cy="600" r="1.3">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 70,-10; 140,0" dur="9s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.8;0" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="180" cy="650" r="1.1">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 80,-6; 160,0" dur="11s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.7;0" dur="11s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="480" cy="620" r="1">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 55,-8; 110,0" dur="12s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.6;0" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="320" cy="680" r="1.4">
+        <animateTransform attributeName="transform" type="translate" values="0,0; 90,-12; 180,0" dur="7s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.75;0" dur="7s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- TINY SPARKLES -->
+    <g fill="#ffd080">
+      <circle cx="220" cy="520" r="0.8">
+        <animate attributeName="opacity" values="0;0.9;0" dur="6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="360" cy="540" r="0.7">
+        <animate attributeName="opacity" values="0;1;0" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="140" cy="600" r="0.9">
+        <animate attributeName="opacity" values="0;0.8;0" dur="7s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="460" cy="570" r="0.8">
+        <animate attributeName="opacity" values="0;0.9;0" dur="5.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- SAND MIST -->
+    <ellipse cx="200" cy="620" rx="180" ry="14" fill="#f0a850" opacity="0.12" filter="url(#blurDesert)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 80,0; 0,0" dur="30s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="440" cy="660" rx="150" ry="12" fill="#d87840" opacity="0.1" filter="url(#blurDesert)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -70,0; 0,0" dur="34s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- BORDER -->
+    <rect x="6" y="6" width="588" height="788" rx="38" ry="38" fill="none" stroke="url(#borderDesert)" stroke-width="1.5" opacity="0.65">
+      <animate attributeName="opacity" values="0.45;0.85;0.45" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <path d="M42,10 Q 300,2 558,10" stroke="#ffd080" stroke-width="1" opacity="0.4" fill="none"/>
+
+    <!-- TYPOGRAPHY -->
+    <g opacity="0.92">
+      <text x="300" y="745" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="10" fill="#f0a850" opacity="0.95">MIRAGE</text>
+      <text x="300" y="768" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="9" letter-spacing="6" fill="#d87840" opacity="0.9">D E S E R T   M O O N</text>
+    </g>
+
+    <!-- VIGNETTE -->
+    <radialGradient id="vignette9" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="55%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>
+    </radialGradient>
+    <rect x="0" y="0" width="600" height="800" fill="url(#vignette9)" pointer-events="none"/>
+  </g>
+</svg>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Button Responsive</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Container căn giữa button */
+  .button-wrapper {
+    display: flex;
+    justify-content: center;   /* căn giữa ngang */
+    align-items: center;       /* căn giữa dọc (nếu có chiều cao) */
+    min-height: 100vh;         /* căn giữa theo màn hình */
+    padding: 20px;
+    background: #f5f5f5;
+  }
+
+  /* Button cơ bản */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    font-weight: 600;
+    color: #fff;
+    background: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    /* Mặc định cho mobile-first */
+    width: 100%;               /* full width trên mobile */
+    max-width: 320px;          /* giới hạn độ rộng */
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  .btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* ===== TABLET (>= 768px) ===== */
+  @media (min-width: 768px) {
+    .btn {
+      width: auto;             /* bỏ full width */
+      padding: 14px 36px;
+      font-size: 16px;
+      border-radius: 10px;
+    }
+  }
+
+  /* ===== DESKTOP (>= 1024px) ===== */
+  @media (min-width: 1024px) {
+    .btn {
+      padding: 16px 48px;
+      font-size: 17px;
+      border-radius: 12px;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="button-wrapper">
+    <button class="btn">🚀 Bắt đầu ngay</button>
+  </div>
+
+</body>
+</html>

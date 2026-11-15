@@ -1,0 +1,46 @@
+┌───────┬───────┬───────┬───────┐
+│   1   │   2   │   3   │   4   │
+├───────┼───────┼───────┼───────┤
+│   5   │   6   │       │       │
+└───────┴───────┴───────┴───────┘
+
+
+1. display: grid                        → Bật grid
+2. grid-template-columns: 1fr 1fr 1fr  1fr là 1 cột → 3 cột (số 1fr = số cột)
+3. gap: 12px                            → Khoảng cách
+
+
+
+ 
+
+--- cách dễ hiểu nè ---
+grid-template-columns: 1fr 1fr 1fr;
+┌─────────┬─────────┬─────────┐
+│  cột 1  │  cột 2  │  cột 3  │
+└─────────┴─────────┴─────────┘
+
+1fr       = 1 cột
+1fr 1fr   = 2 cột
+1fr 1fr 1fr = 3 cột
+
+ 
+khai báo 3 cột :
+<div>1</div> <div>2</div> <div>3</div>
+
+-- còn xuống dòng --
+cứ để nguyên 3 fr đó nó sẽ tự xuống dòng 
+
+
+
+<div>1</div> <div>2</div> <div>3</div>
+<div>4</div> <div>5</div> <div>6</div>
+
+
+khai báo như bình thường nó tự chia ra 3 cái 1 hàng
+xong xuống tiếp
+
+┌─────────┬─────────┬─────────┐
+│    1    │    2    │    3    │  ← hàng 1
+├─────────┼─────────┼─────────┤
+│    4    │    5    │    6    │  ← tự xuống hàng 2
+└─────────┴─────────┴─────────┘

@@ -1,0 +1,7 @@
+1. display:flex nó giúp sắp xếp nhiều dạng
+
+ví dụ :
+[ o1 ]   [ o2]   [ o3] 
+
+kiểu thế đó nhưng mà nó sát nhau mất
+nên phải cần gap để cách khoảng cách ra

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neural Core — Vertical Card</title>
+<style>
+  :root{
+    --bg-1:#04122e;
+    --bg-2:#0a2a6b;
+    --bg-3:#0f47b8;
+    --ink:#eaf2ff;
+    --ink-dim:#8fb0e6;
+    --accent:#4fd1ff;
+    --accent-2:#7c6bff;
+    --line:rgba(120,170,255,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    min-height:100dvh;
+    display:grid;
+    place-items:center;
+    padding:32px 16px;
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg-2);
+    overflow-x:hidden;
+  }
+
+  /* ---------- BACKGROUND SVG ---------- */
+  .bg-wrap{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+  }
+  .bg-wrap svg{width:100%;height:100%;display:block}
+  .bg-wrap .glow{
+    animation:bgPulse 9s ease-in-out infinite alternate;
+    transform-origin:center;
+  }
+  @keyframes bgPulse{
+    0%{opacity:.55;transform:scale(1)}
+    100%{opacity:.95;transform:scale(1.06)}
+  }
+  .bg-wrap .grid{
+    animation:gridDrift 26s linear infinite;
+  }
+  @keyframes gridDrift{
+    from{transform:translate3d(0,0,0)}
+    to{transform:translate3d(-120px,-120px,0)}
+  }
+
+  /* ---------- CARD ---------- */
+  .stage{
+    position:relative;z-index:2;
+    perspective:1400px;
+  }
+
+  .card{
+    position:relative;
+    width:min(380px,92vw);
+    aspect-ratio:9/15;
+    border-radius:28px;
+    padding:26px 24px 22px;
+    display:flex;
+    flex-direction:column;
+    isolation:isolate;
+    background:
+      radial-gradient(120% 90% at 20% 0%, #123a8f 0%, #0a2158 46%, #061331 100%);
+    border:1px solid var(--line);
+    box-shadow:
+      0 40px 80px -30px rgba(0,10,40,.85),
+      0 0 0 1px rgba(255,255,255,.02) inset,
+      0 1px 0 rgba(255,255,255,.06) inset;
+    transform-style:preserve-3d;
+    transition:transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease;
+    will-change:transform;
+    overflow:hidden;
+    animation:cardIn .9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(26px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+
+  /* animated conic border sweep */
+  .card::before{
+    content:"";
+    position:absolute;inset:-1px;
+    border-radius:29px;
+    padding:1px;
+    background:conic-gradient(from 0deg,
+      transparent 0deg,
+      var(--accent) 40deg,
+      transparent 90deg,
+      transparent 220deg,
+      var(--accent-2) 270deg,
+      transparent 320deg);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    opacity:.0;
+    transition:opacity .45s ease;
+    animation:spin 7s linear infinite;
+    z-index:1;
+  }
+  .card:hover::before{opacity:.9}
+  @keyframes spin{to{transform:rotate(1turn)}}
+
+  /* soft top glow */
+  .card::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:28px;
+    background:radial-gradient(70% 45% at 50% -10%, rgba(79,209,255,.28), transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .card:hover{
+    box-shadow:
+      0 55px 100px -30px rgba(0,15,60,.95),
+      0 0 60px -18px rgba(79,209,255,.5),
+      0 0 0 1px rgba(255,255,255,.04) inset,
+      0 1px 0 rgba(255,255,255,.09) inset;
+  }
+
+  /* ---------- HEADER ---------- */
+  .head{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transform:translateZ(20px);
+  }
+  .tag{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);
+    padding:6px 11px;
+    border-radius:100px;
+    border:1px solid rgba(79,209,255,.35);
+    background:rgba(79,209,255,.07);
+    backdrop-filter:blur(4px);
+  }
+  .tag .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 10px 2px rgba(79,209,255,.9);
+    animation:blink 2.2s ease-in-out infinite;
+  }
+  @keyframes blink{50%{opacity:.25}}
+  .serial{
+    font-size:10px;letter-spacing:.18em;
+    color:var(--ink-dim);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- ORB VISUAL ---------- */
+  .orb{
+    position:relative;
+    z-index:2;
+    margin:14px auto 4px;
+    width:min(210px,58%);
+    aspect-ratio:1;
+    transform:translateZ(30px);
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .card:hover .orb{transform:translateZ(45px) scale(1.035)}
+  .orb svg{width:100%;height:100%;overflow:visible}
+  .orb .ring{
+    transform-origin:center;
+    animation:orbit 14s linear infinite;
+  }
+  .orb .ring.r2{animation-duration:20s;animation-direction:reverse}
+  .orb .ring.r3{animation-duration:9s}
+  @keyframes orbit{to{transform:rotate(1turn)}}
+  .orb .core{
+    animation:corePulse 3.4s ease-in-out infinite alternate;
+    transform-origin:center;
+  }
+  @keyframes corePulse{
+    from{opacity:.75;transform:scale(.94)}
+    to{opacity:1;transform:scale(1.06)}
+  }
+  .orb .spark{
+    animation:sparkFloat 5s ease-in-out infinite;
+  }
+  .orb .spark.s2{animation-delay:-1.6s}
+  .orb .spark.s3{animation-delay:-3.1s}
+  @keyframes sparkFloat{
+    0%,100%{transform:translateY(0);opacity:.6}
+    50%{transform:translateY(-7px);opacity:1}
+  }
+
+  /* ---------- TITLE BLOCK ---------- */
+  .title-block{
+    position:relative;
+    z-index:2;
+    margin-top:6px;
+    transform:translateZ(18px);
+  }
+  .eyebrow{
+    font-size:10px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:8px;
+  }
+  .title{
+    font-size:clamp(26px,7.2vw,34px);
+    line-height:.98;
+    font-weight:800;
+    letter-spacing:-.02em;
+    background:linear-gradient(115deg,#ffffff 0%,#cfe4ff 45%,#7fb4ff 100%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+  }
+  .title em{
+    font-style:normal;
+    display:block;
+    color:var(--accent);
+    -webkit-text-fill-color:var(--accent);
+    text-shadow:0 0 26px rgba(79,209,255,.45);
+  }
+  .sub{
+    margin-top:9px;
+    font-size:12.5px;line-height:1.55;
+    color:var(--ink-dim);
+    max-width:30ch;
+  }
+
+  /* ---------- SPEC GRID ---------- */
+  .specs{
+    position:relative;z-index:2;
+    margin-top:auto;
+    padding-top:16px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    transform:translateZ(14px);
+  }
+  .spec{
+    background:linear-gradient(180deg, rgba(10,33,88,.0), rgba(10,33,88,.35));
+    padding:11px 8px 10px;
+    text-align:left;
+    transition:background .3s ease;
+  }
+  .spec:hover{background:rgba(79,209,255,.08)}
+  .spec .val{
+    font-size:16px;font-weight:700;
+    color:#fff;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+  }
+  .spec .val small{font-size:9px;color:var(--accent);margin-left:2px;font-weight:600}
+  .spec .lbl{
+    margin-top:3px;
+    font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+
+  /* ---------- FOOTER ---------- */
+  .foot{
+    position:relative;z-index:2;
+    margin-top:16px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    transform:translateZ(16px);
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:11px 18px;
+    border-radius:100px;
+    font-size:12.5px;font-weight:700;letter-spacing:.02em;
+    color:#04122e;
+    background:linear-gradient(120deg,#8fe3ff,#4fd1ff 45%,#7c6bff);
+    border:none;cursor:pointer;
+    box-shadow:0 10px 26px -10px rgba(79,209,255,.75);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, filter .3s ease;
+  }
+  .cta:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 16px 34px -10px rgba(79,209,255,.9)}
+  .cta:active{transform:translateY(0) scale(.98)}
+  .cta svg{width:14px;height:14px}
+  .meta{
+    text-align:right;
+    font-size:10px;line-height:1.5;
+    color:var(--ink-dim);
+    letter-spacing:.05em;
+  }
+  .meta b{color:#dbe9ff;font-weight:600;display:block;font-size:11px}
+
+  /* shine sweep on hover */
+  .shine{
+    position:absolute;inset:0;z-index:1;border-radius:28px;
+    pointer-events:none;overflow:hidden;
+  }
+  .shine::before{
+    content:"";
+    position:absolute;top:-60%;left:-40%;
+    width:60%;height:220%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.16),transparent);
+    transform:rotate(18deg) translateX(-140%);
+    transition:transform 1.05s cubic-bezier(.2,.8,.2,1);
+  }
+  .card:hover .shine::before{transform:rotate(18deg) translateX(320%)}
+
+  @media (max-width:420px){
+    .card{padding:22px 18px 18px;border-radius:24px}
+    .card::before,.card::after,.shine{border-radius:24px}
+    .spec .val{font-size:15px}
+    .cta{padding:10px 15px;font-size:12px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ BLUE BACKGROUND SVG ============ -->
+<div class="bg-wrap" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="bgBase" cx="50%" cy="38%" r="78%">
+        <stop offset="0%" stop-color="#0f47b8"/>
+        <stop offset="45%" stop-color="#0a2a6b"/>
+        <stop offset="100%" stop-color="#04122e"/>
+      </radialGradient>
+      <radialGradient id="glowA" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#4fd1ff" stop-opacity=".55"/>
+        <stop offset="100%" stop-color="#4fd1ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="glowB" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#7c6bff" stop-opacity=".45"/>
+        <stop offset="100%" stop-color="#7c6bff" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="mesh" width="120" height="120" patternUnits="userSpaceOnUse">
+        <path d="M120 0H0V120" fill="none" stroke="#5a9bff" stroke-opacity=".10" stroke-width="1"/>
+        <circle cx="0" cy="0" r="1.6" fill="#7fb4ff" fill-opacity=".22"/>
+      </pattern>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#bgBase)"/>
+    <rect width="1440" height="900" fill="url(#mesh)" class="grid"/>
+
+    <circle class="glow" cx="1080" cy="180" r="360" fill="url(#glowA)"/>
+    <circle class="glow" cx="300" cy="760" r="420" fill="url(#glowB)" style="animation-delay:-4s"/>
+
+    <!-- faint geometric arcs -->
+    <g fill="none" stroke="#5a9bff" stroke-opacity=".16">
+      <circle cx="720" cy="450" r="300" stroke-width="1"/>
+      <circle cx="720" cy="450" r="460" stroke-width="1" stroke-dasharray="2 10"/>
+      <circle cx="720" cy="450" r="620" stroke-width="1" stroke-opacity=".08"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ============ CARD ============ -->
+<div class="stage">
+  <article class="card" id="card">
+    <div class="shine" aria-hidden="true"></div>
+
+    <!-- HEADER -->
+    <header class="head">
+      <span class="tag"><span class="dot"></span>Neural&nbsp;Core</span>
+      <span class="serial">NX-09 / V.7</span>
+    </header>
+
+    <!-- ORB VISUAL -->
+    <div class="orb" aria-hidden="true">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <radialGradient id="coreG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="35%" stop-color="#8fe3ff"/>
+            <stop offset="100%" stop-color="#4fd1ff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4fd1ff"/>
+            <stop offset="100%" stop-color="#7c6bff"/>
+          </linearGradient>
+          <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+        </defs>
+
+        <!-- outer halo -->
+        <circle cx="100" cy="100" r="78" fill="url(#coreG)" opacity=".25" filter="url(#soft)"/>
+
+        <!-- rings -->
+        <g class="ring">
+          <ellipse cx="100" cy="100" rx="82" ry="30"
+                   fill="none" stroke="url(#ringG)" stroke-width="1.4" stroke-opacity=".85"/>
+        </g>
+        <g class="ring r2">
+          <ellipse cx="100" cy="100" rx="70" ry="70"
+                   fill="none" stroke="#4fd1ff" stroke-width=".9"
+                   stroke-opacity=".45" stroke-dasharray="4 8"/>
+        </g>
+        <g class="ring r3">
+          <ellipse cx="100" cy="100" rx="60" ry="60"
+                   fill="none" stroke="#7c6bff" stroke-width=".8"
+                   stroke-opacity=".4" stroke-dasharray="1 6"/>
+        </g>
+
+        <!-- inner nodes -->
+        <g fill="#bfeaff">
+          <circle cx="100" cy="42" r="2.4" class="spark"/>
+          <circle cx="160" cy="100" r="2" class="spark s2"/>
+          <circle cx="52" cy="132" r="1.8" class="spark s3"/>
+          <circle cx="146" cy="146" r="1.6" class="spark s2"/>
+        </g>
+
+        <!-- core -->
+        <circle class="core" cx="100" cy="100" r="26" fill="url(#coreG)"/>
+        <circle cx="100" cy="100" r="9" fill="#ffffff" opacity=".95"/>
+        <circle cx="100" cy="100" r="14" fill="none" stroke="#8fe3ff" stroke-width="1" opacity=".8"/>
+      </svg>
+    </div>
+
+    <!-- TITLE BLOCK -->
+    <div class="title-block">
+      <div class="eyebrow">Autonomous Intelligence</div>
+      <h2 class="title">Neural<em>Processor</em></h2>
+      <p class="sub">Lõi xử lý thế hệ mới với mạng nơ-ron tự thích ứng, tối ưu cho mô hình on-device.</p>
+    </div>
+
+    <!-- SPECS -->
+    <div class="specs">
+      <div class="spec">
+        <div class="val">128<small>TOPS</small></div>
+        <div class="lbl">Compute</div>
+      </div>
+      <div class="spec">
+        <div class="val">3<small>nm</small></div>
+        <div class="lbl">Process</div>
+      </div>
+      <div class="spec">
+        <div class="val">4.2<small>W</small></div>
+        <div class="lbl">Power</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="foot">
+      <button class="cta" type="button">
+        Khám phá
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h13M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+      <div class="meta">
+        <b>Gen&nbsp;IX</b>
+        Q3 · 2026
+      </div>
+    </footer>
+  </article>
+</div>
+
+<script>
+  (function(){
+    const card = document.getElementById('card');
+    const stage = card.parentElement;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    let raf = null;
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+
+    function loop(){
+      cx += (tx - cx) * 0.12;
+      cy += (ty - cy) * 0.12;
+      card.style.transform =
+        `rotateX(${(-cy * 7).toFixed(2)}deg) rotateY(${(cx * 9).toFixed(2)}deg) translateZ(0)`;
+      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001){
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+      }
+    }
+
+    function onMove(e){
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      tx = (px - 0.5) * 2;
+      ty = (py - 0.5) * 2;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }
+    function onLeave(){
+      tx = 0; ty = 0;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }
+
+    // Chỉ áp dụng tilt trên thiết bị có con trỏ chính xác (desktop)
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches){
+      stage.addEventListener('pointermove', onMove);
+      stage.addEventListener('pointerleave', onLeave);
+    }
+
+    // CTA micro interaction
+    card.querySelector('.cta').addEventListener('click', function(){
+      this.animate(
+        [{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],
+        {duration:260, easing:'ease-out'}
+      );
+    });
+  })();
+</script>
+</body>
+</html>

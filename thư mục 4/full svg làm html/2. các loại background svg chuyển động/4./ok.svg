@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e2a"/>
+      <stop offset="40%" stop-color="#1a1f42"/>
+      <stop offset="70%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#3a3550"/>
+    </linearGradient>
+    <linearGradient id="auroraD1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff5ea8" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#ff5ea8" stop-opacity="0.6"/>
+      <stop offset="55%" stop-color="#a06bff" stop-opacity="0.55"/>
+      <stop offset="80%" stop-color="#5ec8ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#5ec8ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="auroraD2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#5effc8" stop-opacity="0"/>
+      <stop offset="35%" stop-color="#5effc8" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#6ba8ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#c86bff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="duneFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a3a5a"/>
+      <stop offset="100%" stop-color="#3a2a44"/>
+    </linearGradient>
+    <linearGradient id="duneMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3e2a48"/>
+      <stop offset="100%" stop-color="#241a30"/>
+    </linearGradient>
+    <linearGradient id="duneNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1428"/>
+      <stop offset="100%" stop-color="#0e0a16"/>
+    </linearGradient>
+    <linearGradient id="oasisWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a5a7a"/>
+      <stop offset="100%" stop-color="#1a2a4a"/>
+    </linearGradient>
+    <radialGradient id="moonD" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffe8f0" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#c8a8d8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#c8a8d8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="duneBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="auroraBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+
+  <!-- SKY -->
+  <rect width="600" height="800" fill="url(#sky3)"/>
+
+  <!-- STARS -->
+  <g fill="#ffffff">
+    <circle cx="50" cy="50" r="1.3" opacity="0.85">
+      <animate attributeName="opacity" values="0.85;0.2;0.85" dur="4.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="140" cy="80" r="1" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0.15;0.6" dur="5.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="220" cy="40" r="1.5" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.25;0.9" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="330" cy="65" r="1.1" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.15;0.7" dur="6.3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="420" cy="35" r="1.4" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="4.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="510" cy="90" r="1" opacity="0.65">
+      <animate attributeName="opacity" values="0.65;0.12;0.65" dur="5.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="570" cy="55" r="1.2" opacity="0.75">
+      <animate attributeName="opacity" values="0.75;0.18;0.75" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="90" cy="150" r="0.9" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.1;0.5" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="140" r="1.1" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.15;0.7" dur="5.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="460" cy="170" r="1" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0.1;0.6" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="540" cy="130" r="0.9" opacity="0.55">
+      <animate attributeName="opacity" values="0.55;0.1;0.55" dur="7.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- MOON -->
+  <circle cx="150" cy="160" r="70" fill="url(#moonD)"/>
+  <circle cx="150" cy="160" r="16" fill="#fff0f8" opacity="0.9"/>
+
+  <!-- AURORA LAYERS -->
+  <g filter="url(#auroraBlur)" opacity="0.85">
+    <path d="M0,200 C100,140 180,240 300,170 C400,110 500,220 600,160 L600,290 C500,340 400,250 300,310 C180,370 100,270 0,340 Z" fill="url(#auroraD1)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 35,-12; 0,0" dur="16s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.85;0.55;0.85" dur="10s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <g filter="url(#auroraBlur)" opacity="0.7">
+    <path d="M0,170 C120,210 220,140 340,200 C440,250 540,160 600,210 L600,270 C540,230 440,320 340,270 C220,210 120,290 0,250 Z" fill="url(#auroraD2)">
+      <animateTransform attributeName="transform" type="translate" values="0,0; -28,10; 0,0" dur="20s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.42;0.7" dur="12s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- FAR DUNES -->
+  <path d="M0,400 C100,380 200,410 300,390 C400,375 500,405 600,385 L600,470 L0,470 Z" fill="url(#duneFar)" opacity="0.85"/>
+
+  <!-- MID DUNES -->
+  <path d="M0,470 C120,450 220,485 340,460 C440,440 540,475 600,455 L600,560 L0,560 Z" fill="url(#duneMid)"/>
+
+  <!-- DUNE RIDGE HIGHLIGHTS -->
+  <path d="M0,470 C120,450 220,485 340,460 C440,440 540,475 600,455" stroke="#6a4a6e" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+  <!-- OASIS -->
+  <ellipse cx="380" cy="560" rx="90" ry="20" fill="url(#oasisWater)"/>
+  <ellipse cx="380" cy="558" rx="80" ry="14" fill="#4a6a8a" opacity="0.5"/>
+
+  <!-- OASIS REFLECTION OF AURORA -->
+  <ellipse cx="380" cy="560" rx="70" ry="10" fill="#a06bff" opacity="0.3">
+    <animate attributeName="opacity" values="0.3;0.15;0.3" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="380" cy="562" rx="55" ry="6" fill="#5effc8" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.08;0.2" dur="9s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- PALM TREES -->
+  <g>
+    <!-- Trunk -->
+    <path d="M320,555 Q318,510 322,470" stroke="#2a1a28" stroke-width="4" fill="none"/>
+    <!-- Fronds -->
+    <g transform="translate(322,470)">
+      <animateTransform attributeName="transform" type="translate" values="322,470;326,470;322,470" dur="5s" repeatCount="indefinite"/>
+      <path d="M0,0 Q-30,-10 -50,-25" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q-25,-20 -40,-40" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q-10,-30 -15,-50" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q15,-30 25,-48" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q30,-15 50,-25" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q35,-5 55,-10" stroke="#1e1424" stroke-width="3" fill="none"/>
+      <path d="M0,0 Q-40,5 -55,-5" stroke="#1e1424" stroke-width="3" fill="none"/>
+    </g>
+  </g>
+  <g>
+    <path d="M420,558 Q422,520 418,485" stroke="#2a1a28" stroke-width="3.5" fill="none"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0;-3,0;0,0" dur="6s" repeatCount="indefinite"/>
+      <path d="M418,485 Q395,478 380,465" stroke="#1e1424" stroke-width="2.5" fill="none"/>
+      <path d="M418,485 Q400,470 388,455" stroke="#1e1424" stroke-width="2.5" fill="none"/>
+      <path d="M418,485 Q420,458 425,440" stroke="#1e1424" stroke-width="2.5" fill="none"/>
+      <path d="M418,485 Q440,465 455,455" stroke="#1e1424" stroke-width="2.5" fill="none"/>
+      <path d="M418,485 Q445,480 460,475" stroke="#1e1424" stroke-width="2.5" fill="none"/>
+    </g>
+  </g>
+
+  <!-- REFLECTION OF PALMS IN OASIS -->
+  <g opacity="0.25">
+    <path d="M320,560 Q318,585 322,600" stroke="#0e0a16" stroke-width="2" fill="none"/>
+    <path d="M420,560 Q422,585 418,600" stroke="#0e0a16" stroke-width="1.8" fill="none"/>
+  </g>
+
+  <!-- NEAR DUNES -->
+  <path d="M0,560 C150,540 280,600 420,570 C500,555 560,585 600,565 L600,800 L0,800 Z" fill="url(#duneNear)"/>
+
+  <!-- DUNE RIPPLE LINES -->
+  <g stroke="#3a2a48" stroke-width="1" fill="none" opacity="0.4">
+    <path d="M40,620 Q160,612 280,620 T520,616">
+      <animate attributeName="opacity" values="0.4;0.12;0.4" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M80,660 Q200,652 320,660 T560,656">
+      <animate attributeName="opacity" values="0.3;0.08;0.3" dur="6.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M20,710 Q160,702 300,710 T560,706">
+      <animate attributeName="opacity" values="0.25;0.06;0.25" dur="7.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M60,760 Q200,752 340,760 T580,756">
+      <animate attributeName="opacity" values="0.2;0.04;0.2" dur="8.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- CAMEL CARAVAN -->
+  <g fill="#0a0610">
+    <!-- Camel 1 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 140,0" dur="40s" repeatCount="indefinite"/>
+      <path d="M120,600 L128,595 L132,598 L136,595 L142,600 L140,608 L136,610 L124,610 L120,608 Z"/>
+      <path d="M132,598 Q128,590 130,585 L134,585 Q136,590 136,596"/>
+      <path d="M124,610 L122,620 M136,610 L138,620"/>
+    </g>
+    <!-- Camel 2 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 140,0" dur="40s" repeatCount="indefinite"/>
+      <path d="M150,605 L158,600 L162,603 L166,600 L172,605 L170,613 L166,615 L154,615 L150,613 Z"/>
+      <path d="M162,603 Q158,595 160,590 L164,590 Q166,595 166,601"/>
+      <path d="M154,615 L152,625 M166,615 L168,625"/>
+    </g>
+    <!-- Camel 3 -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 140,0" dur="40s" repeatCount="indefinite"/>
+      <path d="M180,610 L188,605 L192,608 L196,605 L202,610 L200,618 L196,620 L184,620 L180,618 Z"/>
+      <path d="M192,608 Q188,600 190,595 L194,595 Q196,600 196,606"/>
+      <path d="M184,620 L182,630 M196,620 L198,630"/>
+    </g>
+  </g>
+
+  <!-- WIND BLOWN SAND -->
+  <g fill="#5a3a5a" opacity="0.35">
+    <ellipse cx="80" cy="640" rx="40" ry="1.5">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 80,0" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.35;0;0.35" dur="8s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="280" cy="680" rx="50" ry="1.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 100,0" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="10s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="180" cy="720" rx="35" ry="1.2">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 90,0" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.25;0;0.25" dur="9s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- SHOOTING STAR -->
+  <g opacity="0">
+    <line x1="0" y1="0" x2="-30" y2="15" stroke="#ffffff" stroke-width="1.5"/>
+    <animateTransform attributeName="transform" type="translate" values="450,120; 550,180" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.9;0" dur="3s" repeatCount="indefinite"/>
+  </g>
+</svg>

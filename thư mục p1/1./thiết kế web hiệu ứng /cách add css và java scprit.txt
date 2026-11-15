@@ -1,0 +1,26 @@
+1. css
+là add cuối trước sau dòng </sytle>
+
+ví dụ :
+(code cần add)
+</style>
+
+
+2. java scprit
+<script>
+(add code)
+</script>
+
+
+nếu mún add thêm code scprit
+
+<script>
+(add code)
+</script>
+-
+<script>
+(add code)
+</script>
+
+
+cứ i vậy 3 4 5 gì cũng được

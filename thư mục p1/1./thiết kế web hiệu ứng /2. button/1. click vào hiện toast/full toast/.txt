@@ -1,0 +1,19 @@
+🎯 Cách dùng — Chỉ 1 dòng
+
+✅ Thành công (xanh lá)
+
+showToast('Lưu thành công!', 'success');
+
+
+❌ Thất bại (đỏ)
+
+
+showToast('Có lỗi xảy ra!', 'error');
+
+
+ℹ️ Thông tin (xanh dương)
+
+showToast('Đang tải dữ liệu...', 'info');
+
+
+⏱️ Tùy chỉnh thời gian

@@ -1,0 +1,139 @@
+Tổng quan: Làm thế nào để đạt "SVG mượt"
+
+Dưới đây là cách làm tổng quát cho từng nguyên tắc, kèm code skeleton chung (không phải sản phẩm hoàn chỉnh, chỉ minh họa cấu trúc).
+
+---
+
+1. Phân lớp theo độ sâu
+
+Cách làm: Chia <g> theo lớp, lớp xa đặt trước, gần đặt sau. Mỗi lớp có opacity/blur/tương phản khác nhau.
+
+```svg
+<g id="layer-far"  opacity="0.7" filter="url(#blurFar)">
+<g id="layer-mid"  opacity="0.9">
+<g id="layer-near" opacity="1.0">
+<g id="layer-fore" opacity="1.0">
+```
+
+---
+
+2. Gradient nhiều stop
+
+Cách làm: Dùng 3–5 stop, không dùng 2 stop. Mỗi vật thể có gradient riêng.
+
+```svg
+<linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="#aaa"/>
+  <stop offset="40%"  stop-color="#bbb"/>
+  <stop offset="70%"  stop-color="#ccc"/>
+  <stop offset="100%" stop-color="#ddd"/>
+</linearGradient>
+```
+
+---
+
+3. Một nguồn sáng nhất quán
+
+Cách làm: Đặt 1 tâm sáng (cx, cy). Mọi highlight/glow/reflection đều hướng về tâm đó.
+
+```svg
+<radialGradient id="light" cx="0.5" cy="0.3" r="0.6">
+  <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+</radialGradient>
+<ellipse cx="300" cy="200" rx="250" ry="180" fill="url(#light)"/>
+```
+
+---
+
+4. Blur theo khoảng cách
+
+Cách làm: Lớp xa → stdDeviation lớn; lớp gần → nhỏ hoặc không blur.
+
+```svg
+<filter id="blurFar"><feGaussianBlur stdDeviation="3"/></filter>
+<filter id="blurMid"><feGaussianBlur stdDeviation="1.5"/></filter>
+<filter id="glow"><feGaussianBlur stdDeviation="8"/></filter>
+```
+
+---
+
+5. Motion lệch pha, biên độ nhỏ, path Bezier
+
+Cách làm: Mỗi vật có dur khác nhau; dùng values="0;1;0" để có vào–ra mềm; dùng path Bezier cho animateMotion.
+
+```svg
+<!-- Lệch pha -->
+<circle cx="100" cy="100" r="2">
+  <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/>
+</circle>
+<circle cx="150" cy="100" r="2">
+  <animate attributeName="opacity" values="0;1;0" dur="7s" repeatCount="indefinite"/>
+</circle>
+
+<!-- Bay lượn -->
+<ellipse rx="3" ry="2" fill="#fdd">
+  <animateMotion dur="12s" repeatCount="indefinite"
+    path="M100,100 C 200,50 300,200 400,100"/>
+  <animateTransform attributeName="transform" type="rotate"
+    values="0;360" dur="4s" repeatCount="indefinite" additive="sum"/>
+</ellipse>
+```
+
+---
+
+6. Tối ưu <use> / <clipPath>
+
+Cách làm: Định nghĩa vật thể lặp trong <defs>, gọi bằng <use>. Bo góc bằng clipPath ở wrapper ngoài cùng.
+
+```svg
+<defs>
+  <clipPath id="card">
+    <rect x="0" y="0" width="600" height="800" rx="42"/>
+  </clipPath>
+
+  <g id="petal">
+    <ellipse rx="4" ry="7" fill="#fcc"/>
+  </g>
+</defs>
+
+<g clip-path="url(#card)">
+  <use href="#petal" x="100" y="200"/>
+  <use href="#petal" x="150" y="250"/>
+  <use href="#petal" x="200" y="300"/>
+</g>
+```
+
+---
+
+7. Khung SVG tối thiểu
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 600 800"
+     preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- gradients, filters, clipPath, <g id> -->
+  </defs>
+
+  <g clip-path="url(#card)">
+    <g id="layer-far">...</g>
+    <g id="layer-mid">...</g>
+    <g id="layer-near">...</g>
+    <g id="layer-fore">...</g>
+    <rect width="600" height="800" fill="url(#vignette)" pointer-events="none"/>
+  </g>
+</svg>
+```
+
+---
+
+Lưu ý (phân biệt sự thật / suy luận)
+
+· Sự thật: Các thẻ/cấu trúc trên là cú pháp SVG chuẩn, hoạt động trong trình duyệt hiện đại.
+· Suy luận: Việc "mượt" phụ thuộc nhiều vào giá trị cụ thể (số stop, stdDeviation, dur, biên độ) — không có con số cố định đúng cho mọi cảnh. Cần tinh chỉnh theo từng thiết kế.
+· Tôi không chắc có một "công thức chung" đảm bảo mượt cho mọi trường hợp; đây là tập nguyên tắc thực hành phổ biến, không phải chuẩn chính thức.
+
+---
+
+Tóm 1 câu: Chia lớp theo độ sâu, gradient nhiều stop, một tâm sáng, blur tỷ lệ khoảng cách, motion dur lệch pha + values="0;1;0" + animateMotion path Bezier, gói trong <use>/clipPath — code skeleton ở trên là đủ để bắt đầu, còn độ mượt cuối cùng phụ thuộc vào việc tinh chỉnh số liệu cụ thể.
