@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kỳ lân – Khu rừng pha lê</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a1a24;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #1a3a5a 0%, #0a2038 45%, #05101c 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(72vw, 72vh);
+      height: min(72vw, 72vh);
+      max-width: 520px;
+      max-height: 520px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: KỲ LÂN === */
+    /* Toàn bộ kỳ lân lơ lửng */
+    .unicorn-float {
+      animation: uniFloat 9s ease-in-out infinite;
+      transform-origin: 50% 60%;
+      will-change: transform;
+    }
+
+    @keyframes uniFloat {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-8px) rotate(-1deg); }
+      60%  { transform: translateY(4px) rotate(0.8deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Thân – nhịp thở chậm rãi */
+    .unicorn-body {
+      animation: bodyBreath 6.5s ease-in-out infinite;
+      transform-origin: 50% 65%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.018, 1.03); }
+    }
+
+    /* Đầu – gật gù duyên dáng */
+    .unicorn-head {
+      animation: headNod 7.5s ease-in-out infinite;
+      transform-origin: 50% 95%;
+      will-change: transform;
+    }
+
+    @keyframes headNod {
+      0%   { transform: translateY(0) rotate(0deg); }
+      35%  { transform: translateY(-3px) rotate(2deg); }
+      70%  { transform: translateY(2px) rotate(-1.5deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Bờm kỳ lân – từng lọn tóc bay */
+    .mane-1 {
+      animation: maneFlow1 4.5s ease-in-out infinite;
+      transform-origin: 0% 50%;
+      will-change: transform;
+    }
+
+    @keyframes maneFlow1 {
+      0%, 100% { transform: rotate(0deg) skewY(0deg); }
+      40%      { transform: rotate(-5deg) skewY(2deg); }
+      75%      { transform: rotate(3deg) skewY(-1deg); }
+    }
+
+    .mane-2 {
+      animation: maneFlow2 5.2s ease-in-out infinite;
+      transform-origin: 0% 50%;
+      will-change: transform;
+    }
+
+    @keyframes maneFlow2 {
+      0%, 100% { transform: rotate(0deg) skewY(0deg); }
+      45%      { transform: rotate(4deg) skewY(-1.5deg); }
+      80%      { transform: rotate(-3deg) skewY(1deg); }
+    }
+
+    .mane-3 {
+      animation: maneFlow3 6s ease-in-out infinite;
+      transform-origin: 0% 50%;
+      will-change: transform;
+    }
+
+    @keyframes maneFlow3 {
+      0%, 100% { transform: rotate(0deg) skewY(0deg); }
+      50%      { transform: rotate(-3deg) skewY(2deg); }
+      85%      { transform: rotate(4deg) skewY(-1deg); }
+    }
+
+    /* Sừng kỳ lân – phát sáng nhẹ nhàng */
+    .horn-glow {
+      animation: hornShimmer 6s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: opacity, transform;
+    }
+
+    @keyframes hornShimmer {
+      0%   { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.04); }
+    }
+
+    /* Tai trái – vểnh nhẹ */
+    .ear-left {
+      animation: earLeft 5.5s ease-in-out infinite;
+      transform-origin: 70% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earLeft {
+      0%, 100% { transform: rotate(0deg); }
+      35%      { transform: rotate(-5deg); }
+      70%      { transform: rotate(3deg); }
+    }
+
+    /* Tai phải – lệch pha */
+    .ear-right {
+      animation: earRight 6.3s ease-in-out infinite;
+      transform-origin: 30% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earRight {
+      0%, 100% { transform: rotate(0deg); }
+      40%      { transform: rotate(5deg); }
+      75%      { transform: rotate(-3deg); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 10s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 11.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Đuôi kỳ lân – uốn lượn mềm mại */
+    .unicorn-tail {
+      animation: tailWave 6.8s ease-in-out infinite;
+      transform-origin: 85% 30%;
+      will-change: transform;
+    }
+
+    @keyframes tailWave {
+      0%   { transform: rotate(0deg) skewY(0deg); }
+      30%  { transform: rotate(-6deg) skewY(2deg); }
+      60%  { transform: rotate(4deg) skewY(-1.5deg); }
+      100% { transform: rotate(0deg) skewY(0deg); }
+    }
+
+    /* Chân trước trái – bước nhẹ */
+    .leg-fl {
+      animation: legFloat 7.5s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legFloat {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      40%      { transform: rotate(4deg) translateY(-3px); }
+      75%      { transform: rotate(-2deg) translateY(2px); }
+    }
+
+    /* Chân trước phải */
+    .leg-fr {
+      animation: legFloat2 8.2s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legFloat2 {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      45%      { transform: rotate(-3deg) translateY(2px); }
+      80%      { transform: rotate(4deg) translateY(-3px); }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Ánh trăng lung linh rất chậm */
+    .moon-glow {
+      animation: moonPulse 16s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes moonPulse {
+      0%   { opacity: 0.5; }
+      100% { opacity: 0.85; }
+    }
+
+    /* Tinh thể pha lê lấp lánh – không nháy đột ngột */
+    .crystal-shine {
+      animation: crystalGlow 9s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes crystalGlow {
+      0%   { opacity: 0.4; }
+      100% { opacity: 0.9; }
+    }
+
+    /* Sương mờ trôi nhẹ */
+    .mist-drift {
+      animation: mistDrift 45s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes mistDrift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-25%); }
+    }
+
+    /* Hạt pha lê bay lơ lửng */
+    .crystal-particle {
+      animation: crystalFloat 13s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes crystalFloat {
+      0%   { transform: translate(0, 0); opacity: 0.3; }
+      50%  { transform: translate(12px, -22px); opacity: 0.75; }
+      100% { transform: translate(-10px, -35px); opacity: 0.35; }
+    }
+
+    .crystal-particle-2 {
+      animation: crystalFloat2 17s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes crystalFloat2 {
+      0%   { transform: translate(0, 0); opacity: 0.25; }
+      50%  { transform: translate(-15px, 18px); opacity: 0.65; }
+      100% { transform: translate(10px, -15px); opacity: 0.3; }
+    }
+
+    /* Cây pha lê đung đưa rất nhẹ */
+    .crystal-tree {
+      animation: treeSway 12s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes treeSway {
+      0%   { transform: rotate(-0.8deg) skewX(0.4deg); }
+      100% { transform: rotate(1deg) skewX(-0.5deg); }
+    }
+
+    /* Đom đóm pha lê – trôi nhẹ */
+    .glow-bug {
+      animation: bugDrift 8s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes bugDrift {
+      0%   { transform: translate(0, 0); opacity: 0.35; }
+      50%  { transform: translate(10px, -14px); opacity: 0.85; }
+      100% { transform: translate(-6px, -22px); opacity: 0.45; }
+    }
+
+    .glow-bug-2 {
+      animation: bugDrift2 10.5s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes bugDrift2 {
+      0%   { transform: translate(0, 0); opacity: 0.3; }
+      50%  { transform: translate(-12px, -10px); opacity: 0.75; }
+      100% { transform: translate(8px, -20px); opacity: 0.4; }
+    }
+
+    /* Ánh sáng nền chuyển động chậm */
+    .ambient-shift {
+      animation: ambientPulse 20s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes ambientPulse {
+      0%   { opacity: 0.35; }
+      100% { opacity: 0.7; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(88vw, 88vh);
+        height: min(88vw, 88vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: KHU RỪNG PHA LÊ ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bầu trời đêm pha lê -->
+        <radialGradient id="skyCrystal" cx="50%" cy="25%" r="85%">
+          <stop offset="0%" stop-color="#2a5a8a"/>
+          <stop offset="35%" stop-color="#123a5c"/>
+          <stop offset="70%" stop-color="#081e30"/>
+          <stop offset="100%" stop-color="#030a12"/>
+        </radialGradient>
+        <radialGradient id="moonAura" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#e0f4ff" stop-opacity="0.75"/>
+          <stop offset="35%" stop-color="#80c0e0" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#2a5a8a" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="ambientGlow" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#60b0e0" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#0a2038" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="crystalGrad1" x1="0" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#a0e8ff" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#40a8d8" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#1a5080" stop-opacity="0.5"/>
+        </linearGradient>
+        <linearGradient id="crystalGrad2" x1="0" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#d0f0ff" stop-opacity="0.85"/>
+          <stop offset="50%" stop-color="#60c0e8" stop-opacity="0.65"/>
+          <stop offset="100%" stop-color="#205a88" stop-opacity="0.45"/>
+        </linearGradient>
+        <linearGradient id="crystalGrad3" x1="0" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#c0a0ff" stop-opacity="0.85"/>
+          <stop offset="50%" stop-color="#8050d0" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#3a1a70" stop-opacity="0.4"/>
+        </linearGradient>
+        <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a5070"/>
+          <stop offset="100%" stop-color="#08182a"/>
+        </linearGradient>
+        <radialGradient id="crystalParticle" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#e0f8ff" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#60b0e0" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glowBugGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="40%" stop-color="#a0e0ff" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#40a0e0" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="mistGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a0d0e8" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#a0d0e8" stop-opacity="0.2"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Nền trời -->
+      <rect width="1200" height="800" fill="url(#skyCrystal)"/>
+
+      <!-- Ánh sáng môi trường -->
+      <rect width="1200" height="800" fill="url(#ambientGlow)" class="ambient-shift"/>
+
+      <!-- Mặt trăng pha lê -->
+      <g class="moon-glow">
+        <circle cx="900" cy="150" r="150" fill="url(#moonAura)"/>
+        <circle cx="900" cy="150" r="60" fill="#e8f8ff" opacity="0.85"/>
+        <circle cx="900" cy="150" r="55" fill="#ffffff" opacity="0.6"/>
+        <circle cx="885" cy="140" r="10" fill="#c0e0f0" opacity="0.4"/>
+        <circle cx="915" cy="160" r="7" fill="#c0e0f0" opacity="0.35"/>
+        <circle cx="905" cy="175" r="5" fill="#c0e0f0" opacity="0.3"/>
+      </g>
+
+      <!-- Sao trời -->
+      <g class="crystal-shine">
+        <circle cx="120" cy="90" r="1.6" fill="#ffffff" opacity="0.6"/>
+        <circle cx="280" cy="60" r="1.4" fill="#ffffff" opacity="0.5"/>
+        <circle cx="460" cy="110" r="1.8" fill="#ffffff" opacity="0.55"/>
+        <circle cx="620" cy="70" r="1.3" fill="#ffffff" opacity="0.45"/>
+        <circle cx="780" cy="50" r="1.5" fill="#ffffff" opacity="0.5"/>
+        <circle cx="1060" cy="90" r="1.7" fill="#ffffff" opacity="0.55"/>
+        <circle cx="180" cy="220" r="1.2" fill="#c0e8ff" opacity="0.4"/>
+        <circle cx="520" cy="200" r="1.4" fill="#c0e8ff" opacity="0.45"/>
+        <circle cx="740" cy="180" r="1.6" fill="#c0e8ff" opacity="0.5"/>
+        <circle cx="1120" cy="230" r="1.3" fill="#c0e8ff" opacity="0.4"/>
+      </g>
+
+      <!-- Tinh thể lớn phía sau -->
+      <g class="crystal-tree" opacity="0.55">
+        <polygon points="150,680 180,380 210,680" fill="url(#crystalGrad1)"/>
+        <polygon points="130,680 155,440 175,680" fill="url(#crystalGrad2)" opacity="0.7"/>
+        <polygon points="200,680 230,420 255,680" fill="url(#crystalGrad3)" opacity="0.6"/>
+      </g>
+
+      <g class="crystal-tree" style="animation-delay: -4s;" opacity="0.6">
+        <polygon points="980,680 1015,340 1050,680" fill="url(#crystalGrad2)"/>
+        <polygon points="1030,680 1060,420 1085,680" fill="url(#crystalGrad1)" opacity="0.7"/>
+        <polygon points="950,680 975,460 995,680" fill="url(#crystalGrad3)" opacity="0.65"/>
+      </g>
+
+      <!-- Tinh thể trung -->
+      <g class="crystal-tree" style="animation-delay: -6s;" opacity="0.7">
+        <polygon points="450,700 480,450 505,700" fill="url(#crystalGrad3)"/>
+        <polygon points="500,700 525,500 545,700" fill="url(#crystalGrad1)" opacity="0.8"/>
+      </g>
+
+      <g class="crystal-tree" style="animation-delay: -8s;" opacity="0.75">
+        <polygon points="700,700 735,400 765,700" fill="url(#crystalGrad1)"/>
+        <polygon points="750,700 775,480 795,700" fill="url(#crystalGrad2)" opacity="0.8"/>
+        <polygon points="680,700 705,520 725,700" fill="url(#crystalGrad3)" opacity="0.7"/>
+      </g>
+
+      <!-- Đá pha lê dưới đất -->
+      <g opacity="0.8">
+        <polygon points="80,740 100,690 120,740" fill="url(#crystalGrad2)"/>
+        <polygon points="110,745 130,700 150,745" fill="url(#crystalGrad3)" opacity="0.7"/>
+        <polygon points="1080,745 1105,690 1130,745" fill="url(#crystalGrad1)"/>
+        <polygon points="1120,748 1140,705 1160,748" fill="url(#crystalGrad3)" opacity="0.75"/>
+      </g>
+
+      <!-- Mặt đất -->
+      <path d="M0 730 Q300 700 600 720 Q900 700 1200 730 L1200 800 L0 800 Z" fill="url(#groundGrad)"/>
+
+      <!-- Sương mờ -->
+      <g class="mist-drift" opacity="0.45">
+        <rect x="0" y="690" width="1400" height="110" fill="url(#mistGrad)"/>
+      </g>
+
+      <!-- Hạt pha lê trôi 1 -->
+      <g class="crystal-particle">
+        <circle cx="180" cy="300" r="3" fill="url(#crystalParticle)"/>
+        <circle cx="420" cy="260" r="2.5" fill="url(#crystalParticle)"/>
+        <circle cx="680" cy="340" r="3.5" fill="url(#crystalParticle)"/>
+        <circle cx="920" cy="280" r="2.8" fill="url(#crystalParticle)"/>
+        <circle cx="1080" cy="360" r="3.2" fill="url(#crystalParticle)"/>
+      </g>
+
+      <!-- Hạt pha lê trôi 2 -->
+      <g class="crystal-particle-2" style="animation-delay: -6s;">
+        <circle cx="280" cy="500" r="2.8" fill="url(#crystalParticle)"/>
+        <circle cx="520" cy="560" r="3.2" fill="url(#crystalParticle)"/>
+        <circle cx="760" cy="520" r="2.5" fill="url(#crystalParticle)"/>
+        <circle cx="1020" cy="580" r="3.5" fill="url(#crystalParticle)"/>
+        <circle cx="120" cy="620" r="2.6" fill="url(#crystalParticle)"/>
+      </g>
+
+      <!-- Đom đóm pha lê 1 -->
+      <g class="glow-bug">
+        <circle cx="320" cy="550" r="16" fill="url(#glowBugGrad)"/>
+        <circle cx="320" cy="550" r="3.5" fill="#ffffff"/>
+      </g>
+      <g class="glow-bug-2" style="animation-delay: -2s;">
+        <circle cx="820" cy="480" r="14" fill="url(#glowBugGrad)"/>
+        <circle cx="820" cy="480" r="3" fill="#ffffff"/>
+      </g>
+      <g class="glow-bug" style="animation-delay: -4s;">
+        <circle cx="560" cy="620" r="12" fill="url(#glowBugGrad)"/>
+        <circle cx="560" cy="620" r="2.5" fill="#ffffff"/>
+      </g>
+      <g class="glow-bug-2" style="animation-delay: -6.5s;">
+        <circle cx="1000" cy="640" r="15" fill="url(#glowBugGrad)"/>
+        <circle cx="1000" cy="640" r="3.2" fill="#ffffff"/>
+      </g>
+      <g class="glow-bug" style="animation-delay: -8s;">
+        <circle cx="180" cy="660" r="11" fill="url(#glowBugGrad)"/>
+        <circle cx="180" cy="660" r="2.3" fill="#ffffff"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: KỲ LÂN ===== -->
+    <div class="hero" role="img" aria-label="Kỳ lân huyền thoại với sừng pha lê phát sáng trong khu rừng pha lê">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Lông kỳ lân -->
+          <radialGradient id="furUniBody" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#f8f0ff"/>
+            <stop offset="55%" stop-color="#d8c8f0"/>
+            <stop offset="100%" stop-color="#a090c8"/>
+          </radialGradient>
+          <radialGradient id="furUniHead" cx="45%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#e0d4f8"/>
+            <stop offset="100%" stop-color="#b0a0d8"/>
+          </radialGradient>
+          <radialGradient id="furFace" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="60%" stop-color="#f0e8ff"/>
+            <stop offset="100%" stop-color="#d8c8f0"/>
+          </radialGradient>
+
+          <!-- Bờm cầu vồng pastel -->
+          <linearGradient id="maneGrad1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffb0d0"/>
+            <stop offset="50%" stop-color="#d0a0ff"/>
+            <stop offset="100%" stop-color="#a0d8ff"/>
+          </linearGradient>
+          <linearGradient id="maneGrad2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#a0e0ff"/>
+            <stop offset="50%" stop-color="#c0a0ff"/>
+            <stop offset="100%" stop-color="#ffb0d0"/>
+          </linearGradient>
+          <linearGradient id="maneGrad3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#d0ffd0"/>
+            <stop offset="50%" stop-color="#a0e8ff"/>
+            <stop offset="100%" stop-color="#c0a0ff"/>
+          </linearGradient>
+
+          <!-- Sừng pha lê -->
+          <linearGradient id="hornCrystal" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#a080e0"/>
+            <stop offset="40%" stop-color="#d0c0ff"/>
+            <stop offset="70%" stop-color="#e8f4ff"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+          <linearGradient id="hornGlow" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#a0e8ff" stop-opacity="0.2"/>
+            <stop offset="50%" stop-color="#e0f8ff" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+          </linearGradient>
+
+          <!-- Mắt kỳ lân -->
+          <radialGradient id="eyeUni" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="35%" stop-color="#c0e8ff"/>
+            <stop offset="75%" stop-color="#6090d0"/>
+            <stop offset="100%" stop-color="#3050a0"/>
+          </radialGradient>
+
+          <!-- Đuôi cầu vồng -->
+          <linearGradient id="tailUni" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffb0d0"/>
+            <stop offset="30%" stop-color="#c0a0ff"/>
+            <stop offset="60%" stop-color="#a0d8ff"/>
+            <stop offset="100%" stop-color="#d0ffd0"/>
+          </linearGradient>
+
+          <!-- Móng vàng -->
+          <linearGradient id="hoofGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f0d888"/>
+            <stop offset="100%" stop-color="#a08040"/>
+          </linearGradient>
+
+          <!-- Bóng đổ -->
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Hào quang sừng -->
+          <radialGradient id="hornAura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e0f8ff" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#a0d0ff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="200" cy="372" rx="100" ry="14" fill="url(#shadowGrad)" opacity="0.5"/>
+
+        <!-- Toàn bộ kỳ lân -->
+        <g class="unicorn-float">
+
+          <!-- ===== ĐUÔI (phía sau) ===== -->
+          <g class="unicorn-tail">
+            <!-- Đuôi cầu vồng bay bổng -->
+            <path d="M290 200 Q330 185 355 155 Q370 175 362 205 Q350 240 320 255 Q300 245 290 225 Z" fill="url(#tailUni)" stroke="#8050a0" stroke-width="1" opacity="0.9"/>
+            <!-- Lọn đuôi -->
+            <path d="M340 175 Q360 160 378 145 Q370 165 358 182" stroke="#ffd0e8" stroke-width="2.5" fill="none" opacity="0.7" stroke-linecap="round"/>
+            <path d="M348 200 Q370 188 385 175 Q378 195 365 210" stroke="#d0c0ff" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round"/>
+            <path d="M330 230 Q352 220 368 210 Q360 230 345 242" stroke="#a0e0ff" stroke-width="2" fill="none" opacity="0.55" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== THÂN ===== -->
+          <g class="unicorn-body">
+            <!-- Thân chính -->
+            <ellipse cx="200" cy="245" rx="78" ry="88" fill="url(#furUniBody)" stroke="#9080b8" stroke-width="1.4"/>
+            <!-- Bụng sáng -->
+            <ellipse cx="200" cy="265" rx="52" ry="60" fill="#ffffff" opacity="0.5"/>
+            <!-- Ánh sáng thân -->
+            <ellipse cx="185" cy="215" rx="35" ry="28" fill="#ffffff" opacity="0.35"/>
+          </g>
+
+          <!-- ===== CHÂN TRƯỚC ===== -->
+          <g class="leg-fl">
+            <path d="M155 315 Q148 345 152 362 Q154 372 168 368 Q178 362 175 348 Q170 328 168 315 Z" fill="url(#furUniBody)" stroke="#9080b8" stroke-width="1.2"/>
+            <ellipse cx="162" cy="366" rx="14" ry="7" fill="url(#hoofGrad)" stroke="#806030" stroke-width="0.8"/>
+          </g>
+          <g class="leg-fr">
+            <path d="M245 315 Q252 345 248 362 Q246 372 232 368 Q222 362 225 348 Q230 328 232 315 Z" fill="url(#furUniBody)" stroke="#9080b8" stroke-width="1.2"/>
+            <ellipse cx="238" cy="366" rx="14" ry="7" fill="url(#hoofGrad)" stroke="#806030" stroke-width="0.8"/>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="unicorn-head">
+            <!-- Đầu -->
+            <ellipse cx="200" cy="130" rx="62" ry="56" fill="url(#furUniHead)" stroke="#9080b8" stroke-width="1.4"/>
+
+            <!-- Mõm -->
+            <ellipse cx="200" cy="162" rx="36" ry="24" fill="url(#furFace)" stroke="#c0b0e0" stroke-width="1"/>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <ellipse cx="175" cy="135" rx="11" ry="13" fill="url(#eyeUni)" stroke="#304870" stroke-width="1"/>
+              <ellipse cx="177" cy="136" rx="5" ry="7" fill="#1a2a50"/>
+              <circle cx="178" cy="131" r="2.8" fill="#ffffff" opacity="0.95"/>
+              <circle cx="172" cy="140" r="1.3" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải -->
+            <g class="eye-right">
+              <ellipse cx="225" cy="135" rx="11" ry="13" fill="url(#eyeUni)" stroke="#304870" stroke-width="1"/>
+              <ellipse cx="227" cy="136" rx="5" ry="7" fill="#1a2a50"/>
+              <circle cx="228" cy="131" r="2.8" fill="#ffffff" opacity="0.95"/>
+              <circle cx="222" cy="140" r="1.3" fill="#ffffff" opacity="0.5"/>
+            </g>
+
+            <!-- Lông mi -->
+            <path d="M163 130 L158 126 M164 135 L158 134 M236 130 L241 126 M235 135 L241 134" stroke="#604080" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+            <!-- Lỗ mũi -->
+            <ellipse cx="190" cy="160" rx="2.5" ry="2" fill="#b090c8" opacity="0.8"/>
+            <ellipse cx="210" cy="160" rx="2.5" ry="2" fill="#b090c8" opacity="0.8"/>
+
+            <!-- Miệng cười nhẹ -->
+            <path d="M188 168 Q200 175 212 168" stroke="#a080c0" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+            <!-- Má hồng -->
+            <ellipse cx="158" cy="150" rx="12" ry="8" fill="#ffb0d0" opacity="0.4"/>
+            <ellipse cx="242" cy="150" rx="12" ry="8" fill="#ffb0d0" opacity="0.4"/>
+
+            <!-- Tai trái -->
+            <g class="ear-left">
+              <path d="M162 92 Q158 62 168 48 Q180 62 182 88 Z" fill="url(#furUniHead)" stroke="#9080b8" stroke-width="1.2"/>
+              <path d="M167 88 Q165 70 170 58 Q176 70 178 85 Z" fill="#ffd0e8" opacity="0.7"/>
+            </g>
+            <!-- Tai phải -->
+            <g class="ear-right">
+              <path d="M238 92 Q242 62 232 48 Q220 62 218 88 Z" fill="url(#furUniHead)" stroke="#9080b8" stroke-width="1.2"/>
+              <path d="M233 88 Q235 70 230 58 Q224 70 222 85 Z" fill="#ffd0e8" opacity="0.7"/>
+            </g>
+
+            <!-- ===== SỪNG PHA LÊ ===== -->
+            <g class="horn-glow">
+              <!-- Hào quang sừng -->
+              <circle cx="200" cy="70" r="32" fill="url(#hornAura)"/>
+              <!-- Sừng -->
+              <path d="M193 88 Q195 60 200 30 Q205 60 207 88 Z" fill="url(#hornCrystal)" stroke="#8060c0" stroke-width="1"/>
+              <!-- Tia sáng trên sừng -->
+              <path d="M197 80 Q198 60 200 42 Q202 60 203 80 Z" fill="url(#hornGlow)" opacity="0.85"/>
+              <!-- Điểm sáng -->
+              <circle cx="200" cy="40" r="3" fill="#ffffff" opacity="0.95"/>
+              <circle cx="198" cy="55" r="2" fill="#e0f8ff" opacity="0.8"/>
+              <circle cx="202" cy="68" r="1.5" fill="#e0f8ff" opacity="0.7"/>
+            </g>
+
+            <!-- Bờm cầu vồng phía trước -->
+            <g class="mane-1">
+              <path d="M165 95 Q145 105 138 128 Q145 118 158 115 Q152 125 155 138 Q162 125 172 118 Z" fill="url(#maneGrad1)" stroke="#a080c0" stroke-width="0.8" opacity="0.9"/>
+            </g>
+            <g class="mane-2">
+              <path d="M168 110 Q150 125 145 148 Q155 138 165 132 Q160 145 162 158 Q170 142 178 132 Z" fill="url(#maneGrad2)" stroke="#a080c0" stroke-width="0.8" opacity="0.85"/>
+            </g>
+            <g class="mane-3">
+              <path d="M232 95 Q252 108 258 132 Q250 122 238 118 Q245 130 242 142 Q234 128 225 122 Z" fill="url(#maneGrad3)" stroke="#a080c0" stroke-width="0.8" opacity="0.85"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

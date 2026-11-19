@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thỏ băng – Hồ băng Bắc Cực</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #061a2a;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 30%, #1a4a6a 0%, #0a2840 45%, #03101c 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(70vw, 70vh);
+      height: min(70vw, 70vh);
+      max-width: 500px;
+      max-height: 500px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: THỎ BĂNG === */
+    .bunny-float {
+      animation: bunnyFloat 8s ease-in-out infinite;
+      transform-origin: 50% 60%;
+      will-change: transform;
+    }
+
+    @keyframes bunnyFloat {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-7px) rotate(0.6deg); }
+      60%  { transform: translateY(3px) rotate(-0.5deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Thân thỏ – nhịp thở */
+    .bunny-body {
+      animation: bodyBreath 5.5s ease-in-out infinite;
+      transform-origin: 50% 70%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.02, 1.03); }
+    }
+
+    /* Đầu thỏ – gật gù nhẹ */
+    .bunny-head {
+      animation: headNod 6.5s ease-in-out infinite;
+      transform-origin: 50% 90%;
+      will-change: transform;
+    }
+
+    @keyframes headNod {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-2px) rotate(1.5deg); }
+      65%  { transform: translateY(1px) rotate(-1deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Tai trái – vểnh và đung đưa */
+    .ear-left {
+      animation: earLeft 5s ease-in-out infinite;
+      transform-origin: 70% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earLeft {
+      0%, 100% { transform: rotate(0deg) scaleY(1); }
+      30%      { transform: rotate(-6deg) scaleY(1.04); }
+      65%      { transform: rotate(4deg) scaleY(0.97); }
+    }
+
+    /* Tai phải – lệch pha */
+    .ear-right {
+      animation: earRight 5.8s ease-in-out infinite;
+      transform-origin: 30% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earRight {
+      0%, 100% { transform: rotate(0deg) scaleY(1); }
+      35%      { transform: rotate(6deg) scaleY(1.03); }
+      70%      { transform: rotate(-4deg) scaleY(0.97); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 9s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 10.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Mũi thỏ – nhịp thở */
+    .nose {
+      animation: noseTwitch 3.8s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes noseTwitch {
+      0%, 100% { transform: scale(1); }
+      40%      { transform: scale(1.08, 0.95); }
+      70%      { transform: scale(0.96, 1.03); }
+    }
+
+    /* Ria mép trái */
+    .whisker-left {
+      animation: whiskerL 4.5s ease-in-out infinite;
+      transform-origin: 100% 50%;
+      will-change: transform;
+    }
+
+    @keyframes whiskerL {
+      0%, 100% { transform: rotate(0deg); }
+      40%      { transform: rotate(-3deg); }
+      75%      { transform: rotate(2deg); }
+    }
+
+    /* Ria mép phải */
+    .whisker-right {
+      animation: whiskerR 5.2s ease-in-out infinite;
+      transform-origin: 0% 50%;
+      will-change: transform;
+    }
+
+    @keyframes whiskerR {
+      0%, 100% { transform: rotate(0deg); }
+      45%      { transform: rotate(3deg); }
+      80%      { transform: rotate(-2deg); }
+    }
+
+    /* Chân trước trái */
+    .paw-fl {
+      animation: pawFloat 7.5s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes pawFloat {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      40%      { transform: rotate(3deg) translateY(-2px); }
+      75%      { transform: rotate(-2deg) translateY(1px); }
+    }
+
+    /* Chân trước phải */
+    .paw-fr {
+      animation: pawFloat2 8.2s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes pawFloat2 {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      45%      { transform: rotate(-3deg) translateY(1px); }
+      80%      { transform: rotate(4deg) translateY(-2px); }
+    }
+
+    /* Đuôi thỏ - lắc nhẹ */
+    .bunny-tail {
+      animation: tailWiggle 5.5s ease-in-out infinite;
+      transform-origin: 20% 50%;
+      will-change: transform;
+    }
+
+    @keyframes tailWiggle {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      35%      { transform: rotate(-6deg) scale(1.05); }
+      70%      { transform: rotate(4deg) scale(0.97); }
+    }
+
+    /* Bông tuyết trên tai – rung nhẹ */
+    .snowflake-ear {
+      animation: snowRattle 6.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes snowRattle {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      30%      { transform: rotate(8deg) scale(1.05); }
+      65%      { transform: rotate(-6deg) scale(0.97); }
+    }
+
+    /* Hơi thở băng từ miệng */
+    .breath {
+      animation: breathPuff 4.2s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+
+    @keyframes breathPuff {
+      0%   { transform: scale(0.6) translateY(0); opacity: 0; }
+      30%  { transform: scale(0.9) translateY(-8px); opacity: 0.5; }
+      70%  { transform: scale(1.2) translateY(-22px); opacity: 0.25; }
+      100% { transform: scale(1.5) translateY(-35px); opacity: 0; }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Cực quang lung linh */
+    .aurora-shift {
+      animation: auroraShift 22s ease-in-out infinite alternate;
+      will-change: opacity, transform;
+    }
+
+    @keyframes auroraShift {
+      0%   { opacity: 0.3; transform: translateY(0) skewX(-2deg); }
+      50%  { opacity: 0.7; transform: translateY(-8px) skewX(1deg); }
+      100% { opacity: 0.45; transform: translateY(0) skewX(2deg); }
+    }
+
+    .aurora-shift-2 {
+      animation: auroraShift2 28s ease-in-out infinite alternate;
+      will-change: opacity, transform;
+    }
+
+    @keyframes auroraShift2 {
+      0%   { opacity: 0.25; transform: translateY(0) skewX(2deg); }
+      50%  { opacity: 0.6; transform: translateY(-10px) skewX(-1deg); }
+      100% { opacity: 0.35; transform: translateY(0) skewX(-2deg); }
+    }
+
+    /* Ánh trăng lan tỏa */
+    .moon-glow {
+      animation: moonPulse 14s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes moonPulse {
+      0%   { opacity: 0.55; }
+      100% { opacity: 0.85; }
+    }
+
+    /* Sương trôi */
+    .mist-drift {
+      animation: mistDrift 38s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes mistDrift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-22%); }
+    }
+
+    /* Tuyết rơi lớp chậm */
+    .snow-slow {
+      animation: snowDropSlow 20s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes snowDropSlow {
+      0%   { transform: translateY(-10vh) translateX(0); }
+      100% { transform: translateY(110vh) translateX(-8vw); }
+    }
+
+    /* Tuyết rơi lớp nhanh */
+    .snow-fast {
+      animation: snowDropFast 13s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes snowDropFast {
+      0%   { transform: translateY(-10vh) translateX(0); }
+      100% { transform: translateY(110vh) translateX(6vw); }
+    }
+
+    /* Sao trời nhẹ */
+    .star-glow {
+      animation: starGlow 8s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes starGlow {
+      0%   { opacity: 0.25; }
+      100% { opacity: 0.7; }
+    }
+
+    /* Tinh thể băng lấp lánh */
+    .ice-shimmer {
+      animation: iceShimmer 10s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes iceShimmer {
+      0%   { opacity: 0.4; }
+      100% { opacity: 0.85; }
+    }
+
+    /* Đom đóm băng trôi */
+    .ice-glow {
+      animation: iceGlowDrift 11s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes iceGlowDrift {
+      0%   { transform: translate(0, 0); opacity: 0.3; }
+      50%  { transform: translate(12px, -18px); opacity: 0.8; }
+      100% { transform: translate(-8px, -28px); opacity: 0.4; }
+    }
+
+    .ice-glow-2 {
+      animation: iceGlowDrift2 14s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes iceGlowDrift2 {
+      0%   { transform: translate(0, 0); opacity: 0.25; }
+      50%  { transform: translate(-15px, 12px); opacity: 0.7; }
+      100% { transform: translate(10px, -10px); opacity: 0.35; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(86vw, 86vh);
+        height: min(86vw, 86vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: HỒ BĂNG BẮC CỰC ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bầu trời đêm Bắc Cực -->
+        <radialGradient id="skyArctic" cx="50%" cy="35%" r="80%">
+          <stop offset="0%" stop-color="#1a5070"/>
+          <stop offset="40%" stop-color="#0a2a44"/>
+          <stop offset="75%" stop-color="#04182a"/>
+          <stop offset="100%" stop-color="#010a14"/>
+        </radialGradient>
+
+        <!-- Cực quang -->
+        <linearGradient id="auroraGreen" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#30ff90" stop-opacity="0"/>
+          <stop offset="30%" stop-color="#40ffb0" stop-opacity="0.6"/>
+          <stop offset="60%" stop-color="#80ffd0" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#30ff90" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="auroraPurple" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#a060ff" stop-opacity="0"/>
+          <stop offset="40%" stop-color="#c080ff" stop-opacity="0.5"/>
+          <stop offset="70%" stop-color="#e0a0ff" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#a060ff" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Ánh trăng -->
+        <radialGradient id="moonAura" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#d0f0ff" stop-opacity="0.6"/>
+          <stop offset="40%" stop-color="#80b8e0" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#204a70" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Núi băng xa -->
+        <linearGradient id="iceMountainFar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5080a8"/>
+          <stop offset="100%" stop-color="#204060"/>
+        </linearGradient>
+        <linearGradient id="iceMountainMid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a6a90"/>
+          <stop offset="100%" stop-color="#142a44"/>
+        </linearGradient>
+        <linearGradient id="iceMountainNear" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#284a6a"/>
+          <stop offset="100%" stop-color="#0a1a2e"/>
+        </linearGradient>
+
+        <!-- Mặt hồ băng -->
+        <linearGradient id="lakeGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a5a80"/>
+          <stop offset="50%" stop-color="#0e2a44"/>
+          <stop offset="100%" stop-color="#041220"/>
+        </linearGradient>
+
+        <!-- Tuyết -->
+        <radialGradient id="snowGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#c0e0f0" stop-opacity="0.4"/>
+        </radialGradient>
+
+        <!-- Tinh thể băng -->
+        <linearGradient id="crystalIce" x1="0" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#c0f0ff" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#60b0d8" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#2060a0" stop-opacity="0.5"/>
+        </linearGradient>
+
+        <!-- Đom đóm băng -->
+        <radialGradient id="iceBugGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="40%" stop-color="#a0e0ff" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#40a0e0" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Sương -->
+        <linearGradient id="mistGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a0d8f0" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#a0d8f0" stop-opacity="0.22"/>
+        </linearGradient>
+
+        <!-- Phản chiếu hồ -->
+        <radialGradient id="lakeReflect" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#80c0e8" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#204060" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Nền trời -->
+      <rect width="1200" height="800" fill="url(#skyArctic)"/>
+
+      <!-- Sao trời -->
+      <g class="star-glow">
+        <circle cx="120" cy="80" r="1.6" fill="#ffffff" opacity="0.6"/>
+        <circle cx="280" cy="50" r="1.3" fill="#ffffff" opacity="0.5"/>
+        <circle cx="480" cy="90" r="1.8" fill="#ffffff" opacity="0.55"/>
+        <circle cx="680" cy="60" r="1.2" fill="#ffffff" opacity="0.45"/>
+        <circle cx="880" cy="100" r="1.5" fill="#ffffff" opacity="0.5"/>
+        <circle cx="1080" cy="70" r="1.7" fill="#ffffff" opacity="0.55"/>
+        <circle cx="180" cy="200" r="1.2" fill="#c0e8ff" opacity="0.4"/>
+        <circle cx="520" cy="180" r="1.4" fill="#c0e8ff" opacity="0.45"/>
+        <circle cx="720" cy="220" r="1.6" fill="#c0e8ff" opacity="0.5"/>
+        <circle cx="1020" cy="190" r="1.3" fill="#c0e8ff" opacity="0.4"/>
+        <circle cx="380" cy="260" r="1.1" fill="#c0e8ff" opacity="0.35"/>
+        <circle cx="840" cy="280" r="1.5" fill="#c0e8ff" opacity="0.45"/>
+      </g>
+
+      <!-- Cực quang lớp 1 -->
+      <g class="aurora-shift">
+        <path d="M-100 150 Q200 100 500 180 Q800 260 1100 150 Q1300 100 1400 180 L1400 260 Q1100 200 800 300 Q500 220 200 160 Q-50 200 -100 240 Z" fill="url(#auroraGreen)" opacity="0.75"/>
+      </g>
+      <!-- Cực quang lớp 2 -->
+      <g class="aurora-shift-2">
+        <path d="M-100 220 Q300 140 600 240 Q900 320 1200 200 Q1350 160 1400 230 L1400 310 Q1200 250 900 350 Q600 280 300 210 Q-50 280 -100 320 Z" fill="url(#auroraPurple)" opacity="0.65"/>
+      </g>
+
+      <!-- Mặt trăng -->
+      <g class="moon-glow">
+        <circle cx="950" cy="140" r="140" fill="url(#moonAura)"/>
+        <circle cx="950" cy="140" r="50" fill="#e8f8ff" opacity="0.85"/>
+        <circle cx="950" cy="140" r="46" fill="#ffffff" opacity="0.6"/>
+        <circle cx="938" cy="132" r="8" fill="#c0e0f0" opacity="0.4"/>
+        <circle cx="962" cy="152" r="6" fill="#c0e0f0" opacity="0.35"/>
+      </g>
+
+      <!-- Núi băng xa -->
+      <path d="M0 520 L80 400 L180 480 L280 360 L400 470 L520 380 L640 480 L760 400 L880 490 L1000 410 L1120 490 L1200 430 L1200 800 L0 800 Z" fill="url(#iceMountainFar)" opacity="0.7"/>
+
+      <!-- Núi băng trung -->
+      <path d="M-50 600 L60 470 L180 550 L320 440 L460 560 L600 460 L740 570 L880 470 L1020 560 L1160 480 L1280 570 L1280 800 L-50 800 Z" fill="url(#iceMountainMid)" opacity="0.85"/>
+
+      <!-- Núi băng gần -->
+      <path d="M-100 680 L40 570 L180 650 L340 540 L500 660 L660 560 L820 670 L980 580 L1140 660 L1300 590 L1300 800 L-100 800 Z" fill="url(#iceMountainNear)"/>
+
+      <!-- Đỉnh núi tuyết trắng -->
+      <g opacity="0.65">
+        <path d="M280 440 L300 455 L290 458 L310 470 L295 470 L305 480 L280 470 Z" fill="#c0e8ff"/>
+        <path d="M740 570 L755 582 L747 585 L763 595 L752 595 L762 605 L740 595 Z" fill="#c0e8ff"/>
+        <path d="M980 580 L995 592 L987 595 L1003 605 L992 605 L1002 615 L980 605 Z" fill="#c0e8ff"/>
+      </g>
+
+      <!-- Mặt hồ băng -->
+      <ellipse cx="600" cy="740" rx="800" ry="120" fill="url(#lakeGrad)"/>
+      <path d="M0 720 Q300 690 600 710 Q900 690 1200 720 L1200 800 L0 800 Z" fill="#062038" opacity="0.85"/>
+
+      <!-- Phản chiếu cực quang lên hồ -->
+      <ellipse cx="600" cy="750" rx="500" ry="40" fill="url(#lakeReflect)" class="aurora-shift" style="animation-delay: -5s;"/>
+
+      <!-- Tinh thể băng dưới đất -->
+      <g class="ice-shimmer" opacity="0.85">
+        <polygon points="100,720 115,660 130,720" fill="url(#crystalIce)"/>
+        <polygon points="130,725 145,675 160,725" fill="url(#crystalIce)" opacity="0.7"/>
+        <polygon points="1050,720 1070,655 1090,720" fill="url(#crystalIce)"/>
+        <polygon points="1085,725 1100,670 1115,725" fill="url(#crystalIce)" opacity="0.75"/>
+      </g>
+
+      <!-- Sương mờ -->
+      <g class="mist-drift" opacity="0.5">
+        <rect x="0" y="680" width="1400" height="120" fill="url(#mistGrad)"/>
+      </g>
+
+      <!-- Tuyết rơi lớp chậm -->
+      <g class="snow-slow" opacity="0.65">
+        <circle cx="100" cy="0" r="3" fill="url(#snowGrad)"/>
+        <circle cx="260" cy="0" r="2.5" fill="url(#snowGrad)"/>
+        <circle cx="420" cy="0" r="3.5" fill="url(#snowGrad)"/>
+        <circle cx="580" cy="0" r="2" fill="url(#snowGrad)"/>
+        <circle cx="740" cy="0" r="3" fill="url(#snowGrad)"/>
+        <circle cx="900" cy="0" r="2.5" fill="url(#snowGrad)"/>
+        <circle cx="1060" cy="0" r="3" fill="url(#snowGrad)"/>
+        <circle cx="1180" cy="0" r="2" fill="url(#snowGrad)"/>
+        <circle cx="180" cy="0" r="2.8" fill="url(#snowGrad)"/>
+        <circle cx="680" cy="0" r="2.4" fill="url(#snowGrad)"/>
+      </g>
+
+      <!-- Tuyết rơi lớp nhanh -->
+      <g class="snow-fast" opacity="0.75" style="animation-delay: -5s;">
+        <circle cx="60" cy="0" r="2" fill="#ffffff"/>
+        <circle cx="200" cy="0" r="1.8" fill="#ffffff"/>
+        <circle cx="360" cy="0" r="2.2" fill="#ffffff"/>
+        <circle cx="520" cy="0" r="1.5" fill="#ffffff"/>
+        <circle cx="660" cy="0" r="2" fill="#ffffff"/>
+        <circle cx="820" cy="0" r="1.8" fill="#ffffff"/>
+        <circle cx="960" cy="0" r="2.2" fill="#ffffff"/>
+        <circle cx="1120" cy="0" r="1.6" fill="#ffffff"/>
+        <circle cx="1180" cy="0" r="2" fill="#ffffff"/>
+        <circle cx="320" cy="0" r="1.4" fill="#ffffff"/>
+        <circle cx="760" cy="0" r="1.9" fill="#ffffff"/>
+      </g>
+
+      <!-- Đom đóm băng 1 -->
+      <g class="ice-glow">
+        <circle cx="200" cy="450" r="15" fill="url(#iceBugGlow)"/>
+        <circle cx="200" cy="450" r="3.5" fill="#ffffff"/>
+      </g>
+      <g class="ice-glow-2" style="animation-delay: -3s;">
+        <circle cx="900" cy="380" r="13" fill="url(#iceBugGlow)"/>
+        <circle cx="900" cy="380" r="3" fill="#ffffff"/>
+      </g>
+      <g class="ice-glow" style="animation-delay: -6s;">
+        <circle cx="480" cy="520" r="11" fill="url(#iceBugGlow)"/>
+        <circle cx="480" cy="520" r="2.5" fill="#ffffff"/>
+      </g>
+      <g class="ice-glow-2" style="animation-delay: -8.5s;">
+        <circle cx="1080" cy="560" r="14" fill="url(#iceBugGlow)"/>
+        <circle cx="1080" cy="560" r="3.2" fill="#ffffff"/>
+      </g>
+      <g class="ice-glow" style="animation-delay: -10s;">
+        <circle cx="720" cy="600" r="12" fill="url(#iceBugGlow)"/>
+        <circle cx="720" cy="600" r="2.8" fill="#ffffff"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: THỎ BĂNG ===== -->
+    <div class="hero" role="img" aria-label="Chú thỏ băng trắng muốt với bông tuyết trên tai, đứng trên hồ băng Bắc Cực">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Lông thỏ trắng -->
+          <radialGradient id="furWhite" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#e8f4fc"/>
+            <stop offset="100%" stop-color="#a8c8dc"/>
+          </radialGradient>
+          <radialGradient id="furHead" cx="45%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="60%" stop-color="#f0f8ff"/>
+            <stop offset="100%" stop-color="#bcd4e4"/>
+          </radialGradient>
+          <radialGradient id="furBelly" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="70%" stop-color="#f4faff"/>
+            <stop offset="100%" stop-color="#c8dce8"/>
+          </radialGradient>
+          <radialGradient id="earInner" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#ffc8d8"/>
+            <stop offset="60%" stop-color="#f0a8c0"/>
+            <stop offset="100%" stop-color="#d088a0"/>
+          </radialGradient>
+
+          <!-- Mắt thỏ -->
+          <radialGradient id="eyeBunny" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="35%" stop-color="#c0e0f8"/>
+            <stop offset="70%" stop-color="#5080b8"/>
+            <stop offset="100%" stop-color="#1a3a68"/>
+          </radialGradient>
+
+          <!-- Mũi hồng -->
+          <radialGradient id="noseGrad" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#ffd0d8"/>
+            <stop offset="50%" stop-color="#f090a8"/>
+            <stop offset="100%" stop-color="#c06078"/>
+          </radialGradient>
+
+          <!-- Bông tuyết -->
+          <linearGradient id="snowCrystal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="50%" stop-color="#d0f0ff"/>
+            <stop offset="100%" stop-color="#80c0e0"/>
+          </linearGradient>
+
+          <!-- Hơi thở băng -->
+          <radialGradient id="breathGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e0f8ff" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#a0d0f0" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Bóng đổ -->
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="200" cy="372" rx="90" ry="14" fill="url(#shadowGrad)" opacity="0.5"/>
+
+        <!-- Toàn bộ thỏ -->
+        <g class="bunny-float">
+
+          <!-- ===== ĐUÔI THỎ ===== -->
+          <g class="bunny-tail">
+            <circle cx="285" cy="280" r="22" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.2"/>
+            <circle cx="290" cy="275" r="10" fill="#ffffff" opacity="0.6"/>
+          </g>
+
+          <!-- ===== THÂN ===== -->
+          <g class="bunny-body">
+            <!-- Thân chính -->
+            <ellipse cx="200" cy="255" rx="72" ry="85" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.4"/>
+            <!-- Bụng sáng -->
+            <ellipse cx="200" cy="270" rx="48" ry="58" fill="url(#furBelly)" stroke="#c8dce8" stroke-width="0.8"/>
+            <!-- Ánh sáng thân -->
+            <ellipse cx="185" cy="220" rx="30" ry="25" fill="#ffffff" opacity="0.5"/>
+          </g>
+
+          <!-- ===== CHÂN TRƯỚC ===== -->
+          <g class="paw-fl">
+            <ellipse cx="158" cy="318" rx="24" ry="30" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.3"/>
+            <ellipse cx="158" cy="340" rx="20" ry="10" fill="#e8f4fc" stroke="#a8c8dc" stroke-width="0.8"/>
+            <!-- Ngón chân -->
+            <path d="M150 345 L150 352 M158 345 L158 352 M166 345 L166 352" stroke="#a8c8dc" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.6"/>
+          </g>
+          <g class="paw-fr">
+            <ellipse cx="242" cy="318" rx="24" ry="30" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.3"/>
+            <ellipse cx="242" cy="340" rx="20" ry="10" fill="#e8f4fc" stroke="#a8c8dc" stroke-width="0.8"/>
+            <path d="M234 345 L234 352 M242 345 L242 352 M250 345 L250 352" stroke="#a8c8dc" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.6"/>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="bunny-head">
+            <!-- Tai trái -->
+            <g class="ear-left">
+              <ellipse cx="168" cy="65" rx="18" ry="55" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.4" transform="rotate(-10 168 65)"/>
+              <ellipse cx="170" cy="70" rx="9" ry="42" fill="url(#earInner)" opacity="0.8" transform="rotate(-10 170 70)"/>
+              <!-- Bông tuyết trên tai trái -->
+              <g class="snowflake-ear" transform="translate(158, 30)">
+                <path d="M0 -8 L0 8 M-7 -4 L7 4 M-7 4 L7 -4" stroke="url(#snowCrystal)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+              </g>
+            </g>
+            <!-- Tai phải -->
+            <g class="ear-right">
+              <ellipse cx="232" cy="65" rx="18" ry="55" fill="url(#furWhite)" stroke="#a8c8dc" stroke-width="1.4" transform="rotate(10 232 65)"/>
+              <ellipse cx="230" cy="70" rx="9" ry="42" fill="url(#earInner)" opacity="0.8" transform="rotate(10 230 70)"/>
+              <!-- Bông tuyết trên tai phải -->
+              <g class="snowflake-ear" transform="translate(242, 30)" style="animation-delay: -3s;">
+                <path d="M0 -8 L0 8 M-7 -4 L7 4 M-7 4 L7 -4" stroke="url(#snowCrystal)" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+              </g>
+            </g>
+
+            <!-- Đầu -->
+            <ellipse cx="200" cy="135" rx="68" ry="60" fill="url(#furHead)" stroke="#a8c8dc" stroke-width="1.4"/>
+
+            <!-- Mảng trắng má -->
+            <ellipse cx="158" cy="150" rx="22" ry="16" fill="#ffffff" opacity="0.6"/>
+            <ellipse cx="242" cy="150" rx="22" ry="16" fill="#ffffff" opacity="0.6"/>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <ellipse cx="178" cy="132" rx="11" ry="13" fill="url(#eyeBunny)" stroke="#204868" stroke-width="1"/>
+              <ellipse cx="180" cy="133" rx="5" ry="8" fill="#0a1a2a"/>
+              <circle cx="181" cy="128" r="3" fill="#ffffff" opacity="0.95"/>
+              <circle cx="175" cy="136" r="1.5" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải -->
+            <g class="eye-right">
+              <ellipse cx="222" cy="132" rx="11" ry="13" fill="url(#eyeBunny)" stroke="#204868" stroke-width="1"/>
+              <ellipse cx="224" cy="133" rx="5" ry="8" fill="#0a1a2a"/>
+              <circle cx="225" cy="128" r="3" fill="#ffffff" opacity="0.95"/>
+              <circle cx="219" cy="136" r="1.5" fill="#ffffff" opacity="0.5"/>
+            </g>
+
+            <!-- Má hồng -->
+            <ellipse cx="156" cy="158" rx="12" ry="7" fill="#ffb0c0" opacity="0.5"/>
+            <ellipse cx="244" cy="158" rx="12" ry="7" fill="#ffb0c0" opacity="0.5"/>
+
+            <!-- Mũi -->
+            <g class="nose">
+              <path d="M193 152 Q200 148 207 152 Q204 160 200 163 Q196 160 193 152 Z" fill="url(#noseGrad)" stroke="#a04060" stroke-width="0.8"/>
+              <ellipse cx="196" cy="153" rx="2" ry="1.5" fill="#ffe0e8" opacity="0.8"/>
+            </g>
+
+            <!-- Miệng nhỏ -->
+            <path d="M200 163 Q194 172 188 168 M200 163 Q206 172 212 168" stroke="#a04060" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.75"/>
+
+            <!-- Răng cửa (đặc trưng thỏ) -->
+            <rect x="196" y="168" width="4" height="6" rx="1" fill="#ffffff" stroke="#a8c8dc" stroke-width="0.5"/>
+            <rect x="200" y="168" width="4" height="6" rx="1" fill="#ffffff" stroke="#a8c8dc" stroke-width="0.5"/>
+
+            <!-- Ria mép trái -->
+            <g class="whisker-left">
+              <path d="M168 156 Q148 152 135 158" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+              <path d="M168 161 Q148 162 135 168" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+              <path d="M168 166 Q150 172 140 180" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+            </g>
+            <!-- Ria mép phải -->
+            <g class="whisker-right">
+              <path d="M232 156 Q252 152 265 158" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+              <path d="M232 161 Q252 162 265 168" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+              <path d="M232 166 Q250 172 260 180" stroke="#8098b0" stroke-width="1.2" fill="none" opacity="0.7" stroke-linecap="round"/>
+            </g>
+
+            <!-- Hơi thở băng -->
+            <g class="breath">
+              <ellipse cx="200" cy="180" rx="12" ry="8" fill="url(#breathGrad)"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

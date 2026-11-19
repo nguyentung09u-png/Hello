@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gấu trúc – Rừng trúc sương mù</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a1a10;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #c8dcd0 0%, #90b8a0 30%, #4a7860 65%, #1a3828 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(70vw, 70vh);
+      height: min(70vw, 70vh);
+      max-width: 500px;
+      max-height: 500px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: GẤU TRÚC === */
+    .panda-float {
+      animation: pandaFloat 8.5s ease-in-out infinite;
+      transform-origin: 50% 65%;
+      will-change: transform;
+    }
+
+    @keyframes pandaFloat {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-6px) rotate(0.5deg); }
+      65%  { transform: translateY(3px) rotate(-0.4deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Thân gấu – thở đều */
+    .panda-body {
+      animation: bodyBreath 6.5s ease-in-out infinite;
+      transform-origin: 50% 70%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.018, 1.028); }
+    }
+
+    /* Đầu gấu – gật gù nhẹ */
+    .panda-head {
+      animation: headBob 7s ease-in-out infinite;
+      transform-origin: 50% 95%;
+      will-change: transform;
+    }
+
+    @keyframes headBob {
+      0%   { transform: translateY(0) rotate(0deg); }
+      35%  { transform: translateY(-2px) rotate(1.5deg); }
+      70%  { transform: translateY(1.5px) rotate(-1deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Tai trái – nhúc nhích nhẹ */
+    .ear-left {
+      animation: earTwitchL 5.5s ease-in-out infinite;
+      transform-origin: 70% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earTwitchL {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      30%      { transform: rotate(-6deg) scale(1.04); }
+      70%      { transform: rotate(3deg) scale(0.97); }
+    }
+
+    /* Tai phải – lệch pha */
+    .ear-right {
+      animation: earTwitchR 6.3s ease-in-out infinite;
+      transform-origin: 30% 100%;
+      will-change: transform;
+    }
+
+    @keyframes earTwitchR {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      40%      { transform: rotate(6deg) scale(1.03); }
+      75%      { transform: rotate(-3deg) scale(0.97); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 10s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 11.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Tay trước trái – phe phẩy nhẹ */
+    .arm-left {
+      animation: armFloatL 7.5s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes armFloatL {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      40%      { transform: rotate(3deg) translateY(-3px); }
+      75%      { transform: rotate(-2deg) translateY(2px); }
+    }
+
+    /* Tay trước phải */
+    .arm-right {
+      animation: armFloatR 8.2s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes armFloatR {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      45%      { transform: rotate(-3deg) translateY(2px); }
+      80%      { transform: rotate(2deg) translateY(-3px); }
+    }
+
+    /* Chân sau trái */
+    .leg-bl {
+      animation: legFloatL 8s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legFloatL {
+      0%, 100% { transform: rotate(0deg); }
+      45%      { transform: rotate(2deg); }
+      80%      { transform: rotate(-1.5deg); }
+    }
+
+    /* Chân sau phải */
+    .leg-br {
+      animation: legFloatR 8.8s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legFloatR {
+      0%, 100% { transform: rotate(0deg); }
+      50%      { transform: rotate(-2deg); }
+      85%      { transform: rotate(1.5deg); }
+    }
+
+    /* Cành trúc gấu cầm – đung đưa */
+    .bamboo-branch {
+      animation: bambooSway 6s ease-in-out infinite;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes bambooSway {
+      0%, 100% { transform: rotate(0deg); }
+      35%      { transform: rotate(-4deg); }
+      70%      { transform: rotate(3deg); }
+    }
+
+    /* Lá trúc – rung nhẹ */
+    .bamboo-leaf {
+      animation: leafRustle 4.2s ease-in-out infinite;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes leafRustle {
+      0%, 100% { transform: rotate(0deg); }
+      50%      { transform: rotate(4deg); }
+    }
+
+    /* Mũi – thở nhẹ */
+    .nose {
+      animation: noseBreath 4.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes noseBreath {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06, 0.96); }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Ánh nắng xuyên sương */
+    .sun-rays {
+      animation: rayShift 15s ease-in-out infinite alternate;
+      transform-origin: 50% 0%;
+      will-change: transform, opacity;
+    }
+
+    @keyframes rayShift {
+      0%   { transform: rotate(-2deg) scaleX(1); opacity: 0.3; }
+      100% { transform: rotate(2deg) scaleX(1.1); opacity: 0.6; }
+    }
+
+    /* Sương mù trôi */
+    .mist-drift {
+      animation: mistDrift 42s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes mistDrift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-22%); }
+    }
+
+    .mist-drift-2 {
+      animation: mistDrift2 55s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes mistDrift2 {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-18%); }
+    }
+
+    /* Cây trúc đung đưa – lớp xa */
+    .bamboo-sway-far {
+      animation: bambooSwayFar 14s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes bambooSwayFar {
+      0%   { transform: rotate(-1deg) skewX(0.5deg); }
+      100% { transform: rotate(1.2deg) skewX(-0.6deg); }
+    }
+
+    /* Cây trúc đung đưa – lớp gần */
+    .bamboo-sway-near {
+      animation: bambooSwayNear 10s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes bambooSwayNear {
+      0%   { transform: rotate(1.2deg) skewX(-0.7deg); }
+      100% { transform: rotate(-1.5deg) skewX(0.8deg); }
+    }
+
+    /* Lá trúc bay */
+    .leaf-fall {
+      animation: leafFall 16s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes leafFall {
+      0%   { transform: translateY(-10vh) translateX(0) rotate(0deg); }
+      100% { transform: translateY(110vh) translateX(-8vw) rotate(280deg); }
+    }
+
+    .leaf-fall-2 {
+      animation: leafFall2 20s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes leafFall2 {
+      0%   { transform: translateY(-10vh) translateX(0) rotate(0deg); }
+      100% { transform: translateY(110vh) translateX(6vw) rotate(-220deg); }
+    }
+
+    /* Hạt sáng / đom đóm */
+    .firefly {
+      animation: fireflyDrift 9s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes fireflyDrift {
+      0%   { transform: translate(0, 0); opacity: 0.3; }
+      50%  { transform: translate(12px, -18px); opacity: 0.8; }
+      100% { transform: translate(-8px, -28px); opacity: 0.4; }
+    }
+
+    .firefly-2 {
+      animation: fireflyDrift2 12s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes fireflyDrift2 {
+      0%   { transform: translate(0, 0); opacity: 0.25; }
+      50%  { transform: translate(-15px, 12px); opacity: 0.7; }
+      100% { transform: translate(10px, -12px); opacity: 0.35; }
+    }
+
+    /* Ánh sáng môi trường */
+    .ambient-glow {
+      animation: ambientPulse 18s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes ambientPulse {
+      0%   { opacity: 0.35; }
+      100% { opacity: 0.7; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(86vw, 86vh);
+        height: min(86vw, 86vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: RỪNG TRÚC SƯƠNG MÙ ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bầu trời sương -->
+        <linearGradient id="skyMist" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d8e8dc"/>
+          <stop offset="30%" stop-color="#b0ccb8"/>
+          <stop offset="60%" stop-color="#80a890"/>
+          <stop offset="100%" stop-color="#4a7860"/>
+        </linearGradient>
+
+        <!-- Ánh sáng mặt trời -->
+        <radialGradient id="sunGlowMist" cx="50%" cy="20%" r="60%">
+          <stop offset="0%" stop-color="#f8f8e0" stop-opacity="0.7"/>
+          <stop offset="45%" stop-color="#e0e8c8" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#80a890" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Tia nắng -->
+        <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f0f8e0" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#f0f8e0" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Trúc xanh -->
+        <linearGradient id="bambooFar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6a9878"/>
+          <stop offset="100%" stop-color="#3a6048"/>
+        </linearGradient>
+        <linearGradient id="bambooMid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#507858"/>
+          <stop offset="100%" stop-color="#204030"/>
+        </linearGradient>
+        <linearGradient id="bambooNear" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#406848"/>
+          <stop offset="100%" stop-color="#102820"/>
+        </linearGradient>
+
+        <!-- Lá trúc -->
+        <linearGradient id="leafGrad1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#70b880"/>
+          <stop offset="100%" stop-color="#2a5838"/>
+        </linearGradient>
+        <linearGradient id="leafGrad2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#90d090"/>
+          <stop offset="100%" stop-color="#3a7848"/>
+        </linearGradient>
+
+        <!-- Đất rừng -->
+        <linearGradient id="groundForest" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a5838"/>
+          <stop offset="100%" stop-color="#1a2010"/>
+        </linearGradient>
+
+        <!-- Sương mù -->
+        <linearGradient id="mistGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8f0e8" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#e8f0e8" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#e8f0e8" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Đom đóm -->
+        <radialGradient id="fireflyGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f8ffc0" stop-opacity="0.9"/>
+          <stop offset="40%" stop-color="#c0f080" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#60a040" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Bầu trời -->
+      <rect width="1200" height="800" fill="url(#skyMist)"/>
+
+      <!-- Ánh sáng mặt trời -->
+      <rect width="1200" height="800" fill="url(#sunGlowMist)" class="ambient-glow"/>
+
+      <!-- Tia nắng xuyên sương -->
+      <g class="sun-rays" style="animation-delay: -4s;">
+        <polygon points="380,0 320,800 460,800" fill="url(#rayGrad)"/>
+        <polygon points="600,0 560,800 680,800" fill="url(#rayGrad)" opacity="0.8"/>
+        <polygon points="850,0 810,800 920,800" fill="url(#rayGrad)" opacity="0.6"/>
+      </g>
+
+      <!-- Rừng trúc xa -->
+      <g class="bamboo-sway-far" opacity="0.55">
+        <rect x="80" y="180" width="14" height="620" fill="url(#bambooFar)"/>
+        <rect x="140" y="150" width="16" height="650" fill="url(#bambooFar)"/>
+        <rect x="220" y="200" width="12" height="600" fill="url(#bambooFar)"/>
+        <rect x="290" y="160" width="15" height="640" fill="url(#bambooFar)"/>
+        <rect x="920" y="170" width="14" height="630" fill="url(#bambooFar)"/>
+        <rect x="980" y="140" width="16" height="660" fill="url(#bambooFar)"/>
+        <rect x="1050" y="195" width="13" height="605" fill="url(#bambooFar)"/>
+        <rect x="1110" y="155" width="15" height="645" fill="url(#bambooFar)"/>
+      </g>
+
+      <!-- Lá trúc xa -->
+      <g opacity="0.5">
+        <ellipse cx="90" cy="200" rx="22" ry="6" fill="url(#leafGrad1)" transform="rotate(-20 90 200)"/>
+        <ellipse cx="150" cy="170" rx="25" ry="7" fill="url(#leafGrad1)" transform="rotate(15 150 170)"/>
+        <ellipse cx="230" cy="215" rx="20" ry="6" fill="url(#leafGrad1)" transform="rotate(-15 230 215)"/>
+        <ellipse cx="930" cy="190" rx="22" ry="6" fill="url(#leafGrad1)" transform="rotate(20 930 190)"/>
+        <ellipse cx="990" cy="160" rx="25" ry="7" fill="url(#leafGrad1)" transform="rotate(-18 990 160)"/>
+        <ellipse cx="1060" cy="215" rx="20" ry="6" fill="url(#leafGrad1)" transform="rotate(15 1060 215)"/>
+      </g>
+
+      <!-- Rừng trúc trung -->
+      <g class="bamboo-sway-near" opacity="0.75" style="animation-delay: -5s;">
+        <rect x="40" y="220" width="18" height="580" fill="url(#bambooMid)"/>
+        <rect x="180" y="240" width="16" height="560" fill="url(#bambooMid)"/>
+        <rect x="1000" y="230" width="18" height="570" fill="url(#bambooMid)"/>
+        <rect x="1140" y="250" width="16" height="550" fill="url(#bambooMid)"/>
+        <!-- Đốt trúc -->
+        <line x1="40" y1="320" x2="58" y2="320" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="40" y1="420" x2="58" y2="420" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="40" y1="520" x2="58" y2="520" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="180" y1="340" x2="196" y2="340" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="180" y1="450" x2="196" y2="450" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="1000" y1="330" x2="1018" y2="330" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="1000" y1="440" x2="1018" y2="440" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="1140" y1="350" x2="1156" y2="350" stroke="#204030" stroke-width="2" opacity="0.5"/>
+        <line x1="1140" y1="470" x2="1156" y2="470" stroke="#204030" stroke-width="2" opacity="0.5"/>
+      </g>
+
+      <!-- Lá trúc trung -->
+      <g opacity="0.75" style="animation-delay: -3s;">
+        <ellipse cx="50" cy="230" rx="30" ry="8" fill="url(#leafGrad2)" transform="rotate(-25 50 230)"/>
+        <ellipse cx="60" cy="250" rx="28" ry="8" fill="url(#leafGrad1)" transform="rotate(20 60 250)"/>
+        <ellipse cx="190" cy="250" rx="32" ry="9" fill="url(#leafGrad2)" transform="rotate(-20 190 250)"/>
+        <ellipse cx="195" cy="275" rx="28" ry="8" fill="url(#leafGrad1)" transform="rotate(25 195 275)"/>
+        <ellipse cx="1010" cy="245" rx="30" ry="8" fill="url(#leafGrad2)" transform="rotate(25 1010 245)"/>
+        <ellipse cx="1015" cy="265" rx="28" ry="8" fill="url(#leafGrad1)" transform="rotate(-20 1015 265)"/>
+        <ellipse cx="1150" cy="260" rx="32" ry="9" fill="url(#leafGrad2)" transform="rotate(-25 1150 260)"/>
+        <ellipse cx="1155" cy="285" rx="28" ry="8" fill="url(#leafGrad1)" transform="rotate(20 1155 285)"/>
+      </g>
+
+      <!-- Rừng trúc gần -->
+      <g class="bamboo-sway-near" opacity="0.9" style="animation-delay: -8s;">
+        <rect x="290" y="280" width="22" height="520" fill="url(#bambooNear)"/>
+        <rect x="870" y="270" width="22" height="530" fill="url(#bambooNear)"/>
+        <!-- Đốt -->
+        <line x1="290" y1="380" x2="312" y2="380" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+        <line x1="290" y1="480" x2="312" y2="480" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+        <line x1="290" y1="590" x2="312" y2="590" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+        <line x1="870" y1="370" x2="892" y2="370" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+        <line x1="870" y1="480" x2="892" y2="480" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+        <line x1="870" y1="590" x2="892" y2="590" stroke="#102820" stroke-width="2.5" opacity="0.6"/>
+      </g>
+
+      <!-- Lá trúc gần -->
+      <g opacity="0.9" style="animation-delay: -6s;">
+        <ellipse cx="305" cy="290" rx="38" ry="10" fill="url(#leafGrad1)" transform="rotate(-22 305 290)"/>
+        <ellipse cx="320" cy="315" rx="34" ry="9" fill="url(#leafGrad2)" transform="rotate(18 320 315)"/>
+        <ellipse cx="880" cy="280" rx="38" ry="10" fill="url(#leafGrad1)" transform="rotate(22 880 280)"/>
+        <ellipse cx="865" cy="305" rx="34" ry="9" fill="url(#leafGrad2)" transform="rotate(-18 865 305)"/>
+      </g>
+
+      <!-- Mặt đất -->
+      <path d="M0 710 Q300 680 600 700 Q900 680 1200 710 L1200 800 L0 800 Z" fill="url(#groundForest)"/>
+
+      <!-- Sương mù lớp 1 -->
+      <g class="mist-drift" opacity="0.55">
+        <rect x="0" y="500" width="1400" height="200" fill="url(#mistGrad)"/>
+      </g>
+
+      <!-- Sương mù lớp 2 -->
+      <g class="mist-drift-2" opacity="0.4" style="animation-delay: -10s;">
+        <rect x="0" y="380" width="1400" height="180" fill="url(#mistGrad)"/>
+      </g>
+
+      <!-- Lá trúc rơi -->
+      <g class="leaf-fall" opacity="0.75">
+        <ellipse cx="180" cy="0" rx="10" ry="3" fill="url(#leafGrad1)"/>
+        <ellipse cx="420" cy="0" rx="9" ry="3" fill="url(#leafGrad2)"/>
+        <ellipse cx="680" cy="0" rx="11" ry="3.5" fill="url(#leafGrad1)"/>
+        <ellipse cx="920" cy="0" rx="9" ry="3" fill="url(#leafGrad2)"/>
+        <ellipse cx="1120" cy="0" rx="10" ry="3" fill="url(#leafGrad1)"/>
+      </g>
+
+      <!-- Lá trúc rơi 2 -->
+      <g class="leaf-fall-2" opacity="0.65" style="animation-delay: -8s;">
+        <ellipse cx="300" cy="0" rx="9" ry="3" fill="url(#leafGrad2)"/>
+        <ellipse cx="560" cy="0" rx="10" ry="3" fill="url(#leafGrad1)"/>
+        <ellipse cx="780" cy="0" rx="9" ry="3" fill="url(#leafGrad2)"/>
+        <ellipse cx="1040" cy="0" rx="11" ry="3.5" fill="url(#leafGrad1)"/>
+      </g>
+
+      <!-- Đom đóm 1 -->
+      <g class="firefly">
+        <circle cx="240" cy="540" r="14" fill="url(#fireflyGlow)"/>
+        <circle cx="240" cy="540" r="3" fill="#ffffff"/>
+      </g>
+      <g class="firefly-2" style="animation-delay: -3s;">
+        <circle cx="860" cy="480" r="12" fill="url(#fireflyGlow)"/>
+        <circle cx="860" cy="480" r="2.5" fill="#ffffff"/>
+      </g>
+      <g class="firefly" style="animation-delay: -6s;">
+        <circle cx="480" cy="620" r="11" fill="url(#fireflyGlow)"/>
+        <circle cx="480" cy="620" r="2.2" fill="#ffffff"/>
+      </g>
+      <g class="firefly-2" style="animation-delay: -9s;">
+        <circle cx="1050" cy="580" r="13" fill="url(#fireflyGlow)"/>
+        <circle cx="1050" cy="580" r="2.8" fill="#ffffff"/>
+      </g>
+      <g class="firefly" style="animation-delay: -11s;">
+        <circle cx="680" cy="650" r="10" fill="url(#fireflyGlow)"/>
+        <circle cx="680" cy="650" r="2" fill="#ffffff"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: GẤU TRÚC ===== -->
+    <div class="hero" role="img" aria-label="Chú gấu trúc đáng yêu ngồi trong rừng trúc sương mù, tay cầm cành trúc">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Lông trắng gấu trúc -->
+          <radialGradient id="pandaWhite" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="55%" stop-color="#f4f4f0"/>
+            <stop offset="100%" stop-color="#d0d0c8"/>
+          </radialGradient>
+          <radialGradient id="pandaBelly" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="65%" stop-color="#f8f8f4"/>
+            <stop offset="100%" stop-color="#e0e0d8"/>
+          </radialGradient>
+          <radialGradient id="pandaHead" cx="45%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="60%" stop-color="#f8f8f4"/>
+            <stop offset="100%" stop-color="#d8d8d0"/>
+          </radialGradient>
+          <!-- Lông đen gấu trúc -->
+          <radialGradient id="pandaBlack" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#3a3a3a"/>
+            <stop offset="55%" stop-color="#1e1e1e"/>
+            <stop offset="100%" stop-color="#050505"/>
+          </radialGradient>
+          <!-- Mắt -->
+          <radialGradient id="eyePanda" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#f0f0ec"/>
+            <stop offset="100%" stop-color="#c0c0b8"/>
+          </radialGradient>
+          <radialGradient id="pupilPanda" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#3a2a20"/>
+            <stop offset="60%" stop-color="#0a0504"/>
+            <stop offset="100%" stop-color="#000000"/>
+          </radialGradient>
+          <!-- Trúc gấu cầm -->
+          <linearGradient id="bambooStem" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#90c878"/>
+            <stop offset="50%" stop-color="#5a9848"/>
+            <stop offset="100%" stop-color="#2a5828"/>
+          </linearGradient>
+          <linearGradient id="bambooLeaf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a0e088"/>
+            <stop offset="100%" stop-color="#4a8840"/>
+          </linearGradient>
+          <!-- Mũi -->
+          <radialGradient id="nosePanda" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#5a5a58"/>
+            <stop offset="60%" stop-color="#2a2a28"/>
+            <stop offset="100%" stop-color="#0a0a08"/>
+          </radialGradient>
+          <!-- Bóng đổ -->
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="200" cy="370" rx="100" ry="14" fill="url(#shadowGrad)" opacity="0.5"/>
+
+        <!-- Toàn bộ gấu trúc -->
+        <g class="panda-float">
+
+          <!-- ===== CHÂN SAU ===== -->
+          <g class="leg-bl">
+            <ellipse cx="150" cy="340" rx="34" ry="30" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.2"/>
+            <ellipse cx="150" cy="348" rx="28" ry="18" fill="url(#pandaWhite)" stroke="#a0a098" stroke-width="0.8"/>
+          </g>
+          <g class="leg-br">
+            <ellipse cx="250" cy="340" rx="34" ry="30" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.2"/>
+            <ellipse cx="250" cy="348" rx="28" ry="18" fill="url(#pandaWhite)" stroke="#a0a098" stroke-width="0.8"/>
+          </g>
+
+          <!-- ===== THÂN ===== -->
+          <g class="panda-body">
+            <!-- Thân chính -->
+            <ellipse cx="200" cy="260" rx="78" ry="85" fill="url(#pandaWhite)" stroke="#b8b8b0" stroke-width="1.4"/>
+            <!-- Bụng sáng -->
+            <ellipse cx="200" cy="275" rx="52" ry="60" fill="url(#pandaBelly)" stroke="#d8d8d0" stroke-width="0.8"/>
+            <!-- Vai đen -->
+            <path d="M130 215 Q140 200 175 205 Q165 230 155 245 Q145 230 130 215 Z" fill="url(#pandaBlack)" opacity="0.95"/>
+            <path d="M270 215 Q260 200 225 205 Q235 230 245 245 Q255 230 270 215 Z" fill="url(#pandaBlack)" opacity="0.95"/>
+            <!-- Đai lưng đen (đặc trưng gấu trúc) -->
+            <path d="M130 265 Q150 255 175 265 Q200 275 225 265 Q250 255 270 265 Q265 285 250 295 Q225 305 200 305 Q175 305 150 295 Q135 285 130 265 Z" fill="url(#pandaBlack)" opacity="0.92"/>
+            <!-- Ánh sáng thân -->
+            <ellipse cx="180" cy="225" rx="30" ry="22" fill="#ffffff" opacity="0.5"/>
+          </g>
+
+          <!-- ===== TAY TRƯỚC TRÁI ===== -->
+          <g class="arm-left">
+            <ellipse cx="135" cy="270" rx="24" ry="38" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.2" transform="rotate(-15 135 270)"/>
+            <!-- Bàn tay -->
+            <ellipse cx="125" cy="305" rx="16" ry="12" fill="url(#pandaBlack)" stroke="#050505" stroke-width="0.8"/>
+          </g>
+
+          <!-- ===== TAY TRƯỚC PHẢI (cầm trúc) ===== -->
+          <g class="arm-right">
+            <ellipse cx="265" cy="270" rx="24" ry="38" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.2" transform="rotate(15 265 270)"/>
+            <!-- Bàn tay -->
+            <ellipse cx="275" cy="305" rx="16" ry="12" fill="url(#pandaBlack)" stroke="#050505" stroke-width="0.8"/>
+          </g>
+
+          <!-- ===== CÀNH TRÚC GẤU CẦM ===== -->
+          <g class="bamboo-branch">
+            <!-- Thân trúc -->
+            <rect x="272" y="180" width="10" height="140" rx="4" fill="url(#bambooStem)" stroke="#2a5828" stroke-width="0.8" transform="rotate(-12 277 250)"/>
+            <!-- Đốt trúc -->
+            <line x1="270" y1="220" x2="282" y2="218" stroke="#2a5828" stroke-width="1.5" opacity="0.7" transform="rotate(-12 277 250)"/>
+            <line x1="272" y1="260" x2="284" y2="258" stroke="#2a5828" stroke-width="1.5" opacity="0.7" transform="rotate(-12 277 250)"/>
+            <line x1="274" y1="300" x2="286" y2="298" stroke="#2a5828" stroke-width="1.5" opacity="0.7" transform="rotate(-12 277 250)"/>
+            <!-- Lá trúc -->
+            <g class="bamboo-leaf">
+              <ellipse cx="285" cy="185" rx="20" ry="5" fill="url(#bambooLeaf)" transform="rotate(-25 285 185)"/>
+            </g>
+            <g class="bamboo-leaf" style="animation-delay: -1.5s;">
+              <ellipse cx="300" cy="205" rx="22" ry="5.5" fill="url(#bambooLeaf)" transform="rotate(20 300 205)"/>
+            </g>
+            <g class="bamboo-leaf" style="animation-delay: -3s;">
+              <ellipse cx="270" cy="195" rx="18" ry="4.5" fill="url(#bambooLeaf)" transform="rotate(-35 270 195)"/>
+            </g>
+            <g class="bamboo-leaf" style="animation-delay: -2.2s;">
+              <ellipse cx="310" cy="230" rx="20" ry="5" fill="url(#bambooLeaf)" transform="rotate(30 310 230)"/>
+            </g>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="panda-head">
+            <!-- Tai trái -->
+            <g class="ear-left">
+              <circle cx="145" cy="105" r="26" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.3"/>
+              <circle cx="145" cy="105" r="14" fill="#3a3a3a" opacity="0.6"/>
+            </g>
+            <!-- Tai phải -->
+            <g class="ear-right">
+              <circle cx="255" cy="105" r="26" fill="url(#pandaBlack)" stroke="#050505" stroke-width="1.3"/>
+              <circle cx="255" cy="105" r="14" fill="#3a3a3a" opacity="0.6"/>
+            </g>
+
+            <!-- Đầu -->
+            <ellipse cx="200" cy="150" rx="72" ry="62" fill="url(#pandaHead)" stroke="#b8b8b0" stroke-width="1.4"/>
+
+            <!-- Mảng đen mắt trái (đặc trưng gấu trúc) -->
+            <ellipse cx="172" cy="148" rx="22" ry="26" fill="url(#pandaBlack)" transform="rotate(-15 172 148)"/>
+            <!-- Mảng đen mắt phải -->
+            <ellipse cx="228" cy="148" rx="22" ry="26" fill="url(#pandaBlack)" transform="rotate(15 228 148)"/>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <ellipse cx="172" cy="148" rx="10" ry="11" fill="url(#eyePanda)" stroke="#5a5a58" stroke-width="0.8"/>
+              <ellipse cx="173" cy="149" rx="5.5" ry="7" fill="url(#pupilPanda)"/>
+              <circle cx="175" cy="145" r="2.8" fill="#ffffff" opacity="0.95"/>
+              <circle cx="170" cy="152" r="1.3" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải -->
+            <g class="eye-right">
+              <ellipse cx="228" cy="148" rx="10" ry="11" fill="url(#eyePanda)" stroke="#5a5a58" stroke-width="0.8"/>
+              <ellipse cx="229" cy="149" rx="5.5" ry="7" fill="url(#pupilPanda)"/>
+              <circle cx="231" cy="145" r="2.8" fill="#ffffff" opacity="0.95"/>
+              <circle cx="226" cy="152" r="1.3" fill="#ffffff" opacity="0.5"/>
+            </g>
+
+            <!-- Mũi -->
+            <g class="nose">
+              <ellipse cx="200" cy="178" rx="10" ry="7" fill="url(#nosePanda)" stroke="#0a0a08" stroke-width="0.8"/>
+              <ellipse cx="197" cy="176" rx="3" ry="2" fill="#7a7a78" opacity="0.7"/>
+            </g>
+
+            <!-- Miệng cười nhẹ -->
+            <path d="M185 192 Q200 202 215 192" stroke="#3a3a3a" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+            <!-- Má hồng nhẹ -->
+            <ellipse cx="150" cy="168" rx="10" ry="6" fill="#ffb0b0" opacity="0.4"/>
+            <ellipse cx="250" cy="168" rx="10" ry="6" fill="#ffb0b0" opacity="0.4"/>
+
+            <!-- Mảng trắng đầu -->
+            <ellipse cx="200" cy="135" rx="22" ry="14" fill="#ffffff" opacity="0.35"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

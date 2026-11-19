@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sidebar Menu · Art Deco Luxe</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --sidebar-width: 286px;
+      --sidebar-collapsed: 88px;
+      --bg-onyx: #0c0a08;
+      --bg-panel: rgba(18, 15, 12, 0.94);
+      --bg-panel-hover: rgba(30, 24, 18, 0.96);
+      --gold-light: #f4d88a;
+      --gold: #d4a94e;
+      --gold-deep: #a67c2e;
+      --gold-glow: rgba(212, 169, 78, 0.4);
+      --gold-soft: rgba(212, 169, 78, 0.1);
+      --emerald: #1f8a6b;
+      --emerald-glow: rgba(31, 138, 107, 0.3);
+      --ruby: #b8344a;
+      --cream: #f5ebd6;
+      --text-primary: #f2e8d5;
+      --text-secondary: #a89578;
+      --text-muted: #6a5c47;
+      --line-gold: rgba(212, 169, 78, 0.18);
+      --line-gold-bright: rgba(212, 169, 78, 0.4);
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 6px;
+      --transition: 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      --font-display: 'Didot', 'Bodoni MT', 'Playfair Display', Georgia, serif;
+      --font-sans: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      background: var(--bg-onyx);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== ANIMATED ART DECO BACKGROUND ===== */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: 
+        radial-gradient(ellipse at 30% 20%, #1a1410 0%, #0c0a08 50%, #050403 100%);
+      overflow: hidden;
+    }
+
+    /* Decorative geometric rays from corner */
+    .bg-rays {
+      position: absolute;
+      top: -30%;
+      left: -20%;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      background: 
+        repeating-conic-gradient(from 0deg at 0% 0%,
+          transparent 0deg,
+          rgba(212, 169, 78, 0.15) 0.5deg,
+          transparent 1deg,
+          transparent 15deg);
+      animation: raysRotate 60s linear infinite;
+    }
+
+    @keyframes raysRotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Gold glow orbs */
+    .bg-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+
+    .bg-glow.a {
+      width: 50vw;
+      height: 50vw;
+      top: -15%;
+      left: 20%;
+      background: radial-gradient(circle, rgba(212, 169, 78, 0.14) 0%, transparent 65%);
+      animation: glowDriftA 30s ease-in-out infinite alternate;
+    }
+
+    .bg-glow.b {
+      width: 40vw;
+      height: 40vw;
+      bottom: -15%;
+      right: -10%;
+      background: radial-gradient(circle, rgba(31, 138, 107, 0.1) 0%, transparent 65%);
+      animation: glowDriftB 36s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowDriftA {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(5%, 4%) scale(1.08); }
+      100% { transform: translate(-3%, 6%) scale(1.02); }
+    }
+    @keyframes glowDriftB {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(-4%, -3%) scale(1.06); }
+      100% { transform: translate(3%, -5%) scale(0.98); }
+    }
+
+    /* Art deco frame lines */
+    .bg-frame {
+      position: absolute;
+      inset: 6%;
+      border: 1px solid rgba(212, 169, 78, 0.06);
+      pointer-events: none;
+    }
+
+    .bg-frame::before,
+    .bg-frame::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(212, 169, 78, 0.12);
+    }
+
+    .bg-frame::before {
+      top: -1px;
+      left: -1px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .bg-frame::after {
+      bottom: -1px;
+      right: -1px;
+      border-left: none;
+      border-top: none;
+    }
+
+    /* Diagonal gold dust motes */
+    .bg-dust {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gold-glow);
+      animation: dustFloat 18s ease-in-out infinite;
+    }
+
+    .bg-dust:nth-child(1) { top: 15%; left: 25%; animation-delay: 0s; }
+    .bg-dust:nth-child(2) { top: 40%; left: 60%; animation-delay: -4s; width: 2px; height: 2px; }
+    .bg-dust:nth-child(3) { top: 70%; left: 35%; animation-delay: -8s; }
+    .bg-dust:nth-child(4) { top: 85%; left: 80%; animation-delay: -12s; width: 2px; height: 2px; }
+    .bg-dust:nth-child(5) { top: 25%; left: 88%; animation-delay: -6s; }
+    .bg-dust:nth-child(6) { top: 55%; left: 15%; animation-delay: -10s; width: 2px; height: 2px; }
+
+    @keyframes dustFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      33%      { transform: translate(12px, -18px) scale(1.3); opacity: 0.7; }
+      66%      { transform: translate(-8px, -10px) scale(0.9); opacity: 0.4; }
+    }
+
+    /* Subtle horizontal shimmer band */
+    .bg-shimmer {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(212, 169, 78, 0.3) 30%, 
+        rgba(244, 216, 138, 0.5) 50%, 
+        rgba(212, 169, 78, 0.3) 70%, 
+        transparent 100%);
+      animation: shimmerSlide 12s ease-in-out infinite;
+      opacity: 0.4;
+    }
+
+    .bg-shimmer.s1 { top: 22%; animation-delay: 0s; }
+    .bg-shimmer.s2 { top: 58%; animation-delay: -4s; animation-duration: 16s; }
+    .bg-shimmer.s3 { top: 82%; animation-delay: -8s; animation-duration: 14s; opacity: 0.3; }
+
+    @keyframes shimmerSlide {
+      0%   { transform: translateX(-40%); opacity: 0; }
+      20%  { opacity: 0.5; }
+      80%  { opacity: 0.5; }
+      100% { transform: translateX(40%); opacity: 0; }
+    }
+
+    /* Fine grain texture */
+    .bg-grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.4;
+      background-image: 
+        radial-gradient(rgba(212, 169, 78, 0.03) 0.5px, transparent 0.5px);
+      background-size: 3px 3px;
+      mask-image: radial-gradient(ellipse at 40% 40%, black 20%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at 40% 40%, black 20%, transparent 80%);
+    }
+
+    /* ===== HAMBURGER ===== */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 100;
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--line-gold);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      transition: background var(--transition), transform 0.2s ease;
+    }
+
+    .hamburger:active {
+      transform: scale(0.92);
+    }
+
+    .hamburger span {
+      display: block;
+      width: 20px;
+      height: 1.5px;
+      background: var(--gold);
+      position: relative;
+      transition: background var(--transition);
+    }
+
+    .hamburger span::before,
+    .hamburger span::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 20px;
+      height: 1.5px;
+      background: var(--gold);
+      transition: transform var(--transition);
+    }
+
+    .hamburger span::before { top: -6px; }
+    .hamburger span::after  { top: 6px; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: var(--sidebar-width);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-right: 1px solid var(--line-gold);
+      box-shadow: 
+        8px 0 50px rgba(0, 0, 0, 0.6),
+        inset -1px 0 0 rgba(212, 169, 78, 0.04);
+      transition: width var(--transition), transform var(--transition);
+      will-change: width, transform;
+      overflow: hidden;
+      padding: 30px 18px 22px;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Gold top border */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent, var(--gold-deep) 15%, var(--gold-light) 50%, var(--gold-deep) 85%, transparent);
+      opacity: 0.8;
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    /* Bottom gold border */
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-deep), transparent);
+      opacity: 0.4;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width) !important;
+        box-shadow: 14px 0 60px rgba(0, 0, 0, 0.7);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .hamburger {
+        display: flex;
+      }
+      .sidebar.collapsed {
+        width: var(--sidebar-width) !important;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+
+    /* ===== BRAND ===== */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 0 8px 28px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: padding var(--transition);
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      position: relative;
+      transition: transform var(--transition);
+    }
+
+    /* Art deco diamond frame */
+    .brand-mark::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+      opacity: 0.5;
+      transition: transform var(--transition), opacity var(--transition);
+    }
+
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--gold-deep);
+      transform: rotate(45deg);
+      opacity: 0.3;
+      transition: transform var(--transition);
+      animation: innerFrameSpin 20s linear infinite;
+    }
+
+    @keyframes innerFrameSpin {
+      to { transform: rotate(405deg); }
+    }
+
+    .brand-mark svg {
+      width: 22px;
+      height: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* SVG motion: rotating monogram */
+    .brand-mark .mono-rot {
+      transform-origin: 16px 16px;
+      animation: monoRotate 12s ease-in-out infinite;
+    }
+
+    @keyframes monoRotate {
+      0%, 100% { transform: rotate(-4deg); }
+      50%      { transform: rotate(4deg); }
+    }
+
+    .brand-mark .mono-spark {
+      animation: monoSpark 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes monoSpark {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.2); }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: var(--gold-light);
+      text-shadow: 0 0 18px rgba(212, 169, 78, 0.25);
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .sidebar.collapsed .brand-text {
+      opacity: 0;
+      transform: translateX(-8px);
+      pointer-events: none;
+    }
+
+    .sidebar.collapsed .brand {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .sidebar.collapsed .brand-mark {
+      transform: scale(0.9);
+    }
+
+    /* ===== DIVIDER (Art Deco) ===== */
+    .deco-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px 16px;
+      transition: opacity var(--transition);
+    }
+
+    .deco-divider .line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line-gold-bright), transparent);
+    }
+
+    .deco-divider .diamond {
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      box-shadow: 0 0 6px var(--gold-glow);
+    }
+
+    .sidebar.collapsed .deco-divider {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* ===== NAV ===== */
+    .nav-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 2px;
+      margin-right: -4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 169, 78, 0.2) transparent;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-scroll::-webkit-scrollbar { width: 3px; }
+    .nav-scroll::-webkit-scrollbar-track { background: transparent; }
+    .nav-scroll::-webkit-scrollbar-thumb {
+      background: rgba(212, 169, 78, 0.2);
+      border-radius: 2px;
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 22px;
+    }
+
+    .nav-group-label {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 500;
+      font-style: italic;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      padding: 0 12px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-group-label::before,
+    .nav-group-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line-gold);
+    }
+
+    .sidebar.collapsed .nav-group-label {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background var(--transition), color var(--transition),
+                  border-color var(--transition), transform 0.2s ease,
+                  box-shadow var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-panel-hover);
+      color: var(--text-primary);
+      border-color: var(--line-gold);
+    }
+
+    .nav-item:active {
+      transform: scale(0.985);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(105deg, var(--gold-soft), rgba(212, 169, 78, 0.03));
+      color: var(--cream);
+      border-color: var(--line-gold-bright);
+      box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(212, 169, 78, 0.08),
+        0 0 22px -8px var(--gold-glow);
+    }
+
+    /* Art deco corner brackets on active */
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 8px;
+      height: 8px;
+      border-top: 1px solid var(--gold);
+      border-left: 1px solid var(--gold);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      border-bottom: 1px solid var(--gold);
+      border-right: 1px solid var(--gold);
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition);
+      color: currentColor;
+      position: relative;
+    }
+
+    .nav-icon svg {
+      width: 22px;
+      height: 22px;
+      overflow: visible;
+    }
+
+    .nav-label {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      transition: opacity var(--transition), transform var(--transition);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--gold-soft);
+      color: var(--gold-light);
+      border: 1px solid var(--line-gold-bright);
+      transition: opacity var(--transition);
+    }
+
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .nav-badge {
+      opacity: 0;
+      transform: translateX(-6px);
+      pointer-events: none;
+      width: 0;
+    }
+
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      gap: 0;
+    }
+
+    /* === SVG MOTION === */
+    .nav-item:hover .nav-icon {
+      transform: scale(1.1);
+    }
+    .nav-item:active .nav-icon {
+      transform: scale(0.94);
+    }
+    .nav-item.active .nav-icon {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 4px var(--gold-glow));
+    }
+
+    /* Icon-specific animations */
+    .ico-crown .crown-gem {
+      animation: gemShimmer 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes gemShimmer {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.2); }
+    }
+
+    .ico-crown .crown-arc {
+      animation: arcShift 4s ease-in-out infinite;
+    }
+
+    @keyframes arcShift {
+      0%, 100% { stroke-dashoffset: 0; }
+      50%      { stroke-dashoffset: 4; }
+    }
+
+    .ico-gem .gem-facet {
+      animation: facetGlow 3.5s ease-in-out infinite;
+    }
+    .ico-gem .gem-facet:nth-child(2) { animation-delay: 0.5s; }
+    .ico-gem .gem-facet:nth-child(3) { animation-delay: 1s; }
+
+    @keyframes facetGlow {
+      0%, 100% { opacity: 0.4; }
+      50%      { opacity: 1; }
+    }
+
+    .ico-mirror .mirror-shine {
+      animation: shineSweep 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes shineSweep {
+      0%, 100% { opacity: 0.3; }
+      50%      { opacity: 0.9; }
+    }
+
+    .ico-mirror .mirror-glint {
+      animation: glintFlash 4s ease-in-out infinite;
+    }
+
+    @keyframes glintFlash {
+      0%, 85%, 100% { opacity: 0; }
+      90%, 95%      { opacity: 1; }
+    }
+
+    .ico-flame .flame-body {
+      animation: flameFlicker 1.8s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    @keyframes flameFlicker {
+      0%, 100% { transform: scale(1) translateX(0); }
+      30%      { transform: scale(1.06) translateX(-1px); }
+      60%      { transform: scale(0.96) translateX(1px); }
+    }
+
+    .ico-flame .flame-inner {
+      animation: innerFlame 1.5s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    @keyframes innerFlame {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50%      { transform: scale(0.9); opacity: 1; }
+    }
+
+    .ico-compass .compass-needle {
+      animation: needleTurn 6s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes needleTurn {
+      0%, 100% { transform: rotate(-15deg); }
+      50%      { transform: rotate(15deg); }
+    }
+
+    .ico-compass .compass-dial {
+      animation: dialShimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes dialShimmer {
+      0%, 100% { opacity: 0.5; }
+      50%      { opacity: 0.9; }
+    }
+
+    .ico-key .key-rotate {
+      animation: keyTurn 5s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes keyTurn {
+      0%, 100% { transform: rotate(-8deg); }
+      50%      { transform: rotate(8deg); }
+    }
+
+    .ico-key .key-bow {
+      animation: bowPulse 2.5s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes bowPulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.1); }
+    }
+
+    /* ===== FOOTER ===== */
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding-top: 18px;
+      border-top: 1px solid var(--line-gold);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      transition: background var(--transition);
+    }
+
+    .footer-profile:hover {
+      background: var(--bg-panel-hover);
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      background: linear-gradient(145deg, rgba(212, 169, 78, 0.15), rgba(166, 124, 46, 0.08));
+      border: 1px solid var(--line-gold-bright);
+      position: relative;
+      transform: rotate(0deg);
+    }
+
+    .avatar::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border: 1px solid var(--line-gold);
+      transform: rotate(45deg);
+      opacity: 0.5;
+      animation: avatarFrameSpin 15s linear infinite;
+    }
+
+    @keyframes avatarFrameSpin {
+      to { transform: rotate(405deg); }
+    }
+
+    .avatar span {
+      transform: rotate(0deg);
+    }
+
+    .footer-meta {
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .footer-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      color: var(--text-primary);
+    }
+
+    .footer-role {
+      font-size: 0.58rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .sidebar.collapsed .footer-meta {
+      opacity: 0;
+      transform: translateX(-6px);
+      pointer-events: none;
+      width: 0;
+    }
+
+    .sidebar.collapsed .footer-profile {
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .sidebar.collapsed .avatar {
+      width: 36px;
+      height: 36px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid var(--line-gold);
+      color: var(--text-secondary);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background var(--transition), color var(--transition),
+                  border-color var(--transition), transform 0.18s ease,
+                  box-shadow var(--transition);
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      background: var(--gold-soft);
+      color: var(--gold-light);
+      border-color: var(--line-gold-bright);
+      box-shadow: 0 0 14px -4px var(--gold-glow);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.9);
+    }
+
+    .btn-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .btn-collapse svg {
+      transition: transform var(--transition);
+    }
+
+    .sidebar.collapsed .btn-collapse svg {
+      transform: rotate(180deg);
+    }
+
+    .btn-close-mobile {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .btn-collapse { display: none; }
+      .btn-close-mobile { display: flex; }
+    }
+
+    .sidebar.collapsed .actions-row {
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar.collapsed .btn-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    /* ===== OVERLAY ===== */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 4, 3, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 40;
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .overlay { display: block; }
+      .overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+    .nav-item:focus-visible,
+    .btn-icon:focus-visible,
+    .hamburger:focus-visible {
+      outline: 1px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Prevent flicker */
+    .sidebar, .nav-item, .brand-mark, .btn-icon, .hamburger {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANIMATED ART DECO BACKGROUND -->
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-rays"></div>
+    <div class="bg-glow a"></div>
+    <div class="bg-glow b"></div>
+    <div class="bg-frame"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-dust"></div>
+    <div class="bg-shimmer s1"></div>
+    <div class="bg-shimmer s2"></div>
+    <div class="bg-shimmer s3"></div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <!-- HAMBURGER -->
+  <button class="hamburger" id="hamburger" aria-label="Mở menu" aria-expanded="false">
+    <span></span>
+  </button>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+
+    <!-- BRAND -->
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="mono-rot">
+            <path d="M16 4L22 10L16 16L10 10L16 4Z" stroke="#d4a94e" stroke-width="1.2"/>
+            <path d="M16 16L22 22L16 28L10 22L16 16Z" stroke="#d4a94e" stroke-width="1.2"/>
+            <path d="M4 16L10 10L16 16L10 22L4 16Z" stroke="#f4d88a" stroke-width="1.2" opacity="0.7"/>
+            <path d="M16 16L22 10L28 16L22 22L16 16Z" stroke="#f4d88a" stroke-width="1.2" opacity="0.7"/>
+          </g>
+          <circle cx="16" cy="16" r="2" fill="#f4d88a" class="mono-spark"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">GATSBY</span>
+        <span class="brand-sub">Private Club</span>
+      </div>
+    </div>
+
+    <!-- DECO DIVIDER -->
+    <div class="deco-divider">
+      <span class="line"></span>
+      <span class="diamond"></span>
+      <span class="line"></span>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-scroll">
+      <div class="nav-group">
+        <div class="nav-group-label">Lounge</div>
+
+        <!-- CROWN -->
+        <div class="nav-item active" data-nav="crown" tabindex="0" role="button" aria-current="page">
+          <span class="nav-icon ico-crown">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 18L4 8L9 13L12 6L15 13L20 8L21 18H3Z" class="crown-arc"/>
+              <circle cx="12" cy="10" r="1.5" fill="currentColor" stroke="none" class="crown-gem"/>
+              <circle cx="7" cy="15" r="1" fill="currentColor" stroke="none" opacity="0.7"/>
+              <circle cx="17" cy="15" r="1" fill="currentColor" stroke="none" opacity="0.7"/>
+            </svg>
+          </span>
+          <span class="nav-label">Grand Hall</span>
+        </div>
+
+        <!-- GEM -->
+        <div class="nav-item" data-nav="gem" tabindex="0" role="button">
+          <span class="nav-icon ico-gem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 4H18L21 10L12 21L3 10L6 4Z" class="gem-facet"/>
+              <path d="M6 4L12 21L18 4" class="gem-facet" opacity="0.6"/>
+              <path d="M3 10H21" class="gem-facet" opacity="0.8"/>
+            </svg>
+          </span>
+          <span class="nav-label">Jewels</span>
+          <span class="nav-badge">VIP</span>
+        </div>
+
+        <!-- MIRROR -->
+        <div class="nav-item" data-nav="mirror" tabindex="0" role="button">
+          <span class="nav-icon ico-mirror">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="11" rx="7" ry="9" class="mirror-shine"/>
+              <path d="M12 20V22M8 22H16"/>
+              <path d="M8 8L12 6" stroke-width="1" opacity="0.6" class="mirror-glint"/>
+              <path d="M14 10L16 9" stroke-width="1" opacity="0.6" class="mirror-glint"/>
+            </svg>
+          </span>
+          <span class="nav-label">Vanity</span>
+        </div>
+
+        <!-- FLAME -->
+        <div class="nav-item" data-nav="flame" tabindex="0" role="button">
+          <span class="nav-icon ico-flame">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22C8 22 5 19 5 15C5 11 8 8 10 5C11 3.5 12 2 12 2C12 2 13 4 14 6C15 8 16 9 16 11C17 9 17 8 17 8C18 10 19 12 19 15C19 19 16 22 12 22Z" class="flame-body"/>
+              <path d="M12 22C10 22 9 20.5 9 19C9 17 10.5 15.5 11 14C11.5 15.5 13 17 13 19C13 20.5 12 22 12 22Z" fill="currentColor" opacity="0.6" stroke="none" class="flame-inner"/>
+            </svg>
+          </span>
+          <span class="nav-label">Fireplace</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">Private</div>
+
+        <!-- COMPASS -->
+        <div class="nav-item" data-nav="compass" tabindex="0" role="button">
+          <span class="nav-icon ico-compass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9" class="compass-dial"/>
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 4V6M12 18V20M4 12H6M18 12H20" opacity="0.5"/>
+              <path d="M12 8L14 12L12 16L10 12L12 8Z" fill="currentColor" stroke="none" class="compass-needle"/>
+              <circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Tours</span>
+        </div>
+
+        <!-- KEY -->
+        <div class="nav-item" data-nav="key" tabindex="0" role="button">
+          <span class="nav-icon ico-key">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="4" class="key-bow"/>
+              <path d="M11 11L20 20M18 18L21 21M15 15L17 17" class="key-rotate"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Members</span>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="nav-item" data-nav="settings" tabindex="0" role="button">
+          <span class="nav-icon ico-compass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3" class="compass-needle"/>
+              <path d="M12 2V5M12 19V22M2 12H5M19 12H22M4.5 4.5L6.5 6.5M17.5 17.5L19.5 19.5M19.5 4.5L17.5 6.5M6.5 17.5L4.5 19.5"/>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="sidebar-footer">
+      <div class="footer-profile">
+        <div class="avatar"><span>G</span></div>
+        <div class="footer-meta">
+          <div class="footer-name">Jay Gatsby</div>
+          <div class="footer-role">Proprietor</div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-icon btn-collapse" id="btnCollapse" aria-label="Thu gọn sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18L9 12L15 6"/>
+          </svg>
+        </button>
+        <button class="btn-icon btn-close-mobile" id="btnCloseMobile" aria-label="Đóng sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6L18 18M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <script>
+    (function() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const hamburger = document.getElementById('hamburger');
+      const btnCollapse = document.getElementById('btnCollapse');
+      const btnCloseMobile = document.getElementById('btnCloseMobile');
+      const navItems = document.querySelectorAll('.nav-item');
+
+      function isMobile() {
+        return window.matchMedia('(max-width: 900px)').matches;
+      }
+
+      function openMobile() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        hamburger.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMobile() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
+
+      hamburger.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+          closeMobile();
+        } else {
+          openMobile();
+        }
+      });
+
+      overlay.addEventListener('click', closeMobile);
+      btnCloseMobile.addEventListener('click', closeMobile);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMobile() && sidebar.classList.contains('open')) {
+          closeMobile();
+        }
+      });
+
+      btnCollapse.addEventListener('click', () => {
+        if (!isMobile()) {
+          sidebar.classList.toggle('collapsed');
+          try {
+            localStorage.setItem('sidebarCollapsed',
+              sidebar.classList.contains('collapsed') ? '1' : '0');
+          } catch (_) {}
+        }
+      });
+
+      if (!isMobile()) {
+        try {
+          if (localStorage.getItem('sidebarCollapsed') === '1') {
+            sidebar.classList.add('collapsed');
+          }
+        } catch (_) {}
+      }
+
+      window.addEventListener('resize', () => {
+        if (!isMobile()) {
+          closeMobile();
+        }
+      });
+
+      navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navItems.forEach(n => {
+            n.classList.remove('active');
+            n.removeAttribute('aria-current');
+          });
+          item.classList.add('active');
+          item.setAttribute('aria-current', 'page');
+          if (isMobile()) closeMobile();
+        });
+
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            item.click();
+          }
+        });
+      });
+
+      // Subtle parallax for gold glows
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const glows = document.querySelectorAll('.bg-glow');
+        let mx = 0, my = 0, raf = null;
+        document.addEventListener('mousemove', (e) => {
+          mx = (e.clientX / window.innerWidth - 0.5) * 2;
+          my = (e.clientY / window.innerHeight - 0.5) * 2;
+          if (!raf) {
+            raf = requestAnimationFrame(() => {
+              glows.forEach((g, i) => {
+                const depth = (i + 1) * 5;
+                g.style.transform = `translate(${mx * depth}px, ${my * depth}px)`;
+              });
+              raf = null;
+            });
+          }
+        });
+      }
+
+      document.addEventListener('touchstart', () => {}, { passive: true });
+    })();
+  </script>
+</body>
+</html>

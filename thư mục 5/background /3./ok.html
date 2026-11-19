@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cá voi xanh – Đại dương sâu thẳm</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #041824;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0a3a5c 0%, #062844 40%, #02121e 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(80vw, 80vh);
+      height: min(80vw, 80vh);
+      max-width: 560px;
+      max-height: 560px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: CÁ VOI XANH === */
+    /* Toàn bộ cá voi bơi lơ lửng */
+    .whale-swim {
+      animation: whaleSwim 11s ease-in-out infinite;
+      transform-origin: 50% 55%;
+      will-change: transform;
+    }
+
+    @keyframes whaleSwim {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-8px) rotate(-1.2deg); }
+      60%  { transform: translateY(3px) rotate(1deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Thân cá voi – nhịp thở chậm */
+    .whale-body {
+      animation: bodyBreath 6.8s ease-in-out infinite;
+      transform-origin: 50% 60%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.018, 1.028); }
+    }
+
+    /* Đầu – gật gù nhẹ */
+    .whale-head {
+      animation: headNod 7.5s ease-in-out infinite;
+      transform-origin: 50% 85%;
+      will-change: transform;
+    }
+
+    @keyframes headNod {
+      0%   { transform: translateY(0) rotate(0deg); }
+      35%  { transform: translateY(-3px) rotate(-1.5deg); }
+      70%  { transform: translateY(2px) rotate(1deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Đuôi cá voi – vẫy chậm, mạnh mẽ */
+    .whale-tail {
+      animation: tailSwish 5.2s ease-in-out infinite;
+      transform-origin: 90% 50%;
+      will-change: transform;
+    }
+
+    @keyframes tailSwish {
+      0%   { transform: rotate(0deg) scaleY(1); }
+      30%  { transform: rotate(-7deg) scaleY(1.05); }
+      60%  { transform: rotate(5deg) scaleY(0.96); }
+      100% { transform: rotate(0deg) scaleY(1); }
+    }
+
+    /* Vây lưng – nhẹ nhàng uốn */
+    .dorsal-fin {
+      animation: dorsalSway 6.5s ease-in-out infinite;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes dorsalSway {
+      0%, 100% { transform: rotate(0deg) skewX(0deg); }
+      50%      { transform: rotate(-2deg) skewX(2deg); }
+    }
+
+    /* Vây ngực trái – vỗ nhẹ */
+    .pectoral-left {
+      animation: pectoralLeft 7.2s ease-in-out infinite;
+      transform-origin: 85% 20%;
+      will-change: transform;
+    }
+
+    @keyframes pectoralLeft {
+      0%   { transform: rotate(0deg) translateY(0); }
+      40%  { transform: rotate(-8deg) translateY(-3px); }
+      75%  { transform: rotate(4deg) translateY(2px); }
+      100% { transform: rotate(0deg) translateY(0); }
+    }
+
+    /* Vây ngực phải – lệch pha */
+    .pectoral-right {
+      animation: pectoralRight 8.1s ease-in-out infinite;
+      transform-origin: 85% 20%;
+      will-change: transform;
+    }
+
+    @keyframes pectoralRight {
+      0%   { transform: rotate(0deg) translateY(0); }
+      45%  { transform: rotate(6deg) translateY(2px); }
+      80%  { transform: rotate(-5deg) translateY(-3px); }
+      100% { transform: rotate(0deg) translateY(0); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 10s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 11.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Lỗ phun nước – hơi thở */
+    .blowhole {
+      animation: blowholePulse 7.8s ease-in-out infinite;
+      transform-origin: 50% 100%;
+      will-change: transform, opacity;
+    }
+
+    @keyframes blowholePulse {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50%      { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Miệng – cười nhẹ */
+    .mouth {
+      animation: mouthTwitch 9s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes mouthTwitch {
+      0%, 100% { transform: scaleX(1); }
+      50%      { transform: scaleX(1.03); }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Ánh sáng từ trên chiếu xuống */
+    .light-beam {
+      animation: beamShift 14s ease-in-out infinite alternate;
+      transform-origin: 50% 0%;
+      will-change: transform, opacity;
+    }
+
+    @keyframes beamShift {
+      0%   { transform: rotate(-3deg) scaleX(1); opacity: 0.18; }
+      100% { transform: rotate(3deg) scaleX(1.15); opacity: 0.35; }
+    }
+
+    /* Bong bóng trôi lên – lớp chậm */
+    .bubble-slow {
+      animation: bubbleRiseSlow 16s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes bubbleRiseSlow {
+      0%   { transform: translateY(0) translateX(0); }
+      100% { transform: translateY(-110vh) translateX(15px); }
+    }
+
+    /* Bong bóng trôi lên – lớp nhanh */
+    .bubble-fast {
+      animation: bubbleRiseFast 10s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes bubbleRiseFast {
+      0%   { transform: translateY(0) translateX(0); }
+      100% { transform: translateY(-110vh) translateX(-12px); }
+    }
+
+    /* Rong biển đung đưa */
+    .seaweed-sway {
+      animation: seaweedSway 8s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes seaweedSway {
+      0%   { transform: rotate(-3deg) skewX(2deg); }
+      100% { transform: rotate(4deg) skewX(-3deg); }
+    }
+
+    .seaweed-sway-2 {
+      animation: seaweedSway2 11s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes seaweedSway2 {
+      0%   { transform: rotate(3deg) skewX(-2deg); }
+      100% { transform: rotate(-4deg) skewX(3deg); }
+    }
+
+    /* Cá nhỏ bơi ngang */
+    .fish-swim {
+      animation: fishSwim 26s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes fishSwim {
+      0%   { transform: translateX(0) translateY(0); }
+      25%  { transform: translateX(30vw) translateY(-10px); }
+      50%  { transform: translateX(60vw) translateY(8px); }
+      75%  { transform: translateX(90vw) translateY(-6px); }
+      100% { transform: translateX(120vw) translateY(0); }
+    }
+
+    .fish-swim-2 {
+      animation: fishSwim2 34s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes fishSwim2 {
+      0%   { transform: translateX(120vw) translateY(0) scaleX(-1); }
+      50%  { transform: translateX(60vw) translateY(12px) scaleX(-1); }
+      100% { transform: translateX(0) translateY(0) scaleX(-1); }
+    }
+
+    /* Sứa lơ lửng */
+    .jellyfish {
+      animation: jellyFloat 9s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes jellyFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-25px) scale(1.04); }
+    }
+
+    /* Hạt sáng trôi nhẹ */
+    .particle-float {
+      animation: particleFloat 13s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes particleFloat {
+      0%   { transform: translate(0, 0); opacity: 0.15; }
+      50%  { transform: translate(10px, -18px); opacity: 0.5; }
+      100% { transform: translate(-8px, -30px); opacity: 0.2; }
+    }
+
+    /* Ánh sáng gradient nước */
+    .water-gradient {
+      animation: waterShift 20s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes waterShift {
+      0%   { opacity: 0.4; }
+      100% { opacity: 0.75; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(92vw, 92vh);
+        height: min(92vw, 92vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: ĐẠI DƯƠNG SÂU ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Gradient nước biển -->
+        <linearGradient id="oceanDeep" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1a6a9a"/>
+          <stop offset="25%" stop-color="#0e4a72"/>
+          <stop offset="60%" stop-color="#062a44"/>
+          <stop offset="100%" stop-color="#010a12"/>
+        </linearGradient>
+        <radialGradient id="lightFromTop" cx="50%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#4ab0d8" stop-opacity="0.55"/>
+          <stop offset="50%" stop-color="#1a7aa0" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#0a2a44" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7fd0f0" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#7fd0f0" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="bubbleGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#e0f8ff" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#a0d8f0" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#60a8c8" stop-opacity="0.1"/>
+        </radialGradient>
+        <linearGradient id="seaweedGrad1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3aa86a"/>
+          <stop offset="100%" stop-color="#0e5a30"/>
+        </linearGradient>
+        <linearGradient id="seaweedGrad2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#50c880"/>
+          <stop offset="100%" stop-color="#1a7040"/>
+        </linearGradient>
+        <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a4a5a"/>
+          <stop offset="100%" stop-color="#0a1a22"/>
+        </linearGradient>
+        <radialGradient id="jellyGrad" cx="50%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="#ffb0e0" stop-opacity="0.85"/>
+          <stop offset="60%" stop-color="#e070b8" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#a04080" stop-opacity="0.2"/>
+        </radialGradient>
+        <radialGradient id="particleGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#c0f0ff" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#80d0f0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Nền nước sâu -->
+      <rect width="1200" height="800" fill="url(#oceanDeep)"/>
+      <!-- Ánh sáng từ mặt nước -->
+      <rect width="1200" height="800" fill="url(#lightFromTop)" class="water-gradient"/>
+
+      <!-- Tia sáng chiếu xuống -->
+      <g class="light-beam" style="animation-delay: -2s;">
+        <polygon points="400,0 360,800 480,800" fill="url(#beamGrad)"/>
+        <polygon points="600,0 570,800 660,800" fill="url(#beamGrad)" opacity="0.7"/>
+        <polygon points="820,0 790,800 880,800" fill="url(#beamGrad)" opacity="0.5"/>
+      </g>
+
+      <!-- Hạt sáng lơ lửng -->
+      <g class="particle-float" style="animation-delay: 0s;">
+        <circle cx="150" cy="200" r="2.5" fill="url(#particleGlow)"/>
+        <circle cx="350" cy="320" r="2" fill="url(#particleGlow)"/>
+        <circle cx="820" cy="280" r="2.8" fill="url(#particleGlow)"/>
+        <circle cx="1050" cy="180" r="2.2" fill="url(#particleGlow)"/>
+      </g>
+      <g class="particle-float" style="animation-delay: -4s;">
+        <circle cx="250" cy="450" r="2" fill="url(#particleGlow)"/>
+        <circle cx="700" cy="380" r="2.6" fill="url(#particleGlow)"/>
+        <circle cx="950" cy="500" r="2.2" fill="url(#particleGlow)"/>
+      </g>
+      <g class="particle-float" style="animation-delay: -8s;">
+        <circle cx="480" cy="550" r="1.8" fill="url(#particleGlow)"/>
+        <circle cx="880" cy="620" r="2.4" fill="url(#particleGlow)"/>
+        <circle cx="1120" cy="400" r="2" fill="url(#particleGlow)"/>
+      </g>
+
+      <!-- Sứa lơ lửng -->
+      <g class="jellyfish" style="animation-delay: -1s;">
+        <ellipse cx="200" cy="380" rx="38" ry="30" fill="url(#jellyGrad)"/>
+        <path d="M165 395 Q175 440 180 470 M185 395 Q190 445 192 475 M200 395 Q200 450 200 480 M215 395 Q210 445 208 475 M235 395 Q225 440 220 470" stroke="#e8a0d0" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round"/>
+      </g>
+      <g class="jellyfish" style="animation-delay: -5s;">
+        <ellipse cx="980" cy="300" rx="30" ry="24" fill="url(#jellyGrad)"/>
+        <path d="M955 315 Q962 350 966 375 M972 315 Q976 355 978 380 M990 315 Q990 355 990 385 M1008 315 Q1004 350 1000 375" stroke="#e8a0d0" stroke-width="1.8" fill="none" opacity="0.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- Đàn cá nhỏ bơi ngang -->
+      <g class="fish-swim" opacity="0.7">
+        <g transform="translate(0, 0)">
+          <path d="M0 0 Q10 -6 20 0 Q10 6 0 0 Z" fill="#7fd0e8"/>
+          <path d="M-6 0 L-10 -4 L-10 4 Z" fill="#7fd0e8"/>
+        </g>
+        <g transform="translate(28, 12)">
+          <path d="M0 0 Q10 -6 20 0 Q10 6 0 0 Z" fill="#9fe0f0"/>
+          <path d="M-6 0 L-10 -4 L-10 4 Z" fill="#9fe0f0"/>
+        </g>
+        <g transform="translate(14, 24)">
+          <path d="M0 0 Q10 -6 20 0 Q10 6 0 0 Z" fill="#6fc0d8"/>
+          <path d="M-6 0 L-10 -4 L-10 4 Z" fill="#6fc0d8"/>
+        </g>
+      </g>
+      <g class="fish-swim-2" opacity="0.6" style="animation-delay: -8s;">
+        <g transform="translate(0, 0)">
+          <path d="M0 0 Q8 -5 16 0 Q8 5 0 0 Z" fill="#a0d0f0"/>
+          <path d="M-5 0 L-8 -3 L-8 3 Z" fill="#a0d0f0"/>
+        </g>
+        <g transform="translate(22, 10)">
+          <path d="M0 0 Q8 -5 16 0 Q8 5 0 0 Z" fill="#80b8e0"/>
+          <path d="M-5 0 L-8 -3 L-8 3 Z" fill="#80b8e0"/>
+        </g>
+      </g>
+
+      <!-- Bong bóng lớp chậm -->
+      <g class="bubble-slow" opacity="0.7">
+        <circle cx="120" cy="800" r="6" fill="url(#bubbleGrad)"/>
+        <circle cx="300" cy="800" r="4" fill="url(#bubbleGrad)"/>
+        <circle cx="560" cy="800" r="7" fill="url(#bubbleGrad)"/>
+        <circle cx="820" cy="800" r="5" fill="url(#bubbleGrad)"/>
+        <circle cx="1050" cy="800" r="6" fill="url(#bubbleGrad)"/>
+        <circle cx="420" cy="800" r="3.5" fill="url(#bubbleGrad)"/>
+        <circle cx="700" cy="800" r="4.5" fill="url(#bubbleGrad)"/>
+      </g>
+
+      <!-- Bong bóng lớp nhanh -->
+      <g class="bubble-fast" opacity="0.55" style="animation-delay: -4s;">
+        <circle cx="180" cy="800" r="4" fill="url(#bubbleGrad)"/>
+        <circle cx="400" cy="800" r="5" fill="url(#bubbleGrad)"/>
+        <circle cx="620" cy="800" r="3.5" fill="url(#bubbleGrad)"/>
+        <circle cx="900" cy="800" r="6" fill="url(#bubbleGrad)"/>
+        <circle cx="1120" cy="800" r="4" fill="url(#bubbleGrad)"/>
+        <circle cx="260" cy="800" r="3" fill="url(#bubbleGrad)"/>
+        <circle cx="760" cy="800" r="4.5" fill="url(#bubbleGrad)"/>
+      </g>
+
+      <!-- Đáy biển -->
+      <path d="M0 730 Q300 700 600 720 Q900 695 1200 730 L1200 800 L0 800 Z" fill="url(#sandGrad)"/>
+
+      <!-- Rong biển đung đưa -->
+      <g class="seaweed-sway" style="animation-delay: -2s;">
+        <path d="M100 730 Q95 680 105 640 Q115 600 105 560 Q95 520 108 480" stroke="url(#seaweedGrad1)" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M130 730 Q125 690 135 660 Q145 625 132 590 Q122 555 135 520" stroke="url(#seaweedGrad2)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+      <g class="seaweed-sway-2" style="animation-delay: -5s;">
+        <path d="M1060 730 Q1065 685 1055 650 Q1045 610 1058 575 Q1068 540 1055 505" stroke="url(#seaweedGrad2)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M1090 730 Q1085 690 1095 660 Q1105 630 1092 595 Q1082 560 1095 525" stroke="url(#seaweedGrad1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+      <g class="seaweed-sway" style="animation-delay: -8s;">
+        <path d="M580 730 Q575 695 585 665 Q595 635 582 600" stroke="url(#seaweedGrad1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <!-- San hô mờ -->
+      <g opacity="0.35">
+        <ellipse cx="350" cy="740" rx="60" ry="22" fill="#a05080"/>
+        <ellipse cx="880" cy="745" rx="70" ry="25" fill="#c06030"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: CÁ VOI XANH ===== -->
+    <div class="hero" role="img" aria-label="Cá voi xanh khổng lồ bơi lượn trong đại dương sâu thẳm">
+      <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Gradient thân cá voi -->
+          <linearGradient id="whaleBody" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0%" stop-color="#3a8ab0"/>
+            <stop offset="45%" stop-color="#1e5e80"/>
+            <stop offset="100%" stop-color="#0a2a3e"/>
+          </linearGradient>
+          <linearGradient id="whaleBelly" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a0d8e8"/>
+            <stop offset="60%" stop-color="#7ab8d0"/>
+            <stop offset="100%" stop-color="#4a90a8"/>
+          </linearGradient>
+          <radialGradient id="whaleHeadGrad" cx="40%" cy="40%" r="70%">
+            <stop offset="0%" stop-color="#4a9ac0"/>
+            <stop offset="60%" stop-color="#1e5e80"/>
+            <stop offset="100%" stop-color="#0a2a3e"/>
+          </radialGradient>
+          <linearGradient id="tailGrad" x1="0" y1="0" x2="1" y2="0.5">
+            <stop offset="0%" stop-color="#1e5e80"/>
+            <stop offset="100%" stop-color="#2a7aa0"/>
+          </linearGradient>
+          <radialGradient id="eyeWhale" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#d0e8f5"/>
+            <stop offset="100%" stop-color="#6a90a8"/>
+          </radialGradient>
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="spoutGlow" cx="50%" cy="100%" r="60%">
+            <stop offset="0%" stop-color="#e0f8ff" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#a0d8f0" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#80c0e0" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="250" cy="370" rx="130" ry="15" fill="url(#shadowGrad)" opacity="0.5"/>
+
+        <!-- Toàn bộ cá voi – bơi lượn -->
+        <g class="whale-swim">
+          <!-- ===== ĐUÔI (phía sau) ===== -->
+          <g class="whale-tail">
+            <!-- Cuống đuôi -->
+            <path d="M380 230 Q420 215 445 195 Q460 210 450 235 Q435 260 400 275 Q385 255 380 230 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1.2"/>
+            <!-- Vây đuôi -->
+            <path d="M430 210 Q470 180 490 165 Q485 200 465 230 Q450 220 430 210 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1"/>
+            <path d="M430 230 Q465 245 485 260 Q475 230 460 215 Q445 222 430 230 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1"/>
+            <!-- Gân đuôi -->
+            <path d="M410 220 Q440 205 455 195" stroke="#4a9ac0" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== THÂN ===== -->
+          <g class="whale-body">
+            <!-- Thân chính -->
+            <path d="M90 220 Q100 150 180 130 Q280 115 370 155 Q410 175 420 220 Q415 270 370 295 Q280 330 180 310 Q100 290 90 220 Z" fill="url(#whaleBody)" stroke="#062030" stroke-width="1.5"/>
+            <!-- Bụng sáng -->
+            <path d="M120 240 Q140 290 200 300 Q280 315 350 285 Q380 270 390 235 Q360 260 300 270 Q220 280 160 260 Q135 252 120 240 Z" fill="url(#whaleBelly)" opacity="0.9"/>
+            <!-- Đốm sáng lưng -->
+            <ellipse cx="230" cy="170" rx="60" ry="20" fill="#5ab0d0" opacity="0.25"/>
+            <!-- Rãnh bụng -->
+            <path d="M160 260 Q200 275 260 278" stroke="#4a90a8" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round"/>
+            <path d="M170 272 Q210 284 265 285" stroke="#4a90a8" stroke-width="1" fill="none" opacity="0.3" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== VÂY LƯNG ===== -->
+          <g class="dorsal-fin">
+            <path d="M270 140 Q278 100 300 90 Q295 115 290 145 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1"/>
+          </g>
+
+          <!-- ===== VÂY NGỰC ===== -->
+          <g class="pectoral-left">
+            <path d="M180 265 Q165 300 145 330 Q160 335 180 310 Q195 290 195 275 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1.2"/>
+          </g>
+          <g class="pectoral-right">
+            <path d="M220 280 Q230 315 240 340 Q255 338 250 312 Q240 288 230 280 Z" fill="url(#tailGrad)" stroke="#062030" stroke-width="1.2"/>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="whale-head">
+            <!-- Đầu -->
+            <path d="M90 220 Q75 190 90 165 Q110 140 150 135 Q185 132 200 150 Q190 190 175 220 Q150 245 115 245 Q95 240 90 220 Z" fill="url(#whaleHeadGrad)" stroke="#062030" stroke-width="1.4"/>
+
+            <!-- Mảng sáng đầu -->
+            <ellipse cx="130" cy="180" rx="35" ry="20" fill="#5ab0d0" opacity="0.2"/>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <ellipse cx="122" cy="195" rx="9" ry="10" fill="url(#eyeWhale)" stroke="#0a2a3e" stroke-width="0.8"/>
+              <ellipse cx="124" cy="196" rx="4.5" ry="5.5" fill="#0a1a22"/>
+              <circle cx="125" cy="193" r="2" fill="#ffffff" opacity="0.95"/>
+              <circle cx="120" cy="199" r="1" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải -->
+            <g class="eye-right">
+              <ellipse cx="158" cy="198" rx="9" ry="10" fill="url(#eyeWhale)" stroke="#0a2a3e" stroke-width="0.8"/>
+              <ellipse cx="160" cy="199" rx="4.5" ry="5.5" fill="#0a1a22"/>
+              <circle cx="161" cy="196" r="2" fill="#ffffff" opacity="0.95"/>
+              <circle cx="156" cy="202" r="1" fill="#ffffff" opacity="0.5"/>
+            </g>
+
+            <!-- Miệng -->
+            <g class="mouth">
+              <path d="M92 225 Q115 235 145 232" stroke="#0a2a3e" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.7"/>
+            </g>
+
+            <!-- Lỗ phun nước -->
+            <g class="blowhole">
+              <ellipse cx="150" cy="148" rx="6" ry="3" fill="#0a2a3e" opacity="0.7"/>
+              <path d="M144 145 Q145 128 148 118 Q152 128 154 145 Z" fill="url(#spoutGlow)" opacity="0.7"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

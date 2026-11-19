@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chim ruồi – Vườn hoa nhiệt đới</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a3010;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #a8d8e8 0%, #88c0d8 25%, #6090a0 55%, #2a5030 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(72vw, 72vh);
+      height: min(72vw, 72vh);
+      max-width: 520px;
+      max-height: 520px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: CHIM RUỒI === */
+    /* Toàn bộ chim ruồi lơ lửng tại chỗ (đặc trưng hover) */
+    .hummingbird-hover {
+      animation: hoverFloat 3.5s ease-in-out infinite;
+      transform-origin: 50% 55%;
+      will-change: transform;
+    }
+
+    @keyframes hoverFloat {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      25%  { transform: translate(3px, -6px) rotate(1deg); }
+      50%  { transform: translate(-2px, -3px) rotate(0deg); }
+      75%  { transform: translate(-4px, -8px) rotate(-1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* Thân chim – nhịp thở nhanh hơn (chim nhỏ, trao đổi chất cao) */
+    .hummingbird-body {
+      animation: bodyBreath 2.8s ease-in-out infinite;
+      transform-origin: 50% 60%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.02, 1.03); }
+    }
+
+    /* Đầu – nghiêng nhanh tìm hoa */
+    .hummingbird-head {
+      animation: headTilt 3.2s ease-in-out infinite;
+      transform-origin: 50% 85%;
+      will-change: transform;
+    }
+
+    @keyframes headTilt {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(-3deg); }
+      55%  { transform: rotate(2.5deg); }
+      80%  { transform: rotate(-1.5deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    /* Cánh trái – vỗ cực nhanh (đặc trưng chim ruồi) */
+    .wing-left {
+      animation: wingLeftFlap 0.18s linear infinite;
+      transform-origin: 85% 30%;
+      will-change: transform;
+    }
+
+    @keyframes wingLeftFlap {
+      0%   { transform: rotate(0deg) scaleY(1); }
+      50%  { transform: rotate(-25deg) scaleY(0.7); }
+      100% { transform: rotate(0deg) scaleY(1); }
+    }
+
+    /* Cánh phải – vỗ lệch pha cực nhỏ */
+    .wing-right {
+      animation: wingRightFlap 0.18s linear infinite;
+      animation-delay: -0.09s;
+      transform-origin: 15% 30%;
+      will-change: transform;
+    }
+
+    @keyframes wingRightFlap {
+      0%   { transform: rotate(0deg) scaleY(1); }
+      50%  { transform: rotate(25deg) scaleY(0.7); }
+      100% { transform: rotate(0deg) scaleY(1); }
+    }
+
+    /* Đuôi – quạt nhẹ để giữ thăng bằng */
+    .hummingbird-tail {
+      animation: tailFan 2.4s ease-in-out infinite;
+      transform-origin: 90% 50%;
+      will-change: transform;
+    }
+
+    @keyframes tailFan {
+      0%, 100% { transform: rotate(0deg) scaleX(1); }
+      40%      { transform: rotate(-3deg) scaleX(1.05); }
+      75%      { transform: rotate(2deg) scaleX(0.97); }
+    }
+
+    /* Mỏ – nhịp mổ hoa nhẹ */
+    .beak {
+      animation: beakDip 3.5s ease-in-out infinite;
+      transform-origin: 100% 50%;
+      will-change: transform;
+    }
+
+    @keyframes beakDip {
+      0%, 100% { transform: rotate(0deg); }
+      30%      { transform: rotate(4deg); }
+      65%      { transform: rotate(-2deg); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 8.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 10s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Lông ngực óng ánh – lung linh nhẹ */
+    .gorget-shimmer {
+      animation: gorgetShine 5s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes gorgetShine {
+      0%   { opacity: 0.55; }
+      100% { opacity: 0.95; }
+    }
+
+    /* Vệt bóng mờ cánh (motion blur) */
+    .wing-blur {
+      animation: wingBlur 0.18s linear infinite;
+      transform-origin: 85% 30%;
+      will-change: transform, opacity;
+    }
+
+    @keyframes wingBlur {
+      0%   { transform: rotate(0deg); opacity: 0.15; }
+      50%  { transform: rotate(-15deg); opacity: 0.3; }
+      100% { transform: rotate(0deg); opacity: 0.15; }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Ánh sáng mặt trời nhiệt đới */
+    .sun-glow {
+      animation: sunPulse 16s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes sunPulse {
+      0%   { opacity: 0.5; }
+      100% { opacity: 0.8; }
+    }
+
+    /* Mây trôi */
+    .cloud-drift {
+      animation: cloudDrift 48s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes cloudDrift {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-20%); }
+    }
+
+    /* Hoa đung đưa */
+    .flower-sway {
+      animation: flowerSway 5.5s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes flowerSway {
+      0%   { transform: rotate(-2deg); }
+      100% { transform: rotate(2.5deg); }
+    }
+
+    .flower-sway-2 {
+      animation: flowerSway2 6.8s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes flowerSway2 {
+      0%   { transform: rotate(2deg); }
+      100% { transform: rotate(-2.5deg); }
+    }
+
+    /* Lá đung đưa */
+    .leaf-sway {
+      animation: leafSway 4.5s ease-in-out infinite alternate;
+      transform-origin: 0% 50%;
+      will-change: transform;
+    }
+
+    @keyframes leafSway {
+      0%   { transform: rotate(-3deg); }
+      100% { transform: rotate(3deg); }
+    }
+
+    /* Cánh bướm vỗ (bướm nhỏ trong nền) */
+    .butterfly-wing {
+      animation: butterflyFlap 0.5s ease-in-out infinite alternate;
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+
+    @keyframes butterflyFlap {
+      0%   { transform: scaleX(1); }
+      100% { transform: scaleX(0.6); }
+    }
+
+    /* Bướm bay */
+    .butterfly-fly {
+      animation: butterflyFly 20s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes butterflyFly {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      25%  { transform: translate(60px, -40px) rotate(5deg); }
+      50%  { transform: translate(120px, -20px) rotate(-3deg); }
+      75%  { transform: translate(70px, -60px) rotate(4deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* Phấn hoa bay */
+    .pollen-drift {
+      animation: pollenFloat 14s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes pollenFloat {
+      0%   { transform: translate(0, 0); opacity: 0.25; }
+      50%  { transform: translate(12px, -18px); opacity: 0.7; }
+      100% { transform: translate(-8px, -28px); opacity: 0.3; }
+    }
+
+    .pollen-drift-2 {
+      animation: pollenFloat2 18s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+
+    @keyframes pollenFloat2 {
+      0%   { transform: translate(0, 0); opacity: 0.2; }
+      50%  { transform: translate(-14px, 10px); opacity: 0.6; }
+      100% { transform: translate(10px, -12px); opacity: 0.25; }
+    }
+
+    /* Ánh sáng môi trường */
+    .ambient-glow {
+      animation: ambientPulse 15s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes ambientPulse {
+      0%   { opacity: 0.35; }
+      100% { opacity: 0.7; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(86vw, 86vh);
+        height: min(86vw, 86vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: VƯỜN HOA NHIỆT ĐỚI ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bầu trời nhiệt đới -->
+        <linearGradient id="skyTropical" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b8e0f0"/>
+          <stop offset="30%" stop-color="#90c8e0"/>
+          <stop offset="55%" stop-color="#70a8c0"/>
+          <stop offset="80%" stop-color="#4a7880"/>
+          <stop offset="100%" stop-color="#2a5840"/>
+        </linearGradient>
+
+        <!-- Ánh sáng mặt trời -->
+        <radialGradient id="sunGlow" cx="50%" cy="20%" r="55%">
+          <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.7"/>
+          <stop offset="45%" stop-color="#ffe080" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#88c0d8" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Mây -->
+        <linearGradient id="cloudGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#a0d0e0" stop-opacity="0.05"/>
+        </linearGradient>
+
+        <!-- Cây cối xa -->
+        <linearGradient id="foliageFar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a7858"/>
+          <stop offset="100%" stop-color="#1a4028"/>
+        </linearGradient>
+        <linearGradient id="foliageMid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a6040"/>
+          <stop offset="100%" stop-color="#0e2818"/>
+        </linearGradient>
+        <linearGradient id="foliageNear" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1e5030"/>
+          <stop offset="100%" stop-color="#08180c"/>
+        </linearGradient>
+
+        <!-- Hoa hồng -->
+        <radialGradient id="flowerPink" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#fff0f8"/>
+          <stop offset="45%" stop-color="#ffb0d8"/>
+          <stop offset="100%" stop-color="#c04090"/>
+        </radialGradient>
+        <radialGradient id="flowerPink2" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#fff8fc"/>
+          <stop offset="50%" stop-color="#ffd0e8"/>
+          <stop offset="100%" stop-color="#e070b0"/>
+        </radialGradient>
+
+        <!-- Hoa đỏ -->
+        <radialGradient id="flowerRed" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#ffd0b0"/>
+          <stop offset="40%" stop-color="#ff6030"/>
+          <stop offset="100%" stop-color="#a01808"/>
+        </radialGradient>
+
+        <!-- Hoa vàng -->
+        <radialGradient id="flowerYellow" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#fffce0"/>
+          <stop offset="45%" stop-color="#ffe040"/>
+          <stop offset="100%" stop-color="#c09000"/>
+        </radialGradient>
+
+        <!-- Hoa tím -->
+        <radialGradient id="flowerPurple" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#f0e0ff"/>
+          <stop offset="45%" stop-color="#c080f0"/>
+          <stop offset="100%" stop-color="#6020a0"/>
+        </radialGradient>
+
+        <!-- Nhị hoa -->
+        <radialGradient id="stamenGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff8c0"/>
+          <stop offset="100%" stop-color="#e0a020"/>
+        </radialGradient>
+
+        <!-- Lá xanh -->
+        <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#60b870"/>
+          <stop offset="100%" stop-color="#1a5828"/>
+        </linearGradient>
+        <linearGradient id="leafGrad2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#80d090"/>
+          <stop offset="100%" stop-color="#2a7038"/>
+        </linearGradient>
+
+        <!-- Phấn hoa -->
+        <radialGradient id="pollenGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff8c0" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#e0b040" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Bầu trời -->
+      <rect width="1200" height="800" fill="url(#skyTropical)"/>
+
+      <!-- Ánh nắng -->
+      <rect width="1200" height="800" fill="url(#sunGlow)" class="ambient-glow"/>
+
+      <!-- Mặt trời -->
+      <circle cx="950" cy="140" r="60" fill="#fff8d0" opacity="0.5" class="sun-glow"/>
+      <circle cx="950" cy="140" r="42" fill="#ffffff" opacity="0.4"/>
+
+      <!-- Mây trôi -->
+      <g class="cloud-drift" opacity="0.55">
+        <ellipse cx="200" cy="120" rx="160" ry="26" fill="url(#cloudGrad)"/>
+        <ellipse cx="400" cy="100" rx="120" ry="20" fill="url(#cloudGrad)"/>
+        <ellipse cx="700" cy="150" rx="170" ry="28" fill="url(#cloudGrad)"/>
+      </g>
+
+      <!-- Cây cối xa -->
+      <g opacity="0.65">
+        <ellipse cx="150" cy="480" rx="180" ry="120" fill="url(#foliageFar)"/>
+        <ellipse cx="400" cy="500" rx="200" ry="130" fill="url(#foliageFar)"/>
+        <ellipse cx="800" cy="490" rx="220" ry="125" fill="url(#foliageFar)"/>
+        <ellipse cx="1080" cy="480" rx="180" ry="120" fill="url(#foliageFar)"/>
+      </g>
+
+      <!-- Cây cối trung -->
+      <g opacity="0.8">
+        <ellipse cx="80" cy="600" rx="200" ry="140" fill="url(#foliageMid)"/>
+        <ellipse cx="500" cy="620" rx="240" ry="150" fill="url(#foliageMid)"/>
+        <ellipse cx="950" cy="610" rx="220" ry="140" fill="url(#foliageMid)"/>
+        <ellipse cx="1200" cy="600" rx="160" ry="130" fill="url(#foliageMid)"/>
+      </g>
+
+      <!-- Cây cối gần -->
+      <g opacity="0.9">
+        <ellipse cx="0" cy="720" rx="240" ry="160" fill="url(#foliageNear)"/>
+        <ellipse cx="1200" cy="720" rx="240" ry="160" fill="url(#foliageNear)"/>
+      </g>
+
+      <!-- ==== HOA LỚN BÊN TRÁI ==== -->
+      <g class="flower-sway" style="animation-delay: -2s;">
+        <!-- Cuống hoa -->
+        <path d="M180 720 Q170 620 160 540" stroke="#3a8048" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <!-- Lá -->
+        <g class="leaf-sway" style="animation-delay: -1s;">
+          <path d="M165 620 Q120 590 100 620 Q130 640 165 630 Z" fill="url(#leafGrad)" stroke="#1a5828" stroke-width="0.8"/>
+          <path d="M165 620 Q140 600 120 610" stroke="#60b870" stroke-width="1" fill="none" opacity="0.5"/>
+        </g>
+        <g class="leaf-sway" style="animation-delay: -3s;">
+          <path d="M170 660 Q210 640 225 665 Q195 685 170 675 Z" fill="url(#leafGrad2)" stroke="#2a7038" stroke-width="0.8"/>
+        </g>
+        <!-- Cánh hoa -->
+        <g>
+          <ellipse cx="120" cy="510" rx="48" ry="30" fill="url(#flowerPink)" stroke="#c04090" stroke-width="1" transform="rotate(-30 120 510)"/>
+          <ellipse cx="200" cy="510" rx="48" ry="30" fill="url(#flowerPink)" stroke="#c04090" stroke-width="1" transform="rotate(30 200 510)"/>
+          <ellipse cx="160" cy="480" rx="45" ry="32" fill="url(#flowerPink2)" stroke="#c04090" stroke-width="1"/>
+          <ellipse cx="130" cy="545" rx="42" ry="28" fill="url(#flowerPink2)" stroke="#c04090" stroke-width="1" transform="rotate(-15 130 545)"/>
+          <ellipse cx="190" cy="545" rx="42" ry="28" fill="url(#flowerPink2)" stroke="#c04090" stroke-width="1" transform="rotate(15 190 545)"/>
+          <!-- Nhị hoa -->
+          <circle cx="160" cy="525" r="14" fill="url(#stamenGrad)" stroke="#a07010" stroke-width="0.8"/>
+          <circle cx="155" cy="520" r="3" fill="#a07010" opacity="0.6"/>
+          <circle cx="165" cy="522" r="3" fill="#a07010" opacity="0.6"/>
+          <circle cx="160" cy="530" r="3" fill="#a07010" opacity="0.6"/>
+        </g>
+      </g>
+
+      <!-- ==== HOA LỚN BÊN PHẢI ==== -->
+      <g class="flower-sway-2" style="animation-delay: -4s;">
+        <path d="M1030 720 Q1040 620 1050 540" stroke="#3a8048" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <g class="leaf-sway" style="animation-delay: -2s;">
+          <path d="M1045 620 Q1090 590 1110 620 Q1080 640 1045 630 Z" fill="url(#leafGrad2)" stroke="#2a7038" stroke-width="0.8"/>
+        </g>
+        <g class="leaf-sway" style="animation-delay: -4s;">
+          <path d="M1040 660 Q1000 640 985 665 Q1015 685 1040 675 Z" fill="url(#leafGrad)" stroke="#1a5828" stroke-width="0.8"/>
+        </g>
+        <!-- Cánh hoa đỏ -->
+        <g>
+          <ellipse cx="1010" cy="510" rx="46" ry="28" fill="url(#flowerRed)" stroke="#a01808" stroke-width="1" transform="rotate(-25 1010 510)"/>
+          <ellipse cx="1090" cy="510" rx="46" ry="28" fill="url(#flowerRed)" stroke="#a01808" stroke-width="1" transform="rotate(25 1090 510)"/>
+          <ellipse cx="1050" cy="485" rx="44" ry="30" fill="url(#flowerRed)" stroke="#a01808" stroke-width="1"/>
+          <ellipse cx="1020" cy="545" rx="40" ry="26" fill="url(#flowerRed)" stroke="#a01808" stroke-width="1" transform="rotate(-15 1020 545)"/>
+          <ellipse cx="1080" cy="545" rx="40" ry="26" fill="url(#flowerRed)" stroke="#a01808" stroke-width="1" transform="rotate(15 1080 545)"/>
+          <circle cx="1050" cy="525" r="13" fill="url(#stamenGrad)" stroke="#a07010" stroke-width="0.8"/>
+        </g>
+      </g>
+
+      <!-- ==== HOA VÀNG NHỎ ==== -->
+      <g class="flower-sway" style="animation-delay: -3s;">
+        <path d="M400 720 Q405 660 410 620" stroke="#3a8048" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="410" cy="605" r="18" fill="url(#flowerYellow)" stroke="#c09000" stroke-width="0.8"/>
+        <circle cx="410" cy="605" r="8" fill="url(#stamenGrad)"/>
+      </g>
+      <g class="flower-sway-2" style="animation-delay: -5s;">
+        <path d="M780 720 Q775 660 770 620" stroke="#3a8048" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="770" cy="605" r="16" fill="url(#flowerPurple)" stroke="#6020a0" stroke-width="0.8"/>
+        <circle cx="770" cy="605" r="7" fill="url(#stamenGrad)"/>
+      </g>
+
+      <!-- Mặt đất -->
+      <path d="M0 740 Q300 720 600 730 Q900 720 1200 740 L1200 800 L0 800 Z" fill="#2a4820" opacity="0.8"/>
+
+      <!-- Bướm bay -->
+      <g class="butterfly-fly" opacity="0.8">
+        <g class="butterfly-wing">
+          <ellipse cx="-6" cy="-4" rx="9" ry="6" fill="#ff80c0" opacity="0.85" transform="rotate(-20 -6 -4)"/>
+          <ellipse cx="6" cy="-4" rx="9" ry="6" fill="#ff80c0" opacity="0.85" transform="rotate(20 6 -4)"/>
+        </g>
+        <ellipse cx="0" cy="2" rx="2" ry="6" fill="#3a2010"/>
+      </g>
+
+      <!-- Phấn hoa bay 1 -->
+      <g class="pollen-drift">
+        <circle cx="260" cy="400" r="2.5" fill="url(#pollenGrad)"/>
+        <circle cx="480" cy="320" r="2" fill="url(#pollenGrad)"/>
+        <circle cx="720" cy="380" r="2.8" fill="url(#pollenGrad)"/>
+        <circle cx="960" cy="340" r="2.2" fill="url(#pollenGrad)"/>
+      </g>
+
+      <!-- Phấn hoa bay 2 -->
+      <g class="pollen-drift-2" style="animation-delay: -7s;">
+        <circle cx="380" cy="500" r="2.2" fill="url(#pollenGrad)"/>
+        <circle cx="640" cy="480" r="2.6" fill="url(#pollenGrad)"/>
+        <circle cx="880" cy="540" r="2" fill="url(#pollenGrad)"/>
+        <circle cx="1100" cy="500" r="2.4" fill="url(#pollenGrad)"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: CHIM RUỒI ===== -->
+    <div class="hero" role="img" aria-label="Chú chim ruồi xanh ngọc lấp lánh đang hút mật hoa trong vườn nhiệt đới">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Thân chim xanh ngọc -->
+          <linearGradient id="humBody" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0%" stop-color="#60e0a0"/>
+            <stop offset="40%" stop-color="#20a070"/>
+            <stop offset="80%" stop-color="#0a6038"/>
+            <stop offset="100%" stop-color="#033018"/>
+          </linearGradient>
+          <radialGradient id="humBelly" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#e0f8e8"/>
+            <stop offset="60%" stop-color="#a0d8b0"/>
+            <stop offset="100%" stop-color="#60a878"/>
+          </radialGradient>
+          <radialGradient id="humHead" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#80f0b8"/>
+            <stop offset="50%" stop-color="#30b080"/>
+            <stop offset="100%" stop-color="#0a5030"/>
+          </radialGradient>
+
+          <!-- Lông ngực óng ánh (đặc trưng chim ruồi) -->
+          <radialGradient id="gorgetGrad" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#ffe080"/>
+            <stop offset="30%" stop-color="#ff8040"/>
+            <stop offset="60%" stop-color="#e040c0"/>
+            <stop offset="100%" stop-color="#8030d0"/>
+          </radialGradient>
+
+          <!-- Cánh mờ -->
+          <linearGradient id="wingGrad" x1="1" y1="0" x2="0" y2="0.5">
+            <stop offset="0%" stop-color="#80e8c0" stop-opacity="0.9"/>
+            <stop offset="50%" stop-color="#40c090" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#208060" stop-opacity="0.2"/>
+          </linearGradient>
+
+          <!-- Mỏ -->
+          <linearGradient id="beakGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#a08060"/>
+            <stop offset="50%" stop-color="#604030"/>
+            <stop offset="100%" stop-color="#2a1810"/>
+          </linearGradient>
+
+          <!-- Mắt chim ruồi -->
+          <radialGradient id="eyeHum" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#d0f0e0"/>
+            <stop offset="100%" stop-color="#408060"/>
+          </radialGradient>
+          <radialGradient id="pupilHum" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#2a1810"/>
+            <stop offset="60%" stop-color="#0a0504"/>
+            <stop offset="100%" stop-color="#000000"/>
+          </radialGradient>
+
+          <!-- Đuôi -->
+          <linearGradient id="tailGrad" x1="0" y1="0" x2="1" y2="0.5">
+            <stop offset="0%" stop-color="#0a6038"/>
+            <stop offset="50%" stop-color="#20a070"/>
+            <stop offset="100%" stop-color="#60e0a0"/>
+          </linearGradient>
+
+          <!-- Giọt mật hoa -->
+          <radialGradient id="nectarGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff8e0" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#ffe080" stop-opacity="0.3"/>
+          </radialGradient>
+
+          <!-- Bóng đổ -->
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="200" cy="370" rx="70" ry="10" fill="url(#shadowGrad)" opacity="0.4"/>
+
+        <!-- Toàn bộ chim ruồi -->
+        <g class="hummingbird-hover">
+
+          <!-- ===== CÁNH TRÁI (phía sau) ===== -->
+          <g class="wing-left">
+            <path d="M200 175 Q140 130 95 95 Q120 145 145 180 Q170 195 195 190 Z" fill="url(#wingGrad)" stroke="#208060" stroke-width="0.8" opacity="0.85"/>
+            <!-- Vân lông cánh -->
+            <path d="M195 175 Q160 145 130 120 M185 182 Q155 160 125 140" stroke="#a0f0d0" stroke-width="0.8" fill="none" opacity="0.5"/>
+          </g>
+          <!-- Motion blur cánh trái -->
+          <g class="wing-blur">
+            <path d="M200 175 Q150 140 105 105 Q125 150 150 180 Z" fill="url(#wingGrad)" opacity="0.2"/>
+          </g>
+
+          <!-- ===== CÁNH PHẢI ===== -->
+          <g class="wing-right">
+            <path d="M240 175 Q300 130 345 95 Q320 145 295 180 Q270 195 245 190 Z" fill="url(#wingGrad)" stroke="#208060" stroke-width="0.8" opacity="0.85"/>
+            <path d="M245 175 Q280 145 310 120 M255 182 Q285 160 315 140" stroke="#a0f0d0" stroke-width="0.8" fill="none" opacity="0.5"/>
+          </g>
+          <g class="wing-blur">
+            <path d="M240 175 Q290 140 335 105 Q315 150 290 180 Z" fill="url(#wingGrad)" opacity="0.2"/>
+          </g>
+
+          <!-- ===== ĐUÔI ===== -->
+          <g class="hummingbird-tail">
+            <path d="M305 240 Q350 230 370 215 Q355 250 340 265 Q320 275 305 265 Z" fill="url(#tailGrad)" stroke="#033018" stroke-width="1"/>
+            <!-- Vân đuôi -->
+            <path d="M320 245 Q345 235 360 225 M320 258 Q345 250 358 240" stroke="#a0f0d0" stroke-width="0.8" fill="none" opacity="0.5"/>
+          </g>
+
+          <!-- ===== THÂN ===== -->
+          <g class="hummingbird-body">
+            <!-- Thân chính -->
+            <ellipse cx="240" cy="210" rx="65" ry="42" fill="url(#humBody)" stroke="#033018" stroke-width="1.3" transform="rotate(-20 240 210)"/>
+            <!-- Bụng sáng -->
+            <ellipse cx="245" cy="225" rx="42" ry="24" fill="url(#humBelly)" stroke="#60a878" stroke-width="0.8" transform="rotate(-20 245 225)" opacity="0.85"/>
+            <!-- Ánh sáng lưng -->
+            <ellipse cx="230" cy="195" rx="22" ry="10" fill="#c0ffe0" opacity="0.35" transform="rotate(-20 230 195)"/>
+            <!-- Lông ngực óng ánh -->
+            <ellipse cx="205" cy="230" rx="22" ry="18" fill="url(#gorgetGrad)" opacity="0.85" class="gorget-shimmer"/>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="hummingbird-head">
+            <!-- Đầu -->
+            <ellipse cx="185" cy="185" rx="32" ry="28" fill="url(#humHead)" stroke="#033018" stroke-width="1.2"/>
+
+            <!-- Mảng sáng đầu -->
+            <ellipse cx="180" cy="175" rx="14" ry="9" fill="#c0ffe0" opacity="0.35"/>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <ellipse cx="172" cy="182" rx="6.5" ry="7.5" fill="url(#eyeHum)" stroke="#204030" stroke-width="0.8"/>
+              <ellipse cx="173" cy="183" rx="3.5" ry="5" fill="url(#pupilHum)"/>
+              <circle cx="174" cy="179" r="1.8" fill="#ffffff" opacity="0.95"/>
+              <circle cx="170" cy="186" r="0.8" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải (hơi khuất) -->
+            <g class="eye-right">
+              <ellipse cx="192" cy="184" rx="5.5" ry="6.5" fill="url(#eyeHum)" stroke="#204030" stroke-width="0.8"/>
+              <ellipse cx="193" cy="185" rx="3" ry="4.2" fill="url(#pupilHum)"/>
+              <circle cx="194" cy="182" r="1.5" fill="#ffffff" opacity="0.95"/>
+            </g>
+
+            <!-- Mỏ dài đặc trưng -->
+            <g class="beak">
+              <path d="M158 192 Q130 190 105 185 L108 192 Q130 195 158 198 Z" fill="url(#beakGrad)" stroke="#1a0a04" stroke-width="0.8"/>
+              <path d="M110 187 Q130 191 155 194" stroke="#a08060" stroke-width="0.5" fill="none" opacity="0.6"/>
+            </g>
+
+            <!-- Giọt mật hoa ở đầu mỏ -->
+            <circle cx="103" cy="188" r="3" fill="url(#nectarGrad)" opacity="0.85"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

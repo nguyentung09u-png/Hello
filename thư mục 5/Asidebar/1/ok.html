@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sidebar Menu · SVG Motion</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --sidebar-width: 280px;
+      --sidebar-collapsed: 88px;
+      --bg-dark: #0b0f17;
+      --bg-panel: rgba(18, 24, 36, 0.82);
+      --bg-panel-hover: rgba(30, 40, 58, 0.9);
+      --border-glass: rgba(255, 255, 255, 0.06);
+      --text-primary: #eef2f8;
+      --text-secondary: #8b9bb4;
+      --accent: #5b8cff;
+      --accent-glow: rgba(91, 140, 255, 0.35);
+      --accent-soft: rgba(91, 140, 255, 0.12);
+      --danger: #ff5c7c;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --transition-smooth: 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 20% 10%, #101828 0%, #070a0f 100%);
+      overflow: hidden;
+    }
+
+    .bg-gradient {
+      position: absolute;
+      inset: -50%;
+      background: radial-gradient(circle at 30% 30%, rgba(91, 140, 255, 0.10) 0%, transparent 55%),
+                  radial-gradient(circle at 75% 70%, rgba(140, 100, 255, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 90%, rgba(80, 200, 255, 0.05) 0%, transparent 60%);
+      animation: bgShift 24s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgShift {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(2%, -1.5%) scale(1.04); }
+      100% { transform: translate(-1.5%, 2%) scale(1.02); }
+    }
+
+    .bg-light {
+      position: absolute;
+      width: 60vw;
+      height: 60vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(91, 140, 255, 0.055) 0%, transparent 70%);
+      top: 15%;
+      left: 5%;
+      animation: lightDrift 32s ease-in-out infinite alternate;
+    }
+
+    .bg-light.second {
+      width: 45vw;
+      height: 45vw;
+      top: auto;
+      left: auto;
+      bottom: 5%;
+      right: 0%;
+      background: radial-gradient(circle, rgba(160, 110, 255, 0.04) 0%, transparent 70%);
+      animation-duration: 28s;
+      animation-delay: -8s;
+    }
+
+    @keyframes lightDrift {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(4%, 3%); }
+    }
+
+    .bg-lines {
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at 40% 50%, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at 40% 50%, black 30%, transparent 80%);
+      animation: gridPulse 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes gridPulse {
+      0%   { opacity: 0.25; }
+      100% { opacity: 0.45; }
+    }
+
+    /* ===== HAMBURGER (Mobile) ===== */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 100;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-glass);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-smooth), transform var(--transition-smooth);
+    }
+
+    .hamburger:active {
+      transform: scale(0.93);
+      background: var(--bg-panel-hover);
+    }
+
+    .hamburger span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      position: relative;
+      transition: background var(--transition-smooth);
+    }
+
+    .hamburger span::before,
+    .hamburger span::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 20px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: transform var(--transition-smooth);
+    }
+
+    .hamburger span::before { top: -6px; }
+    .hamburger span::after  { top: 6px; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: var(--sidebar-width);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-right: 1px solid var(--border-glass);
+      box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
+      transition: width var(--transition-smooth), transform var(--transition-smooth);
+      will-change: width, transform;
+      overflow: hidden;
+      padding: 28px 18px 24px;
+      user-select: none;
+    }
+
+    /* Desktop collapsed */
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    /* Mobile off-canvas */
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width) !important;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 12px 0 60px rgba(0, 0, 0, 0.6);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .hamburger {
+        display: flex;
+      }
+      .sidebar.collapsed {
+        width: var(--sidebar-width) !important;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+
+    /* ===== BRAND / LOGO ===== */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 6px 22px;
+      flex-shrink: 0;
+      position: relative;
+      transition: padding var(--transition-smooth);
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(91, 140, 255, 0.18), rgba(91, 140, 255, 0.04));
+      border: 1px solid rgba(91, 140, 255, 0.2);
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .brand-logo .orbit {
+      transform-origin: 16px 16px;
+      animation: orbitSpin 14s linear infinite;
+    }
+
+    @keyframes orbitSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .brand-logo .pulse-dot {
+      animation: dotPulse 3s ease-in-out infinite;
+      transform-origin: 16px 16px;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.7; r: 2.2; }
+      50%      { opacity: 1;   r: 2.8; }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+    }
+
+    .brand-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: linear-gradient(90deg, #c8d8ff, #7aa2ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-tag {
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sidebar.collapsed .brand-text {
+      opacity: 0;
+      transform: translateX(-8px);
+      pointer-events: none;
+    }
+
+    .sidebar.collapsed .brand {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .sidebar.collapsed .brand-logo {
+      transform: scale(0.92);
+    }
+
+    /* ===== NAV LIST ===== */
+    .nav-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 2px;
+      margin-right: -4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+
+    .nav-scroll::-webkit-scrollbar { width: 4px; }
+    .nav-scroll::-webkit-scrollbar-track { background: transparent; }
+    .nav-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 18px;
+    }
+
+    .nav-group-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      padding: 0 12px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity var(--transition-smooth);
+    }
+
+    .sidebar.collapsed .nav-group-label {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background var(--transition-smooth), color var(--transition-smooth),
+                  border-color var(--transition-smooth), transform 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-panel-hover);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item:active {
+      transform: scale(0.985);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(105deg, var(--accent-soft), rgba(91, 140, 255, 0.04));
+      color: var(--text-primary);
+      border-color: rgba(91, 140, 255, 0.28);
+      box-shadow: 0 0 22px -6px var(--accent-glow), inset 0 0 18px rgba(91, 140, 255, 0.06);
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 22px;
+      border-radius: 0 4px 4px 0;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    /* Icon container */
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition-smooth);
+      color: currentColor;
+    }
+
+    .nav-icon svg {
+      width: 22px;
+      height: 22px;
+      overflow: visible;
+    }
+
+    .nav-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(91, 140, 255, 0.18);
+      color: #9dbcff;
+      border: 1px solid rgba(91, 140, 255, 0.22);
+      transition: opacity var(--transition-smooth);
+    }
+
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .nav-badge {
+      opacity: 0;
+      transform: translateX(-6px);
+      pointer-events: none;
+      width: 0;
+    }
+
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      gap: 0;
+    }
+
+    /* === SVG MOTION – per item hover/active === */
+    .nav-item:hover .nav-icon {
+      transform: scale(1.08);
+    }
+    .nav-item:active .nav-icon {
+      transform: scale(0.95);
+    }
+
+    .nav-item.active .nav-icon {
+      transform: scale(1.06);
+    }
+
+    /* Individual icon animations */
+    .icon-dash .bar-1 { animation: barBounce 2.6s ease-in-out infinite; transform-origin: bottom; }
+    .icon-dash .bar-2 { animation: barBounce 2.6s ease-in-out infinite 0.3s; transform-origin: bottom; }
+    .icon-dash .bar-3 { animation: barBounce 2.6s ease-in-out infinite 0.6s; transform-origin: bottom; }
+
+    @keyframes barBounce {
+      0%, 100% { transform: scaleY(1); }
+      50%      { transform: scaleY(0.6); }
+    }
+
+    .icon-calendar .cal-dot { animation: dotPulse 2.8s ease-in-out infinite; transform-origin: center; }
+    .icon-calendar .cal-dot:nth-child(2) { animation-delay: 0.3s; }
+    .icon-calendar .cal-dot:nth-child(3) { animation-delay: 0.6s; }
+
+    .icon-analytics .spark { animation: sparkFloat 3.2s ease-in-out infinite; }
+    .icon-analytics .spark:nth-child(2) { animation-delay: 0.5s; }
+
+    @keyframes sparkFloat {
+      0%, 100% { transform: translateY(0); opacity: 0.85; }
+      50%      { transform: translateY(-2.5px); opacity: 1; }
+    }
+
+    .icon-settings .gear {
+      transform-origin: 12px 12px;
+      animation: gearSpin 9s linear infinite;
+    }
+
+    @keyframes gearSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .icon-message .msg-line {
+      animation: msgBlink 3s ease-in-out infinite;
+      transform-origin: left;
+    }
+    .icon-message .msg-line:nth-child(2) { animation-delay: 0.4s; }
+    .icon-message .msg-line:nth-child(3) { animation-delay: 0.8s; }
+
+    @keyframes msgBlink {
+      0%, 100% { opacity: 0.5; }
+      50%      { opacity: 1; }
+    }
+
+    .icon-project .p-ring {
+      animation: ringExpand 3.5s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes ringExpand {
+      0%, 100% { transform: scale(0.9); opacity: 0.35; }
+      50%      { transform: scale(1.06); opacity: 0.7; }
+    }
+
+    .icon-home .home-door {
+      animation: doorSway 4s ease-in-out infinite;
+      transform-origin: right center;
+    }
+
+    @keyframes doorSway {
+      0%, 100% { transform: rotate(0deg); }
+      40%      { transform: rotate(-4deg); }
+      70%      { transform: rotate(1deg); }
+    }
+
+    /* ===== TOGGLE & CLOSE (bottom area) ===== */
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: opacity var(--transition-smooth);
+    }
+
+    .footer-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      transition: background var(--transition-smooth);
+    }
+
+    .footer-profile:hover {
+      background: var(--bg-panel-hover);
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #3a5bd0, #6a4fd8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-info {
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+    }
+
+    .footer-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .footer-role {
+      font-size: 0.64rem;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .sidebar.collapsed .footer-info {
+      opacity: 0;
+      transform: translateX(-6px);
+      pointer-events: none;
+      width: 0;
+    }
+
+    .sidebar.collapsed .footer-profile {
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .sidebar.collapsed .avatar {
+      width: 34px;
+      height: 34px;
+    }
+
+    /* toggle & close buttons */
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background var(--transition-smooth), color var(--transition-smooth),
+                  border-color var(--transition-smooth), transform 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-panel-hover);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.92);
+    }
+
+    .btn-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-collapse svg {
+      transition: transform var(--transition-smooth);
+    }
+
+    .sidebar.collapsed .btn-collapse svg {
+      transform: rotate(180deg);
+    }
+
+    .btn-close-mobile {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .btn-collapse { display: none; }
+      .btn-close-mobile { display: flex; }
+    }
+
+    /* Collapsed – hide text & actions center */
+    .sidebar.collapsed .actions-row {
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar.collapsed .btn-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    /* ===== OVERLAY (mobile) ===== */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      z-index: 40;
+      opacity: 0;
+      transition: opacity var(--transition-smooth);
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .overlay {
+        display: block;
+      }
+      .overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+    .nav-item:focus-visible,
+    .btn-icon:focus-visible,
+    .hamburger:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ===== PREVENT FLICKER ===== */
+    .sidebar, .nav-item, .brand-logo, .btn-icon, .hamburger {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANIMATED BACKGROUND -->
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-gradient"></div>
+    <div class="bg-light"></div>
+    <div class="bg-light second"></div>
+    <div class="bg-lines"></div>
+  </div>
+
+  <!-- HAMBURGER -->
+  <button class="hamburger" id="hamburger" aria-label="Mở menu" aria-expanded="false">
+    <span></span>
+  </button>
+
+  <!-- OVERLAY -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+
+    <!-- BRAND -->
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="11" stroke="url(#brandGrad)" stroke-width="1.4" stroke-dasharray="3 4" class="orbit"/>
+          <circle cx="16" cy="16" r="5.5" stroke="url(#brandGrad)" stroke-width="1.6"/>
+          <circle cx="16" cy="16" r="2.4" fill="#5b8cff" class="pulse-dot"/>
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0%" stop-color="#7aa2ff"/>
+              <stop offset="100%" stop-color="#b06aff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Nexus</span>
+        <span class="brand-tag">Workspace</span>
+      </div>
+    </div>
+
+    <!-- NAV SCROLL -->
+    <div class="nav-scroll">
+      <div class="nav-group">
+        <div class="nav-group-label">Tổng quan</div>
+
+        <!-- DASHBOARD -->
+        <div class="nav-item active" data-nav="dashboard" tabindex="0" role="button" aria-current="page">
+          <span class="nav-icon icon-dash">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+              <rect x="3" y="12" width="4" height="9" rx="1" class="bar-1" fill="currentColor" opacity="0.85"/>
+              <rect x="10" y="6" width="4" height="15" rx="1" class="bar-2" fill="currentColor" opacity="0.85"/>
+              <rect x="17" y="9" width="4" height="12" rx="1" class="bar-3" fill="currentColor" opacity="0.85"/>
+            </svg>
+          </span>
+          <span class="nav-label">Bảng điều khiển</span>
+        </div>
+
+        <!-- PROJECTS -->
+        <div class="nav-item" data-nav="projects" tabindex="0" role="button">
+          <span class="nav-icon icon-project">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+              <circle cx="12" cy="12" r="8" class="p-ring" stroke-dasharray="2.5 3"/>
+              <circle cx="12" cy="12" r="4.5"/>
+              <circle cx="12" cy="12" r="1.6" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="nav-label">Dự án</span>
+          <span class="nav-badge">12</span>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="nav-item" data-nav="analytics" tabindex="0" role="button">
+          <span class="nav-icon icon-analytics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19L9 12L13 15L20 5" class="spark"/>
+              <circle cx="9" cy="12" r="1.6" fill="currentColor" stroke="none" class="spark"/>
+              <circle cx="13" cy="15" r="1.6" fill="currentColor" stroke="none" class="spark"/>
+              <circle cx="20" cy="5" r="1.6" fill="currentColor" stroke="none" class="spark"/>
+            </svg>
+          </span>
+          <span class="nav-label">Phân tích</span>
+        </div>
+
+        <!-- CALENDAR -->
+        <div class="nav-item" data-nav="calendar" tabindex="0" role="button">
+          <span class="nav-icon icon-calendar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+              <rect x="3.5" y="5" width="17" height="15" rx="2.5"/>
+              <path d="M8 3V7M16 3V7"/>
+              <path d="M3.5 10H20.5" opacity="0.5"/>
+              <circle cx="8.5" cy="14" r="1.2" fill="currentColor" stroke="none" class="cal-dot"/>
+              <circle cx="12" cy="14" r="1.2" fill="currentColor" stroke="none" class="cal-dot"/>
+              <circle cx="15.5" cy="14" r="1.2" fill="currentColor" stroke="none" class="cal-dot"/>
+            </svg>
+          </span>
+          <span class="nav-label">Lịch</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">Cộng tác</div>
+
+        <!-- MESSAGES -->
+        <div class="nav-item" data-nav="messages" tabindex="0" role="button">
+          <span class="nav-icon icon-message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6H20V16.5C20 17.6 19.1 18.5 18 18.5H8L4 21.5V6Z"/>
+              <line x1="8" y1="10" x2="16" y2="10" class="msg-line"/>
+              <line x1="8" y1="13.5" x2="13" y2="13.5" class="msg-line"/>
+            </svg>
+          </span>
+          <span class="nav-label">Tin nhắn</span>
+          <span class="nav-badge">3</span>
+        </div>
+
+        <!-- HOME -->
+        <div class="nav-item" data-nav="home" tabindex="0" role="button">
+          <span class="nav-icon icon-home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.5 10.5L12 3.5L20.5 10.5V19C20.5 19.8 19.8 20.5 19 20.5H5C4.2 20.5 3.5 19.8 3.5 19V10.5Z"/>
+              <path d="M14.5 20.5V15.5H9.5V20.5" class="home-door"/>
+            </svg>
+          </span>
+          <span class="nav-label">Trang chủ</span>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="nav-item" data-nav="settings" tabindex="0" role="button">
+          <span class="nav-icon icon-settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3.2"/>
+              <g class="gear">
+                <path d="M12 2.5V5.5M12 18.5V21.5M2.5 12H5.5M18.5 12H21.5M5.3 5.3L7.4 7.4M16.6 16.6L18.7 18.7M18.7 5.3L16.6 7.4M7.4 16.6L5.3 18.7"/>
+              </g>
+            </svg>
+          </span>
+          <span class="nav-label">Cài đặt</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="sidebar-footer">
+      <div class="footer-profile">
+        <div class="avatar">AD</div>
+        <div class="footer-info">
+          <div class="footer-name">Alex Designer</div>
+          <div class="footer-role">Quản trị viên</div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-icon btn-collapse" id="btnCollapse" aria-label="Thu gọn sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18L9 12L15 6"/>
+          </svg>
+        </button>
+        <button class="btn-icon btn-close-mobile" id="btnCloseMobile" aria-label="Đóng sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6L18 18M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <script>
+    (function() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const hamburger = document.getElementById('hamburger');
+      const btnCollapse = document.getElementById('btnCollapse');
+      const btnCloseMobile = document.getElementById('btnCloseMobile');
+      const navItems = document.querySelectorAll('.nav-item');
+
+      // === Mobile detection ===
+      function isMobile() {
+        return window.matchMedia('(max-width: 900px)').matches;
+      }
+
+      // === Open / close mobile sidebar ===
+      function openMobile() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        hamburger.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMobile() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
+
+      hamburger.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+          closeMobile();
+        } else {
+          openMobile();
+        }
+      });
+
+      overlay.addEventListener('click', closeMobile);
+      btnCloseMobile.addEventListener('click', closeMobile);
+
+      // Close on escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMobile() && sidebar.classList.contains('open')) {
+          closeMobile();
+        }
+      });
+
+      // === Desktop collapse toggle ===
+      btnCollapse.addEventListener('click', () => {
+        if (!isMobile()) {
+          sidebar.classList.toggle('collapsed');
+          // persist preference
+          try {
+            localStorage.setItem('sidebarCollapsed',
+              sidebar.classList.contains('collapsed') ? '1' : '0');
+          } catch (_) {}
+        }
+      });
+
+      // Restore collapsed state on desktop
+      if (!isMobile()) {
+        try {
+          if (localStorage.getItem('sidebarCollapsed') === '1') {
+            sidebar.classList.add('collapsed');
+          }
+        } catch (_) {}
+      }
+
+      // Close mobile sidebar when resizing to desktop
+      window.addEventListener('resize', () => {
+        if (!isMobile()) {
+          closeMobile();
+        }
+      });
+
+      // === Active nav item selection ===
+      navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          // Remove active from all
+          navItems.forEach(n => {
+            n.classList.remove('active');
+            n.removeAttribute('aria-current');
+          });
+
+          // Set active
+          item.classList.add('active');
+          item.setAttribute('aria-current', 'page');
+
+          // On mobile, close sidebar after selection
+          if (isMobile()) {
+            closeMobile();
+          }
+        });
+
+        // Keyboard accessibility
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            item.click();
+          }
+        });
+      });
+
+      // === Prevent flicker: force GPU compositing on toggles ===
+      // (CSS already handles backface-visibility & translateZ)
+
+      // === Optional: subtle parallax on background (light mouse follow) ===
+      // Disabled on reduced motion
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const bgLight = document.querySelector('.bg-light');
+        const bgLight2 = document.querySelector('.bg-light.second');
+        let mouseX = 0, mouseY = 0;
+        let rafId = null;
+
+        document.addEventListener('mousemove', (e) => {
+          mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+          mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+          if (!rafId) {
+            rafId = requestAnimationFrame(() => {
+              bgLight.style.transform = `translate(${mouseX * 12}px, ${mouseY * 12}px)`;
+              bgLight2.style.transform = `translate(${mouseX * -8}px, ${mouseY * -8}px)`;
+              rafId = null;
+            });
+          }
+        });
+      }
+
+      // === Ensure no horizontal overflow on small screens ===
+      // (Sidebar is fixed, body overflow hidden)
+
+      // === Add touch-friendly tap delay removal ===
+      document.addEventListener('touchstart', () => {}, { passive: true });
+    })();
+  </script>
+</body>
+</html>

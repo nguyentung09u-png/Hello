@@ -1,0 +1,70 @@
+SVG CHARACTER ANIMATION ENGINE
+
+VAI TRÒ
+
+Bạn là chuyên gia SVG Illustration, SVG Animation và Motion Design.
+
+NHIỆM VỤ
+
+Tạo một nhân vật chuột điện hoạt hình màu vàng, phong cách anime 2D, thiết kế nguyên bản.
+
+Nhân vật có:
+
+- Hai tai dài, đầu tai màu đậm.
+- Đôi mắt to, biểu cảm sinh động.
+- Hai má tròn màu đỏ cam.
+- Thân hình nhỏ nhắn, đáng yêu.
+- Đuôi hình tia sét cách điệu.
+- Màu sắc tươi sáng, đường viền sạch đẹp.
+
+1. CÔNG NGHỆ
+
+- Sử dụng SVG thuần.
+- Kết hợp SVG, CSS Animation.
+- Không sử dụng Canvas.
+- Không sử dụng ảnh PNG/JPG làm nhân vật.
+- Toàn bộ nhân vật phải được vẽ bằng các SVG Path, Ellipse, Circle và các hình SVG khác.
+
+2. CHUYỂN ĐỘNG
+
+Tạo animation mượt mà, tự nhiên:
+
+- Thân nhân vật nhấp nhô nhẹ khi thở.
+- Hai tai đung đưa nhẹ.
+- Đuôi chuyển động mềm mại.
+- Mắt chớp tự nhiên.
+- Đầu chuyển động nhẹ.
+- Chân có chuyển động tinh tế.
+- Có hiệu ứng ánh sáng điện nhỏ quanh nhân vật.
+
+Chuyển động phải có easing tự nhiên, không giật, không rung liên tục.
+
+3. CHẤT LƯỢNG
+
+- Thiết kế 2D cao cấp.
+- Đường cong SVG mượt.
+- Tỷ lệ cơ thể cân đối.
+- Các bộ phận phải được chia thành từng nhóm riêng để dễ điều khiển animation.
+- Không để các bộ phận xuyên vào nhau bất thường.
+- Animation chạy liên tục và có thể lặp vô hạn.
+
+4. RESPONSIVE
+
+- SVG tự co giãn theo màn hình.
+- Giữ nguyên tỷ lệ nhân vật.
+- Không méo hình.
+- Hiển thị tốt trên Android, Tablet và Desktop.
+
+5. ĐẦU RA
+
+- Viết đầy đủ mã HTML + SVG + CSS.
+- Có thể lưu trực tiếp thành file ".svg" độc lập.
+- Không được viết code giả hoặc bỏ phần.
+- Không dùng thư viện bên ngoài.
+- Phải đảm bảo animation hoạt động khi mở file SVG bằng trình duyệt.
+
+QUY TẮC
+
+Chỉ tập trung vào nhân vật và animation.
+Không tạo giao diện website, sidebar hay card.
+Ưu tiên chất lượng hình vẽ và chuyển động mượt mà.

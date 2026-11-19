@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cú mèo – Thư viện cổ phép thuật</title>
+  <style>
+    /* === RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a0f08;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* === KHUNG NHÌN CHÍNH === */
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 45%, #3a2414 0%, #1a0f08 60%, #0a0503 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: min(70vw, 70vh);
+      height: min(70vw, 70vh);
+      max-width: 500px;
+      max-height: 500px;
+      will-change: transform;
+    }
+
+    .hero svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* === ANIMATION ĐỐI TƯỢNG: CÚ MÈO HỌC GIẢ === */
+    .owl-float {
+      animation: owlFloat 8.5s ease-in-out infinite;
+      transform-origin: 50% 55%;
+      will-change: transform;
+    }
+
+    @keyframes owlFloat {
+      0%   { transform: translateY(0) rotate(0deg); }
+      30%  { transform: translateY(-7px) rotate(0.8deg); }
+      60%  { transform: translateY(3px) rotate(-0.6deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Thân cú – nhịp thở chậm */
+    .owl-body {
+      animation: bodyBreath 6s ease-in-out infinite;
+      transform-origin: 50% 70%;
+      will-change: transform;
+    }
+
+    @keyframes bodyBreath {
+      0%, 100% { transform: scale(1, 1); }
+      50%      { transform: scale(1.018, 1.03); }
+    }
+
+    /* Đầu cú – gật gù đọc sách */
+    .owl-head {
+      animation: headNod 7s ease-in-out infinite;
+      transform-origin: 50% 90%;
+      will-change: transform;
+    }
+
+    @keyframes headNod {
+      0%   { transform: translateY(0) rotate(0deg); }
+      25%  { transform: translateY(-2px) rotate(2deg); }
+      55%  { transform: translateY(1px) rotate(-1.5deg); }
+      80%  { transform: translateY(-1px) rotate(0.8deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* Tai chùm lông trái – vểnh nhẹ */
+    .tuft-left {
+      animation: tuftLeft 5s ease-in-out infinite;
+      transform-origin: 70% 100%;
+      will-change: transform;
+    }
+
+    @keyframes tuftLeft {
+      0%, 100% { transform: rotate(0deg) scaleY(1); }
+      35%      { transform: rotate(-5deg) scaleY(1.04); }
+      70%      { transform: rotate(3deg) scaleY(0.98); }
+    }
+
+    /* Tai chùm lông phải – lệch pha */
+    .tuft-right {
+      animation: tuftRight 5.8s ease-in-out infinite;
+      transform-origin: 30% 100%;
+      will-change: transform;
+    }
+
+    @keyframes tuftRight {
+      0%, 100% { transform: rotate(0deg) scaleY(1); }
+      40%      { transform: rotate(5deg) scaleY(1.03); }
+      75%      { transform: rotate(-3deg) scaleY(0.98); }
+    }
+
+    /* Mắt trái – nháy chậm */
+    .eye-left {
+      animation: blinkLeft 9.5s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkLeft {
+      0%, 45%, 53%, 100% { transform: scaleY(1); }
+      49% { transform: scaleY(0.08); }
+    }
+
+    /* Mắt phải – lệch nhịp */
+    .eye-right {
+      animation: blinkRight 11s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes blinkRight {
+      0%, 64%, 72%, 100% { transform: scaleY(1); }
+      68% { transform: scaleY(0.08); }
+    }
+
+    /* Cánh trái – khép mở nhẹ */
+    .wing-left {
+      animation: wingLeft 6.5s ease-in-out infinite;
+      transform-origin: 75% 20%;
+      will-change: transform;
+    }
+
+    @keyframes wingLeft {
+      0%   { transform: rotate(0deg) scaleX(1); }
+      30%  { transform: rotate(-4deg) scaleX(1.03); }
+      65%  { transform: rotate(2deg) scaleX(0.98); }
+      100% { transform: rotate(0deg) scaleX(1); }
+    }
+
+    /* Cánh phải – lệch pha */
+    .wing-right {
+      animation: wingRight 7.2s ease-in-out infinite;
+      transform-origin: 25% 20%;
+      will-change: transform;
+    }
+
+    @keyframes wingRight {
+      0%   { transform: rotate(0deg) scaleX(1); }
+      35%  { transform: rotate(4deg) scaleX(1.03); }
+      70%  { transform: rotate(-2deg) scaleX(0.98); }
+      100% { transform: rotate(0deg) scaleX(1); }
+    }
+
+    /* Chân trái – đung đưa nhẹ */
+    .leg-left {
+      animation: legLeft 7.8s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legLeft {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      40%      { transform: rotate(3deg) translateY(-2px); }
+      75%      { transform: rotate(-2deg) translateY(1px); }
+    }
+
+    /* Chân phải – lệch pha */
+    .leg-right {
+      animation: legRight 8.5s ease-in-out infinite;
+      transform-origin: 50% 10%;
+      will-change: transform;
+    }
+
+    @keyframes legRight {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      45%      { transform: rotate(-3deg) translateY(1px); }
+      80%      { transform: rotate(4deg) translateY(-2px); }
+    }
+
+    /* Sách phép thuật – hơi mở nhẹ */
+    .book-pages {
+      animation: pageTurn 9s ease-in-out infinite;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    @keyframes pageTurn {
+      0%, 100% { transform: scaleX(1) rotate(0deg); }
+      50%      { transform: scaleX(1.03) rotate(-1deg); }
+    }
+
+    /* Ánh sáng phép thuật từ sách */
+    .book-glow {
+      animation: bookGlow 5.5s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes bookGlow {
+      0%   { opacity: 0.4; }
+      100% { opacity: 0.85; }
+    }
+
+    /* Kính mắt cú – ánh phản chiếu */
+    .glasses-shine {
+      animation: glassesShine 7.5s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes glassesShine {
+      0%   { opacity: 0.35; }
+      100% { opacity: 0.7; }
+    }
+
+    /* === BACKGROUND ANIMATIONS === */
+    /* Ánh nến ấm lan tỏa */
+    .candle-glow {
+      animation: candlePulse 8s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes candlePulse {
+      0%   { opacity: 0.35; }
+      100% { opacity: 0.7; }
+    }
+
+    /* Bụi phép thuật bay lên */
+    .magic-dust {
+      animation: dustRise 12s linear infinite;
+      will-change: transform, opacity;
+    }
+
+    @keyframes dustRise {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      15%  { opacity: 0.7; }
+      85%  { opacity: 0.5; }
+      100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+    }
+
+    .magic-dust-2 {
+      animation: dustRise2 16s linear infinite;
+      will-change: transform, opacity;
+    }
+
+    @keyframes dustRise2 {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      15%  { opacity: 0.55; }
+      85%  { opacity: 0.4; }
+      100% { transform: translateY(-100vh) translateX(-18px); opacity: 0; }
+    }
+
+    /* Kệ sách – ánh sáng lay động */
+    .shelf-light {
+      animation: shelfLight 10s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes shelfLight {
+      0%   { opacity: 0.4; }
+      100% { opacity: 0.75; }
+    }
+
+    /* Rèm cửa đung đưa */
+    .curtain-sway {
+      animation: curtainSway 14s ease-in-out infinite alternate;
+      transform-origin: 50% 0%;
+      will-change: transform;
+    }
+
+    @keyframes curtainSway {
+      0%   { transform: skewX(-1.5deg); }
+      100% { transform: skewX(1.5deg); }
+    }
+
+    /* Ánh trăng qua cửa sổ */
+    .moon-light {
+      animation: moonLightShift 18s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes moonLightShift {
+      0%   { opacity: 0.25; }
+      100% { opacity: 0.55; }
+    }
+
+    /* Rune phát sáng trên sách */
+    .rune-glow {
+      animation: runeShimmer 6s ease-in-out infinite alternate;
+      will-change: opacity;
+    }
+
+    @keyframes runeShimmer {
+      0%   { opacity: 0.3; }
+      100% { opacity: 0.85; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        width: min(86vw, 86vh);
+        height: min(86vw, 86vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- ===== BACKGROUND SVG: THƯ VIỆN CỔ PHÉP THUẬT ===== -->
+    <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Nền thư viện -->
+        <radialGradient id="libraryBg" cx="50%" cy="45%" r="80%">
+          <stop offset="0%" stop-color="#4a2e18"/>
+          <stop offset="45%" stop-color="#241508"/>
+          <stop offset="100%" stop-color="#080402"/>
+        </radialGradient>
+        <radialGradient id="warmAura" cx="50%" cy="55%" r="55%">
+          <stop offset="0%" stop-color="#ffb050" stop-opacity="0.45"/>
+          <stop offset="50%" stop-color="#c06020" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#3a1a08" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="moonWindow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#c0d8f0" stop-opacity="0.45"/>
+          <stop offset="60%" stop-color="#6080a8" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#203050" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="woodShelf" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5a3818"/>
+          <stop offset="50%" stop-color="#3a2010"/>
+          <stop offset="100%" stop-color="#1e0e06"/>
+        </linearGradient>
+        <linearGradient id="bookSpine1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8a3020"/>
+          <stop offset="100%" stop-color="#4a1808"/>
+        </linearGradient>
+        <linearGradient id="bookSpine2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#305a3a"/>
+          <stop offset="100%" stop-color="#102a18"/>
+        </linearGradient>
+        <linearGradient id="bookSpine3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a3060"/>
+          <stop offset="100%" stop-color="#201030"/>
+        </linearGradient>
+        <linearGradient id="bookSpine4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8a6a20"/>
+          <stop offset="100%" stop-color="#4a3510"/>
+        </linearGradient>
+        <linearGradient id="curtainGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6a1a1a" stop-opacity="0.85"/>
+          <stop offset="100%" stop-color="#2a0808" stop-opacity="0.9"/>
+        </linearGradient>
+        <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a2010"/>
+          <stop offset="100%" stop-color="#140804"/>
+        </linearGradient>
+        <radialGradient id="dustGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffe8a0" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#ffa040" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="candleFlame" cx="50%" cy="60%" r="50%">
+          <stop offset="0%" stop-color="#fff8c0" stop-opacity="0.95"/>
+          <stop offset="40%" stop-color="#ffc040" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#ff6010" stop-opacity="0.2"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Nền thư viện -->
+      <rect width="1200" height="800" fill="url(#libraryBg)"/>
+
+      <!-- Vầng sáng ấm -->
+      <ellipse cx="600" cy="440" rx="520" ry="360" fill="url(#warmAura)" class="candle-glow"/>
+
+      <!-- Cửa sổ phía sau -->
+      <g class="moon-light">
+        <rect x="460" y="80" width="280" height="320" rx="140" fill="url(#moonWindow)"/>
+        <path d="M600 80 L600 400 M460 240 L740 240" stroke="#604830" stroke-width="6" opacity="0.7"/>
+        <rect x="460" y="80" width="280" height="320" rx="140" fill="none" stroke="#4a3018" stroke-width="8" opacity="0.6"/>
+      </g>
+
+      <!-- Rèm cửa trái -->
+      <g class="curtain-sway" opacity="0.85">
+        <path d="M440 60 Q450 200 445 400 Q460 410 470 400 Q460 200 470 60 Z" fill="url(#curtainGrad)"/>
+        <path d="M455 100 Q460 220 458 380" stroke="#8a2a2a" stroke-width="2" fill="none" opacity="0.4"/>
+      </g>
+      <!-- Rèm cửa phải -->
+      <g class="curtain-sway" style="animation-delay: -3s;" opacity="0.85">
+        <path d="M760 60 Q750 200 755 400 Q740 410 730 400 Q740 200 730 60 Z" fill="url(#curtainGrad)"/>
+        <path d="M745 100 Q740 220 742 380" stroke="#8a2a2a" stroke-width="2" fill="none" opacity="0.4"/>
+      </g>
+
+      <!-- Kệ sách trái phía sau -->
+      <g class="shelf-light" opacity="0.85">
+        <rect x="60" y="180" width="320" height="18" fill="url(#woodShelf)"/>
+        <rect x="60" y="380" width="320" height="18" fill="url(#woodShelf)"/>
+        <rect x="60" y="580" width="320" height="18" fill="url(#woodShelf)"/>
+        <!-- Sách hàng 1 -->
+        <rect x="80" y="100" width="22" height="80" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="108" y="110" width="18" height="70" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="132" y="95" width="25" height="85" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="163" y="115" width="20" height="65" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="190" y="105" width="24" height="75" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="220" y="120" width="18" height="60" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="245" y="100" width="22" height="80" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="273" y="110" width="20" height="70" rx="2" fill="url(#bookSpine4)"/>
+        <!-- Sách hàng 2 -->
+        <rect x="80" y="300" width="20" height="80" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="106" y="310" width="24" height="70" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="136" y="295" width="18" height="85" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="160" y="315" width="22" height="65" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="188" y="305" width="20" height="75" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="214" y="320" width="25" height="60" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="245" y="300" width="18" height="80" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="270" y="312" width="22" height="68" rx="2" fill="url(#bookSpine2)"/>
+        <!-- Sách hàng 3 -->
+        <rect x="80" y="500" width="24" height="80" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="110" y="510" width="18" height="70" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="134" y="495" width="22" height="85" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="162" y="515" width="20" height="65" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="188" y="505" width="24" height="75" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="218" y="520" width="18" height="60" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="242" y="500" width="22" height="80" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="270" y="512" width="20" height="68" rx="2" fill="url(#bookSpine3)"/>
+      </g>
+
+      <!-- Kệ sách phải phía sau -->
+      <g class="shelf-light" style="animation-delay: -4s;" opacity="0.8">
+        <rect x="820" y="180" width="320" height="18" fill="url(#woodShelf)"/>
+        <rect x="820" y="380" width="320" height="18" fill="url(#woodShelf)"/>
+        <rect x="820" y="580" width="320" height="18" fill="url(#woodShelf)"/>
+        <rect x="840" y="100" width="22" height="80" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="868" y="110" width="18" height="70" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="892" y="95" width="25" height="85" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="923" y="115" width="20" height="65" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="950" y="105" width="24" height="75" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="980" y="120" width="18" height="60" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="1005" y="100" width="22" height="80" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="1033" y="110" width="20" height="70" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="1060" y="108" width="24" height="72" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="1090" y="118" width="18" height="62" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="840" y="300" width="20" height="80" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="866" y="310" width="24" height="70" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="896" y="295" width="18" height="85" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="920" y="315" width="22" height="65" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="948" y="305" width="20" height="75" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="974" y="320" width="25" height="60" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="1005" y="300" width="18" height="80" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="1030" y="312" width="22" height="68" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="840" y="500" width="24" height="80" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="870" y="510" width="18" height="70" rx="2" fill="url(#bookSpine1)"/>
+        <rect x="894" y="495" width="22" height="85" rx="2" fill="url(#bookSpine3)"/>
+        <rect x="922" y="515" width="20" height="65" rx="2" fill="url(#bookSpine2)"/>
+        <rect x="948" y="505" width="24" height="75" rx="2" fill="url(#bookSpine4)"/>
+        <rect x="978" y="520" width="18" height="60" rx="2" fill="url(#bookSpine1)"/>
+      </g>
+
+      <!-- Sàn gỗ -->
+      <path d="M0 690 Q300 660 600 680 Q900 660 1200 690 L1200 800 L0 800 Z" fill="url(#floorGrad)"/>
+      <path d="M0 720 Q300 700 600 715 Q900 700 1200 720" stroke="#1e0e06" stroke-width="1" fill="none" opacity="0.5"/>
+
+      <!-- Ánh nến bên trái -->
+      <g class="candle-glow">
+        <circle cx="180" cy="620" r="60" fill="url(#candleFlame)" opacity="0.4"/>
+        <rect x="174" y="640" width="12" height="40" rx="3" fill="#d8b878"/>
+        <rect x="172" y="638" width="16" height="6" rx="2" fill="#a88848"/>
+        <ellipse cx="180" cy="628" rx="6" ry="14" fill="url(#candleFlame)"/>
+        <ellipse cx="180" cy="622" rx="3" ry="9" fill="#fff8d0" opacity="0.9"/>
+      </g>
+      <!-- Ánh nến bên phải -->
+      <g class="candle-glow" style="animation-delay: -3s;">
+        <circle cx="1020" cy="620" r="55" fill="url(#candleFlame)" opacity="0.35"/>
+        <rect x="1014" y="640" width="12" height="38" rx="3" fill="#c8a868"/>
+        <rect x="1012" y="638" width="16" height="6" rx="2" fill="#987838"/>
+        <ellipse cx="1020" cy="628" rx="6" ry="13" fill="url(#candleFlame)"/>
+        <ellipse cx="1020" cy="622" rx="3" ry="8" fill="#fff8d0" opacity="0.9"/>
+      </g>
+
+      <!-- Bụi phép thuật 1 -->
+      <g class="magic-dust">
+        <circle cx="150" cy="800" r="3" fill="url(#dustGlow)"/>
+        <circle cx="380" cy="800" r="2.5" fill="url(#dustGlow)"/>
+        <circle cx="620" cy="800" r="3.5" fill="url(#dustGlow)"/>
+        <circle cx="820" cy="800" r="2.8" fill="url(#dustGlow)"/>
+        <circle cx="1050" cy="800" r="3.2" fill="url(#dustGlow)"/>
+      </g>
+      <!-- Bụi phép thuật 2 -->
+      <g class="magic-dust-2" style="animation-delay: -6s;">
+        <circle cx="260" cy="800" r="2.5" fill="url(#dustGlow)"/>
+        <circle cx="480" cy="800" r="3" fill="url(#dustGlow)"/>
+        <circle cx="720" cy="800" r="2.2" fill="url(#dustGlow)"/>
+        <circle cx="940" cy="800" r="3.4" fill="url(#dustGlow)"/>
+        <circle cx="1140" cy="800" r="2.6" fill="url(#dustGlow)"/>
+      </g>
+    </svg>
+
+    <!-- ===== ĐỐI TƯỢNG CHÍNH: CÚ MÈO HỌC GIẢ ===== -->
+    <div class="hero" role="img" aria-label="Chú cú mèo học giả đeo kính đọc sách phép thuật trong thư viện cổ">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Lông cú -->
+          <radialGradient id="owlBody" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#a07a5a"/>
+            <stop offset="50%" stop-color="#6a4a30"/>
+            <stop offset="100%" stop-color="#3a2410"/>
+          </radialGradient>
+          <radialGradient id="owlBelly" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#f0d8b0"/>
+            <stop offset="60%" stop-color="#d8b888"/>
+            <stop offset="100%" stop-color="#a07850"/>
+          </radialGradient>
+          <radialGradient id="owlHead" cx="45%" cy="40%" r="70%">
+            <stop offset="0%" stop-color="#b88a62"/>
+            <stop offset="50%" stop-color="#7a5a38"/>
+            <stop offset="100%" stop-color="#3a2410"/>
+          </radialGradient>
+          <radialGradient id="owlFaceDisc" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stop-color="#f8e8c8"/>
+            <stop offset="60%" stop-color="#e0c8a0"/>
+            <stop offset="100%" stop-color="#b89060"/>
+          </radialGradient>
+          <radialGradient id="owlEye" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#fff8c0"/>
+            <stop offset="35%" stop-color="#ffc830"/>
+            <stop offset="70%" stop-color="#e08010"/>
+            <stop offset="100%" stop-color="#802000"/>
+          </radialGradient>
+          <radialGradient id="owlPupil" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#4a3020"/>
+            <stop offset="60%" stop-color="#1a0a04"/>
+            <stop offset="100%" stop-color="#000000"/>
+          </radialGradient>
+          <linearGradient id="beakGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8c860"/>
+            <stop offset="60%" stop-color="#d89030"/>
+            <stop offset="100%" stop-color="#a06010"/>
+          </linearGradient>
+          <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#6a4a30"/>
+            <stop offset="100%" stop-color="#2a1808"/>
+          </linearGradient>
+          <linearGradient id="bookCover" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6a1a3a"/>
+            <stop offset="100%" stop-color="#2a0818"/>
+          </linearGradient>
+          <linearGradient id="bookPage" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f8e8c0"/>
+            <stop offset="100%" stop-color="#d8c090"/>
+          </linearGradient>
+          <linearGradient id="glassesGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#c8a860"/>
+            <stop offset="50%" stop-color="#f0d888"/>
+            <stop offset="100%" stop-color="#a07830"/>
+          </linearGradient>
+          <radialGradient id="magicAura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#a0d0ff" stop-opacity="0.6"/>
+            <stop offset="60%" stop-color="#6090e0" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#2040a0" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Bóng mờ dưới -->
+        <ellipse cx="200" cy="372" rx="100" ry="14" fill="url(#shadowGrad)" opacity="0.5"/>
+
+        <!-- Toàn bộ cú -->
+        <g class="owl-float">
+
+          <!-- ===== THÂN ===== -->
+          <g class="owl-body">
+            <!-- Thân chính -->
+            <ellipse cx="200" cy="255" rx="80" ry="90" fill="url(#owlBody)" stroke="#2a1808" stroke-width="1.4"/>
+            <!-- Bụng sáng -->
+            <ellipse cx="200" cy="270" rx="52" ry="68" fill="url(#owlBelly)" stroke="#a07850" stroke-width="0.8"/>
+            <!-- Vằn lông bụng -->
+            <path d="M165 240 Q180 250 195 240 M205 240 Q220 250 235 240" stroke="#8a6848" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+            <path d="M162 260 Q180 270 198 260 M202 260 Q220 270 238 260" stroke="#8a6848" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+            <path d="M165 280 Q180 290 195 280 M205 280 Q220 290 235 280" stroke="#8a6848" stroke-width="1.5" fill="none" opacity="0.45" stroke-linecap="round"/>
+            <path d="M170 300 Q185 308 200 300 M200 300 Q215 308 230 300" stroke="#8a6848" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== CÁNH ===== -->
+          <g class="wing-left">
+            <path d="M128 200 Q100 230 105 285 Q112 320 138 322 Q152 318 152 290 Q150 240 140 205 Z" fill="url(#wingGrad)" stroke="#2a1808" stroke-width="1.2"/>
+            <!-- Vằn lông cánh -->
+            <path d="M118 250 Q120 275 128 300" stroke="#8a6848" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/>
+            <path d="M132 245 Q134 270 138 295" stroke="#8a6848" stroke-width="1" fill="none" opacity="0.45" stroke-linecap="round"/>
+          </g>
+          <g class="wing-right">
+            <path d="M272 200 Q300 230 295 285 Q288 320 262 322 Q248 318 248 290 Q250 240 260 205 Z" fill="url(#wingGrad)" stroke="#2a1808" stroke-width="1.2"/>
+            <path d="M282 250 Q280 275 272 300" stroke="#8a6848" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/>
+            <path d="M268 245 Q266 270 262 295" stroke="#8a6848" stroke-width="1" fill="none" opacity="0.45" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== CHÂN ===== -->
+          <g class="leg-left">
+            <path d="M175 320 Q172 340 175 352 Q178 360 188 356 Q194 350 192 342 Q188 330 186 320 Z" fill="#d89030" stroke="#a06010" stroke-width="1.2"/>
+            <!-- Móng -->
+            <path d="M174 352 L170 360 M180 356 L178 364 M186 356 L186 364" stroke="#a06010" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <g class="leg-right">
+            <path d="M225 320 Q228 340 225 352 Q222 360 212 356 Q206 350 208 342 Q212 330 214 320 Z" fill="#d89030" stroke="#a06010" stroke-width="1.2"/>
+            <path d="M226 352 L230 360 M220 356 L222 364 M214 356 L214 364" stroke="#a06010" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== SÁCH PHÉP THUẬT ===== -->
+          <g class="book">
+            <!-- Hào quang sách -->
+            <circle cx="200" cy="330" r="70" fill="url(#magicAura)" class="book-glow"/>
+            <!-- Bìa sách -->
+            <path d="M130 320 Q165 310 200 315 Q235 310 270 320 L270 365 Q235 355 200 360 Q165 355 130 365 Z" fill="url(#bookCover)" stroke="#180408" stroke-width="1.4"/>
+            <!-- Trang sách -->
+            <g class="book-pages">
+              <path d="M140 325 Q170 318 198 322 Q228 318 260 325 L260 358 Q228 352 198 355 Q170 352 140 358 Z" fill="url(#bookPage)" stroke="#a08860" stroke-width="0.8"/>
+              <!-- Chữ rune phát sáng -->
+              <g class="rune-glow">
+                <path d="M155 335 L165 335 M160 330 L160 345" stroke="#4090e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M180 333 Q185 330 190 333 Q185 336 180 333" stroke="#4090e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <circle cx="205" cy="336" r="4" fill="none" stroke="#4090e0" stroke-width="2"/>
+                <path d="M220 332 L228 340 M228 332 L220 340" stroke="#4090e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M240 335 L248 335 M244 330 L244 345" stroke="#4090e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </g>
+              <!-- Ánh sáng trang -->
+              <ellipse cx="200" cy="340" rx="55" ry="15" fill="#80c0ff" opacity="0.25" class="book-glow"/>
+            </g>
+          </g>
+
+          <!-- ===== ĐẦU ===== -->
+          <g class="owl-head">
+            <!-- Đầu -->
+            <ellipse cx="200" cy="130" rx="72" ry="68" fill="url(#owlHead)" stroke="#2a1808" stroke-width="1.4"/>
+
+            <!-- Đĩa mặt -->
+            <ellipse cx="172" cy="140" rx="38" ry="42" fill="url(#owlFaceDisc)" stroke="#a08860" stroke-width="1"/>
+            <ellipse cx="228" cy="140" rx="38" ry="42" fill="url(#owlFaceDisc)" stroke="#a08860" stroke-width="1"/>
+
+            <!-- Chùm lông tai trái -->
+            <g class="tuft-left">
+              <path d="M148 82 Q140 48 152 30 Q168 50 165 82 Z" fill="url(#owlHead)" stroke="#2a1808" stroke-width="1.2"/>
+              <path d="M155 78 Q152 55 158 42 Q164 58 162 78 Z" fill="#8a6848" opacity="0.6"/>
+            </g>
+            <!-- Chùm lông tai phải -->
+            <g class="tuft-right">
+              <path d="M252 82 Q260 48 248 30 Q232 50 235 82 Z" fill="url(#owlHead)" stroke="#2a1808" stroke-width="1.2"/>
+              <path d="M245 78 Q248 55 242 42 Q236 58 238 78 Z" fill="#8a6848" opacity="0.6"/>
+            </g>
+
+            <!-- Mắt trái -->
+            <g class="eye-left">
+              <circle cx="172" cy="140" r="26" fill="url(#owlEye)" stroke="#802000" stroke-width="1.2"/>
+              <circle cx="175" cy="142" r="14" fill="url(#owlPupil)"/>
+              <circle cx="178" cy="135" r="5" fill="#ffffff" opacity="0.95"/>
+              <circle cx="168" cy="148" r="2.5" fill="#ffffff" opacity="0.5"/>
+            </g>
+            <!-- Mắt phải -->
+            <g class="eye-right">
+              <circle cx="228" cy="140" r="26" fill="url(#owlEye)" stroke="#802000" stroke-width="1.2"/>
+              <circle cx="231" cy="142" r="14" fill="url(#owlPupil)"/>
+              <circle cx="234" cy="135" r="5" fill="#ffffff" opacity="0.95"/>
+              <circle cx="224" cy="148" r="2.5" fill="#ffffff" opacity="0.5"/>
+            </g>
+
+            <!-- Kính tròn -->
+            <circle cx="172" cy="140" r="30" fill="none" stroke="url(#glassesGrad)" stroke-width="3.5"/>
+            <circle cx="228" cy="140" r="30" fill="none" stroke="url(#glassesGrad)" stroke-width="3.5"/>
+            <!-- Cầu nối kính -->
+            <path d="M202 138 Q200 132 198 138" stroke="url(#glassesGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Gọng kính -->
+            <path d="M142 138 Q130 135 122 128" stroke="url(#glassesGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M258 138 Q270 135 278 128" stroke="url(#glassesGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Ánh sáng kính -->
+            <ellipse cx="162" cy="130" rx="8" ry="5" fill="#ffffff" opacity="0.5" class="glasses-shine" transform="rotate(-25 162 130)"/>
+            <ellipse cx="218" cy="130" rx="8" ry="5" fill="#ffffff" opacity="0.5" class="glasses-shine" transform="rotate(-25 218 130)"/>
+
+            <!-- Mỏ -->
+            <path d="M192 165 Q200 158 208 165 Q206 178 200 184 Q194 178 192 165 Z" fill="url(#beakGrad)" stroke="#a06010" stroke-width="1"/>
+            <path d="M196 168 Q200 172 204 168" stroke="#f8d880" stroke-width="1" fill="none" opacity="0.6"/>
+
+            <!-- Lông mày -->
+            <path d="M148 108 Q160 102 175 108" stroke="#5a3a20" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M252 108 Q240 102 225 108" stroke="#5a3a20" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
