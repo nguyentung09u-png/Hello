@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kẻ Sát Nhân — Hồ Sơ Đỏ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --void:#080808;
+    --void-2:#121212;
+    --void-3:#1c1c1c;
+    --bone:#e8e3d8;
+    --bone-2:#a8a398;
+    --blood:#d92525;
+    --blood-deep:#8a1515;
+    --tape:#d6c9a8;
+    --mono:'Courier Prime',Courier,monospace;
+    --serif:'Playfair Display',Georgia,serif;
+    --sans:'Oswald',Arial,sans-serif;
+  }
+  html,body{height:100%;overflow:hidden;font-family:var(--mono);background:var(--void);color:var(--bone);}
+  
+  /* Film grain + subtle scratches */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.15;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+    animation:grainShift 1s steps(4) infinite;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:61;opacity:.2;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.3) 3px);
+  }
+  @keyframes grainShift{
+    0%{transform:translate(0,0);}25%{transform:translate(-2px,3px);}50%{transform:translate(3px,-2px);}75%{transform:translate(-1px,-3px);}100%{transform:translate(0,0);}
+  }
+
+  .stage{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+  /* Slides */
+  .slides{position:relative;z-index:2;width:100%;height:100%;}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:clamp(20px,4.5vw,64px) clamp(20px,5vw,70px) clamp(80px,12vh,110px);
+    opacity:0;visibility:hidden;
+    transition:opacity 1s ease,visibility 0s 1s;
+  }
+  .slide.active{opacity:1;visibility:visible;transition:opacity 1s ease,visibility 0s 0s;}
+
+  /* Fade Reveal (Giữ nguyên) */
+  .reveal{opacity:0;transition:opacity 1.1s ease;}
+  .slide.active .reveal{opacity:1;}
+  .slide.active .d1{transition-delay:.15s;}
+  .slide.active .d2{transition-delay:.32s;}
+  .slide.active .d3{transition-delay:.5s;}
+  .slide.active .d4{transition-delay:.68s;}
+  .slide.active .d5{transition-delay:.86s;}
+
+  /* ============ SLIDE 1: COVER ============ */
+  .cover{justify-content:center;position:relative;overflow:hidden;}
+  
+  /* Vết đỏ lớn trang trí */
+  .cover .blood-stain{
+    position:absolute;top:-10%;right:-15%;width:60vw;height:60vw;
+    background:radial-gradient(circle,rgba(217,37,37,.15) 0%,transparent 60%);
+    pointer-events:none;z-index:0;border-radius:50%;
+  }
+
+  .cover .file-header{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    font-size:clamp(10px,1.2vw,13px);font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blood);
+    border-bottom:2px solid var(--blood);padding-bottom:12px;margin-bottom:clamp(24px,4vh,48px);position:relative;z-index:1;
+  }
+  .cover .file-header .right{text-align:right;color:var(--bone-2);font-weight:400;}
+
+  .cover h1{
+    font-family:var(--serif);font-weight:900;
+    font-size:clamp(56px,14vw,180px);line-height:.85;letter-spacing:-.03em;
+    color:var(--bone);position:relative;z-index:1;
+  }
+  .cover h1 .line-2{display:block;padding-left:clamp(30px,8vw,120px);color:var(--blood);}
+  .cover h1 .cross{
+    display:inline-block;width:.15em;height:.15em;background:var(--blood);
+    position:relative;margin-left:.15em;transform:rotate(45deg);
+  }
+  
+  .cover .sub-wrap{
+    display:grid;grid-template-columns:1fr auto;gap:clamp(20px,4vw,40px);align-items:end;
+    margin-top:clamp(30px,5vh,50px);position:relative;z-index:1;
+  }
+  .cover .sub-text p{
+    font-family:var(--mono);font-size:clamp(13px,1.5vw,17px);line-height:1.6;color:var(--bone-2);max-width:50ch;
+  }
+  .cover .stamp{
+    width:clamp(80px,12vw,130px);height:clamp(80px,12vw,130px);border:3px solid var(--blood);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;
+    font-family:var(--sans);font-weight:700;font-size:clamp(10px,1.4vw,14px);letter-spacing:.1em;color:var(--blood);
+    transform:rotate(-15deg);opacity:.8;line-height:1.2;padding:10px;
+  }
+
+  /* ============ SLIDE HEAD ============ */
+  .head{flex:0 0 auto;margin-bottom:clamp(16px,3vh,36px);}
+  .head .tag{
+    font-family:var(--mono);font-size:clamp(10px,1.1vw,13px);font-weight:700;
+    letter-spacing:.3em;text-transform:uppercase;color:var(--blood);margin-bottom:8px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .head .tag::before{content:"";width:14px;height:2px;background:var(--blood);}
+  .head h2{
+    font-family:var(--serif);font-weight:900;font-size:clamp(28px,5vw,58px);line-height:1;letter-spacing:-.02em;color:var(--bone);
+  }
+  .head h2 em{font-style:italic;color:var(--blood);}
+
+  .body{flex:1;min-height:0;display:flex;}
+
+  /* ============ SLIDE 2: ĐỊNH NGHĨA (Case File) ============ */
+  .case-split{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(24px,4.5vw,60px);width:100%;align-items:center;}
+  .case-text .dossier-line{
+    border-left:3px solid var(--blood);padding-left:clamp(14px,2vw,24px);margin-bottom:clamp(20px,3vh,30px);
+  }
+  .case-text p{
+    font-size:clamp(14px,1.5vw,18px);line-height:1.7;color:var(--bone-2);
+  }
+  .case-text p + p{margin-top:14px;}
+  .case-text b{color:var(--bone);background:rgba(217,37,37,.2);padding:2px 6px;border-radius:2px;}
+  
+  /* Polaroid/Evidence photo */
+  .evidence-photo{
+    background:var(--bone);padding:12px 12px 40px;transform:rotate(3deg);
+    box-shadow:0 10px 30px rgba(0,0,0,.8), inset 0 0 20px rgba(0,0,0,.1);
+    position:relative;max-width:min(45vw,320px);margin:0 auto;width:100%;
+  }
+  .evidence-photo::before{
+    content:"";position:absolute;top:-12px;left:50%;transform:translateX(-50%) rotate(-2deg);
+    width:80px;height:24px;background:rgba(214,201,168,.6); /* Băng keo */
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+  }
+  .evidence-inner{
+    aspect-ratio:1;background:#1a1a1a;display:flex;align-items:center;justify-content:center;
+    border:1px solid #000;position:relative;overflow:hidden;
+  }
+  .evidence-inner svg{width:80%;height:80%;opacity:.6;}
+  .evidence-caption{
+    font-family:var(--mono);font-size:clamp(10px,1.1vw,13px);color:#222;text-align:center;
+    margin-top:14px;font-weight:700;letter-spacing:.1em;
+  }
+
+  /* ============ SLIDE 3: PROFILING (Bento/Grid) ============ */
+  .profile-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:clamp(10px,1.6vw,20px);width:100%;}
+  .prof-item{
+    background:var(--void-2);border:1px solid rgba(217,37,37,.2);padding:clamp(16px,2.4vw,28px);
+    display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;
+    transition:border-color .4s, background .4s;
+  }
+  .prof-item:hover{border-color:var(--blood);background:var(--void-3);}
+  .prof-item.big{grid-column:span 2;grid-row:span 2;}
+  
+  .prof-item .lbl{font-family:var(--sans);font-size:clamp(10px,1.2vw,13px);letter-spacing:.2em;text-transform:uppercase;color:var(--blood);font-weight:500;margin-bottom:8px;}
+  .prof-item .val{font-family:var(--serif);font-size:clamp(32px,5vw,64px);font-weight:900;line-height:.9;color:var(--bone);}
+  .prof-item.big .val{font-size:clamp(40px,7vw,90px);color:var(--blood);}
+  .prof-item .desc{font-size:clamp(11px,1.2vw,14px);line-height:1.5;color:var(--bone-2);margin-top:10px;}
+  .prof-item .bg-num{
+    position:absolute;bottom:-15px;right:5px;font-family:var(--serif);font-size:120px;font-weight:900;
+    color:rgba(255,255,255,.03);pointer-events:none;line-height:1;
+  }
+
+  /* ============ SLIDE 4: TIMELINE (Redacted) ============ */
+  .timeline{width:100%;display:flex;flex-direction:column;justify-content:center;gap:0;height:100%;}
+  .t-row{
+    display:grid;grid-template-columns:clamp(60px,10vw,100px) 1fr;gap:clamp(16px,3vw,32px);
+    padding:clamp(14px,2.4vh,24px) 0;border-bottom:1px solid rgba(255,255,255,.08);
+    position:relative;align-items:center;
+  }
+  .t-row:last-child{border-bottom:none;}
+  .t-row::before{
+    content:"";position:absolute;left:calc(clamp(60px,10vw,100px) + clamp(16px,3vw,32px)/2 - 2px);top:0;bottom:0;width:4px;background:var(--void);
+  }
+  .t-row .marker{
+    position:absolute;left:calc(clamp(60px,10vw,100px) + clamp(16px,3vw,32px)/2 - 7px);top:50%;transform:translateY(-50%);
+    width:14px;height:14px;background:var(--blood);border-radius:50%;box-shadow:0 0 10px var(--blood);
+  }
+  .t-time{
+    font-family:var(--mono);font-size:clamp(12px,1.4vw,16px);font-weight:700;color:var(--bone);
+    text-align:right;padding-right:clamp(16px,3vw,32px);
+  }
+  .t-content h3{font-family:var(--serif);font-size:clamp(18px,2.4vw,28px);font-weight:700;color:var(--blood);margin-bottom:4px;}
+  .t-content p{font-size:clamp(13px,1.4vw,16px);color:var(--bone-2);line-height:1.5;}
+  .redacted{
+    background:var(--bone);color:var(--bone);padding:0 4px;user-select:none;cursor:help;
+    transition:background .3s,color .3s;
+  }
+  .redacted:hover{background:transparent;color:var(--blood);}
+
+  /* ============ SLIDE 5: CLOSING ============ */
+  .closing{justify-content:center;align-items:center;text-align:center;}
+  .closing h1{font-family:var(--serif);font-size:clamp(36px,7vw,90px);line-height:1;margin-bottom:24px;}
+  .closing h1 em{color:var(--blood);font-style:italic;}
+  .closing .quote{
+    font-family:var(--mono);font-size:clamp(14px,1.6vw,18px);line-height:1.6;color:var(--bone-2);
+    max-width:50ch;margin:0 auto;border-top:2px solid var(--blood);border-bottom:2px solid var(--blood);
+    padding:clamp(16px,3vh,24px) 0;
+  }
+  .closing .seal{
+    margin-top:clamp(30px,5vh,50px);font-family:var(--sans);font-weight:700;letter-spacing:.4em;text-transform:uppercase;color:var(--blood);opacity:.7;
+  }
+
+  /* ============ NAVIGATION BAR (Chuẩn) ============ */
+  .nav-bar{
+    position:absolute;left:0;right:0;bottom:0;z-index:30;
+    padding:0 clamp(20px,4.5vw,64px) clamp(16px,3vh,30px);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    pointer-events:none;
+    background:linear-gradient(to top, var(--void) 20%, transparent 100%);
+    border-top:1px solid rgba(217,37,37,.2);
+  }
+  .nav-bar > *{pointer-events:auto;}
+  
+  /* (1) Bộ đếm trang */
+  .page-counter{
+    font-family:var(--mono);font-size:clamp(13px,1.5vw,18px);font-weight:700;
+    letter-spacing:.1em;color:var(--bone);white-space:nowrap;
+  }
+  .page-counter b{color:var(--blood);font-size:1.2em;}
+  
+  /* (2) Thanh tiến trình */
+  .progress-bar{
+    flex:1;max-width:400px;height:4px;background:rgba(255,255,255,.1);
+    position:relative;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;width:0%;background:var(--blood);
+    transition:width .6s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 10px var(--blood);
+  }
+
+  /* (3) Cặp nút < > */
+  .nav-btns{display:flex;gap:12px;}
+  .nav-btn{
+    width:clamp(36px,4.5vw,44px);height:clamp(36px,4.5vw,44px);
+    border:1px solid rgba(217,37,37,.4);background:transparent;color:var(--blood);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:all .3s ease;
+  }
+  .nav-btn:hover:not(:disabled){background:var(--blood);color:var(--void);}
+  .nav-btn:active:not(:disabled){transform:scale(.95);}
+  .nav-btn svg{width:45%;height:45%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:square;}
+  .nav-btn:disabled{opacity:.2;cursor:not-allowed;border-color:rgba(255,255,255,.1);color:var(--bone-2);}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:880px){
+    .case-split{grid-template-columns:1fr;gap:30px;}
+    .evidence-photo{max-width:240px;order:-1;}
+    .profile-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+    .prof-item.big{grid-column:span 2;grid-row:span 1;min-height:140px;}
+    .prof-item .bg-num{display:none;}
+    .cover h1 .line-2{padding-left:0;}
+  }
+  @media (max-width:560px){
+    .slide{padding:20px 18px 90px;}
+    .cover .sub-wrap{grid-template-columns:1fr;}
+    .cover .stamp{margin:20px auto 0;}
+    .head h2{font-size:26px;}
+    .profile-grid{gap:8px;}
+    .prof-item{padding:12px;}
+    .prof-item .val{font-size:24px;}
+    .prof-item.big .val{font-size:36px;}
+    .t-row{grid-template-columns:1fr;gap:8px;padding:16px 0;}
+    .t-row::before, .t-row .marker{display:none;}
+    .t-time{text-align:left;padding-right:0;}
+    .nav-bar{padding:0 16px 16px;flex-wrap:wrap;justify-content:center;}
+    .progress-bar{order:3;width:100%;max-width:none;margin-top:12px;}
+    .page-counter{font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="slides" id="slides">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active" data-i="0">
+      <div class="blood-stain"></div>
+      
+      <div class="file-header reveal d1">
+        <div class="left">CASE FILE: #094-KILLER</div>
+        <div class="right">TRẠNG THÁI: ĐANG TRUY TÌM<br>MỨC ĐỘ BẢO MẬT: TỐI CAO</div>
+      </div>
+
+      <h1 class="reveal d2">
+        Kẻ
+        <span class="line-2">Sát Nhân<span class="cross"></span></span>
+      </h1>
+
+      <div class="sub-wrap reveal d4">
+        <div class="sub-text">
+          <p>Họ không phải là quái vật từ trên trời rơi xuống. Họ được sinh ra, được nuôi dưỡng, và tồn tại ngay trong xã hội này. Hồ sơ này mổ xẻ góc tối của con người.</p>
+        </div>
+        <div class="stamp">
+          TỐI<br>MẬT
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: ĐỊNH NGHĨA -->
+    <section class="slide" data-i="1">
+      <div class="head">
+        <div class="tag reveal d1">Hồ sơ 01 / Định nghĩa</div>
+        <h2 class="reveal d2">Kẻ sát nhân là <em>ai?</em></h2>
+      </div>
+      <div class="body">
+        <div class="case-split">
+          <div class="case-text reveal d3">
+            <div class="dossier-line">
+              <p>Là cá nhân thực hiện hành vi <b>tước đoạt mạng sống</b> của người khác một cách trái pháp luật. Nhưng phía sau định nghĩa pháp lý khô khan đó là cả một vực thẳm tâm lý.</p>
+            </div>
+            <p>Phân tâm học không tìm kiếm một "con quỷ", mà tìm kiếm <b>nguyên nhân</b>. Điều gì biến một đứa trẻ thành một kẻ giết người? Đó là câu hỏi mà hồ sơ này cố gắng trả lời.</p>
+          </div>
+          <div class="evidence-photo reveal d4">
+            <div class="evidence-inner">
+              <!-- Silhouette SVG -->
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <path d="M50 20 C 35 20, 25 35, 25 50 C 25 70, 10 80, 10 100 L 90 100 C 90 80, 75 70, 75 50 C 75 35, 65 20, 50 20 Z" fill="#d92525" opacity="0.3"/>
+                <circle cx="50" cy="40" r="15" fill="#000"/>
+                <path d="M30 75 Q 50 90 70 75 L 75 100 L 25 100 Z" fill="#000"/>
+              </svg>
+            </div>
+            <div class="evidence-caption">VẬT CHỨNG #001: CHÂN DUNG TÂM LÝ</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: PROFILING -->
+    <section class="slide" data-i="2">
+      <div class="head">
+        <div class="tag reveal d1">Hồ sơ 02 / Chân dung tội phạm</div>
+        <h2 class="reveal d2">Các <em>chỉ số</em> tâm lý</h2>
+      </div>
+      <div class="body">
+        <div class="profile-grid">
+          <div class="prof-item big reveal d2">
+            <div class="bg-num">?</div>
+            <div class="lbl">Động cơ chính</div>
+            <div>
+              <div class="val">Bản năng<br>Bóng tối</div>
+              <div class="desc">Kẻ sát nhân không chỉ giết người để đoạt mạng. Họ giết để thỏa mãn một khoảng trống quyền lực, để kiểm soát, hoặc để xoa dịu tiếng nói bên trong.</div>
+            </div>
+          </div>
+          <div class="prof-item reveal d3">
+            <div class="lbl">Tâm lý</div>
+            <div class="val">Rối loạn</div>
+            <div class="desc">Ranh giới đạo đức bị xóa nhòa.</div>
+          </div>
+          <div class="prof-item reveal d3">
+            <div class="lbl">Hành vi</div>
+            <div class="val">Tàn nhẫn</div>
+            <div class="desc">Không có sự đồng cảm với nạn nhân.</div>
+          </div>
+          <div class="prof-item reveal d4">
+            <div class="lbl">Quá khứ</div>
+            <div class="val">Tổn thương</div>
+            <div class="desc">Thường xuất phát từ tuổi thơ bị bạo hành.</div>
+          </div>
+          <div class="prof-item reveal d4">
+            <div class="lbl">Vỏ bọc</div>
+            <div class="val">Bình thường</div>
+            <div class="desc">Kẻ nguy hiểm nhất là kẻ trông bình thường nhất.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: TIMELINE -->
+    <section class="slide" data-i="3">
+      <div class="head">
+        <div class="tag reveal d1">Hồ sơ 03 / Diễn biến tâm lý</div>
+        <h2 class="reveal d2">Quá trình <em>tha hóa</em></h2>
+      </div>
+      <div class="body">
+        <div class="timeline">
+          <div class="t-row reveal d2">
+            <div class="t-time">GIAI ĐOẠN 1</div>
+            <div class="marker"></div>
+            <div class="t-content">
+              <h3>Vết nứt đầu tiên</h3>
+              <p>Chấn thương thời thơ ấu. Sự thiếu vắng tình thương hoặc bị lạm dụng thể xác/tinh thần.</p>
+            </div>
+          </div>
+          <div class="t-row reveal d3">
+            <div class="t-time">GIAI ĐOẠN 2</div>
+            <div class="marker"></div>
+            <div class="t-content">
+              <h3>Sự tha hóa</h3>
+              <p>Hình thành <span class="redacted" title="Nhân cách chống đối xã hội">tư duy lệch lạc</span>. Bắt đầu coi người khác là công cụ hoặc chướng ngại vật.</p>
+            </div>
+          </div>
+          <div class="t-row reveal d4">
+            <div class="t-time">GIAI ĐOẠN 3</div>
+            <div class="marker"></div>
+            <div class="t-content">
+              <h3>Kích hoạt</h3>
+              <p>Một biến cố (mất việc, bị từ chối, bị sỉ nhục) trở thành giọt nước tràn ly. Động cơ giết người hình thành.</p>
+            </div>
+          </div>
+          <div class="t-row reveal d5">
+            <div class="t-time">GIAI ĐOẠN 4</div>
+            <div class="marker"></div>
+            <div class="t-content">
+              <h3>Hành động</h3>
+              <p>Thực hiện hành vi. Cảm giác <span class="redacted" title="Hưng phấn tột độ">thỏa mãn</span> sau khi gây án là chất xúc tác cho các lần phạm tội tiếp theo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CLOSING -->
+    <section class="slide closing" data-i="4">
+      <h1 class="reveal d1">Sự thật<br><em>phía sau vụ án</em></h1>
+      <div class="quote reveal d3">
+        "Kẻ sát nhân không phải là một loài khác. Họ là một phần của chúng ta. Họ là kết quả của những môi trường mà chính chúng ta tạo ra."
+      </div>
+      <div class="seal reveal d5">KẾT THÚC HỒ SƠ</div>
+    </section>
+
+  </div>
+
+  <!-- ============ NAVIGATION BAR ============ -->
+  <div class="nav-bar">
+    <!-- (1) Bộ đếm trang -->
+    <div class="page-counter" id="counter">
+      <b>01</b> / 05
+    </div>
+    
+    <!-- (2) Thanh tiến trình -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    
+    <!-- (3) Cặp nút < > -->
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev" aria-label="Slide trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="next" aria-label="Slide tiếp">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  let animating = false;
+
+  function pad(n){ return String(n+1).padStart(2,'0'); }
+
+  function update(){
+    counter.innerHTML = '<b>'+pad(current)+'</b> / '+String(total).padStart(2,'0');
+    progress.style.width = ((current+1)/total*100)+'%';
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===total-1;
+  }
+
+  function go(i){
+    if(animating || i===current || i<0 || i>=total) return;
+    animating = true;
+    const outgoing = slides[current];
+    const incoming = slides[i];
+    outgoing.classList.remove('active');
+    setTimeout(()=>{
+      incoming.classList.add('active');
+      current = i;
+      update();
+      setTimeout(()=>{ animating = false; }, 900);
+    }, 500);
+  }
+
+  prevBtn.addEventListener('click', ()=> go(current-1));
+  nextBtn.addEventListener('click', ()=> go(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(current+1); }
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); go(0); }
+    if(e.key==='End'){ e.preventDefault(); go(total-1); }
+  });
+
+  // Swipe (Touch)
+  let sx=0, sy=0, tracking=false;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking=true;
+  }, {passive:true});
+  stage.addEventListener('touchend', e=>{
+    if(!tracking) return; tracking=false;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(current+1); else go(current-1);
+    }
+  }, {passive:true});
+
+  update();
+})();
+</script>
+</body>
+</html>

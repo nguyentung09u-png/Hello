@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doraemon & Nobita — Chuyện Chưa Kể Từ Ngăn Bàn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --paper:#fcf9f2;
+    --ink:#111;
+    --dora-blue:#0096e6;
+    --dora-blue-dark:#006bb3;
+    --nobi-yellow:#fbd847;
+    --bell-red:#e63946;
+    --shadow-hard: 4px 4px 0 #111;
+    --shadow-hard-lg: 8px 8px 0 #111;
+    --font-comic:'Bangers', cursive;
+    --font-body:'Nunito', sans-serif;
+  }
+  
+  html,body{height:100%;overflow:hidden;font-family:var(--font-body);background:var(--paper);color:var(--ink);}
+  
+  /* Halftone Pattern */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(var(--ink) 1px,transparent 1px);
+    background-size:8px 8px;opacity:.05;
+  }
+
+  .stage{position:relative;width:100vw;height:100vh;overflow:hidden;z-index:1;}
+
+  /* Slides */
+  .slides{position:relative;z-index:2;width:100%;height:100%;}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:clamp(20px,4vw,50px) clamp(20px,5vw,70px) clamp(90px,12vh,120px);
+    opacity:0;visibility:hidden;
+    transition:opacity 1s ease,visibility 0s 1s;
+  }
+  .slide.active{opacity:1;visibility:visible;transition:opacity 1s ease,visibility 0s 0s;}
+
+  /* Fade Reveal (Giữ nguyên) */
+  .reveal{opacity:0;transition:opacity 1.1s ease;}
+  .slide.active .reveal{opacity:1;}
+  .slide.active .d1{transition-delay:.15s;}
+  .slide.active .d2{transition-delay:.32s;}
+  .slide.active .d3{transition-delay:.5s;}
+  .slide.active .d4{transition-delay:.68s;}
+  .slide.active .d5{transition-delay:.86s;}
+
+  /* ============ SLIDE 1: COVER ============ */
+  .cover{justify-content:center;align-items:center;text-align:center;position:relative;}
+  
+  /* Starburst Background */
+  .cover .starburst{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:clamp(280px,60vw,600px);height:clamp(280px,60vw,600px);
+    background:var(--nobi-yellow);
+    clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    z-index:-1;opacity:.3;
+  }
+
+  .cover .badge{
+    font-family:var(--font-comic);font-size:clamp(20px,3vw,32px);
+    background:var(--bell-red);color:white;padding:5px 20px;border:3px solid var(--ink);
+    transform:rotate(-5deg);margin-bottom:20px;box-shadow:var(--shadow-hard);letter-spacing:2px;
+  }
+  
+  .cover h1{
+    font-family:var(--font-comic);font-size:clamp(60px,15vw,180px);line-height:.9;
+    letter-spacing:2px;color:var(--dora-blue);-webkit-text-stroke:2px var(--ink);
+    text-shadow:var(--shadow-hard-lg);
+  }
+  .cover h1 span{color:var(--nobi-yellow);display:block;margin-top:10px;}
+  
+  .cover .sub{
+    margin-top:clamp(20px,4vh,40px);background:#fff;border:3px solid var(--ink);
+    padding:15px 25px;font-size:clamp(14px,1.8vw,20px);font-weight:700;
+    box-shadow:var(--shadow-hard);max-width:600px;position:relative;
+  }
+  .cover .sub::after{ /* Speech bubble tail */
+    content:"";position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);
+    border-width:15px 15px 0;border-style:solid;border-color:#fff transparent transparent;
+    filter:drop-shadow(0 3px 0 var(--ink));
+  }
+
+  /* ============ SLIDE HEAD ============ */
+  .head{flex:0 0 auto;margin-bottom:clamp(16px,3vh,30px);position:relative;}
+  .head .tag{
+    display:inline-block;font-family:var(--font-comic);font-size:clamp(18px,2.5vw,24px);
+    background:var(--dora-blue);color:#fff;padding:2px 15px;border:2px solid var(--ink);
+    box-shadow:2px 2px 0 var(--ink);margin-bottom:10px;letter-spacing:1px;
+  }
+  .head h2{
+    font-family:var(--font-comic);font-size:clamp(36px,5.5vw,70px);line-height:1;letter-spacing:1px;
+  }
+  .head h2 em{color:var(--bell-red);font-style:normal;}
+
+  .body{flex:1;min-height:0;display:flex;}
+
+  /* ============ SLIDE 2: CẶP ĐÔI (Split Panel) ============ */
+  .duo-split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,40px);width:100%;align-items:center;}
+  
+  .duo-card{
+    background:#fff;border:4px solid var(--ink);box-shadow:var(--shadow-hard-lg);
+    padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;gap:20px;height:100%;
+    justify-content:center;position:relative;
+  }
+  .duo-card.dora{border-top:15px solid var(--dora-blue);}
+  .duo-card.nobi{border-top:15px solid var(--nobi-yellow);}
+
+  .duo-card .avatar{
+    width:clamp(80px,12vw,120px);height:clamp(80px,12vw,120px);
+    background:var(--paper);border:3px solid var(--ink);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;margin:0 auto;
+    box-shadow:inset 0 0 0 5px #fff, 3px 3px 0 var(--ink);
+  }
+  .duo-card .avatar svg{width:70%;height:70%;}
+  
+  .duo-card h3{font-family:var(--font-comic);font-size:clamp(28px,4vw,48px);text-align:center;letter-spacing:1px;}
+  .duo-card.dora h3{color:var(--dora-blue);}
+  .duo-card.nobi h3{color:#d4a017;}
+  
+  .duo-card ul{list-style:none;font-size:clamp(14px,1.5vw,18px);font-weight:700;line-height:1.6;}
+  .duo-card li{margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;}
+  .duo-card li::before{content:"★";color:var(--bell-red);font-size:1.2em;}
+
+  /* ============ SLIDE 3: BẢO BỐI (Bento Grid) ============ */
+  .gadgets{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,24px);width:100%;height:100%;}
+  .gadget-box{
+    background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-hard);
+    padding:clamp(16px,2vw,30px);display:flex;align-items:center;gap:clamp(16px,3vw,30px);
+    transition:transform .2s, box-shadow .2s;
+  }
+  .gadget-box:hover{transform:translate(-3px,-3px);box-shadow:var(--shadow-hard-lg);}
+  
+  .gadget-icon{
+    flex:0 0 auto;width:clamp(60px,8vw,100px);height:clamp(60px,8vw,100px);
+    border-radius:50%;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;
+  }
+  .gadget-icon svg{width:60%;height:60%;fill:var(--ink);}
+  
+  .gadget-box:nth-child(1) .gadget-icon{background:#ffb8d0;} /* Cửa thần kỳ */
+  .gadget-box:nth-child(2) .gadget-icon{background:var(--dora-blue);}
+  .gadget-box:nth-child(2) .gadget-icon svg{fill:#fff;}
+  .gadget-box:nth-child(3) .gadget-icon{background:var(--nobi-yellow);}
+  .gadget-box:nth-child(4) .gadget-icon{background:#b19cd9;} /* Máy thời gian */
+
+  .gadget-text h3{font-family:var(--font-comic);font-size:clamp(20px,2.8vw,32px);letter-spacing:1px;margin-bottom:5px;}
+  .gadget-text p{font-size:clamp(12px,1.3vw,15px);font-weight:600;color:#444;line-height:1.4;}
+
+  /* ============ SLIDE 4: BÀI HỌC (Speech Bubbles) ============ */
+  .lessons{width:100%;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,3vh,30px);}
+  
+  .bubble-row{display:flex;width:100%;}
+  .bubble-row.right{justify-content:flex-end;}
+  
+  .speech-bubble{
+    background:#fff;border:3px solid var(--ink);border-radius:20px;
+    padding:clamp(16px,2.5vw,24px) clamp(20px,3vw,32px);position:relative;
+    max-width:80%;box-shadow:var(--shadow-hard);
+  }
+  .bubble-row:not(.right) .speech-bubble{border-bottom-left-radius:0;}
+  .bubble-row.right .speech-bubble{border-bottom-right-radius:0;background:var(--nobi-yellow);}
+  
+  /* Bubble tails */
+  .bubble-row:not(.right) .speech-bubble::after{
+    content:"";position:absolute;bottom:-15px;left:-3px;width:20px;height:20px;
+    background:#fff;border-bottom:3px solid var(--ink);border-left:3px solid var(--ink);
+    transform:skewX(30deg);
+  }
+  .bubble-row.right .speech-bubble::after{
+    content:"";position:absolute;bottom:-15px;right:-3px;width:20px;height:20px;
+    background:var(--nobi-yellow);border-bottom:3px solid var(--ink);border-right:3px solid var(--ink);
+    transform:skewX(-30deg);
+  }
+
+  .speech-bubble h3{font-family:var(--font-comic);font-size:clamp(22px,3vw,36px);letter-spacing:1px;margin-bottom:6px;color:var(--bell-red);}
+  .bubble-row.right .speech-bubble h3{color:var(--dora-blue-dark);}
+  .speech-bubble p{font-size:clamp(14px,1.6vw,18px);font-weight:700;line-height:1.5;}
+
+  /* ============ SLIDE 5: CLOSING ============ */
+  .closing{justify-content:center;align-items:center;text-align:center;position:relative;}
+  
+  .closing h1{
+    font-family:var(--font-comic);font-size:clamp(40px,8vw,100px);line-height:1;
+    color:var(--dora-blue);-webkit-text-stroke:2px var(--ink);text-shadow:var(--shadow-hard);
+    margin-bottom:20px;
+  }
+  .closing h1 em{color:var(--nobi-yellow);font-style:normal;}
+  
+  .closing .quote-box{
+    background:#fff;border:3px solid var(--ink);padding:20px 30px;
+    box-shadow:var(--shadow-hard);max-width:500px;font-weight:700;font-size:clamp(15px,1.8vw,20px);line-height:1.6;
+    transform:rotate(2deg);position:relative;
+  }
+  .closing .quote-box::before{
+    content:"";position:absolute;top:-15px;left:20px;width:40px;height:20px;
+    background:rgba(255,200,0,.6);transform:rotate(-10deg); /* Băng dính vàng */
+  }
+  
+  .closing .end-mark{
+    margin-top:40px;font-family:var(--font-comic);font-size:clamp(24px,4vw,40px);
+    color:var(--bell-red);letter-spacing:2px;transform:rotate(-3deg);
+  }
+
+  /* ============ NAVIGATION BAR (Chuẩn) ============ */
+  .nav-bar{
+    position:absolute;left:0;right:0;bottom:0;z-index:30;
+    padding:0 clamp(20px,4.5vw,64px) clamp(16px,3vh,30px);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    pointer-events:none;
+    background:linear-gradient(to top, var(--paper) 20%, transparent 100%);
+  }
+  .nav-bar > *{pointer-events:auto;}
+  
+  /* (1) Bộ đếm trang */
+  .page-counter{
+    font-family:var(--font-comic);font-size:clamp(20px,3vw,32px);
+    color:var(--ink);white-space:nowrap;letter-spacing:1px;
+    background:#fff;padding:5px 15px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);
+    transform:rotate(-2deg);
+  }
+  .page-counter b{color:var(--bell-red);font-size:1.2em;}
+  
+  /* (2) Thanh tiến trình */
+  .progress-bar{
+    flex:1;max-width:400px;height:16px;background:#fff;
+    border:3px solid var(--ink);position:relative;overflow:hidden;
+    box-shadow:inset 2px 2px 0 rgba(0,0,0,0.1);
+  }
+  .progress-fill{
+    height:100%;width:0%;background:var(--dora-blue);
+    transition:width .6s cubic-bezier(.4,0,.2,1);
+    background-image:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.2) 10px,rgba(255,255,255,.2) 20px); /* Sọc ca rô */
+  }
+
+  /* (3) Cặp nút < > */
+  .nav-btns{display:flex;gap:10px;}
+  .nav-btn{
+    width:clamp(44px,5vw,54px);height:clamp(44px,5vw,54px);
+    border:3px solid var(--ink);background:var(--nobi-yellow);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);transition:all .1s;
+  }
+  .nav-btn:hover:not(:disabled){background:#fff;transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);}
+  .nav-btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);}
+  .nav-btn svg{width:50%;height:50%;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .nav-btn:disabled{background:#ddd;opacity:.5;cursor:not-allowed;box-shadow:none;transform:translate(3px,3px);}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:880px){
+    .duo-split{grid-template-columns:1fr;gap:20px;}
+    .duo-card{border-top:none;border-left:15px solid;}
+    .duo-card.dora{border-left-color:var(--dora-blue);}
+    .duo-card.nobi{border-left-color:var(--nobi-yellow);}
+    .duo-card .avatar{width:60px;height:60px;margin:0 0 10px 0;}
+    .gadgets{grid-template-columns:1fr;}
+    .gadget-box{padding:12px 16px;}
+    .gadget-icon{width:50px;height:50px;}
+    .speech-bubble{max-width:95%;}
+  }
+  @media (max-width:560px){
+    .slide{padding:20px 16px 100px;}
+    .cover h1{font-size:clamp(50px,16vw,80px);-webkit-text-stroke:1.5px var(--ink);}
+    .head h2{font-size:32px;}
+    .gadget-text h3{font-size:18px;}
+    .gadget-text p{font-size:11px;}
+    .nav-bar{flex-wrap:wrap;justify-content:center;gap:10px;padding-bottom:12px;}
+    .progress-bar{order:3;width:100%;max-width:none;margin-top:5px;height:12px;}
+    .page-counter{font-size:16px;padding:2px 10px;}
+    .nav-btn{width:38px;height:38px;}
+    .closing .quote-box{transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="slides" id="slides">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active" data-i="0">
+      <div class="starburst reveal d1"></div>
+      <div class="badge reveal d2">Truyện tranh kỷ niệm</div>
+      <h1 class="reveal d3">
+        DORAEMON
+        <span>& NOBITA</span>
+      </h1>
+      <div class="sub reveal d5">
+        Chuyện chưa kể từ ngăn bàn học.<br>Về một tình bạn vượt thời gian.
+      </div>
+    </section>
+
+    <!-- SLIDE 2: CẶP ĐÔI -->
+    <section class="slide" data-i="1">
+      <div class="head">
+        <div class="tag reveal d1">Hồ Sơ Nhân Vật</div>
+        <h2 class="reveal d2">Sự bù trừ <em>hoàn hảo</em></h2>
+      </div>
+      <div class="body">
+        <div class="duo-split">
+          <!-- Doraemon Card -->
+          <div class="duo-card dora reveal d3">
+            <div class="avatar">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#0096e6" stroke="#111" stroke-width="3"/><circle cx="50" cy="50" r="30" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="50" cy="50" r="5" fill="#e63946"/><path d="M50 45 L50 25 M50 45 L35 35 M50 45 L65 35" stroke="#111" stroke-width="2"/></svg>
+            </div>
+            <h3>Doraemon</h3>
+            <ul>
+              <li>Mèo máy đến từ tương lai</li>
+              <li>Sở hữu túi bảo bối thần kỳ</li>
+              <li>Luôn xuất hiện khi Nobita gặp khó khăn</li>
+              <li>Dù miệng hay càu nhàu nhưng trái tim luôn ấm áp</li>
+            </ul>
+          </div>
+          <!-- Nobita Card -->
+          <div class="duo-card nobi reveal d4">
+            <div class="avatar">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#fbd847" stroke="#111" stroke-width="3"/><circle cx="35" cy="45" r="12" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="65" cy="45" r="12" fill="#fff" stroke="#111" stroke-width="3"/><line x1="47" y1="45" x2="53" y2="45" stroke="#111" stroke-width="3"/><circle cx="35" cy="45" r="3" fill="#111"/><circle cx="65" cy="45" r="3" fill="#111"/></svg>
+            </div>
+            <h3>Nobita</h3>
+            <ul>
+              <li>Cậu bé hậu đậu, yếu đuối</li>
+              <li>Luôn bị điểm 0 và bắt nạt</li>
+              <li>Nhưng lại có trái tim nhân hậu</li>
+              <li>Sẵn sàng hy sinh vì bạn bè</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: BẢO BỐI -->
+    <section class="slide" data-i="2">
+      <div class="head">
+        <div class="tag reveal d1">Kho Bảo Bối</div>
+        <h2 class="reveal d2">Vật phẩm <em>kinh điển</em></h2>
+      </div>
+      <div class="body">
+        <div class="gadgets">
+          <div class="gadget-box reveal d2">
+            <div class="gadget-icon">
+              <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="2" stroke="none"/></svg>
+            </div>
+            <div class="gadget-text">
+              <h3>Cửa Thần Kỳ</h3>
+              <p>Mở ra bất cứ nơi đâu trên thế giới chỉ trong tích tắc.</p>
+            </div>
+          </div>
+          <div class="gadget-box reveal d3">
+            <div class="gadget-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 3C7 3 3 7 3 12c0 5 4 9 9 9s9-4 9-9c0-5-4-9-9-9zm0 4c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5z"/></svg>
+            </div>
+            <div class="gadget-text">
+              <h3>Chong Chóng Tre</h3>
+              <p>Gắn lên đầu và bay lượn tự do trên bầu trời xanh.</p>
+            </div>
+          </div>
+          <div class="gadget-box reveal d4">
+            <div class="gadget-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 8h16v8H4z" stroke="none"/><path d="M8 16v4l4-4"/></svg>
+            </div>
+            <div class="gadget-text">
+              <h3>Túi Thần Kỳ</h3>
+              <p>Chứa đựng vô vàn bảo bối không tưởng của tương lai.</p>
+            </div>
+          </div>
+          <div class="gadget-box reveal d5">
+            <div class="gadget-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#fff" stroke-width="2" fill="none"/></svg>
+            </div>
+            <div class="gadget-text">
+              <h3>Cỗ Máy Thời Gian</h3>
+              <p>Đưa hai cậu bé ngược dòng thời gian để sửa chữa sai lầm.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: BÀI HỌC -->
+    <section class="slide" data-i="3">
+      <div class="head">
+        <div class="tag reveal d1">Trang Truyện Cuối</div>
+        <h2 class="reveal d2">Bài học <em>nhân văn</em></h2>
+      </div>
+      <div class="body">
+        <div class="lessons">
+          <div class="bubble-row reveal d2">
+            <div class="speech-bubble">
+              <h3>Tự lập</h3>
+              <p>Doraemon có thể cho Nobita bảo bối, nhưng không thể sống thay cuộc đời cậu ấy. Bảo bối chỉ là trợ thủ, đôi chân của chính mình mới là thứ đưa ta đến tương lai.</p>
+            </div>
+          </div>
+          <div class="bubble-row right reveal d4">
+            <div class="speech-bubble">
+              <h3>Lòng tốt</h3>
+              <p>Nobita yếu đuối, hậu đậu, nhưng cậu chưa bao giờ bỏ rơi bạn bè. Sự ngay thẳng và lương thiện mới là "bảo bối" mạnh mẽ nhất mà cậu có.</p>
+            </div>
+          </div>
+          <div class="bubble-row reveal d5">
+            <div class="speech-bubble">
+              <h3>Tình bạn</h3>
+              <p>Không có cỗ máy thời gian nào đo đếm được thứ tình cảm giản dị ấy. Điều tuyệt vời nhất không phải tương lai, mà là có người đồng hành cùng ta ở hiện tại.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CLOSING -->
+    <section class="slide closing" data-i="4">
+      <h1 class="reveal d1">TẠM BIỆT<br><em>& HẸN GẶP LẠI</em></h1>
+      <div class="quote-box reveal d3">
+        "Cảm ơn Doraemon, vì đã đến thế giới này.<br>Và cảm ơn cậu bé Nobita ngốc nghếch, vì đã không ngừng lớn lên."
+      </div>
+      <div class="end-mark reveal d5">- THE END -</div>
+    </section>
+
+  </div>
+
+  <!-- ============ NAVIGATION BAR ============ -->
+  <div class="nav-bar">
+    <!-- (1) Bộ đếm trang -->
+    <div class="page-counter" id="counter">
+      <b>01</b> / 05
+    </div>
+    
+    <!-- (2) Thanh tiến trình -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    
+    <!-- (3) Cặp nút < > -->
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev" aria-label="Slide trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="next" aria-label="Slide tiếp">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  let animating = false;
+
+  function pad(n){ return String(n+1).padStart(2,'0'); }
+
+  function update(){
+    counter.innerHTML = '<b>'+pad(current)+'</b> / '+String(total).padStart(2,'0');
+    progress.style.width = ((current+1)/total*100)+'%';
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===total-1;
+  }
+
+  function go(i){
+    if(animating || i===current || i<0 || i>=total) return;
+    animating = true;
+    const outgoing = slides[current];
+    const incoming = slides[i];
+    outgoing.classList.remove('active');
+    setTimeout(()=>{
+      incoming.classList.add('active');
+      current = i;
+      update();
+      setTimeout(()=>{ animating = false; }, 900);
+    }, 500);
+  }
+
+  prevBtn.addEventListener('click', ()=> go(current-1));
+  nextBtn.addEventListener('click', ()=> go(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(current+1); }
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); go(0); }
+    if(e.key==='End'){ e.preventDefault(); go(total-1); }
+  });
+
+  // Swipe (Touch)
+  let sx=0, sy=0, tracking=false;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking=true;
+  }, {passive:true});
+  stage.addEventListener('touchend', e=>{
+    if(!tracking) return; tracking=false;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(current+1); else go(current-1);
+    }
+  }, {passive:true});
+
+  update();
+})();
+</script>
+</body>
+</html>

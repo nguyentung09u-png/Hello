@@ -1,0 +1,68 @@
+Tổng quan cách làm
+
+Nguyên tắc chung: Mỗi thành phần là một khối HTML riêng, CSS lo hiển thị, JS giữ một biến trạng thái current và cập nhật cả 3 phần mỗi khi đổi slide.
+
+Luồng hoạt động:
+
+1. Khai báo biến current = 0 và total = số slide
+2. Viết hàm update() — đọc current, tính toán, gán lại giá trị cho 3 thành phần
+3. Mỗi lần chuyển slide (nút bấm / phím / vuốt) → đổi current → gọi update()
+4. CSS đặt transition để giá trị mới chuyển mượt thay vì nhảy tức thì
+
+---
+
+Code tổng quan (rút gọn)
+
+HTML:
+
+```html
+<div class="counter" id="counter"></div>
+<div class="progress-track">
+  <div class="progress-fill" id="progress"></div>
+</div>
+<button class="nav-btn" id="prev">‹</button>
+<button class="nav-btn" id="next">›</button>
+```
+
+CSS:
+
+```css
+.counter { font-variant-numeric: tabular-nums; }
+.progress-track { height:2px; background:rgba(143,227,255,.14); }
+.progress-fill  { height:100%; width:0; transition: width .6s ease; }
+.nav-btn { border-radius:50%; transition: all .3s; }
+.nav-btn:disabled { opacity:.3; }
+```
+
+JS:
+
+```js
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+function update() {
+  counter.innerHTML = `<b>${String(current+1).padStart(2,'0')}</b> / ${String(total).padStart(2,'0')}`;
+  progress.style.width = ((current+1)/total*100) + '%';
+  prev.disabled = current === 0;
+  next.disabled = current === total-1;
+}
+
+function go(i) {
+  if (i < 0 || i >= total) return;
+  slides[current].classList.remove('active');
+  slides[i].classList.add('active');
+  current = i;
+  update();
+}
+
+prev.onclick = () => go(current-1);
+next.onclick = () => go(current+1);
+update(); // khởi tạo lần đầu
+```
+
+---
+
+Lưu ý: Đây là bản rút gọn để thấy logic cốt lõi. Bản gốc có thêm hiệu ứng exiting, khóa animating chống bấm nhanh, và class active cho slide — tôi không chắc bạn muốn giữ các phần đó hay không, nên chưa đưa vào.
+
+🎯 Tóm 1 câu: Giữ một biến current, viết hàm update() gán lại counter/progress/disabled, gọi nó mỗi khi current thay đổi, và để CSS transition lo phần chuyển động mượt.

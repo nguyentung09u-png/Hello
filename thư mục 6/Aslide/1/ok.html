@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Băng Giá — Khi Thiên Nhiên Khoác Áo Pha Lê</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root{
+    --ice:#d8ecf5;
+    --frost:#f4fafd;
+    --deep:#0a2540;
+    --navy:#123a5c;
+    --cyan:#5ec8e8;
+    --accent:#8fe3ff;
+    --text:#0e2a44;
+    --muted:#5a7a94;
+    --serif:'Georgia','Times New Roman',serif;
+    --sans:'Helvetica Neue',Arial,sans-serif;
+  }
+  html,body{height:100%; overflow:hidden; font-family:var(--sans); background:#04121f; color:var(--text);}
+  .stage{
+    position:relative; width:100vw; height:100vh; overflow:hidden;
+    background:radial-gradient(ellipse at 30% 20%, #123a5c 0%, #071a2b 55%, #020a12 100%);
+  }
+  /* Aurora / frost background drift */
+  .aurora{ position:absolute; inset:-20%; pointer-events:none; z-index:0; opacity:.6;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(94,200,232,.35), transparent 45%),
+      radial-gradient(circle at 75% 65%, rgba(143,227,255,.25), transparent 50%),
+      radial-gradient(circle at 50% 90%, rgba(216,236,245,.15), transparent 55%);
+    filter:blur(40px);
+    animation: auroraDrift 22s ease-in-out infinite alternate;
+  }
+  @keyframes auroraDrift{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(-3%,2%) scale(1.08);}
+  }
+
+  /* Snow particles */
+  .snow{position:absolute; inset:0; pointer-events:none; z-index:1;}
+  .flake{position:absolute; top:-10px; width:4px; height:4px; background:#fff; border-radius:50%; opacity:.8; filter:blur(.3px); animation:fall linear infinite;}
+  @keyframes fall{
+    0%{transform:translateY(-20px) translateX(0);}
+    100%{transform:translateY(105vh) translateX(30px);}
+  }
+
+  /* Slide container */
+  .slides{position:relative; width:100%; height:100%; z-index:2;}
+  .slide{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    padding:clamp(20px,5vw,70px); opacity:0; visibility:hidden;
+    transform:translateY(24px) scale(.985);
+    transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1), visibility 0s .7s;
+  }
+  .slide.active{opacity:1; visibility:visible; transform:translateY(0) scale(1); transition-delay:0s;}
+  .slide.exiting{opacity:0; transform:translateY(-20px) scale(.985); transition-delay:0s;}
+
+  /* Shared typography */
+  .kicker{font-family:var(--sans); font-size:clamp(10px,1.2vw,13px); letter-spacing:.42em; text-transform:uppercase; color:var(--accent); font-weight:600; opacity:.9;}
+  h1{font-family:var(--serif); color:var(--frost); font-weight:400; line-height:1.02; letter-spacing:-.02em;}
+  .lead{font-family:var(--sans); color:#cfe6f2; font-weight:300; line-height:1.5;}
+
+  /* Frost reveal for content */
+  .reveal{opacity:0; transform:translateY(18px); filter:blur(6px); transition: opacity .8s ease, transform .9s cubic-bezier(.22,1,.36,1), filter .8s ease;}
+  .slide.active .reveal{opacity:1; transform:translateY(0); filter:blur(0);}
+  .slide.active .reveal.d1{transition-delay:.15s;}
+  .slide.active .reveal.d2{transition-delay:.30s;}
+  .slide.active .reveal.d3{transition-delay:.45s;}
+  .slide.active .reveal.d4{transition-delay:.60s;}
+  .slide.active .reveal.d5{transition-delay:.75s;}
+
+  /* ============ SLIDE 1: COVER ============ */
+  .cover{justify-content:center; align-items:flex-start; text-align:left;}
+  .cover .kicker{margin-bottom:clamp(14px,2vh,26px);}
+  .cover h1{font-size:clamp(48px,13vw,180px); color:var(--frost);}
+  .cover h1 .iceword{display:inline-block; background:linear-gradient(180deg,#ffffff 0%, #8fe3ff 60%, #5ec8e8 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .cover .sub{margin-top:clamp(18px,3vh,34px); font-size:clamp(14px,1.6vw,20px); max-width:44ch; color:#bfe0f0;}
+  .cover .rule{width:clamp(60px,10vw,120px); height:2px; margin-top:clamp(20px,3vh,32px); background:linear-gradient(90deg,var(--accent),transparent);}
+
+  /* Crystal SVG accent */
+  .crystal{position:absolute; right:clamp(10px,6vw,90px); top:50%; transform:translateY(-50%); width:clamp(160px,32vw,440px); height:auto; opacity:.9; z-index:-1; filter:drop-shadow(0 0 30px rgba(143,227,255,.35));}
+  .crystal path, .crystal polygon{stroke:rgba(200,240,255,.6); stroke-width:1; fill:rgba(94,200,232,.06);}
+  .crystal .glow{fill:rgba(143,227,255,.18); animation:pulse 5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.2;}50%{opacity:.5;}}
+
+  /* ============ CONTENT LAYOUTS ============ */
+  .slide-head{margin-bottom:clamp(16px,3vh,40px); flex:0 0 auto;}
+  .slide-head .kicker{margin-bottom:10px;}
+  .slide-head h2{font-family:var(--serif); font-weight:400; font-size:clamp(26px,4.6vw,58px); color:var(--frost); line-height:1.05; letter-spacing:-.01em;}
+
+  .body-area{flex:1; display:flex; min-height:0;}
+
+  /* Slide 2: definition split */
+  .split{display:grid; grid-template-columns:1.15fr .85fr; gap:clamp(20px,4vw,60px); width:100%; align-items:center;}
+  .split p{font-size:clamp(14px,1.5vw,19px); line-height:1.65; color:#cfe6f2; font-weight:300;}
+  .split .em{color:var(--accent); font-weight:500;}
+  .frost-ring{position:relative; aspect-ratio:1; border-radius:50%; background:conic-gradient(from 200deg, rgba(143,227,255,.4), rgba(94,200,232,.05), rgba(216,236,245,.5), rgba(94,200,232,.05), rgba(143,227,255,.4)); display:flex; align-items:center; justify-content:center; animation:spin 26s linear infinite; max-width:min(60vw,380px); margin:0 auto;}
+  .frost-ring::before{content:""; position:absolute; inset:10%; border-radius:50%; background:radial-gradient(circle at 40% 35%, #0e2a44, #04121f); }
+  .frost-ring .core{position:relative; text-align:center; z-index:2; color:var(--frost);}
+  .frost-ring .core b{display:block; font-family:var(--serif); font-size:clamp(30px,5vw,54px); font-weight:400; background:linear-gradient(180deg,#fff,#8fe3ff); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .frost-ring .core span{font-size:clamp(9px,1vw,12px); letter-spacing:.3em; text-transform:uppercase; color:var(--accent);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Slide 3: stats / bento */
+  .bento{display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:1fr 1fr; gap:clamp(10px,1.4vw,18px); width:100%;}
+  .card{background:linear-gradient(160deg, rgba(18,58,92,.55), rgba(7,26,43,.5)); border:1px solid rgba(143,227,255,.14); border-radius:16px; padding:clamp(14px,2vw,26px); display:flex; flex-direction:column; justify-content:space-between; backdrop-filter:blur(8px); position:relative; overflow:hidden; transition:border-color .4s, transform .4s;}
+  .card:hover{border-color:rgba(143,227,255,.4); transform:translateY(-3px);}
+  .card.big{grid-column:span 2; grid-row:span 2;}
+  .card .num{font-family:var(--serif); font-size:clamp(30px,5.5vw,72px); font-weight:400; line-height:1; background:linear-gradient(180deg,#fff,#8fe3ff); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .card .label{font-size:clamp(10px,1.1vw,13px); letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+  .card .desc{font-size:clamp(11px,1.15vw,14px); color:#b7d6e6; line-height:1.5; font-weight:300; margin-top:8px;}
+  .card .shard{position:absolute; right:-20px; bottom:-20px; width:120px; height:120px; opacity:.18; transform:rotate(20deg);}
+
+  /* Slide 4: timeline / formation */
+  .timeline{width:100%; display:flex; flex-direction:column; justify-content:center; gap:clamp(12px,2vh,22px);}
+  .step{display:grid; grid-template-columns:clamp(40px,6vw,64px) 1fr; gap:clamp(14px,2.4vw,28px); align-items:center; padding:clamp(12px,1.8vh,20px) clamp(14px,2vw,24px); border-left:2px solid rgba(143,227,255,.25); border-radius:0 12px 12px 0; transition:background .4s, border-color .4s;}
+  .step:hover{background:rgba(143,227,255,.06); border-color:var(--accent);}
+  .step .idx{font-family:var(--serif); font-size:clamp(22px,3vw,36px); color:var(--accent); font-weight:400; opacity:.8; text-align:center;}
+  .step h3{color:var(--frost); font-size:clamp(15px,1.9vw,22px); font-weight:600; letter-spacing:.01em; margin-bottom:4px;}
+  .step p{color:#b7d6e6; font-size:clamp(12px,1.3vw,15px); font-weight:300; line-height:1.5;}
+
+  /* Slide 5: closing */
+  .closing{justify-content:center; align-items:center; text-align:center;}
+  .closing h1{font-size:clamp(38px,9vw,120px); line-height:1; background:linear-gradient(180deg,#ffffff,#8fe3ff 55%,#5ec8e8); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .closing p{margin-top:clamp(16px,3vh,30px); font-size:clamp(13px,1.6vw,20px); color:#bfe0f0; font-weight:300; max-width:40ch; line-height:1.6;}
+  .closing .mark{margin-top:clamp(24px,4vh,40px); font-size:clamp(10px,1.1vw,12px); letter-spacing:.4em; text-transform:uppercase; color:var(--accent); opacity:.7;}
+
+  /* ============ NAVIGATION ============ */
+  .nav{position:absolute; bottom:0; left:0; right:0; z-index:20; padding:clamp(14px,2.4vw,28px) clamp(18px,4vw,60px); display:flex; align-items:center; justify-content:space-between; gap:16px; pointer-events:none;}
+  .nav > *{pointer-events:auto;}
+  .progress-track{flex:1; height:2px; background:rgba(143,227,255,.14); border-radius:2px; overflow:hidden; max-width:420px;}
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--cyan),var(--accent)); transition:width .6s cubic-bezier(.22,1,.36,1); border-radius:2px; box-shadow:0 0 12px rgba(143,227,255,.6);}
+  .counter{font-family:var(--sans); font-size:clamp(11px,1.2vw,13px); letter-spacing:.15em; color:#9fc6db; min-width:52px; text-align:center; font-variant-numeric:tabular-nums;}
+  .counter b{color:var(--frost); font-weight:600;}
+  .btns{display:flex; gap:clamp(8px,1.2vw,14px);}
+  .nav-btn{width:clamp(38px,5vw,48px); height:clamp(38px,5vw,48px); border-radius:50%; border:1px solid rgba(143,227,255,.3); background:rgba(18,58,92,.45); color:var(--frost); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s ease; backdrop-filter:blur(6px);}
+  .nav-btn:hover{background:rgba(143,227,255,.2); border-color:var(--accent); transform:scale(1.06);}
+  .nav-btn:active{transform:scale(.95);}
+  .nav-btn svg{width:45%; height:45%;}
+  .nav-btn:disabled{opacity:.3; cursor:not-allowed;}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:820px){
+    .split{grid-template-columns:1fr; gap:20px;}
+    .split .frost-ring{max-width:min(50vw,220px); order:-1;}
+    .bento{grid-template-columns:repeat(2,1fr); grid-template-rows:auto auto auto; }
+    .card.big{grid-column:span 2; grid-row:span 1; min-height:120px;}
+    .crystal{opacity:.35; right:-20px;}
+  }
+  @media (max-width:520px){
+    .slide{padding:22px 20px 84px;}
+    .bento{grid-template-columns:1fr 1fr; gap:8px;}
+    .card{padding:12px; border-radius:12px;}
+    .card .shard{display:none;}
+    .slide-head h2{font-size:26px;}
+    .nav{padding:12px 16px;}
+    .progress-track{max-width:none;}
+  }
+  @media (max-height:520px) and (orientation:landscape){
+    .slide{padding:16px 26px 70px;}
+    .slide-head{margin-bottom:8px;}
+    .slide-head h2{font-size:24px;}
+    .timeline{gap:6px;}
+    .step{padding:6px 12px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s !important; transition-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="aurora"></div>
+  <div class="snow" id="snow"></div>
+
+  <div class="slides" id="slides">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active" data-i="0">
+      <svg class="crystal" viewBox="0 0 200 260" aria-hidden="true">
+        <polygon class="glow" points="100,10 170,70 150,200 50,200 30,70"/>
+        <polygon points="100,10 170,70 100,120 30,70"/>
+        <polygon points="170,70 150,200 100,120"/>
+        <polygon points="30,70 100,120 50,200"/>
+        <line x1="100" y1="10" x2="100" y2="120"/>
+        <line x1="100" y1="120" x2="50" y2="200"/>
+        <line x1="100" y1="120" x2="150" y2="200"/>
+        <line x1="30" y1="70" x2="170" y2="70"/>
+      </svg>
+      <div class="kicker reveal d1">Khí tượng · Vật lý · Thiên nhiên</div>
+      <h1 class="reveal d2"><span class="iceword">Băng&nbsp;Giá</span></h1>
+      <div class="rule reveal d3"></div>
+      <p class="sub lead reveal d4">Khi thiên nhiên khoác áo pha lê — hành trình từ hơi nước đến tinh thể băng và những gì băng giá kể về hành tinh chúng ta.</p>
+    </section>
+
+    <!-- SLIDE 2: BĂNG GIÁ LÀ GÌ -->
+    <section class="slide" data-i="1">
+      <div class="slide-head">
+        <div class="kicker reveal d1">01 — Định nghĩa</div>
+        <h2 class="reveal d2">Băng giá là gì?</h2>
+      </div>
+      <div class="body-area">
+        <div class="split">
+          <div>
+            <p class="lead reveal d3">Băng giá là trạng thái <span class="em">nước đóng băng</span> khi nhiệt độ xuống dưới điểm đông. Trong tự nhiên, nó xuất hiện dưới nhiều hình thái: sương giá trên lá cỏ, băng mỏng trên mặt hồ, hay những tảng băng vĩnh cửu ở hai cực.</p>
+            <p class="lead reveal d4" style="margin-top:16px;">Băng không chỉ là "nước lạnh" — nó là một <span class="em">kho lưu trữ khí hậu</span>, phản chiếu ánh sáng mặt trời và điều hòa nhiệt độ toàn cầu.</p>
+          </div>
+          <div class="frost-ring reveal d4">
+            <div class="core">
+              <b>0°C</b>
+              <span>Điểm đóng băng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: SỰ HÌNH THÀNH -->
+    <section class="slide" data-i="2">
+      <div class="slide-head">
+        <div class="kicker reveal d1">02 — Cơ chế</div>
+        <h2 class="reveal d2">Tinh thể băng hình thành thế nào?</h2>
+      </div>
+      <div class="body-area">
+        <div class="timeline">
+          <div class="step reveal d2"><div class="idx">01</div><div><h3>Hơi nước ngưng tụ</h3><p>Khi nhiệt độ hạ, hơi nước trong không khí bắt đầu ngưng tụ thành các giọt siêu nhỏ.</p></div></div>
+          <div class="step reveal d3"><div class="idx">02</div><div><h3>Mầm tinh thể</h3><p>Một hạt bụi hoặc hạt phấn trở thành "hạt nhân" để phân tử nước bám vào và sắp xếp.</p></div></div>
+          <div class="step reveal d4"><div class="idx">03</div><div><h3>Kết tinh theo mạng lục giác</h3><p>Các phân tử nước liên kết theo cấu trúc lục giác — tạo nên hình dạng sáu cánh đặc trưng của bông tuyết.</p></div></div>
+          <div class="step reveal d5"><div class="idx">04</div><div><h3>Phát triển &amp; lan tỏa</h3><p>Tinh thể lớn dần khi hơi nước tiếp tục đông lại, tạo thành sương giá, băng mỏng hoặc băng dày theo thời gian.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: VAI TRÒ & TÁC ĐỘNG -->
+    <section class="slide" data-i="3">
+      <div class="slide-head">
+        <div class="kicker reveal d1">03 — Tác động</div>
+        <h2 class="reveal d2">Băng giá trong hệ thống khí hậu</h2>
+      </div>
+      <div class="body-area">
+        <div class="bento">
+          <div class="card big reveal d2">
+            <div class="label">Hiệu ứng suất phản chiếu</div>
+            <div>
+              <div class="num">Albedo</div>
+              <div class="desc">Bề mặt băng tuyết phản chiếu phần lớn ánh sáng mặt trời trở lại không gian, giúp Trái Đất giữ được sự cân bằng nhiệt.</div>
+            </div>
+            <svg class="shard" viewBox="0 0 100 100"><polygon points="50,5 90,45 50,95 10,45" fill="#8fe3ff"/></svg>
+          </div>
+          <div class="card reveal d3">
+            <div class="label">Nước ngọt</div>
+            <div class="desc">Phần lớn nước ngọt trên Trái Đất được lưu giữ trong các khối băng.</div>
+          </div>
+          <div class="card reveal d4">
+            <div class="label">Mực nước biển</div>
+            <div class="desc">Băng tan góp phần làm thay đổi mực nước đại dương.</div>
+          </div>
+          <div class="card reveal d5">
+            <div class="label">Sinh thái</div>
+            <div class="desc">Là môi trường sống của nhiều loài sinh vật vùng cực.</div>
+          </div>
+          <div class="card reveal d5">
+            <div class="label">Khí hậu</div>
+            <div class="desc">Băng là "băng ghi" lịch sử khí hậu hàng trăm nghìn năm.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: KẾT -->
+    <section class="slide closing" data-i="4">
+      <div class="kicker reveal d1" style="margin-bottom:clamp(16px,3vh,28px);">Kết luận</div>
+      <h1 class="reveal d2">Băng giá<br>không hề lạnh lẽo</h1>
+      <p class="reveal d3">Mỗi tinh thể băng là một mảnh ghép của hệ thống khí hậu — nhỏ bé nhưng giữ vai trò sống còn với sự cân bằng của hành tinh.</p>
+      <div class="mark reveal d4">Cảm ơn bạn đã theo dõi</div>
+    </section>
+
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav">
+    <div class="counter" id="counter"><b>01</b> / 05</div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="btns">
+      <button class="nav-btn" id="prev" aria-label="Slide trước">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="next" aria-label="Slide tiếp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  let animating = false;
+
+  function pad(n){ return String(n+1).padStart(2,'0'); }
+
+  function update(){
+    counter.innerHTML = '<b>'+pad(current)+'</b> / '+String(total).padStart(2,'0');
+    progress.style.width = ((current+1)/total*100)+'%';
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===total-1;
+  }
+
+  function go(i){
+    if(animating || i===current || i<0 || i>=total) return;
+    animating = true;
+    const outgoing = slides[current];
+    const incoming = slides[i];
+    outgoing.classList.remove('active');
+    outgoing.classList.add('exiting');
+    setTimeout(()=>{
+      outgoing.classList.remove('exiting');
+      incoming.classList.add('active');
+      current = i;
+      update();
+      setTimeout(()=>{ animating = false; }, 650);
+    }, 550);
+  }
+
+  prevBtn.addEventListener('click', ()=> go(current-1));
+  nextBtn.addEventListener('click', ()=> go(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight' || e.key===' ' || e.key==='PageDown'){ e.preventDefault(); go(current+1); }
+    if(e.key==='ArrowLeft' || e.key==='PageUp'){ e.preventDefault(); go(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); go(0); }
+    if(e.key==='End'){ e.preventDefault(); go(total-1); }
+  });
+
+  // Swipe (touch)
+  let sx=0, sy=0, tracking=false;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking=true;
+  }, {passive:true});
+  stage.addEventListener('touchend', e=>{
+    if(!tracking) return; tracking=false;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(current+1); else go(current-1);
+    }
+  }, {passive:true});
+
+  // Snow particles
+  const snowBox = document.getElementById('snow');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){
+    const count = window.innerWidth < 600 ? 28 : 60;
+    for(let i=0;i<count;i++){
+      const f = document.createElement('div');
+      f.className='flake';
+      const size = Math.random()*3+2;
+      f.style.width = size+'px';
+      f.style.height = size+'px';
+      f.style.left = Math.random()*100+'vw';
+      f.style.opacity = (Math.random()*.6+.3).toFixed(2);
+      f.style.animationDuration = (Math.random()*10+8)+'s';
+      f.style.animationDelay = (-Math.random()*18)+'s';
+      snowBox.appendChild(f);
+    }
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>

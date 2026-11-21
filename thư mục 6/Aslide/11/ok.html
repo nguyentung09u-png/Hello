@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Công An — Những Người Giữ Nhịp Bình Yên</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --navy-bg:#061529;
+    --navy-deep:#0a1f3d;
+    --navy-panel:#0e294d;
+    --cyan:#00d2ff;
+    --cyan-muted:rgba(0, 210, 255, 0.15);
+    --red:#e63946;
+    --gold:#fca311;
+    --text-light:#e6f1ff;
+    --text-muted:#8ba3c7;
+    
+    --font-display:'Oswald', sans-serif;
+    --font-body:'Inter', sans-serif;
+  }
+  
+  html,body{height:100%;overflow:hidden;background:var(--navy-bg);color:var(--text-light);font-family:var(--font-body);}
+  
+  /* Technical Blueprint Grid Background */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(var(--cyan-muted) 1px, transparent 1px),
+      linear-gradient(90deg, var(--cyan-muted) 1px, transparent 1px);
+    background-size:40px 40px;
+    background-position:center center;
+  }
+  /* Vignette overlay để làm tối viền */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(circle at center, transparent 40%, rgba(6,21,41,0.9) 100%);
+  }
+
+  .stage{position:relative;width:100vw;height:100vh;overflow:hidden;z-index:2;}
+
+  /* Slides */
+  .slides{position:relative;width:100%;height:100%;}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:clamp(24px,4.5vw,60px) clamp(20px,5vw,70px) clamp(80px,12vh,110px);
+    opacity:0;visibility:hidden;
+    transition:opacity 1s ease,visibility 0s 1s;
+  }
+  .slide.active{opacity:1;visibility:visible;transition:opacity 1s ease,visibility 0s 0s;}
+
+  /* Fade Reveal (Giữ nguyên) */
+  .reveal{opacity:0;transition:opacity 1.1s ease;}
+  .slide.active .reveal{opacity:1;}
+  .slide.active .d1{transition-delay:.15s;}
+  .slide.active .d2{transition-delay:.32s;}
+  .slide.active .d3{transition-delay:.5s;}
+  .slide.active .d4{transition-delay:.68s;}
+  .slide.active .d5{transition-delay:.86s;}
+
+  /* ============ SLIDE 1: COVER ============ */
+  .cover{justify-content:center;position:relative;overflow:hidden;}
+  
+  /* Trang trí vòng tròn radar */
+  .cover .radar{
+    position:absolute;top:50%;right:-10%;transform:translateY(-50%);
+    width:clamp(300px,50vw,600px);height:clamp(300px,50vw,600px);
+    border-radius:50%;border:1px solid var(--cyan-muted);z-index:-1;
+  }
+  .cover .radar::before,.cover .radar::after{
+    content:"";position:absolute;inset:15%;border-radius:50%;border:1px dashed rgba(0,210,255,0.1);
+  }
+  .cover .radar::after{inset:35%;border-style:solid;border-color:rgba(0,210,255,0.05);}
+
+  .cover .doc-tag{
+    font-family:var(--font-body);font-size:clamp(10px,1.2vw,13px);font-weight:500;
+    letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);
+    display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  }
+  .cover .doc-tag::before{content:"";width:30px;height:2px;background:var(--cyan);}
+
+  .cover h1{
+    font-family:var(--font-display);font-weight:700;
+    font-size:clamp(56px,12vw,160px);line-height:.85;letter-spacing:.02em;
+    text-transform:uppercase;color:#fff;position:relative;z-index:2;
+  }
+  .cover h1 span{color:var(--red);}
+  .cover h1 .sub-line{
+    font-size:.35em;display:block;letter-spacing:.15em;font-weight:400;color:var(--text-muted);margin-top:15px;
+  }
+
+  .cover .mission{
+    margin-top:40px;border-left:3px solid var(--gold);padding-left:20px;
+    max-width:600px;font-size:clamp(14px,1.6vw,18px);line-height:1.6;color:var(--text-light);font-weight:300;
+  }
+
+  /* ============ SLIDE HEADS ============ */
+  .head{flex:0 0 auto;margin-bottom:clamp(20px,4vh,40px);display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--cyan-muted);padding-bottom:16px;}
+  .head .title-wrap .tag{
+    font-family:var(--font-display);font-size:clamp(12px,1.4vw,16px);font-weight:500;letter-spacing:.2em;
+    color:var(--red);text-transform:uppercase;margin-bottom:8px;display:block;
+  }
+  .head h2{font-family:var(--font-display);font-size:clamp(28px,4.5vw,54px);font-weight:600;line-height:1.1;text-transform:uppercase;}
+  .head .code{font-family:monospace;font-size:clamp(10px,1.2vw,14px);color:var(--cyan);opacity:.6;}
+
+  .body{flex:1;min-height:0;display:flex;}
+
+  /* ============ SLIDE 2: NHIỆM VỤ (Split Layout) ============ */
+  .duty-split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,50px);width:100%;align-items:stretch;}
+  
+  .duty-text{display:flex;flex-direction:column;justify-content:center;}
+  .duty-text p{font-size:clamp(14px,1.5vw,18px);line-height:1.7;color:var(--text-muted);margin-bottom:16px;}
+  .duty-text p b{color:var(--text-light);font-weight:500;}
+  .duty-text .hl-box{background:var(--cyan-muted);border:1px solid rgba(0,210,255,0.3);padding:16px;border-radius:4px;margin-top:10px;color:var(--cyan);font-weight:500;font-size:clamp(13px,1.4vw,16px);}
+
+  /* Biểu tượng thiết kế dạng Blueprint */
+  .blueprint-svg{
+    border:1px solid var(--cyan-muted);background:rgba(0,0,0,0.2);
+    position:relative;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  /* Dấu 4 góc */
+  .blueprint-svg::before,.blueprint-svg::after{content:"";position:absolute;width:10px;height:10px;border:1px solid var(--cyan);}
+  .blueprint-svg::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+  .blueprint-svg::after{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+  
+  .blueprint-svg svg{width:100%;height:auto;max-height:300px;stroke:var(--cyan);fill:none;stroke-width:1.5;}
+
+  /* ============ SLIDE 3: 3 TRỤ CỘT (Data Cards) ============ */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,24px);width:100%;height:100%;}
+  .pillar{
+    background:var(--navy-panel);border:1px solid var(--cyan-muted);padding:clamp(20px,3vw,32px);
+    display:flex;flex-direction:column;position:relative;
+    transition:background .3s, border-color .3s, transform .3s;
+  }
+  .pillar:hover{background:rgba(14,41,77,0.8);border-color:var(--cyan);transform:translateY(-5px);}
+  .pillar .icon{
+    width:clamp(40px,5vw,60px);height:clamp(40px,5vw,60px);margin-bottom:20px;
+    border-radius:50%;background:var(--cyan-muted);display:flex;align-items:center;justify-content:center;
+  }
+  .pillar .icon svg{width:50%;height:50%;fill:var(--cyan);}
+  .pillar h3{font-family:var(--font-display);font-size:clamp(20px,2.4vw,28px);font-weight:600;margin-bottom:12px;letter-spacing:.05em;}
+  .pillar p{font-size:clamp(13px,1.4vw,15px);line-height:1.6;color:var(--text-muted);margin-top:auto;}
+  .pillar::after{content:attr(data-num);position:absolute;top:20px;right:20px;font-family:var(--font-display);font-size:clamp(30px,5vw,60px);font-weight:700;color:rgba(255,255,255,0.03);}
+
+  /* ============ SLIDE 4: QUY TRÌNH (Timeline) ============ */
+  .process{width:100%;display:flex;flex-direction:column;justify-content:center;gap:20px;height:100%;}
+  .step-row{display:flex;align-items:stretch;gap:20px;}
+  
+  .step-idx{
+    font-family:var(--font-display);font-size:clamp(20px,3vw,32px);font-weight:700;color:var(--cyan);
+    min-width:50px;text-align:right;border-right:2px solid var(--cyan-muted);padding-right:15px;display:flex;align-items:center;justify-content:flex-end;
+  }
+  .step-content{
+    background:var(--navy-panel);border:1px solid var(--cyan-muted);padding:16px 24px;
+    flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;
+  }
+  .step-content h3{font-family:var(--font-display);font-size:clamp(16px,2vw,22px);font-weight:500;margin-bottom:4px;letter-spacing:.05em;}
+  .step-content p{font-size:clamp(12px,1.3vw,14px);color:var(--text-muted);line-height:1.5;}
+  
+  /* Connector line */
+  .step-row:not(:last-child) .step-idx{position:relative;}
+  .step-row:not(:last-child) .step-idx::after{
+    content:"";position:absolute;bottom:-20px;right:-2px;width:2px;height:20px;background:var(--cyan-muted);
+  }
+
+  /* ============ SLIDE 5: KẾT ============ */
+  .closing{justify-content:center;align-items:center;text-align:center;}
+  .closing .badge{
+    width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;margin-bottom:30px;
+    box-shadow:0 0 20px rgba(252,163,17,0.2);position:relative;
+  }
+  .closing .badge svg{width:40px;height:40px;fill:var(--gold);}
+  
+  .closing h1{font-family:var(--font-display);font-size:clamp(36px,6vw,80px);line-height:1.1;text-transform:uppercase;margin-bottom:20px;font-weight:600;}
+  .closing h1 em{color:var(--cyan);font-style:normal;display:block;font-size:.8em;}
+  .closing p{font-size:clamp(14px,1.6vw,18px);color:var(--text-muted);max-width:60ch;line-height:1.7;margin:0 auto;border-top:1px solid var(--cyan-muted);padding-top:24px;}
+
+  /* ============ NAVIGATION BAR ============ */
+  .nav-bar{
+    position:absolute;left:0;right:0;bottom:0;z-index:30;
+    padding:0 clamp(20px,4.5vw,64px) clamp(16px,3vh,30px);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    pointer-events:none;
+    background:linear-gradient(to top, var(--navy-bg) 10%, transparent 100%);
+  }
+  .nav-bar > *{pointer-events:auto;}
+  
+  /* (1) Bộ đếm trang */
+  .page-counter{
+    font-family:var(--font-display);font-size:clamp(16px,2vw,22px);font-weight:500;
+    letter-spacing:.1em;color:var(--text-light);white-space:nowrap;
+    background:var(--navy-panel);padding:6px 16px;border:1px solid var(--cyan-muted);border-radius:4px;
+  }
+  .page-counter b{color:var(--cyan);}
+  
+  /* (2) Thanh tiến trình */
+  .progress-bar{
+    flex:1;max-width:400px;height:4px;background:rgba(255,255,255,0.1);
+    position:relative;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;width:0%;background:var(--cyan);
+    transition:width .6s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 10px var(--cyan);
+  }
+
+  /* (3) Cặp nút < > */
+  .nav-btns{display:flex;gap:10px;}
+  .nav-btn{
+    width:clamp(40px,4.5vw,48px);height:clamp(40px,4.5vw,48px);
+    border:1px solid var(--cyan-muted);background:var(--navy-panel);color:var(--cyan);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:all .3s ease;border-radius:4px;
+  }
+  .nav-btn:hover:not(:disabled){background:rgba(0,210,255,0.1);border-color:var(--cyan);}
+  .nav-btn:active:not(:disabled){transform:scale(.95);}
+  .nav-btn svg{width:40%;height:40%;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:square;stroke-linejoin:miter;}
+  .nav-btn:disabled{opacity:.3;cursor:not-allowed;color:var(--text-muted);border-color:rgba(255,255,255,0.05);}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:880px){
+    .duty-split{grid-template-columns:1fr;}
+    .blueprint-svg{order:-1;}
+    .pillars{grid-template-columns:1fr;gap:12px;}
+    .pillar{flex-direction:row;align-items:center;gap:16px;padding:16px;}
+    .pillar .icon{margin-bottom:0;flex:0 0 auto;}
+    .pillar p{margin-top:0;flex:1;}
+    .pillar::after{font-size:40px;top:10px;right:10px;}
+  }
+  @media (max-width:560px){
+    .slide{padding:20px 16px 90px;}
+    .cover h1{font-size:clamp(42px,14vw,64px);}
+    .head{flex-direction:column;align-items:flex-start;gap:8px;}
+    .head h2{font-size:26px;}
+    .nav-bar{padding:0 16px 16px;}
+    .progress-bar{max-width:100px;}
+    .step-row{flex-direction:column;gap:8px;}
+    .step-idx{text-align:left;border-right:none;border-bottom:2px solid var(--cyan-muted);padding-right:0;padding-bottom:4px;justify-content:flex-start;}
+    .step-row:not(:last-child) .step-idx::after{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="slides" id="slides">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active" data-i="0">
+      <div class="radar reveal d1"></div>
+      <div class="doc-tag reveal d2">Hồ sơ năng lực · Lực lượng vũ trang</div>
+      <h1 class="reveal d3">
+        Công <span>An</span>
+        <span class="sub-line">Người giữ nhịp bình yên</span>
+      </h1>
+      <div class="mission reveal d5">
+        <p>Giữa những dòng xe hối hả và nhịp sống đổi thay từng ngày, có những người lặng lẽ đứng giữa để giữ cho xã hội một nhịp đập an toàn.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: NHIỆM VỤ -->
+    <section class="slide" data-i="1">
+      <div class="head">
+        <div class="title-wrap">
+          <span class="tag reveal d1">01 — Sứ mệnh</span>
+          <h2 class="reveal d2">Lá chắn của nhân dân</h2>
+        </div>
+        <div class="code reveal d1">SYS.VER: 2024.01</div>
+      </div>
+      <div class="body">
+        <div class="duty-split">
+          <div class="duty-text reveal d3">
+            <p>Lực lượng Công an nhân dân không chỉ là những người thực thi pháp luật, mà trước hết là <b>người phục vụ nhân dân</b>. Mọi hành động đều xuất phát từ mục tiêu bảo vệ cuộc sống bình yên.</p>
+            <p>Trong thời đại số, nhiệm vụ không chỉ dừng lại ở không gian thực mà còn mở rộng sang không gian mạng, bảo vệ dữ liệu và sự an toàn của mỗi công dân.</p>
+            <div class="hl-box">
+              "Vì nước quên thân, vì dân phục vụ"
+            </div>
+          </div>
+          <div class="blueprint-svg reveal d4">
+            <!-- SVG Khiên và Sao -->
+            <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+              <path d="M50 10 L90 25 C90 60 70 85 50 95 C30 85 10 60 10 25 Z" stroke-dasharray="4 2"/>
+              <path d="M50 30 L60 50 L80 50 L65 65 L70 85 L50 75 L30 85 L35 65 L20 50 L40 50 Z" />
+              <circle cx="50" cy="50" r="40" stroke-opacity="0.3"/>
+              <line x1="10" y1="50" x2="90" y2="50" stroke-opacity="0.3"/>
+              <line x1="50" y1="10" x2="50" y2="95" stroke-opacity="0.3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: 3 TRỤ CỘT -->
+    <section class="slide" data-i="2">
+      <div class="head">
+        <div class="title-wrap">
+          <span class="tag reveal d1">02 — Cấu trúc</span>
+          <h2 class="reveal d2">Ba trụ cột bảo vệ</h2>
+        </div>
+        <div class="code reveal d1">GRID.3X</div>
+      </div>
+      <div class="body">
+        <div class="pillars">
+          <div class="pillar reveal d2" data-num="01">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3>An ninh Quốc gia</h3>
+            <p>Bảo vệ chủ quyền, toàn vẹn lãnh thổ và sự ổn định chính trị của đất nước trước mọi âm mưu chống phá.</p>
+          </div>
+          
+          <div class="pillar reveal d3" data-num="02">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3>Trật tự Xã hội</h3>
+            <p>Đấu tranh phòng chống tội phạm, giữ gìn an ninh trật tự, đảm bảo cuộc sống bình yên cho nhân dân.</p>
+          </div>
+          
+          <div class="pillar reveal d4" data-num="03">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <h3>An toàn Thông tin</h3>
+            <p>Bảo vệ không gian mạng, chống tội phạm công nghệ cao và bảo mật dữ liệu cá nhân của công dân.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: QUY TRÌNH -->
+    <section class="slide" data-i="3">
+      <div class="head">
+        <div class="title-wrap">
+          <span class="tag reveal d1">03 — Quy trình</span>
+          <h2 class="reveal d2">Nhịp độ phản ứng</h2>
+        </div>
+        <div class="code reveal d1">PROC.STD</div>
+      </div>
+      <div class="body">
+        <div class="process">
+          <div class="step-row reveal d2">
+            <div class="step-idx">01</div>
+            <div class="step-content">
+              <h3>Tiếp nhận thông tin</h3>
+              <p>Lắng nghe, thu thập dữ liệu từ hiện trường hoặc qua đường dây nóng. Không bỏ sót bất kỳ tín hiệu nguy hiểm nào.</p>
+            </div>
+          </div>
+          
+          <div class="step-row reveal d3">
+            <div class="step-idx">02</div>
+            <div class="step-content">
+              <h3>Phân tích & Điều tra</h3>
+              <p>Sử dụng nghiệp vụ và công nghệ để làm rõ bản chất vụ việc, xác định mức độ ảnh hưởng đến an ninh xã hội.</p>
+            </div>
+          </div>
+
+          <div class="step-row reveal d4">
+            <div class="step-idx">03</div>
+            <div class="step-content">
+              <h3>Triển khai hành động</h3>
+              <p>Huy động lực lượng, can thiệp kịp thời để ngăn chặn hành vi vi phạm, giải quyết vụ việc theo đúng pháp luật.</p>
+            </div>
+          </div>
+
+          <div class="step-row reveal d5">
+            <div class="step-idx">04</div>
+            <div class="step-content">
+              <h3>Báo cáo & Phòng ngừa</h3>
+              <p>Đánh giá lại hiệu quả, đưa ra giải pháp phòng ngừa chung để hệ thống an ninh luôn được củng cố vững chắc.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: KẾT -->
+    <section class="slide closing" data-i="4">
+      <div class="badge reveal d1">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h1 class="reveal d2">
+        Vì một Việt Nam
+        <em>bình yên & phát triển</em>
+      </h1>
+      <p class="reveal d4">
+        Sự bình yên không tự nhiên mà có. Đó là thành quả của những giờ phút trực chiến thầm lặng, của những hy sinh không tên tuổi vì sự an toàn của cộng đồng.
+      </p>
+    </section>
+
+  </div>
+
+  <!-- ============ NAVIGATION BAR ============ -->
+  <div class="nav-bar">
+    <!-- (1) Bộ đếm trang -->
+    <div class="page-counter" id="counter">
+      <b>01</b> / 05
+    </div>
+    
+    <!-- (2) Thanh tiến trình -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    
+    <!-- (3) Cặp nút < > -->
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev" aria-label="Slide trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="next" aria-label="Slide tiếp">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  let animating = false;
+
+  function pad(n){ return String(n+1).padStart(2,'0'); }
+
+  function update(){
+    counter.innerHTML = '<b>'+pad(current)+'</b> / '+String(total).padStart(2,'0');
+    progress.style.width = ((current+1)/total*100)+'%';
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===total-1;
+  }
+
+  function go(i){
+    if(animating || i===current || i<0 || i>=total) return;
+    animating = true;
+    const outgoing = slides[current];
+    const incoming = slides[i];
+    outgoing.classList.remove('active');
+    setTimeout(()=>{
+      incoming.classList.add('active');
+      current = i;
+      update();
+      setTimeout(()=>{ animating = false; }, 900);
+    }, 500);
+  }
+
+  prevBtn.addEventListener('click', ()=> go(current-1));
+  nextBtn.addEventListener('click', ()=> go(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(current+1); }
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); go(0); }
+    if(e.key==='End'){ e.preventDefault(); go(total-1); }
+  });
+
+  let sx=0, sy=0, tracking=false;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking=true;
+  }, {passive:true});
+  stage.addEventListener('touchend', e=>{
+    if(!tracking) return; tracking=false;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(current+1); else go(current-1);
+    }
+  }, {passive:true});
+
+  update();
+})();
+</script>
+</body>
+</html>

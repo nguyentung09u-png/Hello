@@ -1,0 +1,20 @@
+0. giữ nguyên fade hiệu ứng
+
+
+1.Số trang (04 / 05): Bộ đếm slide (Slide Counter) - Cho biết đang ở trang mấy.
+
+2.
+· Dấu thanh ngang: Thanh tiến trình (Progress Bar) - Thanh chạy dài ra để báo hiệu đã xem được bao nhiêu %.
+
+3.
+· Nút < và >: Cặp nút chuyển trang (Prev / Next Buttons) - Bấm để lùi hoặc tiến.
+
+
+
+-----như này nè-------
+0. giữ nguyên fade hiệu ứng
+
+· (1) Số trang: Tên gọi: Bộ đếm trang (Slide Counter). 
+ví dụ : 04/05
+· (2) Dấu thanh ngang: [==========----------------] (Thanh tiến trình)
+· (3) Cặp nút < >: ( < ) và ( > )

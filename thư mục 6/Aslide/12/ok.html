@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Công An — Nhịp Đập Thép</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --bg:#0d0d0d;
+    --paper:#f2efe9;
+    --ink:#1a1a1a;
+    --gold:#eab308;
+    --red:#b91c1c;
+    --grey:#5c5c5c;
+    
+    --font-display:'Bebas Neue', Impact, sans-serif;
+    --font-serif:'Playfair Display', Georgia, serif;
+    --font-body:'Inter', Helvetica, sans-serif;
+  }
+  
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--paper);font-family:var(--font-body);}
+  
+  /* Texture background */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.15;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+
+  .stage{position:relative;width:100vw;height:100vh;overflow:hidden;z-index:1;}
+
+  /* Slides */
+  .slides{position:relative;width:100%;height:100%;}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:clamp(24px,5vw,60px) clamp(20px,5vw,70px) clamp(80px,12vh,110px);
+    opacity:0;visibility:hidden;
+    transition:opacity 1s ease,visibility 0s 1s;
+  }
+  .slide.active{opacity:1;visibility:visible;transition:opacity 1s ease,visibility 0s 0s;}
+
+  /* Fade Reveal (Giữ nguyên) */
+  .reveal{opacity:0;transition:opacity 1.1s ease;}
+  .slide.active .reveal{opacity:1;}
+  .slide.active .d1{transition-delay:.15s;}
+  .slide.active .d2{transition-delay:.32s;}
+  .slide.active .d3{transition-delay:.5s;}
+  .slide.active .d4{transition-delay:.68s;}
+  .slide.active .d5{transition-delay:.86s;}
+
+  /* ============ SLIDE 1: COVER ============ */
+  .cover{justify-content:space-between;padding-bottom:clamp(100px,15vh,140px);}
+  
+  .cover-top{
+    display:flex;justify-content:space-between;border-bottom:1px solid var(--grey);padding-bottom:15px;
+    font-size:clamp(10px,1.2vw,14px);font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  }
+  
+  .cover-main{
+    display:flex;flex-direction:column;justify-content:center;flex:1;position:relative;
+  }
+  
+  .cover-main h1{
+    font-family:var(--font-display);
+    font-size:clamp(80px,18vw,240px);line-height:.8;letter-spacing:.02em;
+    color:var(--paper);position:relative;z-index:2;
+  }
+  .cover-main h1 span{color:transparent;-webkit-text-stroke:2px var(--paper);}
+  
+  .cover-main .subtitle{
+    font-family:var(--font-serif);font-style:italic;font-size:clamp(20px,3vw,40px);
+    color:var(--gold);margin-top:10px;margin-left:clamp(10px,15vw,200px);position:relative;z-index:2;
+  }
+
+  /* Lớp chữ trang trí (Marquee text) */
+  .cover-marquee{
+    position:absolute;top:50%;left:0;transform:translateY(-50%);
+    font-family:var(--font-display);font-size:clamp(150px,30vw,400px);color:var(--red);
+    opacity:.1;white-space:nowrap;pointer-events:none;z-index:1;line-height:1;
+  }
+
+  .cover-bot{
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--grey);padding-top:20px;
+  }
+  .cover-bot p{font-size:clamp(13px,1.4vw,16px);line-height:1.6;color:#ccc;max-width:40ch;}
+  .cover-bot .stamp{
+    border:2px solid var(--red);color:var(--red);display:inline-flex;
+    padding:6px 12px;font-weight:700;letter-spacing:.1em;font-size:12px;text-transform:uppercase;
+    transform:rotate(-5deg);align-self:flex-start;margin-top:10px;
+  }
+
+  /* ============ SLIDE HEAD ============ */
+  .head{flex:0 0 auto;margin-bottom:clamp(24px,4vh,40px);display:flex;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--paper);padding-bottom:12px;}
+  .head h2{font-family:var(--font-display);font-size:clamp(40px,6vw,80px);line-height:1;letter-spacing:.02em;}
+  .head .num{
+    font-family:var(--font-serif);font-style:italic;font-size:clamp(30px,5vw,60px);color:var(--gold);
+  }
+
+  .body{flex:1;min-height:0;display:flex;}
+
+  /* ============ SLIDE 2: NGUYÊN TẮC (Split Columns) ============ */
+  .principles{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,80px);width:100%;align-items:center;}
+  
+  .principles-text{display:flex;flex-direction:column;gap:24px;}
+  .principles-text .item{display:flex;gap:20px;align-items:flex-start;}
+  .principles-text .item .marker{
+    font-family:var(--font-display);font-size:32px;color:var(--red);line-height:.8;
+  }
+  .principles-text .item h3{font-size:clamp(16px,1.8vw,20px);font-weight:600;margin-bottom:6px;color:var(--gold);}
+  .principles-text .item p{font-size:clamp(13px,1.4vw,15px);color:#aaa;line-height:1.5;}
+
+  .principles-visual{
+    border:1px solid var(--grey);position:relative;
+    aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+  }
+  /* Khung ngắm (Crosshair) */
+  .principles-visual::before,.principles-visual::after{
+    content:"";position:absolute;background:var(--grey);
+  }
+  .principles-visual::before{width:100%;height:1px;top:50%;}
+  .principles-visual::after{width:1px;height:100%;left:50%;}
+  
+  .principles-visual .badge-svg{width:70%;height:70%;fill:var(--paper);opacity:.9;z-index:2;}
+  .principles-visual .dot{
+    position:absolute;width:8px;height:8px;background:var(--gold);border-radius:50%;
+  }
+  .principles-visual .dot.tl{top:10px;left:10px;}
+  .principles-visual .dot.br{bottom:10px;right:10px;}
+
+  /* ============ SLIDE 3: BIỂU TƯỢNG (Typographic Blocks) ============ */
+  .blocks{display:flex;flex-direction:column;gap:12px;width:100%;height:100%;justify-content:center;}
+  .block{
+    border:1px solid var(--grey);padding:clamp(16px,2.5vw,24px);
+    display:grid;grid-template-columns:clamp(60px,10vw,120px) 1fr;gap:20px;align-items:center;
+    transition:background .3s, border-color .3s;
+  }
+  .block:hover{background:rgba(255,255,255,0.05);border-color:var(--gold);}
+  
+  .block .icon-txt{
+    font-family:var(--font-display);font-size:clamp(30px,5vw,60px);color:var(--red);text-align:center;line-height:1;
+  }
+  .block-content h3{font-family:var(--font-serif);font-size:clamp(20px,2.5vw,28px);margin-bottom:4px;color:var(--gold);}
+  .block-content p{font-size:clamp(13px,1.4vw,16px);color:#aaa;line-height:1.5;}
+
+  /* ============ SLIDE 4: LỜI THỀ (Poster) ============ */
+  .oath{display:flex;width:100%;height:100%;align-items:center;justify-content:center;position:relative;}
+  
+  .oath .poster{
+    border:4px solid var(--red);padding:clamp(24px,5vw,60px);
+    max-width:800px;width:100%;text-align:center;position:relative;background:var(--bg);
+  }
+  .oath .poster::before{
+    content:"★";position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+    font-size:40px;color:var(--gold);background:var(--bg);padding:0 10px;
+  }
+  
+  .oath h3{
+    font-family:var(--font-display);font-size:clamp(32px,6vw,70px);color:var(--gold);
+    letter-spacing:.05em;line-height:1;margin-bottom:clamp(20px,4vh,40px);
+  }
+  .oath p{
+    font-family:var(--font-serif);font-style:italic;font-size:clamp(18px,2.5vw,28px);
+    line-height:1.5;color:var(--paper);
+  }
+  .oath .sign{
+    margin-top:40px;font-family:var(--font-body);font-size:12px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--grey);
+  }
+
+  /* ============ SLIDE 5: KẾT ============ */
+  .closing{justify-content:center;align-items:center;text-align:center;}
+  .closing h1{font-family:var(--font-display);font-size:clamp(50px,10vw,140px);line-height:.9;margin-bottom:24px;}
+  .closing h1 span{color:var(--gold);}
+  .closing p{font-size:clamp(14px,1.6vw,20px);color:#aaa;max-width:60ch;line-height:1.6;}
+  .closing .line{width:1px;height:80px;background:var(--red);margin:40px auto;}
+
+  /* ============ NAVIGATION BAR ============ */
+  .nav-bar{
+    position:absolute;left:0;right:0;bottom:0;z-index:30;
+    padding:0 clamp(20px,4.5vw,64px) clamp(16px,3vh,30px);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    pointer-events:none;
+    background:linear-gradient(to top, var(--bg) 20%, transparent 100%);
+  }
+  .nav-bar > *{pointer-events:auto;}
+  
+  /* (1) Bộ đếm trang */
+  .page-counter{
+    font-family:var(--font-display);font-size:clamp(20px,3vw,32px);
+    color:var(--paper);letter-spacing:.05em;
+  }
+  .page-counter b{color:var(--red);}
+  
+  /* (2) Thanh tiến trình */
+  .progress-bar{
+    flex:1;max-width:400px;height:8px;background:#222;
+    position:relative;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;width:0%;background:var(--gold);
+    transition:width .6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* (3) Cặp nút < > */
+  .nav-btns{display:flex;gap:2px;}
+  .nav-btn{
+    width:clamp(40px,5vw,50px);height:clamp(40px,5vw,50px);
+    background:#222;border:none;color:var(--paper);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:all .2s ease;
+  }
+  .nav-btn:hover:not(:disabled){background:var(--gold);color:var(--bg);}
+  .nav-btn:active:not(:disabled){transform:scale(.95);}
+  .nav-btn svg{width:40%;height:40%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:square;}
+  .nav-btn:disabled{opacity:.2;cursor:not-allowed;}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:880px){
+    .cover-bot{grid-template-columns:1fr;gap:16px;}
+    .principles{grid-template-columns:1fr;}
+    .principles-visual{aspect-ratio:16/9;}
+    .block{grid-template-columns:1fr;text-align:center;gap:10px;}
+    .block .icon-txt{font-size:40px;}
+  }
+  @media (max-width:560px){
+    .slide{padding:20px 16px 90px;}
+    .cover-main h1{font-size:70px;-webkit-text-stroke:1.5px var(--paper);}
+    .cover-main .subtitle{margin-left:0;}
+    .head h2{font-size:36px;}
+    .oath .poster{border-width:2px;}
+    .oath h3{font-size:28px;}
+    .oath p{font-size:16px;}
+    .nav-bar{padding:0 16px 16px;}
+    .progress-bar{max-width:100px;height:6px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="slides" id="slides">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active" data-i="0">
+      <div class="cover-top reveal d1">
+        <span>Hồ sơ lực lượng</span>
+        <span>Mã: CAND-2024</span>
+      </div>
+      
+      <div class="cover-main">
+        <div class="cover-marquee">BẢO VỆ BÌNH YÊN</div>
+        <h1 class="reveal d2">CÔNG <span>AN</span></h1>
+        <div class="subtitle reveal d3">Nhịp đập thép giữa đời thường</div>
+      </div>
+      
+      <div class="cover-bot reveal d5">
+        <div>
+          <p>Không phải những siêu anh hùng trong phim ảnh. Đó là những người lính thầm lặng, ngày đêm đứng giữa ranh giới của sự sống và cái chết để giữ cho mỗi người dân một giấc ngủ yên bình.</p>
+        </div>
+        <div>
+          <div class="stamp">Mật · Tối mật</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: NGUYÊN TẮC -->
+    <section class="slide" data-i="1">
+      <div class="head">
+        <h2 class="reveal d1">NGUYÊN TẮC</h2>
+        <div class="num reveal d1">01</div>
+      </div>
+      <div class="body">
+        <div class="principles">
+          <div class="principles-text">
+            <div class="item reveal d2">
+              <div class="marker">01</div>
+              <div>
+                <h3>Đặt tính mạng lên trên hết</h3>
+                <p>Mỗi quyết định can thiệp đều phải đảm bảo an toàn tối đa cho người dân và đồng đội.</p>
+              </div>
+            </div>
+            <div class="item reveal d3">
+              <div class="marker">02</div>
+              <div>
+                <h3>Thượng tôn pháp luật</h3>
+                <p>Mọi hành động phải dựa trên cơ sở pháp lý vững chắc, bảo vệ công lý và lẽ phải.</p>
+              </div>
+            </div>
+            <div class="item reveal d4">
+              <div class="marker">03</div>
+              <div>
+                <h3>Vì nhân dân phục vụ</h3>
+                <p>Lấy sự hài lòng và an toàn của người dân làm thước đo cho mọi nỗ lực.</p>
+              </div>
+            </div>
+          </div>
+          <div class="principles-visual reveal d4">
+            <div class="dot tl"></div>
+            <div class="dot br"></div>
+            <!-- SVG Khiên Công An Cách Điệu -->
+            <svg class="badge-svg" viewBox="0 0 100 100">
+              <path d="M50 5 L90 25 V60 C90 80 70 95 50 98 C30 95 10 80 10 60 V25 Z" fill="none" stroke="var(--paper)" stroke-width="2"/>
+              <path d="M50 15 L80 30 V60 C80 75 65 85 50 90 C35 85 20 75 20 60 V30 Z" fill="none" stroke="var(--gold)" stroke-width="1" stroke-dasharray="4 2"/>
+              <polygon points="50,30 60,45 80,45 65,58 70,78 50,65 30,78 35,58 20,45 40,45" fill="var(--red)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: BIỂU TƯỢNG -->
+    <section class="slide" data-i="2">
+      <div class="head">
+        <h2 class="reveal d1">BIỂU TƯỢNG</h2>
+        <div class="num reveal d1">02</div>
+      </div>
+      <div class="body">
+        <div class="blocks">
+          <div class="block reveal d2">
+            <div class="icon-txt">★</div>
+            <div class="block-content">
+              <h3>Ngôi sao vàng</h3>
+              <p>Biểu tượng của lòng trung thành tuyệt đối với Tổ quốc và nhân dân.</p>
+            </div>
+          </div>
+          <div class="block reveal d3">
+            <div class="icon-txt">⚖</div>
+            <div class="block-content">
+              <h3>Cán cân công lý</h3>
+              <p>Đại diện cho sự công bằng, minh bạch và không thiên vị trong thực thi pháp luật.</p>
+            </div>
+          </div>
+          <div class="block reveal d4">
+            <div class="icon-txt">⚔</div>
+            <div class="block-content">
+              <h3>Thanh gươm thép</h3>
+              <p>Ý chí sắt đá, sẵn sàng đấu tranh không khoan nhượng với cái ác và tội phạm.</p>
+            </div>
+          </div>
+          <div class="block reveal d5">
+            <div class="icon-txt">🛡</div>
+            <div class="block-content">
+              <h3>Lá chắn vững chắc</h3>
+              <p>Che chở và bảo vệ cuộc sống bình yên của mỗi người dân Việt Nam.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: LỜI THỀ -->
+    <section class="slide" data-i="3">
+      <div class="head">
+        <h2 class="reveal d1">LỜI THỀ</h2>
+        <div class="num reveal d1">03</div>
+      </div>
+      <div class="body">
+        <div class="oath">
+          <div class="poster reveal d2">
+            <h3>DANH DỰ LÀ THỨ<br>KHÔNG THỂ ĐÁNH ĐỔI</h3>
+            <p>"Chúng tôi thề trước Tổ quốc và nhân dân: Tuyệt đối trung thành, sẵn sàng chiến đấu, hy sinh vì độc lập tự do của Tổ quốc, vì bình yên và hạnh phúc của nhân dân."</p>
+            <div class="sign">Ký tên: Lực lượng Công an nhân dân Việt Nam</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: KẾT -->
+    <section class="slide closing" data-i="4">
+      <h1 class="reveal d1">VÌ MỘT VIỆT NAM <br><span>BÌNH YÊN</span></h1>
+      <div class="line reveal d2"></div>
+      <p class="reveal d4">Máu và mồ hôi của những người lính không mặc áo giáp là cái giá để đổi lấy sự bình yên hôm nay. Hãy trân trọng và chung tay bảo vệ thành quả đó.</p>
+    </section>
+
+  </div>
+
+  <!-- ============ NAVIGATION BAR ============ -->
+  <div class="nav-bar">
+    <!-- (1) Bộ đếm trang -->
+    <div class="page-counter" id="counter">
+      <b>01</b> / 05
+    </div>
+    
+    <!-- (2) Thanh tiến trình -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    
+    <!-- (3) Cặp nút < > -->
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev" aria-label="Slide trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn" id="next" aria-label="Slide tiếp">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  let animating = false;
+
+  function pad(n){ return String(n+1).padStart(2,'0'); }
+
+  function update(){
+    counter.innerHTML = '<b>'+pad(current)+'</b> / '+String(total).padStart(2,'0');
+    progress.style.width = ((current+1)/total*100)+'%';
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===total-1;
+  }
+
+  function go(i){
+    if(animating || i===current || i<0 || i>=total) return;
+    animating = true;
+    const outgoing = slides[current];
+    const incoming = slides[i];
+    outgoing.classList.remove('active');
+    setTimeout(()=>{
+      incoming.classList.add('active');
+      current = i;
+      update();
+      setTimeout(()=>{ animating = false; }, 900);
+    }, 500);
+  }
+
+  prevBtn.addEventListener('click', ()=> go(current-1));
+  nextBtn.addEventListener('click', ()=> go(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(current+1); }
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); go(0); }
+    if(e.key==='End'){ e.preventDefault(); go(total-1); }
+  });
+
+  let sx=0, sy=0, tracking=false;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking=true;
+  }, {passive:true});
+  stage.addEventListener('touchend', e=>{
+    if(!tracking) return; tracking=false;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0) go(current+1); else go(current-1);
+    }
+  }, {passive:true});
+
+  update();
+})();
+</script>
+</body>
+</html>
